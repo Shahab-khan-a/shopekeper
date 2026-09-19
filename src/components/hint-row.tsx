@@ -1,9 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { View, StyleSheet } from 'react-native';
-
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
-
+import { View, Text, StyleSheet } from 'react-native';
 import { Spacing } from '@/constants/theme';
 
 type HintRowProps = {
@@ -14,22 +10,22 @@ type HintRowProps = {
 export function HintRow({ title = 'Try editing', hint = 'app/index.tsx' }: HintRowProps) {
   return (
     <View style={styles.stepRow}>
-      <ThemedText type="small">{title}</ThemedText>
-      <ThemedView type="backgroundSelected" style={styles.codeSnippet}>
-        <ThemedText themeColor="textSecondary">{hint}</ThemedText>
-      </ThemedView>
+      <Text style={styles.text}>{title}</Text>
+      <View style={styles.codeSnippet}>
+        <Text style={styles.hintText}>{hint as any}</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  stepRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
+  stepRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  text: { fontSize: 14 },
   codeSnippet: {
-    borderRadius: Spacing.two,
-    paddingVertical: Spacing.half,
-    paddingHorizontal: Spacing.two,
+    borderRadius: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    backgroundColor: '#F1F5F9',
   },
+  hintText: { fontSize: 12, color: '#64748B' },
 });
