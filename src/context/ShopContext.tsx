@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Product,
   Sale,
@@ -7,10 +7,44 @@ import {
   ShopSettings,
   ActiveTab,
   PaymentMethod,
+  CompleteSaleInput,
+  SaleResult,
+  RefundResult,
+  KhataTransaction,
 } from '@/types';
-import { StorageAdapter } from '@/storage/storageAdapter';
-import { INITIAL_PRODUCTS, INITIAL_SETTINGS, INITIAL_KHATA } from '@/constants/sampleData';
+import {
+  ProductRepository,
+  SaleRepository,
+  CustomerRepository,
+  SettingsRepository,
+  SyncQueueRepository,
+} from '@/storage/repositories';
+import { getDatabase } from '@/storage/db';
+import { MigrationService } from '@/storage/migration/migrationService';
+import { NetworkService } from '@/services/networkService';
+import { SyncQueueService } from '@/services/syncQueueService';
+import { MergeService } from '@/services/mergeService';
+import { googleDriveService } from '@/services/googleDriveService';
+import { INITIAL_SETTINGS } from '@/constants/sampleData';
 import { Translations, Language, TranslationKey } from '@/constants/translations';
+import { User } from 'firebase/auth';
+import { 
+  signInWithGoogle as authSignInWithGoogle, 
+  signOutUser, 
+  subscribeToAuth, 
+  checkRedirectAuth, 
+  AuthResult 
+} from '@/services/authService';
+
+export interface DashboardStats {
+  todaySalesTotal: number;
+  todayOrdersCount: number;
+  todayProfit: number;
+  outstandingUdhaar: number;
+  totalInventoryCount: number;
+  lowStockCount: number;
+  recentSales: Sale[];
+}
 
 interface ShopContextType {
   // Navigation
@@ -23,6 +57,13 @@ interface ShopContextType {
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   getProductById: (id: string) => Product | undefined;
+  getProducts: () => Product[];
+
+  // Transaction Engine (Local ACID Transactions)
+  completeSale: (input: CompleteSaleInput) => Promise<SaleResult>;
+  refundSale: (saleId: string, reason?: string) => Promise<RefundResult>;
+  recordCustomerPayment: (customerId: string, amount: number, note?: string) => Promise<void>;
+  receiveKhataPayment: (customerId: string, amount: number, note?: string) => Promise<void>;
 
   // Sales & Billing
   sales: Sale[];
@@ -37,18 +78,38 @@ interface ShopContextType {
   }) => Promise<Sale>;
   deleteSale: (saleId: string) => Promise<void>;
   getSaleById: (id: string) => Sale | undefined;
+  getSales: () => Sale[];
 
   // Udhaar Khata
   khata: CustomerKhata[];
+  addCustomer: (customer: Omit<CustomerKhata, 'id' | 'createdAt' | 'lastUpdated' | 'transactions'>) => Promise<CustomerKhata>;
   addCustomerPayment: (customerId: string, amount: number, note?: string) => Promise<void>;
   totalUdhaarReceivable: number;
+  getCustomers: () => CustomerKhata[];
+
+  // Dashboard Stats
+  getDashboardStats: () => DashboardStats;
 
   // Settings
   settings: ShopSettings;
   updateSettings: (newSettings: Partial<ShopSettings>) => Promise<void>;
   resetToSampleData: () => Promise<void>;
+  clearStoreData: () => Promise<void>;
   exportDataJSON: () => string;
   importDataJSON: (jsonString: string) => Promise<boolean>;
+
+  // Network & Sync State
+  user: User | null;
+  authLoading: boolean;
+  isOnline: boolean;
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'error' | 'offline';
+  pendingSyncCount: number;
+  signInWithGoogle: () => Promise<AuthResult>;
+  logout: () => Promise<void>;
+  syncNow: () => Promise<{ success: boolean; error?: string }>;
+  isGuestMode: boolean;
+  setIsGuestMode: (val: boolean) => void;
+  continueAsGuest: () => void;
 
   // Localization
   language: Language;
@@ -58,6 +119,7 @@ interface ShopContextType {
   // Computed Metrics
   todaySalesTotal: number;
   todayOrdersCount: number;
+  todayProfit: number;
   lowStockProducts: Product[];
   outOfStockProducts: Product[];
 
@@ -68,17 +130,14 @@ interface ShopContextType {
   setEditingProduct: (product: Product | null) => void;
   isAddProductOpen: boolean;
   setIsAddProductOpen: (open: boolean) => void;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  isEditShopOpen: boolean;
+  setIsEditShopOpen: (open: boolean) => void;
+  isLoaded: boolean;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
-
-const STORAGE_KEYS = {
-  PRODUCTS: '@shop_products_v1',
-  SALES: '@shop_sales_v1',
-  KHATA: '@shop_khata_v1',
-  SETTINGS: '@shop_settings_v1',
-  BILL_COUNTER: '@shop_bill_counter_v1',
-};
 
 export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
@@ -86,119 +145,252 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [sales, setSales] = useState<Sale[]>([]);
   const [khata, setKhata] = useState<CustomerKhata[]>([]);
   const [settings, setSettings] = useState<ShopSettings>(INITIAL_SETTINGS);
-  const [billCounter, setBillCounter] = useState<number>(1001);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Network & Cloud Sync State
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error' | 'offline'>('idle');
+  const [pendingSyncCount, setPendingSyncCount] = useState<number>(0);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   // Modals state
   const [activeReceipt, setActiveReceipt] = useState<Sale | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isEditShopOpen, setIsEditShopOpen] = useState(false);
 
-  // Load persistent state on boot
+  const continueAsGuest = useCallback(() => {
+    setIsGuestMode(true);
+    SettingsRepository.setGuestMode(true).catch(console.warn);
+  }, []);
+
+  // Helpers to refresh state from SQLite/IndexedDB
+  const refreshProducts = useCallback(async () => {
+    try {
+      const prods = await ProductRepository.getAll();
+      setProducts(prods);
+      return prods;
+    } catch (e) {
+      console.warn('[ShopContext] refreshProducts error:', e);
+      return [];
+    }
+  }, []);
+
+  const refreshSales = useCallback(async () => {
+    try {
+      const s = await SaleRepository.getAll();
+      setSales(s);
+      return s;
+    } catch (e) {
+      console.warn('[ShopContext] refreshSales error:', e);
+      return [];
+    }
+  }, []);
+
+  const refreshKhata = useCallback(async () => {
+    try {
+      const k = await CustomerRepository.getAll();
+      setKhata(k);
+      return k;
+    } catch (e) {
+      console.warn('[ShopContext] refreshKhata error:', e);
+      return [];
+    }
+  }, []);
+
+  const refreshSettings = useCallback(async () => {
+    try {
+      const s = await SettingsRepository.getSettings();
+      setSettings(s);
+      return s;
+    } catch (e) {
+      console.warn('[ShopContext] refreshSettings error:', e);
+      return INITIAL_SETTINGS;
+    }
+  }, []);
+
+  const refreshPendingCount = useCallback(async () => {
+    try {
+      const count = await SyncQueueRepository.getPendingCount();
+      setPendingSyncCount(count);
+      return count;
+    } catch {
+      return 0;
+    }
+  }, []);
+
+  // 1. Initial boot: Network init -> Migration -> Load from local SQLite/IndexedDB
   useEffect(() => {
-    async function loadData() {
+    async function bootApp() {
       try {
-        const [savedProds, savedSales, savedKhata, savedSettings, savedCounter] = await Promise.all([
-          StorageAdapter.getItem(STORAGE_KEYS.PRODUCTS),
-          StorageAdapter.getItem(STORAGE_KEYS.SALES),
-          StorageAdapter.getItem(STORAGE_KEYS.KHATA),
-          StorageAdapter.getItem(STORAGE_KEYS.SETTINGS),
-          StorageAdapter.getItem(STORAGE_KEYS.BILL_COUNTER),
+        // Initialize network listener
+        await NetworkService.init();
+        const initialOnline = await NetworkService.isOnline();
+        setIsOnline(initialOnline);
+
+        // Run local DB migration from legacy AsyncStorage if needed
+        await MigrationService.runMigrationIfNeeded();
+        await MigrationService.purgeDummyDataIfNeeded();
+
+        // Load all entities from primary SQLite database
+        const [prods, sList, kList, setts, pCount, savedGuest] = await Promise.all([
+          ProductRepository.getAll(),
+          SaleRepository.getAll(),
+          CustomerRepository.getAll(),
+          SettingsRepository.getSettings(),
+          SyncQueueRepository.getPendingCount(),
+          SettingsRepository.getGuestMode(),
         ]);
 
-        if (savedProds) {
-          setProducts(JSON.parse(savedProds));
-        } else {
-          setProducts(INITIAL_PRODUCTS);
-          await StorageAdapter.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
+        setProducts(prods);
+        setSales(sList);
+        setKhata(kList);
+        setSettings(setts);
+        setPendingSyncCount(pCount);
+        if (savedGuest) {
+          setIsGuestMode(true);
         }
 
-        if (savedSales) {
-          setSales(JSON.parse(savedSales));
-        } else {
-          setSales([]);
+        if (!initialOnline) {
+          setSyncStatus('offline');
+        } else if (pCount > 0) {
+          setSyncStatus('idle');
         }
-
-        if (savedKhata) {
-          setKhata(JSON.parse(savedKhata));
-        } else {
-          setKhata(INITIAL_KHATA);
-          await StorageAdapter.setItem(STORAGE_KEYS.KHATA, JSON.stringify(INITIAL_KHATA));
-        }
-
-        if (savedSettings) {
-          setSettings(JSON.parse(savedSettings));
-        } else {
-          setSettings(INITIAL_SETTINGS);
-          await StorageAdapter.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(INITIAL_SETTINGS));
-        }
-
-        if (savedCounter) {
-          setBillCounter(parseInt(savedCounter, 10) || 1001);
-        }
-      } catch (e) {
-        console.error('Error loading shop data from storage:', e);
-        setProducts(INITIAL_PRODUCTS);
-        setSettings(INITIAL_SETTINGS);
-        setKhata(INITIAL_KHATA);
+      } catch (err) {
+        console.error('[ShopContext] Error during local boot:', err);
       } finally {
         setIsLoaded(true);
       }
     }
 
-    loadData();
+    bootApp();
   }, []);
 
-  // Save products whenever updated
-  const saveProducts = useCallback(async (newProducts: Product[]) => {
-    setProducts(newProducts);
-    await StorageAdapter.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(newProducts));
-  }, []);
+  // 2. Network connectivity subscriber: Triggers background sync on OFFLINE -> ONLINE
+  useEffect(() => {
+    const unsubscribe = NetworkService.subscribeToNetworkChanges(async (online) => {
+      setIsOnline(online);
+      if (!online) {
+        setSyncStatus('offline');
+      } else {
+        console.log('[ShopContext] Network restored to ONLINE. Draining offline sync queue...');
+        const count = await refreshPendingCount();
+        if (count > 0 && user) {
+          setSyncStatus('syncing');
+          const res = await SyncQueueService.processQueue(user.uid);
+          await refreshPendingCount();
+          setSyncStatus(res.errors > 0 ? 'error' : 'synced');
+        } else {
+          setSyncStatus('synced');
+        }
+      }
+    });
 
-  // Save sales whenever updated
-  const saveSales = useCallback(async (newSales: Sale[]) => {
-    setSales(newSales);
-    await StorageAdapter.setItem(STORAGE_KEYS.SALES, JSON.stringify(newSales));
-  }, []);
+    return () => unsubscribe();
+  }, [user, refreshPendingCount]);
 
-  // Save khata whenever updated
-  const saveKhata = useCallback(async (newKhata: CustomerKhata[]) => {
-    setKhata(newKhata);
-    await StorageAdapter.setItem(STORAGE_KEYS.KHATA, JSON.stringify(newKhata));
-  }, []);
+  // 3. Firebase Auth listener: Non-blocking background sync & merge
+  useEffect(() => {
+    if (!isLoaded) return;
 
-  // Product CRUD
+    checkRedirectAuth().catch((err) => console.warn('[ShopContext] checkRedirectAuth error:', err));
+
+    const unsubscribe = subscribeToAuth(async (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+
+      if (currentUser) {
+        setSyncStatus('syncing');
+        try {
+          // Perform safe bidirectional merge without destroying local sales
+          await MergeService.mergeGuestDataWithAccount(currentUser.uid);
+
+          // Refresh state from updated local database
+          await Promise.all([
+            refreshProducts(),
+            refreshSales(),
+            refreshKhata(),
+            refreshSettings(),
+            refreshPendingCount(),
+          ]);
+
+          setSyncStatus('synced');
+        } catch (err) {
+          console.warn('[ShopContext] Merge/sync error on auth:', err);
+          setSyncStatus('error');
+        }
+      } else {
+        setSyncStatus('idle');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isLoaded, refreshProducts, refreshSales, refreshKhata, refreshSettings, refreshPendingCount]);
+
+  // ==================== PRODUCT CRUD ====================
+
   const addProduct = useCallback(
     async (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
+      const now = Date.now();
       const newProduct: Product = {
         ...productData,
-        id: 'prod-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        id: 'prod-' + now + '-' + Math.floor(Math.random() * 1000),
+        sellingPrice: productData.sellingPrice ?? productData.price,
+        imageUri: productData.imageUri ?? productData.image,
+        createdAt: now,
+        updatedAt: now,
+        syncStatus: 'pending',
       };
-      const updated = [newProduct, ...products];
-      await saveProducts(updated);
+
+      await ProductRepository.insert(newProduct, 'pending');
+      await SyncQueueRepository.enqueue('product', newProduct.id, 'create', newProduct);
+
+      await refreshProducts();
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
+
       return newProduct;
     },
-    [products, saveProducts]
+    [user, isOnline, refreshProducts, refreshPendingCount]
   );
 
   const updateProduct = useCallback(
     async (id: string, updates: Partial<Product>) => {
-      const updated = products.map((p) =>
-        p.id === id ? { ...p, ...updates, updatedAt: Date.now() } : p
-      );
-      await saveProducts(updated);
+      await ProductRepository.update(id, updates, 'pending');
+      const updated = await ProductRepository.getById(id);
+      if (updated) {
+        await SyncQueueRepository.enqueue('product', id, 'update', updated);
+      }
+
+      await refreshProducts();
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
     },
-    [products, saveProducts]
+    [user, isOnline, refreshProducts, refreshPendingCount]
   );
 
   const deleteProduct = useCallback(
     async (id: string) => {
-      const updated = products.filter((p) => p.id !== id);
-      await saveProducts(updated);
+      await ProductRepository.softDelete(id, 'pending');
+      await SyncQueueRepository.enqueue('product', id, 'delete', { id });
+
+      await refreshProducts();
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
     },
-    [products, saveProducts]
+    [user, isOnline, refreshProducts, refreshPendingCount]
   );
 
   const getProductById = useCallback(
@@ -208,7 +400,162 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [products]
   );
 
-  // Sales & Billing with automatic stock cut and Udhaar recording
+  const getProducts = useCallback(() => products, [products]);
+
+  // ==================== TRANSACTION ENGINE ====================
+
+  /**
+   * Complete Sale: Atomic Local Transaction
+   * Operates completely offline without waiting for Firebase.
+   */
+  const completeSale = useCallback(
+    async (input: CompleteSaleInput): Promise<SaleResult> => {
+      const result = await SaleRepository.completeSaleTransaction(input);
+
+      if (result.success && result.sale) {
+        // Immediate local state update from transactional database
+        await Promise.all([
+          refreshProducts(),
+          refreshSales(),
+          refreshKhata(),
+          refreshPendingCount(),
+        ]);
+
+        setActiveReceipt(result.sale);
+
+        // Upload individual bill receipt to 5 TB Google Drive in background (silent & non-blocking)
+        googleDriveService
+          .uploadBillToDrive(result.sale, settings)
+          .catch(() => {});
+
+        // Background cloud sync if online (never blocks UI or receipt)
+        if (user && isOnline) {
+          SyncQueueService.processQueue(user.uid)
+            .then(refreshPendingCount)
+            .catch((e) => console.warn('[ShopContext] Background sync warning:', e));
+        }
+      }
+
+      return result;
+    },
+    [user, isOnline, settings, refreshProducts, refreshSales, refreshKhata, refreshPendingCount]
+  );
+
+  /**
+   * Refund Sale: Safe Audit Trail Reversal
+   * Restores stock, marks sale as refunded, reverses Khata balance.
+   */
+  const refundSale = useCallback(
+    async (saleId: string, reason?: string): Promise<RefundResult> => {
+      const result = await SaleRepository.refundSaleTransaction(saleId, reason || 'Customer Return');
+
+      if (result.success && result.refundedSale) {
+        await Promise.all([
+          refreshProducts(),
+          refreshSales(),
+          refreshKhata(),
+          refreshPendingCount(),
+        ]);
+
+        if (user && isOnline) {
+          SyncQueueService.processQueue(user.uid)
+            .then(refreshPendingCount)
+            .catch((e) => console.warn('[ShopContext] Background sync warning:', e));
+        }
+      }
+
+      return result;
+    },
+    [user, isOnline, refreshProducts, refreshSales, refreshKhata, refreshPendingCount]
+  );
+
+  /**
+   * Customer Vasooli Payment
+   */
+  const recordCustomerPayment = useCallback(
+    async (customerId: string, amount: number, note?: string) => {
+      if (amount <= 0) return;
+      const now = Date.now();
+      const txId = `ktx-${now}`;
+      const pmtId = `pmt-${now}`;
+
+      await CustomerRepository.updateBalance(customerId, -amount);
+
+      const newTx: KhataTransaction = {
+        id: txId,
+        customerId,
+        type: 'payment',
+        amount,
+        note: note?.trim() || 'Payment received (vasooli)',
+        createdAt: now,
+        date: new Date(now).toISOString(),
+        syncStatus: 'pending',
+      };
+      await CustomerRepository.addTransaction(newTx, 'pending');
+
+      await CustomerRepository.recordPayment({
+        id: pmtId,
+        customerId,
+        amount,
+        paymentMethod: 'cash',
+        createdAt: now,
+        syncStatus: 'pending',
+      });
+
+      const updatedCust = await CustomerRepository.getById(customerId);
+      if (updatedCust) {
+        await SyncQueueRepository.enqueueBatch([
+          { entityType: 'customer', entityId: customerId, operation: 'update', payload: updatedCust },
+          { entityType: 'khata_transaction', entityId: txId, operation: 'create', payload: newTx },
+          { entityType: 'payment', entityId: pmtId, operation: 'create', payload: { id: pmtId, customerId, amount, paymentMethod: 'cash', createdAt: now } },
+        ]);
+      }
+
+      await refreshKhata();
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
+    },
+    [user, isOnline, refreshKhata, refreshPendingCount]
+  );
+
+  const receiveKhataPayment = recordCustomerPayment;
+  const addCustomerPayment = recordCustomerPayment;
+
+  // Add Customer directly
+  const addCustomer = useCallback(
+    async (custData: Omit<CustomerKhata, 'id' | 'createdAt' | 'lastUpdated' | 'transactions'>): Promise<CustomerKhata> => {
+      const now = Date.now();
+      const newCust: CustomerKhata = {
+        ...custData,
+        id: 'cust-' + now + '-' + Math.floor(Math.random() * 1000),
+        totalDebt: custData.balance || custData.totalDebt || 0,
+        balance: custData.balance || custData.totalDebt || 0,
+        transactions: [],
+        createdAt: now,
+        lastUpdated: now,
+        updatedAt: now,
+        syncStatus: 'pending',
+      };
+
+      await CustomerRepository.insert(newCust, 'pending');
+      await SyncQueueRepository.enqueue('customer', newCust.id, 'create', newCust);
+
+      await refreshKhata();
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
+
+      return newCust;
+    },
+    [user, isOnline, refreshKhata, refreshPendingCount]
+  );
+
+  // Backward compatibility wrappers
   const createSale = useCallback(
     async ({
       customerName,
@@ -227,154 +574,28 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       paymentMethod: PaymentMethod;
       notes?: string;
     }): Promise<Sale> => {
-      // 1. Calculate totals
-      const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-      const discountAmount =
-        discountType === 'percent' ? Math.round((subtotal * discount) / 100) : discount;
-      const grandTotal = Math.max(0, subtotal - discountAmount);
-
-      // Profit calculation
-      const totalProfit = items.reduce((sum, item) => {
-        const cost = item.product.costPrice || item.unitPrice * 0.8;
-        return sum + (item.unitPrice - cost) * item.quantity;
-      }, 0) - discountAmount;
-
-      const currentCounter = billCounter;
-      const nextCounter = currentCounter + 1;
-      const billNumber = `INV-${currentCounter}`;
-
-      const newSale: Sale = {
-        id: 'sale-' + Date.now(),
-        billNumber,
-        date: new Date().toISOString(),
-        customerName: customerName?.trim() || undefined,
-        customerPhone: customerPhone?.trim() || undefined,
+      const res = await completeSale({
         items,
-        subtotal,
-        discount: discountAmount,
+        discount,
         discountType,
-        grandTotal,
-        totalProfit: Math.round(totalProfit),
         paymentMethod,
+        customerName,
+        customerPhone,
         notes,
-        createdAt: Date.now(),
-      };
-
-      // 2. AUTOMATIC STOCK CUT: Deduct sold quantities from inventory
-      const updatedProducts = products.map((prod) => {
-        const soldItem = items.find((it) => it.product.id === prod.id);
-        if (soldItem) {
-          const newStock = Math.max(0, prod.stock - soldItem.quantity);
-          return { ...prod, stock: newStock, updatedAt: Date.now() };
-        }
-        return prod;
       });
-
-      // 3. IF PAYMENT IS UDHAAR: Automatically record in Udhaar Khata ledger
-      let updatedKhata = [...khata];
-      if (paymentMethod === 'udhaar' && (customerName || customerPhone)) {
-        const custName = customerName?.trim() || 'Walk-in Customer';
-        const custPhone = customerPhone?.trim() || '';
-
-        // Find customer by phone or name
-        const existingIndex = updatedKhata.findIndex(
-          (k) => (custPhone && k.phone === custPhone) || k.name.toLowerCase() === custName.toLowerCase()
-        );
-
-        const newTx = {
-          id: 'tx-' + Date.now(),
-          date: new Date().toISOString(),
-          type: 'credit_sale' as const,
-          amount: grandTotal,
-          billId: newSale.id,
-          billNumber: newSale.billNumber,
-          note: `Credit sale - Bill #${billNumber}`,
-        };
-
-        if (existingIndex >= 0) {
-          const customer = updatedKhata[existingIndex];
-          updatedKhata[existingIndex] = {
-            ...customer,
-            phone: custPhone || customer.phone,
-            totalDebt: customer.totalDebt + grandTotal,
-            transactions: [newTx, ...customer.transactions],
-            lastUpdated: Date.now(),
-          };
-        } else {
-          updatedKhata = [
-            {
-              id: 'cust-' + Date.now(),
-              name: custName,
-              phone: custPhone,
-              totalDebt: grandTotal,
-              transactions: [newTx],
-              lastUpdated: Date.now(),
-            },
-            ...updatedKhata,
-          ];
-        }
+      if (!res.success || !res.sale) {
+        throw new Error(res.error || 'Failed to complete sale');
       }
-
-      // Save everything asynchronously
-      setBillCounter(nextCounter);
-      await Promise.all([
-        saveProducts(updatedProducts),
-        saveSales([newSale, ...sales]),
-        saveKhata(updatedKhata),
-        StorageAdapter.setItem(STORAGE_KEYS.BILL_COUNTER, nextCounter.toString()),
-      ]);
-
-      return newSale;
+      return res.sale;
     },
-    [billCounter, products, sales, khata, saveProducts, saveSales, saveKhata]
+    [completeSale]
   );
 
-  // Delete bill and AUTOMATICALLY RESTORE STOCK!
   const deleteSale = useCallback(
     async (saleId: string) => {
-      const saleToDelete = sales.find((s) => s.id === saleId);
-      if (!saleToDelete) return;
-
-      // 1. RESTORE STOCK: Add back item quantities
-      const updatedProducts = products.map((prod) => {
-        const itemSold = saleToDelete.items.find((it) => it.product.id === prod.id);
-        if (itemSold) {
-          return { ...prod, stock: prod.stock + itemSold.quantity, updatedAt: Date.now() };
-        }
-        return prod;
-      });
-
-      // 2. If it was an Udhaar bill, remove or adjust the customer's khata debit
-      let updatedKhata = khata;
-      if (saleToDelete.paymentMethod === 'udhaar') {
-        updatedKhata = khata
-          .map((cust) => {
-            const hasTx = cust.transactions.some((tx) => tx.billId === saleId);
-            if (hasTx) {
-              const remainingTx = cust.transactions.filter((tx) => tx.billId !== saleId);
-              const newDebt = Math.max(0, cust.totalDebt - saleToDelete.grandTotal);
-              return {
-                ...cust,
-                totalDebt: newDebt,
-                transactions: remainingTx,
-                lastUpdated: Date.now(),
-              };
-            }
-            return cust;
-          })
-          .filter((cust) => cust.totalDebt > 0 || cust.transactions.length > 0);
-      }
-
-      // 3. Remove sale from sales list
-      const updatedSales = sales.filter((s) => s.id !== saleId);
-
-      await Promise.all([
-        saveProducts(updatedProducts),
-        saveSales(updatedSales),
-        saveKhata(updatedKhata),
-      ]);
+      await refundSale(saleId, 'Removed via Bill History');
     },
-    [sales, products, khata, saveProducts, saveSales, saveKhata]
+    [refundSale]
   );
 
   const getSaleById = useCallback(
@@ -384,65 +605,105 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [sales]
   );
 
-  // Khata Payment (Vasooli)
-  const addCustomerPayment = useCallback(
-    async (customerId: string, amount: number, note?: string) => {
-      if (amount <= 0) return;
-
-      const updatedKhata = khata.map((cust) => {
-        if (cust.id === customerId) {
-          const newDebt = Math.max(0, cust.totalDebt - amount);
-          const newTx = {
-            id: 'tx-' + Date.now(),
-            date: new Date().toISOString(),
-            type: 'payment_received' as const,
-            amount,
-            note: note?.trim() || 'Cash payment received (vasooli)',
-          };
-          return {
-            ...cust,
-            totalDebt: newDebt,
-            transactions: [newTx, ...cust.transactions],
-            lastUpdated: Date.now(),
-          };
-        }
-        return cust;
-      });
-
-      await saveKhata(updatedKhata);
-    },
-    [khata, saveKhata]
-  );
+  const getSales = useCallback(() => sales, [sales]);
+  const getCustomers = useCallback(() => khata, [khata]);
 
   const totalUdhaarReceivable = useMemo(() => {
-    return khata.reduce((sum, c) => sum + (c.totalDebt || 0), 0);
+    return khata.reduce((sum, c) => sum + (c.totalDebt || c.balance || 0), 0);
   }, [khata]);
 
-  // Settings
+  // ==================== SETTINGS ====================
+
   const updateSettings = useCallback(
     async (newSettings: Partial<ShopSettings>) => {
       const merged = { ...settings, ...newSettings };
       setSettings(merged);
-      await StorageAdapter.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
+      await SettingsRepository.saveSettings(merged);
+      await SyncQueueRepository.enqueue('settings', 'profile', 'update', merged);
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
     },
-    [settings]
+    [settings, user, isOnline, refreshPendingCount]
   );
 
-  const resetToSampleData = useCallback(async () => {
-    setProducts(INITIAL_PRODUCTS);
-    setSales([]);
-    setKhata(INITIAL_KHATA);
-    setSettings(INITIAL_SETTINGS);
-    setBillCounter(1001);
+  // ==================== AUTH & SYNC ACTIONS ====================
 
-    await Promise.all([
-      StorageAdapter.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS)),
-      StorageAdapter.setItem(STORAGE_KEYS.SALES, JSON.stringify([])),
-      StorageAdapter.setItem(STORAGE_KEYS.KHATA, JSON.stringify(INITIAL_KHATA)),
-      StorageAdapter.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(INITIAL_SETTINGS)),
-      StorageAdapter.setItem(STORAGE_KEYS.BILL_COUNTER, '1001'),
-    ]);
+  const signInWithGoogle = useCallback(async () => {
+    setAuthLoading(true);
+    const result = await authSignInWithGoogle();
+    setAuthLoading(false);
+    if (result.success && result.user) {
+      const gUser = result.user;
+      setUser(gUser);
+      setIsGuestMode(false);
+      setSyncStatus('syncing');
+
+      await MergeService.mergeGuestDataWithAccount(gUser.uid);
+      await Promise.all([refreshProducts(), refreshSales(), refreshKhata(), refreshSettings(), refreshPendingCount()]);
+      setSyncStatus('synced');
+    }
+    return result;
+  }, [refreshProducts, refreshSales, refreshKhata, refreshSettings, refreshPendingCount]);
+
+  const logout = useCallback(async () => {
+    await signOutUser();
+    await googleDriveService.disconnect();
+    setUser(null);
+    setIsGuestMode(false);
+    setSyncStatus('idle');
   }, []);
+
+  const syncNow = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    if (!user) return { success: false, error: 'User is not logged in' };
+    const online = await NetworkService.isOnline();
+    if (!online) {
+      setSyncStatus('offline');
+      return { success: false, error: 'Cannot sync while offline. Your changes are safe locally.' };
+    }
+
+    setSyncStatus('syncing');
+    const result = await SyncQueueService.processQueue(user.uid);
+    await refreshPendingCount();
+    setSyncStatus(result.errors > 0 ? 'error' : 'synced');
+
+    return {
+      success: result.errors === 0,
+      error: result.errors > 0 ? `${result.errors} operations failed to upload.` : undefined,
+    };
+  }, [user, refreshPendingCount]);
+
+  const clearStoreData = useCallback(async () => {
+    const db = getDatabase();
+    await db.run('DELETE FROM sale_items');
+    await db.run('DELETE FROM sales');
+    await db.run('DELETE FROM khata_transactions');
+    await db.run('DELETE FROM payments');
+    await db.run('DELETE FROM customers');
+    await db.run('DELETE FROM products');
+    await db.run('DELETE FROM sync_queue');
+    await SettingsRepository.setInvoiceCounter(1001);
+    await Promise.all([
+      refreshProducts(),
+      refreshSales(),
+      refreshKhata(),
+      refreshPendingCount(),
+    ]);
+  }, [refreshProducts, refreshSales, refreshKhata, refreshPendingCount]);
+
+  const resetToSampleData = useCallback(async () => {
+    await MigrationService.purgeDummyDataIfNeeded();
+    await SyncQueueService.clear();
+    await Promise.all([
+      refreshProducts(),
+      refreshSales(),
+      refreshKhata(),
+      refreshSettings(),
+      refreshPendingCount(),
+    ]);
+  }, [refreshProducts, refreshSales, refreshKhata, refreshSettings, refreshPendingCount]);
 
   const exportDataJSON = useCallback(() => {
     return JSON.stringify(
@@ -451,43 +712,64 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sales,
         khata,
         settings,
-        billCounter,
         exportedAt: new Date().toISOString(),
       },
       null,
       2
     );
-  }, [products, sales, khata, settings, billCounter]);
+  }, [products, sales, khata, settings]);
 
   const importDataJSON = useCallback(
     async (jsonString: string): Promise<boolean> => {
       try {
         const parsed = JSON.parse(jsonString);
         if (parsed.products && Array.isArray(parsed.products)) {
-          await saveProducts(parsed.products);
-        }
-        if (parsed.sales && Array.isArray(parsed.sales)) {
-          await saveSales(parsed.sales);
+          for (const p of parsed.products) {
+            await ProductRepository.insert(p, 'pending');
+          }
         }
         if (parsed.khata && Array.isArray(parsed.khata)) {
-          await saveKhata(parsed.khata);
+          for (const c of parsed.khata) {
+            await CustomerRepository.insert(c, 'pending');
+          }
         }
         if (parsed.settings) {
-          setSettings(parsed.settings);
-          await StorageAdapter.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(parsed.settings));
+          await SettingsRepository.saveSettings(parsed.settings);
         }
-        if (parsed.billCounter) {
-          setBillCounter(parsed.billCounter);
-          await StorageAdapter.setItem(STORAGE_KEYS.BILL_COUNTER, parsed.billCounter.toString());
-        }
+        await Promise.all([refreshProducts(), refreshSales(), refreshKhata(), refreshSettings()]);
         return true;
       } catch (e) {
         console.error('Failed to parse import JSON:', e);
         return false;
       }
     },
-    [saveProducts, saveSales, saveKhata]
+    [refreshProducts, refreshSales, refreshKhata, refreshSettings]
   );
+
+  // Silent automatic store backup to 5 TB Google Drive whenever catalog, sales, or khata change
+  const driveAutoSyncTimer = useRef<any>(null);
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (driveAutoSyncTimer.current) {
+      clearTimeout(driveAutoSyncTimer.current);
+    }
+    driveAutoSyncTimer.current = setTimeout(() => {
+      googleDriveService
+        .isConnected()
+        .then((connected) => {
+          if (connected) {
+            googleDriveService.autoSyncBackupToDrive(exportDataJSON()).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }, 5000);
+
+    return () => {
+      if (driveAutoSyncTimer.current) {
+        clearTimeout(driveAutoSyncTimer.current);
+      }
+    };
+  }, [products, sales, khata, settings, isLoaded, exportDataJSON]);
 
   // Localization
   const language = settings.language;
@@ -506,14 +788,16 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [language]
   );
 
-  // Computed metrics for Dashboard
-  const { todaySalesTotal, todayOrdersCount } = useMemo(() => {
+  // Computed Metrics
+  const { todaySalesTotal, todayOrdersCount, todayProfit } = useMemo(() => {
     const today = new Date();
     const todayYear = today.getFullYear();
     const todayMonth = today.getMonth();
     const todayDate = today.getDate();
 
-    const todaySales = sales.filter((s) => {
+    const activeSales = sales.filter((s) => s.status !== 'refunded' && s.status !== 'cancelled');
+
+    const todaySales = activeSales.filter((s) => {
       const saleDate = new Date(s.date);
       return (
         saleDate.getFullYear() === todayYear &&
@@ -522,10 +806,13 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
     });
 
-    const total = todaySales.reduce((sum, s) => sum + s.grandTotal, 0);
+    const total = todaySales.reduce((sum, s) => sum + (s.total ?? s.grandTotal), 0);
+    const profit = todaySales.reduce((sum, s) => sum + (s.totalProfit || 0), 0);
+
     return {
       todaySalesTotal: total,
       todayOrdersCount: todaySales.length,
+      todayProfit: profit,
     };
   }, [sales]);
 
@@ -538,6 +825,18 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return products.filter((p) => p.stock <= 0);
   }, [products]);
 
+  const getDashboardStats = useCallback((): DashboardStats => {
+    return {
+      todaySalesTotal,
+      todayOrdersCount,
+      todayProfit,
+      outstandingUdhaar: totalUdhaarReceivable,
+      totalInventoryCount: products.reduce((s, p) => s + p.stock, 0),
+      lowStockCount: lowStockProducts.length,
+      recentSales: sales.slice(0, 10),
+    };
+  }, [todaySalesTotal, todayOrdersCount, todayProfit, totalUdhaarReceivable, products, lowStockProducts, sales]);
+
   const value = useMemo(
     () => ({
       activeTab,
@@ -547,16 +846,26 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateProduct,
       deleteProduct,
       getProductById,
+      getProducts,
+      completeSale,
+      refundSale,
+      recordCustomerPayment,
+      receiveKhataPayment,
       sales,
       createSale,
       deleteSale,
       getSaleById,
+      getSales,
       khata,
+      addCustomer,
       addCustomerPayment,
       totalUdhaarReceivable,
+      getCustomers,
+      getDashboardStats,
       settings,
       updateSettings,
       resetToSampleData,
+      clearStoreData,
       exportDataJSON,
       importDataJSON,
       language,
@@ -564,6 +873,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       t,
       todaySalesTotal,
       todayOrdersCount,
+      todayProfit,
       lowStockProducts,
       outOfStockProducts,
       activeReceipt,
@@ -572,6 +882,22 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setEditingProduct,
       isAddProductOpen,
       setIsAddProductOpen,
+      isAuthModalOpen,
+      setIsAuthModalOpen,
+      isEditShopOpen,
+      setIsEditShopOpen,
+      user,
+      authLoading,
+      isOnline,
+      syncStatus,
+      pendingSyncCount,
+      signInWithGoogle,
+      logout,
+      syncNow,
+      isGuestMode,
+      setIsGuestMode,
+      continueAsGuest,
+      isLoaded,
     }),
     [
       activeTab,
@@ -580,16 +906,26 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateProduct,
       deleteProduct,
       getProductById,
+      getProducts,
+      completeSale,
+      refundSale,
+      recordCustomerPayment,
+      receiveKhataPayment,
       sales,
       createSale,
       deleteSale,
       getSaleById,
+      getSales,
       khata,
+      addCustomer,
       addCustomerPayment,
       totalUdhaarReceivable,
+      getCustomers,
+      getDashboardStats,
       settings,
       updateSettings,
       resetToSampleData,
+      clearStoreData,
       exportDataJSON,
       importDataJSON,
       language,
@@ -597,11 +933,25 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       t,
       todaySalesTotal,
       todayOrdersCount,
+      todayProfit,
       lowStockProducts,
       outOfStockProducts,
       activeReceipt,
       editingProduct,
       isAddProductOpen,
+      isAuthModalOpen,
+      isEditShopOpen,
+      user,
+      authLoading,
+      isOnline,
+      syncStatus,
+      pendingSyncCount,
+      signInWithGoogle,
+      logout,
+      syncNow,
+      isGuestMode,
+      continueAsGuest,
+      isLoaded,
     ]
   );
 

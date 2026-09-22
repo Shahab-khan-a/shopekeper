@@ -17,6 +17,9 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+google-drive-key.json
+client_secret.json
+client_secret*.json
 
 # Metro
 .metro-health-check*
@@ -31,7 +34,9 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo

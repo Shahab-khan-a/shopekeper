@@ -27,6 +27,8 @@ export const DashboardScreen: React.FC = () => {
     setActiveTab,
     setActiveReceipt,
     setIsAddProductOpen,
+    setIsAuthModalOpen,
+    user,
     t,
     language,
   } = useShop();
@@ -56,16 +58,14 @@ export const DashboardScreen: React.FC = () => {
               {language === 'ur' ? '👋 خوش آمدید' : '👋 Welcome back,'}
             </Text>
             <Text style={styles.heroOwner} numberOfLines={1}>
-              {settings.ownerName}
+              {settings.ownerName || user?.displayName || (language === 'ur' ? 'معزز دکاندار' : 'Valued Shopkeeper')}
             </Text>
             <Text style={styles.heroShop} numberOfLines={1}>
-              {language === 'ur' && settings.shopNameUrdu ? settings.shopNameUrdu : settings.shopName}
+              {language === 'ur' && settings.shopNameUrdu
+                ? settings.shopNameUrdu
+                : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : 'My Store'))}
             </Text>
-            {settings.businessType ? (
-              <Text style={styles.heroBusinessType} numberOfLines={1}>
-                🏷️ {settings.businessType} {settings.city ? `• 📍 ${settings.city}` : ''}
-              </Text>
-            ) : null}
+
           </View>
 
           <Pressable
@@ -75,7 +75,7 @@ export const DashboardScreen: React.FC = () => {
               pressed && { opacity: 0.85, transform: [{ scale: 0.95 }] },
             ]}>
             <View style={[styles.heroIconCircle, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
-              {settings.profileImage ? (
+              {settings.profileImage && (!settings.profileImage.includes('googleusercontent.com') || settings.profileImage.includes('/d/')) ? (
                 <Image source={{ uri: settings.profileImage }} style={styles.heroAvatarImg} />
               ) : (
                 <Ionicons name="storefront" size={30} color="rgba(255,255,255,0.9)" />
@@ -94,6 +94,35 @@ export const DashboardScreen: React.FC = () => {
           <Text style={[styles.heroCTAText, { color: theme.heroBg }]}>{t('newBillBtn')}</Text>
         </Pressable>
       </View>
+
+
+
+      {/* ── Google Cloud Backup Reminder Banner (when not signed in) ── */}
+      {!user && (
+        <Pressable
+          onPress={() => setIsAuthModalOpen(true)}
+          style={({ pressed }) => [
+            styles.cloudBanner,
+            { backgroundColor: theme.card, borderColor: theme.border },
+            pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+          ]}
+        >
+          <View style={[styles.cloudBannerIcon, { backgroundColor: theme.primaryLight }]}>
+            <Ionicons name="cloud-upload" size={18} color={theme.primary} />
+          </View>
+          <View style={styles.cloudBannerTextWrap}>
+            <Text style={[styles.cloudBannerTitle, { color: theme.text }]}>
+              {language === 'ur' ? 'گوگل کلاؤڈ بیک اپ' : 'Google Cloud Backup'}
+            </Text>
+            <Text style={[styles.cloudBannerDesc, { color: theme.textSecondary }]}>
+              {language === 'ur'
+                ? 'اپنے سامان، بلز اور کھاتہ کو محفوظ رکھنے کیلئے لاگ ان کریں'
+                : 'Connect your Google account to safeguard store records.'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+        </Pressable>
+      )}
 
       {/* ── Today's Metrics ── */}
       <View style={styles.metricsGrid}>
@@ -411,7 +440,7 @@ const styles = StyleSheet.create({
   quickTile: {
     flex: 1,
     minWidth: '45%',
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.xl,
     alignItems: 'center',
@@ -462,4 +491,33 @@ const styles = StyleSheet.create({
   saleTime: { fontSize: 11, fontWeight: '500' },
   saleRight: { alignItems: 'flex-end', gap: 4 },
   saleAmount: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3 },
+  cloudBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginTop: Spacing.md,
+    ...Shadows.sm,
+  },
+  cloudBannerIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cloudBannerTextWrap: {
+    flex: 1,
+  },
+  cloudBannerTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  cloudBannerDesc: {
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
+  },
 });

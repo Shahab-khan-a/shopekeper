@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated, Platform, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { ActiveTab } from '@/types';
@@ -11,19 +11,20 @@ const TabItem: React.FC<{
   icon: keyof typeof Ionicons.glyphMap;
   isActive: boolean;
   hasBadge?: boolean;
+  avatarUri?: string;
   onPress: () => void;
   theme: ReturnType<typeof Colors.dark extends typeof Colors.light ? () => typeof Colors.light : () => typeof Colors.dark>;
-}> = ({ tabKey, label, icon, isActive, hasBadge, onPress, theme }) => {
+}> = ({ tabKey, label, icon, isActive, hasBadge, avatarUri, onPress, theme }) => {
   const scale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (isActive) {
       Animated.sequence([
-        Animated.timing(scale, { toValue: 0.88, duration: 80, useNativeDriver: true }),
-        Animated.spring(scale, { toValue: 1, friction: 5, useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 0.88, duration: 80, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.spring(scale, { toValue: 1, friction: 5, useNativeDriver: Platform.OS !== 'web' }),
       ]).start();
     }
-  }, [isActive]);
+  }, [isActive, scale]);
 
   return (
     <Pressable
@@ -38,11 +39,17 @@ const TabItem: React.FC<{
             styles.iconWrapper,
             isActive && { backgroundColor: theme.primaryLight, borderRadius: BorderRadius.md },
           ]}>
-          <Ionicons
-            name={isActive ? icon : (`${icon}-outline` as any)}
-            size={22}
-            color={isActive ? theme.primary : theme.tabBarInactive}
-          />
+          {avatarUri ? (
+            <View style={[styles.avatarWrap, { borderColor: isActive ? theme.primary : theme.border }]}>
+              <Image source={{ uri: avatarUri }} style={styles.avatarImg} />
+            </View>
+          ) : (
+            <Ionicons
+              name={isActive ? icon : (`${icon}-outline` as any)}
+              size={20}
+              color={isActive ? theme.primary : theme.tabBarInactive}
+            />
+          )}
           {hasBadge && (
             <View style={[styles.miniBadge, { backgroundColor: theme.danger }]} />
           )}
@@ -67,7 +74,12 @@ export const BottomNav: React.FC = () => {
   const { activeTab, setActiveTab, t, settings, lowStockProducts } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
-  const tabs: { key: ActiveTab; label: string; icon: keyof typeof Ionicons.glyphMap; isFab?: boolean }[] = [
+  const tabs: {
+    key: ActiveTab;
+    label: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    isFab?: boolean;
+  }[] = [
     { key: 'dashboard', label: t('home'), icon: 'home' },
     { key: 'products', label: t('products'), icon: 'cube' },
     { key: 'sale', label: t('sale'), icon: 'cart', isFab: true },
@@ -91,8 +103,7 @@ export const BottomNav: React.FC = () => {
                   { borderColor: theme.surface },
                   pressed && { transform: [{ scale: 0.93 }] },
                 ]}>
-                <View style={[styles.fabGlow, { backgroundColor: theme.primaryLight }]} />
-                <View style={[styles.fabButton, { backgroundColor: theme.primary }, Shadows.xl]}>
+                  <View style={[styles.fabButton, { backgroundColor: theme.primary }, Shadows.xl]}>
                   <Ionicons name="cart" size={22} color="#FFFFFF" />
                 </View>
                 <Text style={[styles.fabLabel, { color: theme.primary }]}>{tab.label}</Text>
@@ -141,15 +152,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.xs,
-    minHeight: 52,
-    gap: 3,
+    minHeight: 44,
+    gap: 2,
   },
   iconWrapper: {
     position: 'relative',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImg: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
   },
   miniBadge: {
     position: 'absolute',
@@ -160,7 +185,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 9.5,
     textAlign: 'center',
     letterSpacing: 0.1,
   },
@@ -170,17 +195,11 @@ const styles = StyleSheet.create({
     marginTop: -20,
     paddingBottom: 2,
     gap: 3,
-  },
-  fabGlow: {
-    position: 'absolute',
-    width: 68,
-    height: 68,
-    borderRadius: BorderRadius.full,
-    top: -4,
+    paddingHorizontal: 4,
   },
   fabButton: {
-    width: 60,
-    height: 60,
+    width: 58,
+    height: 58,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -192,3 +211,4 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
 });
+

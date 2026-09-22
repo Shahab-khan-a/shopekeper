@@ -24,7 +24,7 @@ export const BarcodeModal: React.FC<BarcodeModalProps> = ({
   onClose,
   onSelectProduct,
 }) => {
-  const { products, settings, t } = useShop();
+  const { products, settings } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [inputCode, setInputCode] = useState('');

@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Product, ProductCategory } from '@/types';
+import { ProductCategory } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { ProductCard } from '@/components/ProductCard';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';

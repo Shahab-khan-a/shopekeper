@@ -110,32 +110,45 @@ export const Typography = {
 };
 
 export const Shadows = {
-  sm: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  lg: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  xl: {
-    shadowColor: '#059669',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 12,
-  },
+  sm: Platform.select({
+    web: { boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.06)' },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 3,
+      elevation: 2,
+    },
+  }) as any,
+  md: Platform.select({
+    web: { boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.10)' },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.10,
+      shadowRadius: 6,
+      elevation: 4,
+    },
+  }) as any,
+  lg: Platform.select({
+    web: { boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.15)' },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.15,
+      shadowRadius: 12,
+      elevation: 8,
+    },
+  }) as any,
+  xl: Platform.select({
+    web: { boxShadow: '0px 8px 16px rgba(5, 150, 105, 0.25)' },
+    default: {
+      shadowColor: '#059669',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      elevation: 12,
+    },
+  }) as any,
 };
+

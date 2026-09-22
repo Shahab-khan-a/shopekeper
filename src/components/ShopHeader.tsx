@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
@@ -11,46 +11,139 @@ export const ShopHeader: React.FC = () => {
     lowStockProducts,
     outOfStockProducts,
     setActiveTab,
+    setIsAuthModalOpen,
+    setIsEditShopOpen,
+    user,
+    isOnline,
+    syncStatus,
+    pendingSyncCount,
+    syncNow,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const totalAlerts = lowStockProducts.length + outOfStockProducts.length;
 
+  const handleSyncPillPress = async () => {
+    if (!isOnline) {
+      const msg =
+        language === 'ur'
+          ? `آپ آف لائن ہیں۔ ${pendingSyncCount} تبدیلیاں محفوظ ہیں اور انٹرنیٹ آتے ہی خود بخود کلاؤڈ پر منتقل ہو جائیں گی۔`
+          : `You are offline. ${pendingSyncCount} local changes are safely queued and will sync automatically when internet returns.`;
+      if (Platform.OS === 'web') {
+        window.alert(msg);
+      } else {
+        Alert.alert('Offline Mode', msg);
+      }
+      return;
+    }
+
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    await syncNow();
+  };
+
+  // Determine Pill Appearance
+  const getSyncPillConfig = () => {
+    if (!isOnline) {
+      return {
+        bg: '#FEE2E2',
+        border: '#FCA5A5',
+        color: '#DC2626',
+        icon: 'cloud-offline' as const,
+        label: pendingSyncCount > 0 ? `Offline (${pendingSyncCount})` : 'Offline',
+      };
+    }
+
+    if (syncStatus === 'syncing') {
+      return {
+        bg: '#FEF9C3',
+        border: '#FDE047',
+        color: '#CA8A04',
+        icon: 'sync' as const,
+        label: pendingSyncCount > 0 ? `Syncing ${pendingSyncCount}...` : 'Syncing...',
+      };
+    }
+
+    if (syncStatus === 'error') {
+      return {
+        bg: '#FEE2E2',
+        border: '#FCA5A5',
+        color: '#DC2626',
+        icon: 'alert-circle' as const,
+        label: 'Sync failed',
+      };
+    }
+
+    if (pendingSyncCount > 0) {
+      return {
+        bg: '#FFEDD5',
+        border: '#FDBA74',
+        color: '#EA580C',
+        icon: 'cloud-upload' as const,
+        label: `${pendingSyncCount} pending`,
+      };
+    }
+
+    return {
+      bg: '#DCFCE7',
+      border: '#86EFAC',
+      color: '#16A34A',
+      icon: 'checkmark-circle' as const,
+      label: 'Synced',
+    };
+  };
+
+  const pill = getSyncPillConfig();
+
   return (
     <View style={[styles.headerContainer, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
-      {/* Left: Clickable Logo + Shop Info (Opens Store Details & Settings) */}
+      {/* Left: Clickable Logo + Shop Info (Opens Quick Edit Shop Modal) */}
       <Pressable
-        onPress={() => setActiveTab('settings')}
+        onPress={() => setIsEditShopOpen(true)}
         style={({ pressed }) => [
           styles.leftSection,
           pressed && { opacity: 0.75, transform: [{ scale: 0.99 }] },
         ]}>
         <View style={[styles.logoBadge, { backgroundColor: theme.primaryLight }]}>
-          {settings.profileImage ? (
+          {settings.profileImage && (!settings.profileImage.includes('googleusercontent.com') || settings.profileImage.includes('/d/')) ? (
             <Image source={{ uri: settings.profileImage }} style={styles.logoImage} />
           ) : (
             <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
-              <Ionicons name="storefront" size={20} color="#FFFFFF" />
+              <Ionicons name="storefront" size={22} color="#FFFFFF" />
             </View>
           )}
         </View>
         <View style={styles.titleWrap}>
-          <View style={styles.titleRow}>
-            <Text style={[styles.shopTitle, { color: theme.text }]} numberOfLines={1}>
-              {language === 'ur' && settings.shopNameUrdu ? settings.shopNameUrdu : settings.shopName}
-            </Text>
-            <Ionicons name="chevron-forward" size={14} color={theme.textMuted} style={{ marginTop: 2 }} />
-          </View>
-          <Text style={[styles.shopSubtitle, { color: theme.primary }]} numberOfLines={1}>
-            {settings.ownerName
-              ? `👤 ${settings.ownerName} ${settings.phone ? `• 📞 ${settings.phone}` : ''}`
-              : (settings.phone ? `📞 ${settings.phone}` : (language === 'ur' ? 'دکان کی تفصیلات دیکھیں' : 'View Store Details'))}
+          <Text style={[styles.shopTitle, { color: theme.text }]} numberOfLines={1}>
+            {language === 'ur' && settings.shopNameUrdu
+              ? settings.shopNameUrdu
+              : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : 'My Store'))}
+          </Text>
+          <Text style={[styles.shopSubtitle, { color: theme.textSecondary }]} numberOfLines={1}>
+            {settings.ownerName || user?.displayName || ''}
+            {settings.phone ? (settings.ownerName || user?.displayName ? ` • ${settings.phone}` : settings.phone) : ''}
           </Text>
         </View>
       </Pressable>
 
       {/* Right: Controls */}
       <View style={styles.rightSection}>
+        {/* Sync Status Pill */}
+        <Pressable
+          onPress={handleSyncPillPress}
+          accessibilityLabel="Sync Status Indicator"
+          style={({ pressed }) => [
+            styles.syncPill,
+            { backgroundColor: pill.bg, borderColor: pill.border },
+            pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
+          ]}>
+          <Ionicons name={pill.icon} size={13} color={pill.color} />
+          <Text style={[styles.syncPillText, { color: pill.color }]}>{pill.label}</Text>
+        </Pressable>
+
         {/* Alert Badge */}
         {totalAlerts > 0 && (
           <Pressable
@@ -65,19 +158,26 @@ export const ShopHeader: React.FC = () => {
           </Pressable>
         )}
 
-        {/* Profile / Store Settings Avatar Button */}
+        {/* Profile Avatar / Cloud Login Button */}
         <Pressable
-          onPress={() => setActiveTab('settings')}
-          accessibilityLabel="Profile & Settings"
+          onPress={() => (user ? setActiveTab('settings') : setIsAuthModalOpen(true))}
+          accessibilityLabel="Account & Settings"
           style={({ pressed }) => [
             styles.profileBtn,
-            { backgroundColor: theme.primaryLight, borderColor: theme.border },
+            {
+              backgroundColor: user ? theme.primaryLight : theme.surfaceSubtle,
+              borderColor: theme.border,
+            },
             pressed && { opacity: 0.8, transform: [{ scale: 0.94 }] },
           ]}>
-          {settings.profileImage ? (
-            <Image source={{ uri: settings.profileImage }} style={styles.profileAvatarImg} />
+          {user?.photoURL ? (
+            <Image source={{ uri: user.photoURL }} style={styles.profileAvatarImg} />
           ) : (
-            <Ionicons name="person" size={17} color={theme.primary} />
+            <Ionicons
+              name={user ? 'person' : 'person-outline'}
+              size={17}
+              color={user ? theme.primary : theme.textMuted}
+            />
           )}
         </Pressable>
       </View>
@@ -126,11 +226,6 @@ const styles = StyleSheet.create({
   titleWrap: {
     flex: 1,
   },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   shopTitle: {
     fontSize: 17,
     fontWeight: '800',
@@ -145,6 +240,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+  },
+  syncPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  syncPillText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   alertButton: {
     flexDirection: 'row',

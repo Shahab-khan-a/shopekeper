@@ -5,6 +5,7 @@ import { Product } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { CameraModal } from '@/components/CameraModal';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { googleDriveService } from '@/services/googleDriveService';
 
 interface ProductCardProps {
   product: Product;
@@ -242,6 +243,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onClose={() => setIsCameraOpen(false)}
         onCapture={(uri) => {
           updateProduct(product.id, { image: uri });
+          // Upload directly to 5 TB Google Drive if connected
+          googleDriveService
+            .getSavedAuth()
+            .then((auth) => {
+              if (auth) {
+                googleDriveService
+                  .uploadProductImage(uri, `product_${product.id}_${Date.now()}.jpg`)
+                  .then((driveUrl) => {
+                    updateProduct(product.id, { image: driveUrl });
+                  })
+                  .catch((err) => console.warn('[ProductCard] Drive image upload error:', err));
+              }
+            })
+            .catch(() => {});
         }}
         title={`${product.image ? 'Change' : 'Snap'} Photo: ${product.name}`}
       />

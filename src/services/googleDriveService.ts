@@ -1,0 +1,602 @@
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
+import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
+
+WebBrowser.maybeCompleteAuthSession();
+
+export interface GoogleDriveAuth {
+  accessToken: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+  expiresAt: number;
+}
+
+export interface DriveFolderCache {
+  rootFolderId: string;
+  imagesFolderId: string;
+  backupsFolderId: string;
+  billsFolderId: string;
+}
+
+const FOLDER_CACHE_KEY = '@shopkeeper_gdrive_folder_cache';
+
+class GoogleDriveService {
+  private currentAuth: GoogleDriveAuth | null = null;
+  private folderCache: DriveFolderCache | null = null;
+
+  /**
+   * Loads saved credentials from AsyncStorage
+   */
+  async getSavedAuth(): Promise<GoogleDriveAuth | null> {
+    if (this.currentAuth && this.currentAuth.expiresAt > Date.now() + 60000) {
+      return this.currentAuth;
+    }
+
+    try {
+      const raw = await AsyncStorage.getItem(GOOGLE_DRIVE_CONFIG.storageKey);
+      if (!raw) return null;
+      const parsed: GoogleDriveAuth = JSON.parse(raw);
+      if (parsed.expiresAt > Date.now()) {
+        this.currentAuth = parsed;
+        return parsed;
+      }
+      // Expired token
+      await this.disconnect();
+      return null;
+    } catch (e) {
+      console.warn('[GoogleDriveService] Failed to load saved auth:', e);
+      return null;
+    }
+  }
+
+  /**
+   * Save auth info to memory and storage
+   */
+  async saveAuth(auth: GoogleDriveAuth): Promise<void> {
+    this.currentAuth = auth;
+    await AsyncStorage.setItem(GOOGLE_DRIVE_CONFIG.storageKey, JSON.stringify(auth));
+  }
+
+  /**
+   * Disconnect and clear local token cache
+   */
+  async disconnect(): Promise<void> {
+    this.currentAuth = null;
+    this.folderCache = null;
+    await AsyncStorage.removeItem(GOOGLE_DRIVE_CONFIG.storageKey);
+    await AsyncStorage.removeItem(FOLDER_CACHE_KEY);
+  }
+
+  /**
+   * Connect with Google Drive OAuth2
+   */
+  async connect(): Promise<{ success: boolean; error?: string; user?: GoogleDriveAuth }> {
+    try {
+      const redirectUri = AuthSession.makeRedirectUri({
+        scheme: 'shopkeeperapp',
+        preferLocalhost: Platform.OS === 'web',
+      });
+
+      const scopeString = GOOGLE_DRIVE_CONFIG.scopes.join(' ');
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${encodeURIComponent(GOOGLE_DRIVE_CONFIG.clientId)}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=token` +
+        `&scope=${encodeURIComponent(scopeString)}` +
+        `&prompt=select_account`;
+
+      if (Platform.OS === 'web') {
+        const result = await this.openWebAuthPopup(authUrl, redirectUri);
+        if (result && result.accessToken) {
+          await this.saveAuth(result);
+          // Initialize folders in background
+          this.ensureFolders(result.accessToken).catch((e) =>
+            console.warn('[GoogleDriveService] Background folder ensure error:', e)
+          );
+          return { success: true, user: result };
+        }
+        return { success: false, error: 'Google Drive authorization was cancelled or failed.' };
+      } else {
+        const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+        if (authResponse.type === 'success' && authResponse.url) {
+          const auth = this.extractTokenFromUrl(authResponse.url);
+          if (auth) {
+            await this.saveAuth(auth);
+            this.ensureFolders(auth.accessToken).catch(console.warn);
+            return { success: true, user: auth };
+          }
+        }
+        return { success: false, error: 'Authorization flow did not complete.' };
+      }
+    } catch (e: any) {
+      console.error('[GoogleDriveService] Connect error:', e);
+      return { success: false, error: e?.message || 'Failed to connect Google Drive.' };
+    }
+  }
+
+  /**
+   * Open OAuth popup on Web
+   */
+  private async openWebAuthPopup(authUrl: string, redirectUri: string): Promise<GoogleDriveAuth | null> {
+    return new Promise((resolve) => {
+      const width = 500;
+      const height = 650;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+
+      const popup = window.open(
+        authUrl,
+        'google_oauth_popup',
+        `width=${width},height=${height},left=${left},top=${top},status=0,toolbar=0,menubar=0`
+      );
+
+      if (!popup) {
+        // Fallback to direct redirect if popup blocked
+        window.location.href = authUrl;
+        return;
+      }
+
+      const checkInterval = setInterval(async () => {
+        try {
+          if (!popup || popup.closed) {
+            clearInterval(checkInterval);
+            resolve(null);
+            return;
+          }
+
+          const currentUrl = popup.location?.href;
+          if (currentUrl && currentUrl.startsWith(redirectUri)) {
+            clearInterval(checkInterval);
+            const auth = this.extractTokenFromUrl(currentUrl);
+            popup.close();
+
+            if (auth) {
+              // Fetch user profile info
+              try {
+                const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${auth.accessToken}` },
+                });
+                if (profileRes.ok) {
+                  const profile = await profileRes.json();
+                  auth.email = profile.email;
+                  auth.name = profile.name;
+                  auth.picture = profile.picture;
+                }
+              } catch (profileErr) {
+                console.warn('[GoogleDriveService] Could not fetch profile:', profileErr);
+              }
+              resolve(auth);
+            } else {
+              resolve(null);
+            }
+          }
+        } catch {
+          // Cross-origin access error while popup is on google.com — normal until it redirects back
+        }
+      }, 500);
+    });
+  }
+
+  /**
+   * Extract access_token from hash parameters
+   */
+  private extractTokenFromUrl(url: string): GoogleDriveAuth | null {
+    try {
+      const hashIndex = url.indexOf('#');
+      if (hashIndex === -1) return null;
+      const hash = url.substring(hashIndex + 1);
+      const params = new URLSearchParams(hash);
+
+      const accessToken = params.get('access_token');
+      const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
+
+      if (!accessToken) return null;
+
+      return {
+        accessToken,
+        expiresAt: Date.now() + expiresIn * 1000,
+      };
+    } catch (e) {
+      console.warn('[GoogleDriveService] Failed to extract token:', e);
+      return null;
+    }
+  }
+
+  /**
+   * Ensure root and subfolders exist in Google Drive
+   */
+  async ensureFolders(token?: string): Promise<DriveFolderCache> {
+    if (this.folderCache) return this.folderCache;
+
+    try {
+      const cached = await AsyncStorage.getItem(FOLDER_CACHE_KEY);
+      if (cached) {
+        this.folderCache = JSON.parse(cached);
+        return this.folderCache!;
+      }
+    } catch {
+      // Ignore
+    }
+
+    const accessToken = token || (await this.getSavedAuth())?.accessToken;
+    if (!accessToken) throw new Error('Google Drive is not connected.');
+
+    // 1. Locate root folder (or use pre-shared folder ID)
+    let rootId = GOOGLE_DRIVE_CONFIG.defaultFolderId;
+    try {
+      const checkRes = await fetch(`https://www.googleapis.com/drive/v3/files/${rootId}?fields=id,name,trashed`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!checkRes.ok) {
+        rootId = await this.findOrCreateFolder(accessToken, GOOGLE_DRIVE_CONFIG.folderName);
+      }
+    } catch {
+      rootId = await this.findOrCreateFolder(accessToken, GOOGLE_DRIVE_CONFIG.folderName);
+    }
+
+    // 2. Locate or create Images, Backups, and Bills subfolders
+    const imagesFolderId = await this.findOrCreateFolder(
+      accessToken,
+      GOOGLE_DRIVE_CONFIG.imagesFolderName,
+      rootId
+    );
+    const backupsFolderId = await this.findOrCreateFolder(
+      accessToken,
+      GOOGLE_DRIVE_CONFIG.backupsFolderName,
+      rootId
+    );
+    const billsFolderId = await this.findOrCreateFolder(
+      accessToken,
+      GOOGLE_DRIVE_CONFIG.billsFolderName,
+      rootId
+    );
+
+    const cache: DriveFolderCache = {
+      rootFolderId: rootId,
+      imagesFolderId,
+      backupsFolderId,
+      billsFolderId,
+    };
+
+    this.folderCache = cache;
+    await AsyncStorage.setItem(FOLDER_CACHE_KEY, JSON.stringify(cache));
+    return cache;
+  }
+
+  /**
+   * Uploads shop profile logo to Google Drive Images folder
+   */
+  async uploadProfileLogo(imageUri: string): Promise<string> {
+    return this.uploadProductImage(imageUri, `shop_logo_${Date.now()}.jpg`);
+  }
+
+  /**
+   * Uploads an individual sale / bill receipt directly to the Bills folder in Google Drive
+   * Completely resilient: never throws or crashes the UI
+   */
+  async uploadBillToDrive(
+    sale: any,
+    shopSettings?: any
+  ): Promise<{ id: string; name: string } | null> {
+    try {
+      const auth = await this.getSavedAuth();
+      if (!auth) return null;
+
+      const folders = await this.ensureFolders(auth.accessToken);
+      const invNum = sale.invoiceNumber || sale.id.slice(0, 8);
+      const dateStr = new Date(sale.date).toISOString().slice(0, 10);
+      const filename = `bill_INV-${invNum}_${dateStr}.json`;
+
+      const billSnapshot = {
+        invoiceNumber: invNum,
+        date: sale.date,
+        customerName: sale.customerName || 'Walk-in Customer',
+        customerPhone: sale.customerPhone || '',
+        items: (sale.items || []).map((it: any) => ({
+          name: it.name,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          total: it.total,
+        })),
+        subtotal:
+          sale.subtotal ??
+          (sale.items || []).reduce((acc: number, it: any) => acc + (it.total || 0), 0),
+        discount: sale.discount || 0,
+        grandTotal: sale.grandTotal ?? sale.total,
+        paymentMethod: sale.paymentMethod || 'cash',
+        shopName: shopSettings?.shopName || 'Shopkeeper POS',
+        shopPhone: shopSettings?.phone || '',
+        shopAddress: shopSettings?.address || '',
+        syncedAt: new Date().toISOString(),
+      };
+
+      const billContent = JSON.stringify(billSnapshot, null, 2);
+
+      const metadata = {
+        name: filename,
+        parents: [folders.billsFolderId],
+        mimeType: 'application/json',
+      };
+
+      const boundary = '-------bill_boundary_' + Date.now();
+      const multipartBody =
+        `--${boundary}\r\n` +
+        `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+        `${JSON.stringify(metadata)}\r\n` +
+        `--${boundary}\r\n` +
+        `Content-Type: application/json\r\n\r\n` +
+        `${billContent}\r\n` +
+        `--${boundary}--`;
+
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+          'Content-Type': `multipart/related; boundary=${boundary}`,
+        },
+        body: multipartBody,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return { id: data.id, name: filename };
+      }
+      return null;
+    } catch (err) {
+      console.warn('[GoogleDriveService] Bill auto-upload skipped (silent):', err);
+      return null;
+    }
+  }
+
+  /**
+   * Helper to find an existing folder or create one
+   */
+  private async findOrCreateFolder(accessToken: string, name: string, parentId?: string): Promise<string> {
+    let q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    if (parentId) {
+      q += ` and '${parentId}' in parents`;
+    }
+
+    const listRes = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    if (listRes.ok) {
+      const data = await listRes.json();
+      if (data.files && data.files.length > 0) {
+        return data.files[0].id;
+      }
+    }
+
+    // Create folder
+    const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        mimeType: 'application/vnd.google-apps.folder',
+        ...(parentId ? { parents: [parentId] } : {}),
+      }),
+    });
+
+    const createData = await createRes.json();
+    return createData.id;
+  }
+
+  /**
+   * Uploads a product image directly to the 5 TB Google Drive
+   * Returns a direct CDN thumbnail URL (https://lh3.googleusercontent.com/d/{fileId})
+   */
+  async uploadProductImage(imageUri: string, filename?: string): Promise<string> {
+    const auth = await this.getSavedAuth();
+    if (!auth) throw new Error('Google Drive is not connected. Please connect Google Drive in Settings.');
+
+    const folders = await this.ensureFolders(auth.accessToken);
+    const resolvedName = filename || `product_${Date.now()}.jpg`;
+
+    // 1. Fetch image binary / blob
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const mimeType = blob.type || 'image/jpeg';
+
+    // 2. Prepare multipart upload
+    const metadata = {
+      name: resolvedName,
+      parents: [folders.imagesFolderId],
+      mimeType,
+    };
+
+    const boundary = '-------dukandar_boundary_' + Date.now();
+    const metadataHeader = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(
+      metadata
+    )}\r\n`;
+    const fileHeader = `--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`;
+    const footer = `\r\n--${boundary}--`;
+
+    const metadataBlob = new Blob([metadataHeader], { type: 'text/plain' });
+    const fileHeaderBlob = new Blob([fileHeader], { type: 'text/plain' });
+    const footerBlob = new Blob([footer], { type: 'text/plain' });
+
+    const multipartBlob = new Blob([metadataBlob, fileHeaderBlob, blob, footerBlob], {
+      type: `multipart/related; boundary=${boundary}`,
+    });
+
+    // 3. Upload to Google Drive
+    const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      body: multipartBlob,
+    });
+
+    if (!uploadRes.ok) {
+      const err = await uploadRes.json();
+      throw new Error(err?.error?.message || 'Failed to upload image to Google Drive.');
+    }
+
+    const fileData = await uploadRes.json();
+    const fileId = fileData.id;
+
+    // 4. Set public read permission so the thumbnail can display smoothly anywhere
+    try {
+      await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          role: 'reader',
+          type: 'anyone',
+        }),
+      });
+    } catch (permErr) {
+      console.warn('[GoogleDriveService] Setting public permission failed (optional):', permErr);
+    }
+
+    // Direct Google CDN image display link
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+  }
+
+  /**
+   * Uploads store backup JSON to Backups folder in Google Drive
+   */
+  async uploadStoreBackup(backupJsonString: string): Promise<{ id: string; name: string; size: number }> {
+    const auth = await this.getSavedAuth();
+    if (!auth) throw new Error('Google Drive is not connected.');
+
+    const folders = await this.ensureFolders(auth.accessToken);
+    const dateStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const name = `dukandar_backup_${dateStr}.json`;
+
+    const metadata = {
+      name,
+      parents: [folders.backupsFolderId],
+      mimeType: 'application/json',
+    };
+
+    const boundary = '-------backup_boundary_' + Date.now();
+    const multipartBody =
+      `--${boundary}\r\n` +
+      `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+      `${JSON.stringify(metadata)}\r\n` +
+      `--${boundary}\r\n` +
+      `Content-Type: application/json\r\n\r\n` +
+      `${backupJsonString}\r\n` +
+      `--${boundary}--`;
+
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`,
+      },
+      body: multipartBody,
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err?.error?.message || 'Failed to upload backup to Google Drive.');
+    }
+
+    const data = await res.json();
+    return {
+      id: data.id,
+      name,
+      size: new Blob([backupJsonString]).size,
+    };
+  }
+
+  /**
+   * Check if Google Drive is currently connected
+   */
+  async isConnected(): Promise<boolean> {
+    const auth = await this.getSavedAuth();
+    return !!auth;
+  }
+
+  /**
+   * Auto-syncs latest store state silently to Google Drive in the background.
+   * Updates 'latest_store_backup.json' in Backups folder.
+   * Completely resilient: never throws or disrupts the user.
+   */
+  async autoSyncBackupToDrive(backupJsonString: string): Promise<void> {
+    try {
+      const auth = await this.getSavedAuth();
+      if (!auth) return;
+
+      const folders = await this.ensureFolders(auth.accessToken);
+      const filename = 'latest_store_backup.json';
+
+      // Check if latest_store_backup.json already exists in Backups folder
+      const q = `name='${filename}' and '${folders.backupsFolderId}' in parents and trashed=false`;
+      const searchRes = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,
+        { headers: { Authorization: `Bearer ${auth.accessToken}` } }
+      );
+
+      let existingFileId: string | null = null;
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        if (searchData.files && searchData.files.length > 0) {
+          existingFileId = searchData.files[0].id;
+        }
+      }
+
+      if (existingFileId) {
+        // Overwrite existing latest backup file
+        await fetch(
+          `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=media`,
+          {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${auth.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: backupJsonString,
+          }
+        );
+      } else {
+        // Create it
+        const metadata = {
+          name: filename,
+          parents: [folders.backupsFolderId],
+          mimeType: 'application/json',
+        };
+        const boundary = '-------auto_backup_boundary_' + Date.now();
+        const multipartBody =
+          `--${boundary}\r\n` +
+          `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+          `${JSON.stringify(metadata)}\r\n` +
+          `--${boundary}\r\n` +
+          `Content-Type: application/json\r\n\r\n` +
+          `${backupJsonString}\r\n` +
+          `--${boundary}--`;
+
+        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`,
+            'Content-Type': `multipart/related; boundary=${boundary}`,
+          },
+          body: multipartBody,
+        });
+      }
+    } catch (e) {
+      console.warn('[GoogleDriveService] Silent background auto-sync skipped:', e);
+    }
+  }
+}
+
+export const googleDriveService = new GoogleDriveService();

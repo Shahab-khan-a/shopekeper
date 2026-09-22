@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomerKhata } from '@/types';
@@ -200,16 +199,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: Spacing.lg,
+    padding: Spacing.md,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
     borderLeftWidth: 4,
     marginBottom: Spacing.sm,
-    ...Shadows.md,
+    ...Shadows.sm,
   },
   summaryLeft: { flex: 1 },
   summaryLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  summaryValue: { fontSize: 26, fontWeight: '900', marginTop: 2, letterSpacing: -0.5 },
+  summaryValue: { fontSize: 22, fontWeight: '900', marginTop: 2, letterSpacing: -0.5 },
   summaryBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',

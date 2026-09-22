@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Platform, StyleSheet, type TextProps } from 'react-native';
+import { Text, Platform, StyleSheet, type TextProps } from 'react-native';
 import { Colors } from '@/constants/theme';
 
 export type ThemedTextProps = TextProps & {

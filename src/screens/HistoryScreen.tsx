@@ -20,7 +20,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 type HistoryFilter = 'all' | 'today' | 'week' | 'month';
 
 export const HistoryScreen: React.FC = () => {
-  const { sales, deleteSale, setActiveReceipt, setActiveTab, settings, t, language } = useShop();
+  const { sales, refundSale, setActiveReceipt, setActiveTab, settings, t, language } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,20 +60,32 @@ export const HistoryScreen: React.FC = () => {
     });
   }, [sales, searchQuery, filter]);
 
-  const { filterRevenue, filterProfit } = useMemo(() => {
-    const rev = filteredSales.reduce((sum, s) => sum + s.grandTotal, 0);
-    const prof = filteredSales.reduce((sum, s) => sum + (s.totalProfit || 0), 0);
-    return { filterRevenue: rev, filterProfit: prof };
+  const { filterRevenue, filterProfit, completedCount } = useMemo(() => {
+    const activeSales = filteredSales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled');
+    const rev = activeSales.reduce((sum, s) => sum + s.grandTotal, 0);
+    const prof = activeSales.reduce((sum, s) => sum + (s.totalProfit || 0), 0);
+    return { filterRevenue: rev, filterProfit: prof, completedCount: activeSales.length };
   }, [filteredSales]);
 
-  const handleDeleteSale = (sale: Sale) => {
-    const confirmMessage = t('deleteBillWarning');
+  const handleRefundSale = (sale: Sale) => {
+    const isUrdu = language === 'ur';
+    const confirmTitle = isUrdu ? 'بل واپس / منسوخ کریں؟' : 'Refund / Void Bill?';
+    const confirmMessage = isUrdu
+      ? `کیا آپ واقعی بل #${sale.billNumber} واپس کرنا چاہتے ہیں؟ اس سے اشیاء واپس اسٹاک میں شامل ہو جائیں گی اور ادھار بھی ختم ہو جائے گا۔`
+      : `Are you sure you want to refund Bill #${sale.billNumber}? Sold items will be restored to inventory and customer debt will be reversed.`;
+
     if (Platform.OS === 'web') {
-      if (window.confirm(confirmMessage)) deleteSale(sale.id);
+      if (window.confirm(confirmMessage)) {
+        refundSale(sale.id, 'Voided from History');
+      }
     } else {
-      Alert.alert(t('deleteBill'), confirmMessage, [
+      Alert.alert(confirmTitle, confirmMessage, [
         { text: t('cancel'), style: 'cancel' },
-        { text: t('delete'), style: 'destructive', onPress: () => deleteSale(sale.id) },
+        {
+          text: isUrdu ? 'واپس کریں (Refund)' : 'Refund & Restore',
+          style: 'destructive',
+          onPress: () => refundSale(sale.id, 'Voided from History'),
+        },
       ]);
     }
   };
@@ -104,7 +116,7 @@ export const HistoryScreen: React.FC = () => {
         <View style={[styles.statsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.statCol}>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Total Bills</Text>
-            <Text style={[styles.statValue, { color: theme.text }]}>{filteredSales.length}</Text>
+            <Text style={[styles.statValue, { color: theme.text }]}>{completedCount}</Text>
           </View>
           <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
           <View style={styles.statCol}>
@@ -165,6 +177,8 @@ export const HistoryScreen: React.FC = () => {
               const payColor = getPayColor(sale.paymentMethod);
               const payBg = getPayBg(sale.paymentMethod);
 
+              const isRefunded = sale.status === 'refunded';
+
               return (
                 <View
                   key={sale.id}
@@ -172,14 +186,15 @@ export const HistoryScreen: React.FC = () => {
                     styles.billCard,
                     {
                       backgroundColor: theme.card,
-                      borderColor: theme.border,
-                      borderLeftColor: payColor,
+                      borderColor: isRefunded ? theme.border : theme.border,
+                      borderLeftColor: isRefunded ? theme.textMuted : payColor,
+                      opacity: isRefunded ? 0.75 : 1,
                     },
                   ]}>
                   {/* Header */}
                   <View style={styles.billCardTop}>
                     <View style={styles.billBadgeWrap}>
-                      <Text style={[styles.billNoText, { color: theme.primary }]}>
+                      <Text style={[styles.billNoText, { color: isRefunded ? theme.textMuted : theme.primary }]}>
                         #{sale.billNumber}
                       </Text>
                       <StatusBadge
@@ -187,6 +202,14 @@ export const HistoryScreen: React.FC = () => {
                         bg={payBg}
                         color={payColor}
                       />
+                      {isRefunded && (
+                        <StatusBadge
+                          label={language === 'ur' ? 'واپس شدہ' : 'REFUNDED'}
+                          bg={theme.dangerLight}
+                          color={theme.danger}
+                          icon="refresh-outline"
+                        />
+                      )}
                     </View>
                     <Text style={[styles.billDateText, { color: theme.textSecondary }]}>
                       {new Date(sale.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
@@ -216,7 +239,11 @@ export const HistoryScreen: React.FC = () => {
                   <View style={[styles.billCardBottom, { borderTopColor: theme.border }]}>
                     <View>
                       <Text style={[styles.totalLabel, { color: theme.textSecondary }]}>{t('grandTotal')}</Text>
-                      <Text style={[styles.totalAmount, { color: theme.text }]}>
+                      <Text style={[
+                        styles.totalAmount, 
+                        { color: isRefunded ? theme.textMuted : theme.text },
+                        isRefunded && { textDecorationLine: 'line-through' }
+                      ]}>
                         {settings.currencySymbol} {sale.grandTotal}
                       </Text>
                     </View>
@@ -235,15 +262,24 @@ export const HistoryScreen: React.FC = () => {
                         </Text>
                       </Pressable>
 
-                      <Pressable
-                        onPress={() => handleDeleteSale(sale)}
-                        style={({ pressed }) => [
-                          styles.deleteBtn,
-                          { backgroundColor: theme.dangerLight },
-                          pressed && { opacity: 0.8 },
-                        ]}>
-                        <Ionicons name="trash-outline" size={16} color={theme.danger} />
-                      </Pressable>
+                      {isRefunded ? (
+                        <View style={[styles.refundedTag, { backgroundColor: theme.surfaceSubtle }]}>
+                          <Ionicons name="refresh-circle" size={16} color={theme.danger} />
+                          <Text style={[styles.refundedTagText, { color: theme.danger }]}>
+                            {language === 'ur' ? 'واپس شدہ' : 'Refunded'}
+                          </Text>
+                        </View>
+                      ) : (
+                        <Pressable
+                          onPress={() => handleRefundSale(sale)}
+                          style={({ pressed }) => [
+                            styles.deleteBtn,
+                            { backgroundColor: theme.dangerLight },
+                            pressed && { opacity: 0.8 },
+                          ]}>
+                          <Ionicons name="return-down-back-outline" size={16} color={theme.danger} />
+                        </Pressable>
+                      )}
                     </View>
                   </View>
                 </View>
@@ -329,4 +365,13 @@ const styles = StyleSheet.create({
   },
   viewBtnText: { fontSize: 12, fontWeight: '700' },
   deleteBtn: { padding: 8, borderRadius: BorderRadius.full, alignItems: 'center', justifyContent: 'center' },
+  refundedTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.full,
+  },
+  refundedTagText: { fontSize: 11, fontWeight: '700' },
 });

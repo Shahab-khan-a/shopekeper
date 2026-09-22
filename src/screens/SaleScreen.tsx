@@ -43,13 +43,13 @@ export const SaleScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const isWideScreen = width >= 860;
 
-  const { products, khata, createSale, setActiveReceipt, settings, t, language } = useShop();
+  const { products, khata, completeSale, settings, t, language } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   // Cart state
   const [cart, setCart] = useState<CartItem[]>([]);
   const [discount, setDiscount] = useState<string>('');
-  const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed');
+  const [discountType] = useState<'fixed' | 'percent'>('fixed');
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
@@ -260,22 +260,35 @@ export const SaleScreen: React.FC = () => {
 
     setIsProcessing(true);
     try {
-      const newSale = await createSale({
+      const result = await completeSale({
         customerName: customerName.trim() || undefined,
         customerPhone: customerPhone.trim() || undefined,
+        customerId: selectedKhataCustomer?.id,
         items: cart,
         discount: parsedDiscount,
         discountType,
         paymentMethod,
+        tenderedCash: parsedTendered > 0 ? parsedTendered : undefined,
       });
+
+      if (!result.success) {
+        if (Platform.OS === 'web') {
+          window.alert(result.error || 'Failed to complete sale');
+        } else {
+          Alert.alert(t('warningAlert'), result.error || 'Failed to complete sale');
+        }
+        return;
+      }
 
       // Clear cart and close drawer
       clearCart();
-
-      // Show thermal receipt modal
-      setActiveReceipt(newSale);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      if (Platform.OS === 'web') {
+        window.alert(e.message || 'Failed to complete sale');
+      } else {
+        Alert.alert(t('warningAlert'), e.message || 'Failed to complete sale');
+      }
     } finally {
       setIsProcessing(false);
     }

@@ -11,6 +11,7 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -18,6 +19,7 @@ import { Product, ProductCategory, ProductUnit } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { CameraModal } from '@/components/CameraModal';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { googleDriveService } from '@/services/googleDriveService';
 
 interface ProductModalProps {
   visible: boolean;
@@ -71,6 +73,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [image, setImage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
+  const [isDriveConnected, setIsDriveConnected] = useState(false);
+
+  useEffect(() => {
+    googleDriveService.getSavedAuth().then((auth) => {
+      setIsDriveConnected(!!auth);
+    });
+  }, [visible]);
 
   useEffect(() => {
     if (productToEdit) {
@@ -100,6 +110,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setImage('');
     setIsSubmitting(false);
     setIsCameraOpen(false);
+    setIsUploadingToDrive(false);
   };
 
   // Live profit calculation
@@ -107,6 +118,27 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const parsedCost = parseFloat(costPrice) || (parsedPrice > 0 ? Math.round(parsedPrice * 0.8) : 0);
   const unitProfit = Math.max(0, parsedPrice - parsedCost);
   const profitMarginPercent = parsedPrice > 0 ? Math.round((unitProfit / parsedPrice) * 100) : 0;
+
+  const handleImageSelected = async (localUri: string) => {
+    setImage(localUri);
+
+    // If Google Drive is connected, upload directly to 5 TB storage
+    const driveAuth = await googleDriveService.getSavedAuth();
+    if (driveAuth) {
+      setIsUploadingToDrive(true);
+      try {
+        const driveUrl = await googleDriveService.uploadProductImage(
+          localUri,
+          `product_${Date.now()}.jpg`
+        );
+        setImage(driveUrl);
+      } catch (err: any) {
+        console.warn('[ProductModal] 5 TB Google Drive upload error:', err);
+      } finally {
+        setIsUploadingToDrive(false);
+      }
+    }
+  };
 
   const takePhoto = () => {
     setIsCameraOpen(true);
@@ -130,7 +162,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        setImage(result.assets[0].uri);
+        await handleImageSelected(result.assets[0].uri);
       }
     } catch (e) {
       console.warn('Image picker error:', e);
@@ -265,28 +297,58 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 showsVerticalScrollIndicator={false}>
                 {/* ── Photo Section ── */}
                 <View style={[styles.formSectionCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                  <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                    {language === 'ur' ? 'پروڈکٹ کی تصویر' : 'Product Photo'}
-                  </Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
+                      {language === 'ur' ? 'پروڈکٹ کی تصویر' : 'Product Photo'}
+                    </Text>
+                    {isDriveConnected && (
+                      <View style={styles.driveStatusPill}>
+                        <Ionicons name="cloud-done" size={12} color="#10B981" />
+                        <Text style={styles.driveStatusPillText}>5 TB Drive Active</Text>
+                      </View>
+                    )}
+                  </View>
 
                   {image ? (
                     <View style={styles.imagePreviewWrap}>
                       <Image source={{ uri: image }} style={styles.previewImage} />
+
+                      {/* Loading overlay during Google Drive upload */}
+                      {isUploadingToDrive && (
+                        <View style={styles.driveUploadingOverlay}>
+                          <ActivityIndicator size="small" color="#FFFFFF" />
+                          <Text style={styles.driveUploadingText}>
+                            {t('uploadingImageToDrive')}
+                          </Text>
+                        </View>
+                      )}
+
+                      {/* Drive Cloud badge if saved in Google Drive */}
+                      {(image.includes('googleusercontent.com') || image.includes('drive.google.com')) && !isUploadingToDrive && (
+                        <View style={styles.driveSavedBadge}>
+                          <Ionicons name="cloud-done" size={12} color="#FFFFFF" />
+                          <Text style={styles.driveSavedBadgeText}>5 TB Google Drive</Text>
+                        </View>
+                      )}
+
                       <View style={styles.imageOverlayRow}>
                         <Pressable
                           onPress={takePhoto}
+                          disabled={isUploadingToDrive}
                           style={[styles.overlayActionBtn, { backgroundColor: theme.primary }]}>
                           <Ionicons name="camera" size={14} color="#FFFFFF" />
                           <Text style={styles.overlayActionText}>{t('takePhoto')}</Text>
                         </Pressable>
                         <Pressable
                           onPress={pickImage}
+                          disabled={isUploadingToDrive}
                           style={[styles.overlayActionBtn, { backgroundColor: theme.surface }]}>
                           <Ionicons name="images-outline" size={14} color={theme.text} />
                           <Text style={[styles.overlayActionText, { color: theme.text }]}>{t('chooseGallery')}</Text>
                         </Pressable>
                         <Pressable
                           onPress={() => setImage('')}
+                          disabled={isUploadingToDrive}
                           style={[styles.overlayActionBtn, { backgroundColor: theme.danger }]}>
                           <Ionicons name="trash-outline" size={14} color="#FFFFFF" />
                         </Pressable>
@@ -601,7 +663,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       <CameraModal
         visible={isCameraOpen}
         onClose={() => setIsCameraOpen(false)}
-        onCapture={(uri) => setImage(uri)}
+        onCapture={(uri) => handleImageSelected(uri)}
         title={name.trim() ? `Photo: ${name.trim()}` : t('takePhoto')}
       />
     </>
@@ -892,5 +954,58 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '800',
+  },
+  driveStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+  },
+  driveStatusPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  driveUploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    zIndex: 10,
+  },
+  driveUploadingText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingHorizontal: 12,
+  },
+  driveSavedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(16, 185, 129, 0.9)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+    zIndex: 5,
+  },
+  driveSavedBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });

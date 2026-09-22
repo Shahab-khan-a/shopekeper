@@ -53,6 +53,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({
     return () => {
       stopWebCamera();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, facingMode]);
 
   const launchNativeCamera = async () => {
