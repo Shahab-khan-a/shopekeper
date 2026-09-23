@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "65013515513-v4cvkrc60ch7pl5qun9avovtssu7cb86.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shahabkhan34.ShopkeeperApp",
+            "certificate_hash": "14730b7eb8a7611afa8270d1a17357c7651ae5b7"
+          }
+        },
+        {
           "client_id": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
           "client_type": 3
         }

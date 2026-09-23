@@ -115,19 +115,25 @@ export const HistoryScreen: React.FC = () => {
         {/* Stats Card */}
         <View style={[styles.statsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.statCol}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Total Bills</Text>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+              {language === 'ur' ? 'کل بلز' : 'Total Bills'}
+            </Text>
             <Text style={[styles.statValue, { color: theme.text }]}>{completedCount}</Text>
           </View>
           <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
           <View style={styles.statCol}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Revenue</Text>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+              {language === 'ur' ? 'کل آمدنی' : 'Revenue'}
+            </Text>
             <Text style={[styles.statValue, { color: theme.primary }]}>
               {settings.currencySymbol} {filterRevenue.toLocaleString()}
             </Text>
           </View>
           <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
           <View style={styles.statCol}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Est. Profit</Text>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+              {language === 'ur' ? 'خالص منافع' : 'Net Profit'}
+            </Text>
             <Text style={[styles.statValue, { color: theme.secondary }]}>
               {settings.currencySymbol} {filterProfit.toLocaleString()}
             </Text>

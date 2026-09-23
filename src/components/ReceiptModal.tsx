@@ -1258,8 +1258,8 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
                   <Ionicons name="cloud-done" size={13} color="#059669" />
                   <Text style={styles.driveStatusText}>
                     {language === 'ur'
-                      ? '✓ گوگل ڈرائیو میں خودکار محفوظ (5 TB کلاؤڈ)'
-                      : '✓ Auto-Saved to Google Drive (5 TB Cloud)'}
+                      ? '✓ گوگل ڈرائیو میں محفوظ'
+                      : '✓ Auto-Saved to Google Drive'}
                   </Text>
                 </View>
               )}

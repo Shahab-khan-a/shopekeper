@@ -211,18 +211,30 @@ export const Translations = {
     signOut: 'Sign Out',
     signedInAs: 'Signed in as',
 
-    // Google Drive 5 TB
-    googleDriveTitle: 'Google Drive (5 TB Storage)',
-    googleDriveDesc: 'Store high-resolution product photos and automated shop backups directly in your 5 TB Google Drive.',
-    connectDrive: 'Connect 5 TB Google Drive',
+    // Google Drive Storage
+    googleDriveTitle: 'Google Drive Storage',
+    googleDriveDesc: 'Store high-resolution product photos and automated shop backups directly in your Google Drive.',
+    connectDrive: 'Connect Google Drive',
     disconnectDrive: 'Disconnect Google Drive',
-    driveConnected: '5 TB Google Drive Connected',
-    driveNotConnected: '5 TB Google Drive Disconnected',
+    driveConnected: 'Google Drive Connected',
+    driveNotConnected: 'Google Drive Disconnected',
     backupToDrive: 'Backup Store to Drive',
     backingUpToDrive: 'Backing up to Google Drive...',
     backupToDriveSuccess: 'Store data backed up to Google Drive successfully!',
-    uploadingImageToDrive: 'Uploading photo to 5 TB Google Drive...',
+    uploadingImageToDrive: 'Uploading photo to Google Drive...',
     imageUploadedToDrive: 'Photo uploaded to Google Drive!',
+
+    // Investment & Earnings
+    investmentSection: 'Store Investment & Earnings',
+    totalInvestment: 'Stock Investment',
+    stockRetailValue: 'Stock Retail Value',
+    totalStoreEarnings: 'Total Store Earnings',
+    totalProfitEarned: 'Total Net Profit',
+    expectedStockProfit: 'Expected Stock Profit',
+    profitMargin: 'Profit Margin',
+    potentialProfit: 'Potential Profit',
+    stockCost: 'Stock Cost',
+    inventorySummary: 'Inventory Financial Summary',
 
     // Common
     success: 'Success',
@@ -447,18 +459,30 @@ export const Translations = {
     signOut: 'لاگ آؤٹ',
     signedInAs: 'لاگ ان بطور',
 
-    // Google Drive 5 TB
-    googleDriveTitle: 'گوگل ڈرائیو (5 TB اسٹوریج)',
-    googleDriveDesc: 'پروڈکٹس کی تصاویر اور دکان کا مکمل بیک اپ اپنی 5 TB گوگل ڈرائیو میں محفوظ کریں۔',
-    connectDrive: '5 TB گوگل ڈرائیو کنیکٹ کریں',
+    // Google Drive Storage
+    googleDriveTitle: 'گوگل ڈرائیو (کلاؤڈ اسٹوریج)',
+    googleDriveDesc: 'پروڈکٹس کی تصاویر اور دکان کا مکمل بیک اپ اپنی گوگل ڈرائیو میں محفوظ کریں۔',
+    connectDrive: 'گوگل ڈرائیو کنیکٹ کریں',
     disconnectDrive: 'گوگل ڈرائیو منقطع کریں',
-    driveConnected: '5 TB گوگل ڈرائیو منسلک ہے',
+    driveConnected: 'گوگل ڈرائیو منسلک ہے',
     driveNotConnected: 'گوگل ڈرائیو منسلک نہیں ہے',
     backupToDrive: 'ڈیٹا گوگل ڈرائیو پر محفوظ کریں',
     backingUpToDrive: 'گوگل ڈرائیو پر بیک اپ ہو رہا ہے...',
     backupToDriveSuccess: 'دکان کا بیک اپ گوگل ڈرائیو پر کامیابی سے محفوظ ہو گیا!',
-    uploadingImageToDrive: 'تصویر 5 TB گوگل ڈرائیو پر اپلوڈ ہو رہی ہے...',
+    uploadingImageToDrive: 'تصویر گوگل ڈرائیو پر اپلوڈ ہو رہی ہے...',
     imageUploadedToDrive: 'تصویر گوگل ڈرائیو پر اپلوڈ ہو گئی!',
+
+    // Investment & Earnings
+    investmentSection: 'دکان کی سرمایہ کاری اور کمائی',
+    totalInvestment: 'اسٹاک میں سرمایہ کاری',
+    stockRetailValue: 'اسٹاک کی کل مالیت',
+    totalStoreEarnings: 'کل دکان کی کمائی',
+    totalProfitEarned: 'حاصل شدہ خالص منافع',
+    expectedStockProfit: 'متوقع منافع',
+    profitMargin: 'منافع کا تناسب',
+    potentialProfit: 'ممکنہ منافع',
+    stockCost: 'اسٹاک لاگت',
+    inventorySummary: 'اسٹاک مالیاتی خلاصہ',
 
     // Common
     success: 'کامیابی',

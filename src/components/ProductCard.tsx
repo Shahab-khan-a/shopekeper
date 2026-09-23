@@ -6,6 +6,7 @@ import { useShop } from '@/context/ShopContext';
 import { CameraModal } from '@/components/CameraModal';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { googleDriveService } from '@/services/googleDriveService';
+import { ProductImage } from '@/components/ProductImage';
 
 interface ProductCardProps {
   product: Product;
@@ -72,13 +73,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       ]}>
       {/* Top Image Area */}
       <View style={[styles.imageContainer, { backgroundColor: theme.surfaceSubtle }]}>
-        {product.image ? (
-          <Image source={{ uri: product.image }} style={styles.image} resizeMode="cover" />
-        ) : (
-          <View style={styles.fallbackWrap}>
-            <Ionicons name="cube-outline" size={32} color={theme.textMuted} />
-          </View>
-        )}
+        <ProductImage
+          uri={product.image || product.imageUri}
+          style={styles.image}
+          resizeMode="cover"
+          fallbackColor={theme.textMuted}
+          fallbackSize={32}
+        />
 
         {/* Category badge top-left */}
         <View style={[styles.categoryBadge, { backgroundColor: 'rgba(0,0,0,0.6)' }]}>
@@ -130,12 +131,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </View>
 
-        {/* Cost price */}
-        {product.costPrice ? (
-          <Text style={[styles.costValue, { color: theme.textMuted }]}>
-            {t('cost')}: {settings.currencySymbol}{product.costPrice}
-          </Text>
-        ) : null}
+        {/* Cost price & Product Investment */}
+        <View style={styles.costAndInvRow}>
+          {product.costPrice ? (
+            <Text style={[styles.costValue, { color: theme.textMuted }]}>
+              {t('cost')}: {settings.currencySymbol}{product.costPrice}
+            </Text>
+          ) : null}
+          {product.stock > 0 ? (
+            <Text style={[styles.productInvestmentText, { color: theme.textSecondary }]}>
+              {t('totalInvestment')}: {settings.currencySymbol}{(cost * product.stock).toLocaleString()}
+            </Text>
+          ) : null}
+        </View>
 
         {/* Stock bar */}
         <View style={styles.stockSection}>
@@ -242,7 +250,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         visible={isCameraOpen}
         onClose={() => setIsCameraOpen(false)}
         onCapture={(uri) => {
-          updateProduct(product.id, { image: uri });
+          updateProduct(product.id, { image: uri, imageUri: uri });
           // Upload directly to 5 TB Google Drive if connected
           googleDriveService
             .getSavedAuth()
@@ -251,7 +259,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 googleDriveService
                   .uploadProductImage(uri, `product_${product.id}_${Date.now()}.jpg`)
                   .then((driveUrl) => {
-                    updateProduct(product.id, { image: driveUrl });
+                    updateProduct(product.id, { image: driveUrl, imageUri: driveUrl });
                   })
                   .catch((err) => console.warn('[ProductCard] Drive image upload error:', err));
               }
@@ -357,6 +365,17 @@ const styles = StyleSheet.create({
   costValue: {
     fontSize: 10,
     fontWeight: '600',
+  },
+  costAndInvRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  productInvestmentText: {
+    fontSize: 10,
+    fontWeight: '700',
   },
   profitChip: {
     paddingHorizontal: 6,

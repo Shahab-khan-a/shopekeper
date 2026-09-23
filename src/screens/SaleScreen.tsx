@@ -22,6 +22,7 @@ import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ProductImage } from '@/components/ProductImage';
 
 const CATEGORIES: ProductCategory[] = [
   'All',
@@ -860,13 +861,15 @@ export const SaleScreen: React.FC = () => {
                       },
                     ]}>
                     <View style={styles.listRowLeft}>
-                      {product.image ? (
-                        <Image source={{ uri: product.image }} style={styles.listThumb} />
-                      ) : (
-                        <View style={[styles.listThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                          <Ionicons name="cube-outline" size={18} color={theme.textMuted} />
-                        </View>
-                      )}
+                      <View style={[styles.listThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
+                        <ProductImage
+                          uri={product.image || product.imageUri}
+                          style={styles.listThumb}
+                          resizeMode="cover"
+                          fallbackColor={theme.textMuted}
+                          fallbackSize={18}
+                        />
+                      </View>
                       <View style={{ flex: 1 }}>
                         <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
                           {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
@@ -972,13 +975,15 @@ export const SaleScreen: React.FC = () => {
                   </View>
 
                   <View style={styles.gridCardTop}>
-                    {product.image ? (
-                      <Image source={{ uri: product.image }} style={styles.gridThumb} />
-                    ) : (
-                      <View style={[styles.gridThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                        <Ionicons name="cube-outline" size={24} color={theme.textMuted} />
-                      </View>
-                    )}
+                    <View style={[styles.gridThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
+                      <ProductImage
+                        uri={product.image || product.imageUri}
+                        style={styles.gridThumb}
+                        resizeMode="cover"
+                        fallbackColor={theme.textMuted}
+                        fallbackSize={24}
+                      />
+                    </View>
                     <View style={styles.gridTextContainer}>
                       <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>
                         {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}

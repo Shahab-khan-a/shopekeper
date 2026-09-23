@@ -6,13 +6,32 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_PROJECT_ID": "shopkeeper-ea7d8",
+        "EXPO_PUBLIC_GOOGLE_DRIVE_DEFAULT_FOLDER_ID": "1I_Ej25KI7BPLqL7w7vM1M3QjhTI5eAJV"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "65013515513-v4cvkrc60ch7pl5qun9avovtssu7cb86.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_PROJECT_ID": "shopkeeper-ea7d8",
+        "EXPO_PUBLIC_GOOGLE_DRIVE_DEFAULT_FOLDER_ID": "1I_Ej25KI7BPLqL7w7vM1M3QjhTI5eAJV"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "65013515513-v4cvkrc60ch7pl5qun9avovtssu7cb86.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_PROJECT_ID": "shopkeeper-ea7d8",
+        "EXPO_PUBLIC_GOOGLE_DRIVE_DEFAULT_FOLDER_ID": "1I_Ej25KI7BPLqL7w7vM1M3QjhTI5eAJV"
+      }
     }
   },
   "submit": {

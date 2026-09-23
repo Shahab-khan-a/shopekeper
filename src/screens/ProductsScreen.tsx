@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  Image,
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +17,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { IconButton } from '@/components/ui/IconButton';
+import { ProductImage } from '@/components/ProductImage';
 
 const CATEGORIES: (ProductCategory | 'LowStock')[] = [
   'All',
@@ -38,6 +40,10 @@ export const ProductsScreen: React.FC = () => {
     setEditingProduct,
     setIsAddProductOpen,
     settings,
+    totalInventoryInvestment,
+    totalInventoryRetailValue,
+    totalExpectedStockProfit,
+    totalInventoryUnits,
     t,
     language,
     lowStockProducts,
@@ -128,15 +134,49 @@ export const ProductsScreen: React.FC = () => {
           })}
         </ScrollView>
 
+        {/* ── Financial Investment Summary Bar ── */}
+        <View style={[styles.financeSummaryBar, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={styles.financeSummaryItem}>
+            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]}>
+              {t('totalInvestment')}
+            </Text>
+            <Text style={[styles.financeSummaryVal, { color: theme.text }]}>
+              {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
+            </Text>
+          </View>
+
+          <View style={[styles.financeSummaryDivider, { backgroundColor: theme.border }]} />
+
+          <View style={styles.financeSummaryItem}>
+            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]}>
+              {t('stockRetailValue')}
+            </Text>
+            <Text style={[styles.financeSummaryVal, { color: theme.text }]}>
+              {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
+            </Text>
+          </View>
+
+          <View style={[styles.financeSummaryDivider, { backgroundColor: theme.border }]} />
+
+          <View style={styles.financeSummaryItem}>
+            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]}>
+              {t('expectedStockProfit')}
+            </Text>
+            <Text style={[styles.financeSummaryVal, { color: '#059669' }]}>
+              +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
+            </Text>
+          </View>
+        </View>
+
         {/* ── Products Display ── */}
         {filteredProducts.length === 0 ? (
           <EmptyState
             icon="search-outline"
-            title="No products found"
+            title={language === 'ur' ? 'کوئی پروڈکٹ نہیں ملا' : 'No products found'}
             subtitle={
               searchQuery
-                ? 'Try a different search term.'
-                : 'Adjust the category filter or add a new product.'
+                ? (language === 'ur' ? 'مختلف نام سے تلاش کریں۔' : 'Try a different search term.')
+                : (language === 'ur' ? 'کیٹیگری فلٹر تبدیل کریں یا نیا پروڈکٹ شامل کریں۔' : 'Adjust the category filter or add a new product.')
             }
             actionLabel={t('addProductBtn')}
             onAction={() => {
@@ -175,7 +215,13 @@ export const ProductsScreen: React.FC = () => {
                   {/* Left: Thumbnail + Name */}
                   <View style={styles.listRowLeft}>
                     <View style={[styles.listThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                      <Ionicons name="cube-outline" size={20} color={theme.textMuted} />
+                      <ProductImage
+                        uri={product.image || product.imageUri}
+                        style={styles.listThumb}
+                        resizeMode="cover"
+                        fallbackColor={theme.textMuted}
+                        fallbackSize={20}
+                      />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
@@ -214,7 +260,7 @@ export const ProductsScreen: React.FC = () => {
                       {settings.currencySymbol}{product.price}
                     </Text>
                     <Text style={[styles.listRowMargin, { color: theme.textMuted }]}>
-                      {margin}% margin
+                      {margin}% {language === 'ur' ? 'منافع' : 'margin'}
                     </Text>
                   </View>
 
@@ -311,6 +357,11 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   listRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 2 },
+  listThumb: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+  },
   listThumbFallback: {
     width: 40,
     height: 40,
@@ -332,5 +383,36 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // Finance Summary Bar
+  financeSummaryBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+    ...Shadows.sm,
+  },
+  financeSummaryItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+  },
+  financeSummaryLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  financeSummaryVal: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  financeSummaryDivider: {
+    width: 1,
+    height: 24,
   },
 });

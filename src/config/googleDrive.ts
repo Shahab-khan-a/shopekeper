@@ -14,8 +14,5 @@ export const GOOGLE_DRIVE_CONFIG = {
   imagesFolderName: 'Images',
   backupsFolderName: 'Backups',
   billsFolderName: 'Bills',
-  // Pre-created/known shared folder ID from user's Drive
-  defaultFolderId:
-    process.env.EXPO_PUBLIC_GOOGLE_DRIVE_DEFAULT_FOLDER_ID || '1I_Ej25KI7BPLqL7w7vM1M3QjhTI5eAJV',
   storageKey: '@shopkeeper_google_drive_auth',
 };

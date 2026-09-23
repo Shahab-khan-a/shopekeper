@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
+import { ImageCacheService } from './imageCacheService';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -80,6 +81,10 @@ class GoogleDriveService {
         preferLocalhost: Platform.OS === 'web',
       });
 
+      // Log exact redirect URI so you can register it in Google Cloud Console:
+      // console.cloud.google.com -> OAuth 2.0 Client -> Authorized redirect URIs
+      console.log('[GoogleDriveService] OAuth redirectUri:', redirectUri);
+
       const scopeString = GOOGLE_DRIVE_CONFIG.scopes.join(' ');
       const authUrl =
         `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -90,6 +95,33 @@ class GoogleDriveService {
         `&prompt=select_account`;
 
       if (Platform.OS === 'web') {
+        try {
+          const { signInWithPopup, GoogleAuthProvider } = await import('firebase/auth');
+          const { auth } = await import('@/config/firebase');
+          const googleProvider = new GoogleAuthProvider();
+          googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+          googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+          const fbResult = await signInWithPopup(auth, googleProvider);
+          const credential = GoogleAuthProvider.credentialFromResult(fbResult);
+          if (credential?.accessToken) {
+            const driveUser: GoogleDriveAuth = {
+              accessToken: credential.accessToken,
+              email: fbResult.user.email || undefined,
+              name: fbResult.user.displayName || undefined,
+              picture: fbResult.user.photoURL || undefined,
+              expiresAt: Date.now() + 3600 * 1000,
+            };
+            await this.saveAuth(driveUser);
+            this.ensureFolders(driveUser.accessToken).catch((e) =>
+              console.warn('[GoogleDriveService] Background folder ensure error:', e)
+            );
+            return { success: true, user: driveUser };
+          }
+        } catch (firebaseErr: any) {
+          console.warn('[GoogleDriveService] Firebase Google sign-in fallback to popup:', firebaseErr);
+        }
+
         const result = await this.openWebAuthPopup(authUrl, redirectUri);
         if (result && result.accessToken) {
           await this.saveAuth(result);
@@ -207,7 +239,21 @@ class GoogleDriveService {
   }
 
   /**
-   * Ensure root and subfolders exist in Google Drive
+   * Returns root folder ID if initialized
+   */
+  async getRootFolderId(): Promise<string | null> {
+    try {
+      const auth = await this.getSavedAuth();
+      if (!auth) return null;
+      const folders = await this.ensureFolders(auth.accessToken);
+      return folders.rootFolderId;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Ensure root and subfolders exist in user's 5 TB Google Drive
    */
   async ensureFolders(token?: string): Promise<DriveFolderCache> {
     if (this.folderCache) return this.folderCache;
@@ -223,22 +269,12 @@ class GoogleDriveService {
     }
 
     const accessToken = token || (await this.getSavedAuth())?.accessToken;
-    if (!accessToken) throw new Error('Google Drive is not connected.');
+    if (!accessToken) throw new Error('Google Drive is not connected. Please connect Google Drive in Settings.');
 
-    // 1. Locate root folder (or use pre-shared folder ID)
-    let rootId = GOOGLE_DRIVE_CONFIG.defaultFolderId;
-    try {
-      const checkRes = await fetch(`https://www.googleapis.com/drive/v3/files/${rootId}?fields=id,name,trashed`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!checkRes.ok) {
-        rootId = await this.findOrCreateFolder(accessToken, GOOGLE_DRIVE_CONFIG.folderName);
-      }
-    } catch {
-      rootId = await this.findOrCreateFolder(accessToken, GOOGLE_DRIVE_CONFIG.folderName);
-    }
+    // 1. Locate or create root folder in user's Drive
+    const rootId = await this.findOrCreateFolder(accessToken, GOOGLE_DRIVE_CONFIG.folderName);
 
-    // 2. Locate or create Images, Backups, and Bills subfolders
+    // 2. Locate or create Images, Backups, and Bills subfolders inside the root folder
     const imagesFolderId = await this.findOrCreateFolder(
       accessToken,
       GOOGLE_DRIVE_CONFIG.imagesFolderName,
@@ -353,7 +389,7 @@ class GoogleDriveService {
   }
 
   /**
-   * Helper to find an existing folder or create one
+   * Helper to find an existing folder or create one in the user's 5 TB Google Drive
    */
   private async findOrCreateFolder(accessToken: string, name: string, parentId?: string): Promise<string> {
     let q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
@@ -373,6 +409,10 @@ class GoogleDriveService {
       if (data.files && data.files.length > 0) {
         return data.files[0].id;
       }
+    } else {
+      const errData = await listRes.json().catch(() => ({}));
+      const msg = errData?.error?.message;
+      if (msg) throw new Error(msg);
     }
 
     // Create folder
@@ -388,6 +428,12 @@ class GoogleDriveService {
         ...(parentId ? { parents: [parentId] } : {}),
       }),
     });
+
+    if (!createRes.ok) {
+      const createErr = await createRes.json().catch(() => ({}));
+      const msg = createErr?.error?.message || `Failed to create Google Drive folder: ${name}`;
+      throw new Error(msg);
+    }
 
     const createData = await createRes.json();
     return createData.id;
@@ -405,7 +451,18 @@ class GoogleDriveService {
     const resolvedName = filename || `product_${Date.now()}.jpg`;
 
     // 1. Fetch image binary / blob
-    const response = await fetch(imageUri);
+    let uriToFetch = imageUri;
+    if (
+      !uriToFetch.startsWith('http') &&
+      !uriToFetch.startsWith('file://') &&
+      !uriToFetch.startsWith('data:') &&
+      !uriToFetch.startsWith('blob:') &&
+      !uriToFetch.startsWith('content://')
+    ) {
+      uriToFetch = `data:image/jpeg;base64,${uriToFetch}`;
+    }
+
+    const response = await fetch(uriToFetch);
     const blob = await response.blob();
     const mimeType = blob.type || 'image/jpeg';
 
@@ -436,6 +493,7 @@ class GoogleDriveService {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`,
       },
       body: multipartBlob,
     });
@@ -448,7 +506,10 @@ class GoogleDriveService {
     const fileData = await uploadRes.json();
     const fileId = fileData.id;
 
-    // 4. Set public read permission so the thumbnail can display smoothly anywhere
+    // Cache the original image for instant offline and refresh display
+    ImageCacheService.set(fileId, imageUri).catch(() => {});
+
+    // 4. Set public read permission if allowed (optional)
     try {
       await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
         method: 'POST',
@@ -600,3 +661,100 @@ class GoogleDriveService {
 }
 
 export const googleDriveService = new GoogleDriveService();
+
+/**
+ * Extracts Google Drive file ID from any drive URL format
+ */
+export function extractDriveFileId(uri?: string | null): string | null {
+  if (!uri) return null;
+  if (uri.startsWith('drive://')) {
+    return uri.replace('drive://', '');
+  }
+  const matchD = uri.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchD) return matchD[1];
+
+  const matchId = uri.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchId) return matchId[1];
+
+  return null;
+}
+
+const activeResolutions = new Map<string, Promise<string>>();
+
+/**
+ * Resolves a Google Drive URL or local URI into a viewable image URI.
+ * If the image is stored in Google Drive:
+ * 1. Checks local cache (instant)
+ * 2. Fetches via Google Drive API with OAuth Bearer Token (safe for private 5 TB files)
+ * 3. Creates local object URL / data URL and caches it
+ */
+export async function resolveDriveImageUrl(uri?: string | null): Promise<string> {
+  if (!uri) return '';
+
+  // Local data URIs, blob URLs, or file URLs require no transformation
+  if (uri.startsWith('data:') || uri.startsWith('blob:') || uri.startsWith('file://')) {
+    return uri;
+  }
+
+  const fileId = extractDriveFileId(uri);
+  if (!fileId) {
+    return uri;
+  }
+
+  // 1. Check local cache first
+  const cached = await ImageCacheService.get(fileId);
+  if (cached) {
+    return cached;
+  }
+
+  // 2. Check in-flight fetch to avoid duplicate concurrent requests
+  if (activeResolutions.has(fileId)) {
+    return activeResolutions.get(fileId)!;
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const auth = await googleDriveService.getSavedAuth();
+      if (!auth?.accessToken) {
+        // Not connected to drive: return fallback thumbnail URL
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+      }
+
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.warn(`[GoogleDriveService] Media fetch returned ${res.status} for file ${fileId}`);
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+      }
+
+      const blob = await res.blob();
+      let resolvedUri: string;
+      if (Platform.OS === 'web' && typeof URL !== 'undefined' && URL.createObjectURL) {
+        resolvedUri = URL.createObjectURL(blob);
+      } else {
+        resolvedUri = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      // Save to local cache so next time it loads instantly
+      await ImageCacheService.set(fileId, resolvedUri);
+      return resolvedUri;
+    } catch (err) {
+      console.warn('[GoogleDriveService] resolveDriveImageUrl error:', err);
+      return uri;
+    } finally {
+      activeResolutions.delete(fileId);
+    }
+  })();
+
+  activeResolutions.set(fileId, fetchPromise);
+  return fetchPromise;
+}

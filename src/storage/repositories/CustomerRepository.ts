@@ -98,7 +98,12 @@ export const CustomerRepository = {
 
     if (customer.transactions && customer.transactions.length > 0) {
       for (const tx of customer.transactions) {
-        await this.addTransaction(tx, syncStatus, db);
+        // Ensure the transaction has a customerId; legacy data may be missing it
+        const txWithCustomer: KhataTransaction = {
+          ...tx,
+          customerId: tx.customerId || customer.id,
+        };
+        await this.addTransaction(txWithCustomer, syncStatus, db);
       }
     }
   },
@@ -137,6 +142,11 @@ export const CustomerRepository = {
   },
 
   async addTransaction(tx: KhataTransaction, syncStatus: SyncStatus = 'pending', db: IDatabaseAdapter = getDatabase()): Promise<void> {
+    // Guard: customerId is NOT NULL in schema — skip invalid transactions
+    if (!tx.customerId) {
+      console.warn('[CustomerRepository] Skipping transaction with missing customerId:', tx.id);
+      return;
+    }
     const now = Date.now();
     await db.run(
       `INSERT OR REPLACE INTO khata_transactions (

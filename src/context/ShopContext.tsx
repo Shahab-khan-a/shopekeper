@@ -35,6 +35,7 @@ import {
   checkRedirectAuth, 
   AuthResult 
 } from '@/services/authService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface DashboardStats {
   todaySalesTotal: number;
@@ -123,6 +124,14 @@ interface ShopContextType {
   lowStockProducts: Product[];
   outOfStockProducts: Product[];
 
+  // Investment & Earnings
+  totalInventoryInvestment: number;
+  totalInventoryRetailValue: number;
+  totalExpectedStockProfit: number;
+  totalLifetimeEarnings: number;
+  totalLifetimeProfit: number;
+  totalInventoryUnits: number;
+
   // Modal Controls
   activeReceipt: Sale | null;
   setActiveReceipt: (sale: Sale | null) => void;
@@ -164,7 +173,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const continueAsGuest = useCallback(() => {
     setIsGuestMode(true);
-    SettingsRepository.setGuestMode(true).catch(console.warn);
   }, []);
 
   // Helpers to refresh state from SQLite/IndexedDB
@@ -250,9 +258,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setKhata(kList);
         setSettings(setts);
         setPendingSyncCount(pCount);
-        if (savedGuest) {
-          setIsGuestMode(true);
-        }
+        // Ensure guest mode is not auto-enabled on boot so the Login screen is shown first
+        setIsGuestMode(false);
+        await SettingsRepository.setGuestMode(false).catch(() => {});
 
         if (!initialOnline) {
           setSyncStatus('offline');
@@ -339,6 +347,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...productData,
         id: 'prod-' + now + '-' + Math.floor(Math.random() * 1000),
         sellingPrice: productData.sellingPrice ?? productData.price,
+        image: productData.image ?? productData.imageUri,
         imageUri: productData.imageUri ?? productData.image,
         createdAt: now,
         updatedAt: now,
@@ -649,12 +658,20 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [refreshProducts, refreshSales, refreshKhata, refreshSettings, refreshPendingCount]);
 
   const logout = useCallback(async () => {
+    if (user?.uid) {
+      try {
+        await AsyncStorage.removeItem(`@shopkeeper_drive_onboarded_${user.uid}`);
+      } catch (e) {
+        console.warn('[ShopContext] Error clearing drive onboarding flag:', e);
+      }
+    }
+    await SettingsRepository.setGuestMode(false).catch(() => {});
     await signOutUser();
     await googleDriveService.disconnect();
     setUser(null);
     setIsGuestMode(false);
     setSyncStatus('idle');
-  }, []);
+  }, [user?.uid]);
 
   const syncNow = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: 'User is not logged in' };
@@ -825,6 +842,47 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return products.filter((p) => p.stock <= 0);
   }, [products]);
 
+  // Investment & Financial Stock Metrics
+  const {
+    totalInventoryInvestment,
+    totalInventoryRetailValue,
+    totalExpectedStockProfit,
+    totalInventoryUnits,
+  } = useMemo(() => {
+    let investment = 0;
+    let retail = 0;
+    let units = 0;
+
+    for (const p of products) {
+      const stock = Math.max(0, p.stock || 0);
+      const cost = p.costPrice != null ? p.costPrice : Math.round((p.sellingPrice ?? p.price ?? 0) * 0.8);
+      const price = p.sellingPrice ?? p.price ?? 0;
+
+      investment += cost * stock;
+      retail += price * stock;
+      units += stock;
+    }
+
+    return {
+      totalInventoryInvestment: Math.round(investment),
+      totalInventoryRetailValue: Math.round(retail),
+      totalExpectedStockProfit: Math.max(0, Math.round(retail - investment)),
+      totalInventoryUnits: units,
+    };
+  }, [products]);
+
+  // All-time Store Earnings & Net Realized Profit
+  const { totalLifetimeEarnings, totalLifetimeProfit } = useMemo(() => {
+    const activeSales = sales.filter((s) => s.status !== 'refunded' && s.status !== 'cancelled');
+    const earnings = activeSales.reduce((sum, s) => sum + (s.grandTotal ?? s.total ?? 0), 0);
+    const profit = activeSales.reduce((sum, s) => sum + (s.totalProfit || 0), 0);
+
+    return {
+      totalLifetimeEarnings: Math.round(earnings),
+      totalLifetimeProfit: Math.round(profit),
+    };
+  }, [sales]);
+
   const getDashboardStats = useCallback((): DashboardStats => {
     return {
       todaySalesTotal,
@@ -876,6 +934,12 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       todayProfit,
       lowStockProducts,
       outOfStockProducts,
+      totalInventoryInvestment,
+      totalInventoryRetailValue,
+      totalExpectedStockProfit,
+      totalLifetimeEarnings,
+      totalLifetimeProfit,
+      totalInventoryUnits,
       activeReceipt,
       setActiveReceipt,
       editingProduct,
@@ -936,6 +1000,12 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       todayProfit,
       lowStockProducts,
       outOfStockProducts,
+      totalInventoryInvestment,
+      totalInventoryRetailValue,
+      totalExpectedStockProfit,
+      totalLifetimeEarnings,
+      totalLifetimeProfit,
+      totalInventoryUnits,
       activeReceipt,
       editingProduct,
       isAddProductOpen,

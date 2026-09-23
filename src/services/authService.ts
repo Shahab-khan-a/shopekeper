@@ -19,11 +19,10 @@ import { googleDriveService } from '@/services/googleDriveService';
 // Complete auth session if returning from a web-browser auth flow
 WebBrowser.maybeCompleteAuthSession();
 
-// Configure Google Auth Provider with Profile, Email, and Google Drive scopes
+// Configure Google Auth Provider with Profile and Email scopes
 const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
-googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export interface AuthResult {
@@ -65,16 +64,6 @@ export async function checkRedirectAuth(): Promise<User | null> {
     try {
       const result = await getRedirectResult(auth, browserPopupRedirectResolver);
       if (result && result.user) {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        if (credential?.accessToken) {
-          await googleDriveService.saveAuth({
-            accessToken: credential.accessToken,
-            email: result.user.email || undefined,
-            name: result.user.displayName || undefined,
-            picture: result.user.photoURL || undefined,
-            expiresAt: Date.now() + 3600 * 1000,
-          });
-        }
         return result.user;
       }
     } catch (e: any) {
@@ -92,17 +81,6 @@ export async function signInWithGoogle(): Promise<AuthResult> {
     if (Platform.OS === 'web') {
       try {
         const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        if (credential?.accessToken) {
-          await googleDriveService.saveAuth({
-            accessToken: credential.accessToken,
-            email: result.user.email || undefined,
-            name: result.user.displayName || undefined,
-            picture: result.user.photoURL || undefined,
-            expiresAt: Date.now() + 3600 * 1000,
-          });
-          googleDriveService.ensureFolders(credential.accessToken).catch(() => {});
-        }
         return { success: true, user: result.user };
       } catch (popupErr: any) {
         if (
@@ -116,54 +94,57 @@ export async function signInWithGoogle(): Promise<AuthResult> {
         throw popupErr;
       }
     } else {
-      // Mobile (Android / iOS): Use expo-auth-session with custom scheme
+      // Mobile (Android / iOS): Use the Android OAuth client with reverse-client-ID redirect URI.
+      // Google Android clients automatically accept:
+      //   com.googleusercontent.apps.{CLIENT_ID}:/oauth2redirect/google
+      // This is registered in google-services.json (client_type: 1).
+      const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '';
       const redirectUri = AuthSession.makeRedirectUri({
-        scheme: 'shopkeeperapp',
+        native: `com.googleusercontent.apps.${ANDROID_CLIENT_ID.split('.apps.')[0]}:/oauth2redirect/google`,
       });
 
-      const scopeString = ['openid', 'profile', 'email', ...GOOGLE_DRIVE_CONFIG.scopes].join(' ');
+      console.log('[AuthService] Mobile redirectUri:', redirectUri);
+
+      const nonce = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+      const scopeString = ['openid', 'profile', 'email'].join(' ');
       const authUrl =
         `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${encodeURIComponent(GOOGLE_DRIVE_CONFIG.clientId)}` +
+        `client_id=${encodeURIComponent(ANDROID_CLIENT_ID)}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=${encodeURIComponent('id_token token')}` +
+        `&response_type=${encodeURIComponent('id_token')}` +
         `&scope=${encodeURIComponent(scopeString)}` +
-        `&nonce=${Math.random().toString(36).substring(2)}` +
+        `&nonce=${encodeURIComponent(nonce)}` +
         `&prompt=select_account`;
 
       const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+      console.log('[AuthService] Mobile auth response type:', authResponse.type);
+
       if (authResponse.type === 'success' && authResponse.url) {
+        // Google returns tokens in the URL hash fragment
         const hashIndex = authResponse.url.indexOf('#');
         const queryIndex = authResponse.url.indexOf('?');
-        const fragment = hashIndex !== -1 ? authResponse.url.substring(hashIndex + 1) : (queryIndex !== -1 ? authResponse.url.substring(queryIndex + 1) : '');
+        const fragment =
+          hashIndex !== -1
+            ? authResponse.url.substring(hashIndex + 1)
+            : queryIndex !== -1
+            ? authResponse.url.substring(queryIndex + 1)
+            : '';
         const params = new URLSearchParams(fragment);
         const idToken = params.get('id_token');
-        const accessToken = params.get('access_token');
-
-        if (accessToken) {
-          await googleDriveService.saveAuth({
-            accessToken,
-            expiresAt: Date.now() + 3600 * 1000,
-          });
-          googleDriveService.ensureFolders(accessToken).catch(() => {});
-        }
 
         if (idToken) {
-          const credential = GoogleAuthProvider.credential(idToken, accessToken || undefined);
-          const userCred = await signInWithCredential(auth, credential);
-          return { success: true, user: userCred.user };
+          return await signInWithGoogleIdToken(idToken);
         }
+        console.warn('[AuthService] No id_token in response URL:', authResponse.url);
       }
-      return { success: false, error: 'Google sign-in was cancelled.' };
+      return { success: false, error: 'Sign-in flow did not complete.' };
     }
-  } catch (error: any) {
-    console.error('[AuthService] Google Sign-In failed:', error);
-    return {
-      success: false,
-      error: getFriendlyAuthErrorMessage(error),
-    };
+  } catch (e: any) {
+    console.error('[AuthService] signInWithGoogle error:', e);
+    return { success: false, error: getFriendlyAuthErrorMessage(e) };
   }
 }
+
 
 /**
  * Sign in using an ID token (e.g. from Google Sign-In on Native)

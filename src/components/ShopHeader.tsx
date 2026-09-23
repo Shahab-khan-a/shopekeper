@@ -47,13 +47,16 @@ export const ShopHeader: React.FC = () => {
 
   // Determine Pill Appearance
   const getSyncPillConfig = () => {
+    const isUrdu = language === 'ur';
     if (!isOnline) {
       return {
         bg: '#FEE2E2',
         border: '#FCA5A5',
         color: '#DC2626',
         icon: 'cloud-offline' as const,
-        label: pendingSyncCount > 0 ? `Offline (${pendingSyncCount})` : 'Offline',
+        label: pendingSyncCount > 0
+          ? (isUrdu ? `آف لائن (${pendingSyncCount})` : `Offline (${pendingSyncCount})`)
+          : (isUrdu ? 'آف لائن' : 'Offline'),
       };
     }
 
@@ -63,7 +66,9 @@ export const ShopHeader: React.FC = () => {
         border: '#FDE047',
         color: '#CA8A04',
         icon: 'sync' as const,
-        label: pendingSyncCount > 0 ? `Syncing ${pendingSyncCount}...` : 'Syncing...',
+        label: pendingSyncCount > 0
+          ? (isUrdu ? `ہم آہنگ ${pendingSyncCount}...` : `Syncing ${pendingSyncCount}...`)
+          : (isUrdu ? 'ہم آہنگ...' : 'Syncing...'),
       };
     }
 
@@ -73,7 +78,7 @@ export const ShopHeader: React.FC = () => {
         border: '#FCA5A5',
         color: '#DC2626',
         icon: 'alert-circle' as const,
-        label: 'Sync failed',
+        label: isUrdu ? 'ہم آہنگی ناکام' : 'Sync failed',
       };
     }
 
@@ -83,7 +88,7 @@ export const ShopHeader: React.FC = () => {
         border: '#FDBA74',
         color: '#EA580C',
         icon: 'cloud-upload' as const,
-        label: `${pendingSyncCount} pending`,
+        label: isUrdu ? `${pendingSyncCount} زیر التوا` : `${pendingSyncCount} pending`,
       };
     }
 
@@ -92,7 +97,7 @@ export const ShopHeader: React.FC = () => {
       border: '#86EFAC',
       color: '#16A34A',
       icon: 'checkmark-circle' as const,
-      label: 'Synced',
+      label: isUrdu ? 'ہم آہنگ' : 'Synced',
     };
   };
 
@@ -120,7 +125,7 @@ export const ShopHeader: React.FC = () => {
           <Text style={[styles.shopTitle, { color: theme.text }]} numberOfLines={1}>
             {language === 'ur' && settings.shopNameUrdu
               ? settings.shopNameUrdu
-              : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : 'My Store'))}
+              : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (language === 'ur' ? 'میری دکان' : 'My Store')))}
           </Text>
           <Text style={[styles.shopSubtitle, { color: theme.textSecondary }]} numberOfLines={1}>
             {settings.ownerName || user?.displayName || ''}

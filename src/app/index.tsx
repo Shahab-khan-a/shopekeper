@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, StatusBar, ActivityIndicator, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { ShopHeader } from '@/components/ShopHeader';
@@ -10,6 +11,7 @@ import { ReceiptModal } from '@/components/ReceiptModal';
 import { AuthModal } from '@/components/AuthModal';
 import { EditShopModal } from '@/components/EditShopModal';
 import { LoginScreen } from '@/screens/LoginScreen';
+import { ConnectDriveScreen } from '@/screens/ConnectDriveScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { ProductsScreen } from '@/screens/ProductsScreen';
@@ -41,6 +43,39 @@ export default function App() {
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
+  // Track if user has completed or dismissed the post-login Google Drive setup
+  const [isDriveStepCompleted, setIsDriveStepCompleted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setIsDriveStepCompleted(null);
+      return;
+    }
+
+    AsyncStorage.getItem(`@shopkeeper_drive_onboarded_${user.uid}`)
+      .then((val) => {
+        if (val === 'true') {
+          setIsDriveStepCompleted(true);
+        } else {
+          setIsDriveStepCompleted(false);
+        }
+      })
+      .catch(() => {
+        setIsDriveStepCompleted(false);
+      });
+  }, [user?.uid]);
+
+  const handleFinishDriveOnboarding = async () => {
+    if (user?.uid) {
+      try {
+        await AsyncStorage.setItem(`@shopkeeper_drive_onboarded_${user.uid}`, 'true');
+      } catch (e) {
+        console.warn('[App] Error storing drive onboarding flag:', e);
+      }
+    }
+    setIsDriveStepCompleted(true);
+  };
+
   // 1. Initial Local Database Loading Splash (only waits for local SQLite/IndexedDB, <100ms)
   if (!isLoaded) {
     return (
@@ -54,10 +89,11 @@ export default function App() {
             <Ionicons name="storefront" size={36} color="#FFFFFF" />
           </View>
         </View>
-        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 24 }} />
         <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
+        <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
+        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
         <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
-          Loading local offline store...
+          Loading your store...
         </Text>
       </SafeAreaView>
     );
@@ -77,10 +113,11 @@ export default function App() {
               <Ionicons name="storefront" size={36} color="#FFFFFF" />
             </View>
           </View>
-          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 24 }} />
           <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
+          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
+          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
           <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
-            Checking authentication & store records...
+            Checking your account...
           </Text>
         </SafeAreaView>
       );
@@ -97,7 +134,46 @@ export default function App() {
     );
   }
 
-  // 3. Authenticated or Guest Mode -> Show Main Store POS App
+  // 3. Authenticated User - Check Drive Onboarding Status
+  if (user && !isGuestMode && isDriveStepCompleted === null) {
+    return (
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
+        <StatusBar
+          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.surface}
+        />
+        <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
+          <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
+            <Ionicons name="storefront" size={36} color="#FFFFFF" />
+          </View>
+        </View>
+        <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
+        <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
+        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
+        <Text style={[styles.loadingSub, { color: theme.textMuted, marginTop: 12 }]}>
+          Setting up your store...
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  // 4. Authenticated User - Connect Google Drive Screen (Post-Login Step)
+  if (user && !isGuestMode && !isDriveStepCompleted) {
+    return (
+      <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
+        <StatusBar
+          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.surface}
+        />
+        <ConnectDriveScreen
+          user={user}
+          onGoNext={handleFinishDriveOnboarding}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // 5. Authenticated or Guest Mode -> Show Main Store POS App
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -196,6 +272,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.3,
     marginTop: 18,
+  },
+  loadingTitleUrdu: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 4,
+    opacity: 0.7,
   },
   loadingSub: {
     fontSize: 13,

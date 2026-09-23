@@ -20,6 +20,7 @@ import { useShop } from '@/context/ShopContext';
 import { CameraModal } from '@/components/CameraModal';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { googleDriveService } from '@/services/googleDriveService';
+import { ProductImage } from '@/components/ProductImage';
 
 interface ProductModalProps {
   visible: boolean;
@@ -119,8 +120,39 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const unitProfit = Math.max(0, parsedPrice - parsedCost);
   const profitMarginPercent = parsedPrice > 0 ? Math.round((unitProfit / parsedPrice) * 100) : 0;
 
-  const handleImageSelected = async (localUri: string) => {
-    setImage(localUri);
+  const handleConnectDriveFromModal = async () => {
+    try {
+      const res = await googleDriveService.connect();
+      if (res.success && res.user) {
+        setIsDriveConnected(true);
+        if (image && !image.includes('googleusercontent.com') && !image.includes('drive.google.com')) {
+          await handleImageSelected(image);
+        }
+      }
+    } catch (e: any) {
+      console.warn('[ProductModal] Connect Drive error:', e);
+    }
+  };
+
+  const toPersistentDataUrl = async (uri: string): Promise<string> => {
+    if (!uri || uri.startsWith('data:')) return uri;
+    try {
+      const res = await fetch(uri);
+      const blob = await res.blob();
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve((reader.result as string) || uri);
+        reader.onerror = () => resolve(uri);
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return uri;
+    }
+  };
+
+  const handleImageSelected = async (rawUri: string) => {
+    const persistentUri = await toPersistentDataUrl(rawUri);
+    setImage(persistentUri);
 
     // If Google Drive is connected, upload directly to 5 TB storage
     const driveAuth = await googleDriveService.getSavedAuth();
@@ -128,15 +160,43 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setIsUploadingToDrive(true);
       try {
         const driveUrl = await googleDriveService.uploadProductImage(
-          localUri,
+          persistentUri,
           `product_${Date.now()}.jpg`
         );
         setImage(driveUrl);
       } catch (err: any) {
-        console.warn('[ProductModal] 5 TB Google Drive upload error:', err);
+        console.error('[ProductModal] 5 TB Google Drive upload error:', err);
+        const errMsg = err?.message || 'Upload to Google Drive failed.';
+        if (errMsg.includes('Google Drive API has not been used') || errMsg.includes('disabled')) {
+          if (Platform.OS === 'web') {
+            window.open(
+              'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513',
+              '_blank'
+            );
+            window.alert(
+              'We opened the Google Cloud Console in a new tab for you!\n\n' +
+              '1. Click the blue "ENABLE" button on that page.\n' +
+              '2. Wait 1 minute.\n' +
+              '3. Come back and retry uploading your photo.'
+            );
+          } else {
+            Alert.alert(
+              'Google Drive Setup Required',
+              'Please visit:\nhttps://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513\n\nand click "ENABLE".'
+            );
+          }
+        } else {
+          if (Platform.OS === 'web') {
+            window.alert(`Google Drive Upload Error: ${errMsg}`);
+          } else {
+            Alert.alert('Google Drive Error', errMsg);
+          }
+        }
       } finally {
         setIsUploadingToDrive(false);
       }
+    } else {
+      setIsDriveConnected(false);
     }
   };
 
@@ -301,17 +361,29 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
                       {language === 'ur' ? 'پروڈکٹ کی تصویر' : 'Product Photo'}
                     </Text>
-                    {isDriveConnected && (
+                    {isDriveConnected ? (
                       <View style={styles.driveStatusPill}>
                         <Ionicons name="cloud-done" size={12} color="#10B981" />
-                        <Text style={styles.driveStatusPillText}>5 TB Drive Active</Text>
+                        <Text style={styles.driveStatusPillText}>Drive Active</Text>
                       </View>
+                    ) : (
+                      <Pressable
+                        onPress={handleConnectDriveFromModal}
+                        style={({ pressed }) => [
+                          styles.driveConnectWarningBtn,
+                          pressed && { opacity: 0.8 },
+                        ]}>
+                        <Ionicons name="cloud-offline-outline" size={12} color="#B45309" />
+                        <Text style={styles.driveConnectWarningText}>
+                          {language === 'ur' ? 'ڈرائیو منسلک کریں ↗' : 'Connect Drive ↗'}
+                        </Text>
+                      </Pressable>
                     )}
                   </View>
 
                   {image ? (
                     <View style={styles.imagePreviewWrap}>
-                      <Image source={{ uri: image }} style={styles.previewImage} />
+                      <ProductImage uri={image} style={styles.previewImage} resizeMode="cover" />
 
                       {/* Loading overlay during Google Drive upload */}
                       {isUploadingToDrive && (
@@ -327,7 +399,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       {(image.includes('googleusercontent.com') || image.includes('drive.google.com')) && !isUploadingToDrive && (
                         <View style={styles.driveSavedBadge}>
                           <Ionicons name="cloud-done" size={12} color="#FFFFFF" />
-                          <Text style={styles.driveSavedBadgeText}>5 TB Google Drive</Text>
+                          <Text style={styles.driveSavedBadgeText}>Google Drive</Text>
                         </View>
                       )}
 
@@ -643,15 +715,23 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
                 <Pressable
                   onPress={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploadingToDrive}
                   style={({ pressed }) => [
                     styles.footerSaveBtn,
-                    { backgroundColor: theme.primary },
+                    { backgroundColor: (isSubmitting || isUploadingToDrive) ? theme.border : theme.primary },
                     pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
                   ]}>
-                  <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                  {isUploadingToDrive ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                  )}
                   <Text style={styles.footerSaveText}>
-                    {isSubmitting ? 'Saving...' : t('saveProduct')}
+                    {isUploadingToDrive
+                      ? (language === 'ur' ? 'ڈرائیو پر اپلوڈ ہو رہا ہے...' : 'Uploading Image...')
+                      : isSubmitting
+                      ? (language === 'ur' ? 'محفوظ ہو رہا ہے...' : 'Saving...')
+                      : t('saveProduct')}
                   </Text>
                 </Pressable>
               </View>
@@ -970,6 +1050,22 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: '#15803D',
+  },
+  driveConnectWarningBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: '#FCD34D',
+  },
+  driveConnectWarningText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
   },
   driveUploadingOverlay: {
     position: 'absolute',

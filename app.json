@@ -22,7 +22,21 @@
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.shahabkhan34.ShopkeeperApp",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.googleusercontent.apps.65013515513-v4cvkrc60ch7pl5qun9avovtssu7cb86",
+              "host": "oauth2redirect",
+              "path": "/google"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "output": "static",

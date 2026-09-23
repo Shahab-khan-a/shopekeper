@@ -23,11 +23,16 @@ export const DashboardScreen: React.FC = () => {
     products,
     sales,
     totalUdhaarReceivable,
+    totalInventoryInvestment,
+    totalInventoryRetailValue,
+    totalExpectedStockProfit,
+    totalLifetimeEarnings,
+    totalLifetimeProfit,
+    totalInventoryUnits,
     settings,
     setActiveTab,
     setActiveReceipt,
     setIsAddProductOpen,
-    setIsAuthModalOpen,
     user,
     t,
     language,
@@ -63,7 +68,7 @@ export const DashboardScreen: React.FC = () => {
             <Text style={styles.heroShop} numberOfLines={1}>
               {language === 'ur' && settings.shopNameUrdu
                 ? settings.shopNameUrdu
-                : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : 'My Store'))}
+                : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (language === 'ur' ? 'میری دکان' : 'My Store')))}
             </Text>
 
           </View>
@@ -97,32 +102,7 @@ export const DashboardScreen: React.FC = () => {
 
 
 
-      {/* ── Google Cloud Backup Reminder Banner (when not signed in) ── */}
-      {!user && (
-        <Pressable
-          onPress={() => setIsAuthModalOpen(true)}
-          style={({ pressed }) => [
-            styles.cloudBanner,
-            { backgroundColor: theme.card, borderColor: theme.border },
-            pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
-          ]}
-        >
-          <View style={[styles.cloudBannerIcon, { backgroundColor: theme.primaryLight }]}>
-            <Ionicons name="cloud-upload" size={18} color={theme.primary} />
-          </View>
-          <View style={styles.cloudBannerTextWrap}>
-            <Text style={[styles.cloudBannerTitle, { color: theme.text }]}>
-              {language === 'ur' ? 'گوگل کلاؤڈ بیک اپ' : 'Google Cloud Backup'}
-            </Text>
-            <Text style={[styles.cloudBannerDesc, { color: theme.textSecondary }]}>
-              {language === 'ur'
-                ? 'اپنے سامان، بلز اور کھاتہ کو محفوظ رکھنے کیلئے لاگ ان کریں'
-                : 'Connect your Google account to safeguard store records.'}
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
-        </Pressable>
-      )}
+
 
       {/* ── Today's Metrics ── */}
       <View style={styles.metricsGrid}>
@@ -187,6 +167,113 @@ export const DashboardScreen: React.FC = () => {
             </View>
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('totalInventory')}</Text>
             <Text style={[styles.metricValue, { color: theme.text }]}>{products.length}</Text>
+          </View>
+        </Pressable>
+      </View>
+
+      {/* ── Store Investment & Lifetime Earnings Section ── */}
+      <View style={{ marginTop: Spacing.md, marginBottom: Spacing.xs }}>
+        <SectionHeader title={t('investmentSection')} />
+      </View>
+
+      <View style={styles.financeGrid}>
+        {/* Card 1: Stock Investment & Value */}
+        <Pressable
+          onPress={() => setActiveTab('products')}
+          style={({ pressed }) => [
+            styles.financeCard,
+            { backgroundColor: theme.card, borderColor: theme.border },
+            pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+          ]}>
+          <View style={styles.financeCardHeader}>
+            <View style={[styles.financeIconWrap, { backgroundColor: '#ECFDF5' }]}>
+              <Ionicons name="wallet-outline" size={20} color="#059669" />
+            </View>
+            <View style={[styles.financeHeaderBadge, { backgroundColor: '#D1FAE5' }]}>
+              <Ionicons name="cube-outline" size={11} color="#059669" />
+              <Text style={[styles.financeHeaderBadgeText, { color: '#059669' }]}>
+                {totalInventoryUnits} {language === 'ur' ? 'اشیاء' : 'units'}
+              </Text>
+            </View>
+          </View>
+
+          <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+            {t('totalInvestment')}
+          </Text>
+          <Text style={[styles.financeMainAmount, { color: theme.text }]}>
+            {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
+          </Text>
+
+          <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
+
+          <View style={styles.financeSubStatsRow}>
+            <View style={styles.financeSubStat}>
+              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                {t('stockRetailValue')}
+              </Text>
+              <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
+              </Text>
+            </View>
+            <View style={styles.financeSubStat}>
+              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                {t('expectedStockProfit')}
+              </Text>
+              <Text style={[styles.financeSubStatValue, { color: '#059669', fontWeight: '800' }]}>
+                +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+
+        {/* Card 2: Total Store Earnings & Realized Profit */}
+        <Pressable
+          onPress={() => setActiveTab('history')}
+          style={({ pressed }) => [
+            styles.financeCard,
+            { backgroundColor: theme.card, borderColor: theme.border },
+            pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+          ]}>
+          <View style={styles.financeCardHeader}>
+            <View style={[styles.financeIconWrap, { backgroundColor: '#F5F3FF' }]}>
+              <Ionicons name="trending-up-outline" size={20} color="#7C3AED" />
+            </View>
+            <View style={[styles.financeHeaderBadge, { backgroundColor: '#EDE9FE' }]}>
+              <Ionicons name="checkmark-done" size={11} color="#7C3AED" />
+              <Text style={[styles.financeHeaderBadgeText, { color: '#7C3AED' }]}>
+                {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {language === 'ur' ? 'بلز' : 'sales'}
+              </Text>
+            </View>
+          </View>
+
+          <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+            {t('totalStoreEarnings')}
+          </Text>
+          <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
+            {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
+          </Text>
+
+          <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
+
+          <View style={styles.financeSubStatsRow}>
+            <View style={styles.financeSubStat}>
+              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                {t('totalProfitEarned')}
+              </Text>
+              <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
+                +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
+              </Text>
+            </View>
+            <View style={styles.financeSubStat}>
+              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                {t('profitMargin')}
+              </Text>
+              <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                {totalLifetimeEarnings > 0
+                  ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
+                  : '0%'}
+              </Text>
+            </View>
           </View>
         </Pressable>
       </View>
@@ -297,7 +384,7 @@ export const DashboardScreen: React.FC = () => {
 
                 <View style={styles.saleMiddle}>
                   <Text style={[styles.saleCustomer, { color: theme.text }]} numberOfLines={1}>
-                    {s.customerName || 'Cash Sale'}
+                    {s.customerName || (language === 'ur' ? 'نقد سیل' : 'Cash Sale')}
                   </Text>
                   <Text style={[styles.saleTime, { color: theme.textMuted }]}>
                     {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {s.billNumber} • {s.items.length} {t('itemsCount')}
@@ -491,33 +578,76 @@ const styles = StyleSheet.create({
   saleTime: { fontSize: 11, fontWeight: '500' },
   saleRight: { alignItems: 'flex-end', gap: 4 },
   saleAmount: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3 },
-  cloudBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  // Finance & Investment Grid
+  financeGrid: {
     gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  financeCard: {
     padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    marginTop: Spacing.md,
     ...Shadows.sm,
   },
-  cloudBannerIcon: {
+  financeCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  financeIconWrap: {
     width: 38,
     height: 38,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cloudBannerTextWrap: {
-    flex: 1,
+  financeHeaderBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
   },
-  cloudBannerTitle: {
-    fontSize: 14,
+  financeHeaderBadgeText: {
+    fontSize: 11,
     fontWeight: '700',
   },
-  cloudBannerDesc: {
+  financeCardTitle: {
     fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  financeMainAmount: {
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: -0.5,
     marginTop: 2,
-    lineHeight: 16,
+    marginBottom: Spacing.xs,
+  },
+  financeDivider: {
+    height: 1,
+    width: '100%',
+    marginVertical: Spacing.xs,
+  },
+  financeSubStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 4,
+  },
+  financeSubStat: {
+    flex: 1,
+    gap: 2,
+  },
+  financeSubStatLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  financeSubStatValue: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

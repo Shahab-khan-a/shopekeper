@@ -382,8 +382,8 @@ export const SettingsScreen: React.FC = () => {
       if (res.success && res.user) {
         setDriveAuth(res.user);
         const msg = language === 'ur'
-          ? '5 TB گوگل ڈرائیو کامیابی سے منسلک ہو گئی!'
-          : '5 TB Google Drive connected successfully!';
+          ? 'گوگل ڈرائیو کامیابی سے منسلک ہو گئی!'
+          : 'Google Drive connected successfully!';
         if (Platform.OS === 'web') {
           window.alert(msg);
         } else {
@@ -438,7 +438,7 @@ export const SettingsScreen: React.FC = () => {
       setDriveBackupSuccess(res.name);
       const msg = language === 'ur'
         ? `بیک اپ محفوظ ہو گیا: ${res.name}`
-        : `Store backed up to 5 TB Google Drive: ${res.name}`;
+        : `Store backed up to Google Drive: ${res.name}`;
       if (Platform.OS === 'web') {
         window.alert(msg);
       } else {
@@ -447,24 +447,56 @@ export const SettingsScreen: React.FC = () => {
     } catch (e: any) {
       console.error('[SettingsScreen] Drive backup error:', e);
       const err = e?.message || 'Failed to backup to Google Drive.';
-      if (Platform.OS === 'web') {
-        window.alert(err);
+      if (err.includes('Google Drive API has not been used') || err.includes('disabled')) {
+        if (Platform.OS === 'web') {
+          window.open(
+            'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513',
+            '_blank'
+          );
+          window.alert(
+            'We opened the Google Cloud Console in a new tab for you!\n\n' +
+            '1. Click the blue "ENABLE" button on that page.\n' +
+            '2. Wait 1 minute.\n' +
+            '3. Come back and retry your backup.'
+          );
+        } else {
+          Alert.alert(
+            'Google Drive Setup Required',
+            'Please visit:\nhttps://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513\n\nand click "ENABLE".'
+          );
+        }
       } else {
-        Alert.alert(t('error'), err);
+        if (Platform.OS === 'web') {
+          window.alert(err);
+        } else {
+          Alert.alert(t('error'), err);
+        }
       }
     } finally {
       setDriveBackupLoading(false);
     }
   };
 
-  const handleOpenDriveFolder = () => {
-    const folderUrl = `https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.defaultFolderId}`;
-    if (Platform.OS === 'web') {
-      window.open(folderUrl, '_blank');
-    } else {
-      Linking.openURL(folderUrl).catch((err) =>
-        console.warn('Could not open drive URL:', err)
-      );
+  const handleOpenDriveFolder = async () => {
+    try {
+      const rootId = await googleDriveService.getRootFolderId();
+      const folderUrl = rootId
+        ? `https://drive.google.com/drive/folders/${rootId}`
+        : 'https://drive.google.com/drive/my-drive';
+      if (Platform.OS === 'web') {
+        window.open(folderUrl, '_blank');
+      } else {
+        Linking.openURL(folderUrl).catch((err) =>
+          console.warn('Could not open drive URL:', err)
+        );
+      }
+    } catch {
+      const folderUrl = 'https://drive.google.com/drive/my-drive';
+      if (Platform.OS === 'web') {
+        window.open(folderUrl, '_blank');
+      } else {
+        Linking.openURL(folderUrl).catch(() => {});
+      }
     }
   };
 
@@ -1000,9 +1032,6 @@ export const SettingsScreen: React.FC = () => {
                     <Text style={[styles.driveTitle, { color: theme.text }]}>
                       {t('googleDriveTitle')}
                     </Text>
-                    <View style={styles.driveStoragePill}>
-                      <Text style={styles.driveStoragePillText}>5 TB</Text>
-                    </View>
                   </View>
                   <Text style={[styles.driveDesc, { color: theme.textMuted }]}>
                     {driveAuth
@@ -1020,7 +1049,7 @@ export const SettingsScreen: React.FC = () => {
                   <View style={[styles.driveFolderInfoRow, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
                     <Ionicons name="folder" size={16} color="#0F9D58" />
                     <Text style={[styles.driveFolderName, { color: theme.textSecondary }]} numberOfLines={1}>
-                      Folder: Shopkeeper_Store_Data
+                      {language === 'ur' ? 'فولڈر: Shopkeeper_Store_Data' : 'Folder: Shopkeeper_Store_Data'}
                     </Text>
                     <Pressable
                       onPress={handleOpenDriveFolder}
