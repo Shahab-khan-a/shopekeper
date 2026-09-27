@@ -1,0 +1,4 @@
+{
+  "name": "firebase",
+  "description": "Firebase CLI MCP Server integration for Firestore, Authentication, Rules, and Cloud tools"
+}
