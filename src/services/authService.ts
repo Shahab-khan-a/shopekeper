@@ -11,19 +11,27 @@ import {
 } from 'firebase/auth';
 import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as AuthSession from 'expo-auth-session';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '@/config/firebase';
 import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
 import { googleDriveService } from '@/services/googleDriveService';
 
-// Complete auth session if returning from a web-browser auth flow
+// Complete auth session if returning from a web-browser auth flow (Web)
 WebBrowser.maybeCompleteAuthSession();
 
-// Configure Google Auth Provider with Profile and Email scopes
+// Configure Google Auth Provider with Profile and Email scopes for Web
 const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
 googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+// Configure Native Google Sign-In for Mobile (Android & iOS)
+if (Platform.OS !== 'web') {
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    scopes: ['profile', 'email'],
+  });
+}
 
 export interface AuthResult {
   success: boolean;
@@ -74,11 +82,14 @@ export async function checkRedirectAuth(): Promise<User | null> {
 }
 
 /**
- * Universal Google Sign In for Web and Mobile (100% Native & Web support)
+ * Universal Google Sign In for Web and Mobile.
+ * - Web: Firebase popup / redirect
+ * - Mobile: Native Google Sign-In SDK via Google Play Services (100% native, no browser redirect issues)
  */
 export async function signInWithGoogle(): Promise<AuthResult> {
   try {
     if (Platform.OS === 'web') {
+      // --- Web: Firebase popup with redirect fallback ---
       try {
         const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
         return { success: true, user: result.user };
@@ -94,57 +105,25 @@ export async function signInWithGoogle(): Promise<AuthResult> {
         throw popupErr;
       }
     } else {
-      // Mobile (Android / iOS): Use the Android OAuth client with reverse-client-ID redirect URI.
-      // Google Android clients automatically accept:
-      //   com.googleusercontent.apps.{CLIENT_ID}:/oauth2redirect/google
-      // This is registered in google-services.json (client_type: 1).
-      const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '';
-      const redirectUri = AuthSession.makeRedirectUri({
-        native: `com.googleusercontent.apps.${ANDROID_CLIENT_ID.split('.apps.')[0]}:/oauth2redirect/google`,
-      });
+      // --- Mobile (Android & iOS): Native Google Play Services ---
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const signInResponse = await GoogleSignin.signIn();
+      
+      // Support both latest v13+ data wrapper and standard response
+      const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
 
-      console.log('[AuthService] Mobile redirectUri:', redirectUri);
-
-      const nonce = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-      const scopeString = ['openid', 'profile', 'email'].join(' ');
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${encodeURIComponent(ANDROID_CLIENT_ID)}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=${encodeURIComponent('id_token')}` +
-        `&scope=${encodeURIComponent(scopeString)}` +
-        `&nonce=${encodeURIComponent(nonce)}` +
-        `&prompt=select_account`;
-
-      const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
-      console.log('[AuthService] Mobile auth response type:', authResponse.type);
-
-      if (authResponse.type === 'success' && authResponse.url) {
-        // Google returns tokens in the URL hash fragment
-        const hashIndex = authResponse.url.indexOf('#');
-        const queryIndex = authResponse.url.indexOf('?');
-        const fragment =
-          hashIndex !== -1
-            ? authResponse.url.substring(hashIndex + 1)
-            : queryIndex !== -1
-            ? authResponse.url.substring(queryIndex + 1)
-            : '';
-        const params = new URLSearchParams(fragment);
-        const idToken = params.get('id_token');
-
-        if (idToken) {
-          return await signInWithGoogleIdToken(idToken);
-        }
-        console.warn('[AuthService] No id_token in response URL:', authResponse.url);
+      if (!idToken) {
+        console.error('[AuthService] No idToken received from Google Sign-In:', signInResponse);
+        return { success: false, error: 'Could not obtain ID token from Google.' };
       }
-      return { success: false, error: 'Sign-in flow did not complete.' };
+
+      return await signInWithGoogleIdToken(idToken);
     }
   } catch (e: any) {
     console.error('[AuthService] signInWithGoogle error:', e);
     return { success: false, error: getFriendlyAuthErrorMessage(e) };
   }
 }
-
 
 /**
  * Sign in using an ID token (e.g. from Google Sign-In on Native)
@@ -167,6 +146,13 @@ export async function signInWithGoogleIdToken(idToken: string): Promise<AuthResu
  */
 export async function signOutUser(): Promise<{ success: boolean; error?: string }> {
   try {
+    if (Platform.OS !== 'web') {
+      try {
+        await GoogleSignin.signOut();
+      } catch (e) {
+        console.warn('[AuthService] GoogleSignin.signOut warning:', e);
+      }
+    }
     await signOut(auth);
     return { success: true };
   } catch (error: any) {

@@ -133,6 +133,40 @@ class GoogleDriveService {
         }
         return { success: false, error: 'Google Drive authorization was cancelled or failed.' };
       } else {
+        // --- Mobile (Android & iOS): Native Google Play Services SDK ---
+        try {
+          const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+          await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+          try {
+            await GoogleSignin.addScopes({
+              scopes: GOOGLE_DRIVE_CONFIG.scopes,
+            });
+          } catch (scopeErr) {
+            console.warn('[GoogleDriveService] addScopes fallback, attempting signIn:', scopeErr);
+            await GoogleSignin.signIn();
+          }
+
+          const tokens = await GoogleSignin.getTokens();
+          const currentUser = GoogleSignin.getCurrentUser();
+
+          if (tokens.accessToken) {
+            const driveUser: GoogleDriveAuth = {
+              accessToken: tokens.accessToken,
+              email: currentUser?.user?.email || undefined,
+              name: currentUser?.user?.name || undefined,
+              picture: currentUser?.user?.photo || undefined,
+              expiresAt: Date.now() + 3500 * 1000,
+            };
+            await this.saveAuth(driveUser);
+            this.ensureFolders(driveUser.accessToken).catch(console.warn);
+            return { success: true, user: driveUser };
+          }
+        } catch (nativeErr: any) {
+          console.warn('[GoogleDriveService] Native Google Sign-In fallback to WebBrowser:', nativeErr);
+        }
+
+        // Browser Fallback (if native is unavailable)
         const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
         if (authResponse.type === 'success' && authResponse.url) {
           const auth = this.extractTokenFromUrl(authResponse.url);
