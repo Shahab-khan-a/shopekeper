@@ -210,6 +210,13 @@ export const Translations = {
     syncError: 'Cloud Sync Failed',
     signOut: 'Sign Out',
     signedInAs: 'Signed in as',
+    deleteAccount: 'Delete Account & Cloud Data',
+    deleteAccountConfirm: 'Are you sure you want to permanently delete your account and all synced cloud records? This action CANNOT be undone.',
+    deleteAccountSuccess: 'Your account and all associated cloud data have been permanently deleted.',
+    deletingAccount: 'Deleting account & cloud data...',
+    aboutLegal: 'About & Legal',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
 
     // Google Drive Storage
     googleDriveTitle: 'Google Drive Storage',
@@ -458,6 +465,13 @@ export const Translations = {
     syncError: 'کلاؤڈ محفوظ کرنے میں خرابی',
     signOut: 'لاگ آؤٹ',
     signedInAs: 'لاگ ان بطور',
+    deleteAccount: 'اکاؤنٹ اور کلاؤڈ ڈیٹا ڈیلیٹ کریں',
+    deleteAccountConfirm: 'کیا آپ واقعی اپنا اکاؤنٹ اور تمام کلاؤڈ ڈیٹا مستقل طور پر ختم کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔',
+    deleteAccountSuccess: 'آپ کا اکاؤنٹ اور تمام متعلقہ ڈیٹا مستقل طور پر ڈیلیٹ کر دیا گیا ہے۔',
+    deletingAccount: 'اکاؤنٹ اور کلاؤڈ ڈیٹا ختم ہو رہا ہے...',
+    aboutLegal: 'ایپ اور قانونی معلومات',
+    privacyPolicy: 'پرائیویسی پالیسی',
+    termsOfService: 'شرائط و ضوابط',
 
     // Google Drive Storage
     googleDriveTitle: 'گوگل ڈرائیو (کلاؤڈ اسٹوریج)',

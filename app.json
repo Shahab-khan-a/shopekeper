@@ -18,9 +18,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ],
+      "permissions": [],
       "package": "com.shahabkhan34.ShopkeeperApp",
       "googleServicesFile": "./google-services.json",
       "intentFilters": [

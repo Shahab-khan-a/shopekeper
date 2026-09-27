@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
 
 interface LoginScreenProps {
   onContinueAsGuest: () => void;
@@ -231,14 +232,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
             </Pressable>
           </View>
 
-          {/* Footer Security Note */}
+          {/* Footer Security Note & Privacy Policy */}
           <View style={styles.footerWrap}>
-            <Ionicons name="lock-closed" size={14} color="#64748B" />
+            <Ionicons name="lock-closed" size={13} color="#64748B" />
             <Text style={[styles.footerText, { color: theme.textMuted }]}>
               {isUrdu
                 ? 'آپ کا ریکارڈ محفوظ اور انکرپٹڈ ہے • گوگل فائر بیس کلاؤڈ'
                 : 'Encrypted & secured by Firebase Authentication'}
             </Text>
+          </View>
+
+          <View style={styles.legalLinksRow}>
+            <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}>
+              <Text style={[styles.legalLinkText, { color: theme.primary }]}>
+                {isUrdu ? 'پرائیویسی پالیسی' : 'Privacy Policy'}
+              </Text>
+            </Pressable>
+            <Text style={[styles.legalDot, { color: theme.textMuted }]}>•</Text>
+            <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}>
+              <Text style={[styles.legalLinkText, { color: theme.primary }]}>
+                {isUrdu ? 'شرائط و ضوابط' : 'Terms of Service'}
+              </Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
@@ -473,5 +488,20 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 11,
     textAlign: 'center',
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: Spacing.sm,
+  },
+  legalLinkText: {
+    fontSize: 12,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  legalDot: {
+    fontSize: 12,
   },
 });

@@ -8,6 +8,7 @@ import {
   onAuthStateChanged, 
   User,
   browserPopupRedirectResolver,
+  deleteUser,
 } from 'firebase/auth';
 import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
@@ -15,6 +16,7 @@ import * as AuthSession from 'expo-auth-session';
 import { auth } from '@/config/firebase';
 import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
 import { googleDriveService } from '@/services/googleDriveService';
+import { deleteAllUserCloudData } from '@/services/firestoreService';
 
 // Complete auth session if returning from a web-browser auth flow
 WebBrowser.maybeCompleteAuthSession();
@@ -103,8 +105,6 @@ export async function signInWithGoogle(): Promise<AuthResult> {
         native: `com.googleusercontent.apps.${ANDROID_CLIENT_ID.split('.apps.')[0]}:/oauth2redirect/google`,
       });
 
-      console.log('[AuthService] Mobile redirectUri:', redirectUri);
-
       const nonce = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
       const scopeString = ['openid', 'profile', 'email'].join(' ');
       const authUrl =
@@ -117,7 +117,6 @@ export async function signInWithGoogle(): Promise<AuthResult> {
         `&prompt=select_account`;
 
       const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
-      console.log('[AuthService] Mobile auth response type:', authResponse.type);
 
       if (authResponse.type === 'success' && authResponse.url) {
         // Google returns tokens in the URL hash fragment
@@ -135,7 +134,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
         if (idToken) {
           return await signInWithGoogleIdToken(idToken);
         }
-        console.warn('[AuthService] No id_token in response URL:', authResponse.url);
+        console.warn('[AuthService] No id_token received in auth callback.');
       }
       return { success: false, error: 'Sign-in flow did not complete.' };
     }
@@ -187,3 +186,50 @@ export function subscribeToAuth(callback: (user: User | null) => void) {
 export function getCurrentUser(): User | null {
   return auth.currentUser;
 }
+
+/**
+ * Permanently delete the user's account and cloud data:
+ * 1. Purges Firestore shops/{userId} and subcollections
+ * 2. Disconnects Google Drive
+ * 3. Deletes Firebase Auth user
+ * Complies with Google Play Account Deletion policy.
+ */
+export async function deleteCurrentUserAccount(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      return { success: false, error: 'No authenticated user found.' };
+    }
+
+    // 1. Delete all Firestore records first while still authenticated
+    const cloudResult = await deleteAllUserCloudData(user.uid);
+    if (!cloudResult.success) {
+      console.warn('[AuthService] Cloud data deletion warning:', cloudResult.error);
+    }
+
+    // 2. Disconnect Google Drive
+    try {
+      await googleDriveService.disconnect();
+    } catch (driveErr) {
+      console.warn('[AuthService] Drive disconnect warning during account deletion:', driveErr);
+    }
+
+    // 3. Delete Firebase Auth user
+    await deleteUser(user);
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('[AuthService] deleteCurrentUserAccount error:', error);
+    if (error?.code === 'auth/requires-recent-login') {
+      return {
+        success: false,
+        error: 'Please sign out and sign in again before deleting your account for security verification.',
+      };
+    }
+    return {
+      success: false,
+      error: getFriendlyAuthErrorMessage(error) || error?.message || 'Failed to delete account.',
+    };
+  }
+}
+
