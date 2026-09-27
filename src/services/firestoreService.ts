@@ -8,7 +8,8 @@ import {
   getDoc,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { db, storage } from '@/config/firebase';
+import { ref, listAll, deleteObject } from 'firebase/storage';
 import { Product, Sale, CustomerKhata, KhataTransaction, Payment, ShopSettings, SyncQueueItem } from '@/types';
 
 /**
@@ -357,10 +358,34 @@ export async function deleteAllUserCloudData(userId: string): Promise<{ success:
     const shopRootRef = doc(db, 'shops', userId);
     await deleteDoc(shopRootRef);
 
+    // Recursively delete all Firebase Storage files under shops/{userId}/
+    try {
+      const userStorageRoot = ref(storage, `shops/${userId}`);
+      await deleteStorageFolderRecursively(userStorageRoot);
+    } catch (storageErr) {
+      console.warn('[FirestoreService] Firebase Storage clean-up warning:', storageErr);
+    }
+
     return { success: true };
   } catch (err: any) {
     console.error('[FirestoreService] deleteAllUserCloudData error:', err);
     return { success: false, error: err?.message || 'Failed to delete cloud documents.' };
+  }
+}
+
+/**
+ * Recursively deletes all files and subfolders under a Firebase Storage reference.
+ */
+async function deleteStorageFolderRecursively(folderRef: any): Promise<void> {
+  try {
+    const listResult = await listAll(folderRef);
+    const filePromises = listResult.items.map((item) => deleteObject(item));
+    const folderPromises = listResult.prefixes.map((prefix) => deleteStorageFolderRecursively(prefix));
+    await Promise.all([...filePromises, ...folderPromises]);
+  } catch (err: any) {
+    if (err?.code !== 'storage/object-not-found') {
+      console.warn('[FirestoreService] Firebase Storage folder delete notice:', err?.message || err);
+    }
   }
 }
 

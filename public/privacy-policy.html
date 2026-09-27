@@ -159,7 +159,7 @@
       <li><strong>In-App Deletion:</strong> You can permanently delete your account, business profile, inventory, sales, and Khata records at any time by going to <em>Settings &gt; Google Cloud Backup &gt; Delete Account &amp; Cloud Data</em>.</li>
       <li><strong>Web Deletion Portal:</strong> If you have uninstalled the app or cannot access your device, you can request account deletion online at <a href="delete-account.html">Account Deletion Portal</a>.</li>
     </ul>
-    <p>Upon deletion, all records under your Firebase account (`shops/{userId}`) and your Firebase Authentication profile are permanently purged within 30 days.</p>
+    <p>Upon deletion, all records under your Firebase account (`shops/{userId}` in Firestore and Firebase Storage) and your Firebase Authentication profile are permanently purged. Google Drive access tokens are actively revoked on Google servers, leaving any user-owned files in your personal Google Drive for your own retention.</p>
 
     <h2>7. Children's Privacy</h2>
     <p>Shopkeeper POS is intended for business owners and retail operators. It is not directed at or designed for children under the age of 13. We do not knowingly collect personal information from children.</p>

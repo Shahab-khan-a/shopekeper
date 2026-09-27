@@ -9,6 +9,8 @@ import {
   User,
   browserPopupRedirectResolver,
   deleteUser,
+  reauthenticateWithPopup,
+  reauthenticateWithCredential,
 } from 'firebase/auth';
 import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
@@ -188,10 +190,74 @@ export function getCurrentUser(): User | null {
 }
 
 /**
+ * Prompts the user to re-authenticate with Google to refresh credentials.
+ * Mandatory before sensitive operations like account deletion to prevent auth/requires-recent-login errors.
+ */
+export async function reauthenticateCurrentUser(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      return { success: false, error: 'No authenticated user found.' };
+    }
+
+    if (Platform.OS === 'web') {
+      await reauthenticateWithPopup(user, googleProvider, browserPopupRedirectResolver);
+      return { success: true };
+    } else {
+      const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '';
+      const redirectUri = AuthSession.makeRedirectUri({
+        native: `com.googleusercontent.apps.${ANDROID_CLIENT_ID.split('.apps.')[0]}:/oauth2redirect/google`,
+      });
+
+      const nonce = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+      const scopeString = ['openid', 'profile', 'email'].join(' ');
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${encodeURIComponent(ANDROID_CLIENT_ID)}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=${encodeURIComponent('id_token')}` +
+        `&scope=${encodeURIComponent(scopeString)}` +
+        `&nonce=${encodeURIComponent(nonce)}` +
+        `&prompt=select_account`;
+
+      const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+
+      if (authResponse.type === 'success' && authResponse.url) {
+        const hashIndex = authResponse.url.indexOf('#');
+        const queryIndex = authResponse.url.indexOf('?');
+        const fragment =
+          hashIndex !== -1
+            ? authResponse.url.substring(hashIndex + 1)
+            : queryIndex !== -1
+            ? authResponse.url.substring(queryIndex + 1)
+            : '';
+        const params = new URLSearchParams(fragment);
+        const idToken = params.get('id_token');
+
+        if (idToken) {
+          const credential = GoogleAuthProvider.credential(idToken);
+          await reauthenticateWithCredential(user, credential);
+          return { success: true };
+        }
+      }
+      return { success: false, error: 'Google sign-in verification was cancelled.' };
+    }
+  } catch (error: any) {
+    console.warn('[AuthService] reauthenticateCurrentUser warning:', error);
+    return {
+      success: false,
+      error: getFriendlyAuthErrorMessage(error) || error?.message || 'Verification failed.',
+    };
+  }
+}
+
+/**
  * Permanently delete the user's account and cloud data:
- * 1. Purges Firestore shops/{userId} and subcollections
- * 2. Disconnects Google Drive
- * 3. Deletes Firebase Auth user
+ * 1. Re-authenticates with Google first to ensure fresh credentials (avoids auth/requires-recent-login failure)
+ * 2. Purges Firestore shops/{userId} collections and document
+ * 3. Purges Firebase Storage folder shops/{userId}/
+ * 4. Revokes Google Drive OAuth token and disconnects Drive
+ * 5. Deletes Firebase Auth user
  * Complies with Google Play Account Deletion policy.
  */
 export async function deleteCurrentUserAccount(): Promise<{ success: boolean; error?: string }> {
@@ -201,31 +267,39 @@ export async function deleteCurrentUserAccount(): Promise<{ success: boolean; er
       return { success: false, error: 'No authenticated user found.' };
     }
 
-    // 1. Delete all Firestore records first while still authenticated
-    const cloudResult = await deleteAllUserCloudData(user.uid);
+    // 1. Re-authenticate first: If cancelled, abort immediately to protect user data
+    const reauthResult = await reauthenticateCurrentUser();
+    if (!reauthResult.success) {
+      return {
+        success: false,
+        error: reauthResult.error || 'Google verification is required to confirm account deletion.',
+      };
+    }
+
+    const confirmedUser = auth.currentUser;
+    if (!confirmedUser) {
+      return { success: false, error: 'User session expired during verification.' };
+    }
+
+    // 2. Delete all Firestore records and Firebase Storage files while still authenticated
+    const cloudResult = await deleteAllUserCloudData(confirmedUser.uid);
     if (!cloudResult.success) {
       console.warn('[AuthService] Cloud data deletion warning:', cloudResult.error);
     }
 
-    // 2. Disconnect Google Drive
+    // 3. Revoke Google Drive OAuth token and clear local Drive session
     try {
-      await googleDriveService.disconnect();
+      await googleDriveService.disconnect(true);
     } catch (driveErr) {
       console.warn('[AuthService] Drive disconnect warning during account deletion:', driveErr);
     }
 
-    // 3. Delete Firebase Auth user
-    await deleteUser(user);
+    // 4. Delete Firebase Auth user (guaranteed fresh credentials from step 1)
+    await deleteUser(confirmedUser);
 
     return { success: true };
   } catch (error: any) {
     console.error('[AuthService] deleteCurrentUserAccount error:', error);
-    if (error?.code === 'auth/requires-recent-login') {
-      return {
-        success: false,
-        error: 'Please sign out and sign in again before deleting your account for security verification.',
-      };
-    }
     return {
       success: false,
       error: getFriendlyAuthErrorMessage(error) || error?.message || 'Failed to delete account.',
