@@ -62,9 +62,22 @@ class GoogleDriveService {
   }
 
   /**
-   * Disconnect and clear local token cache
+   * Disconnect and clear local token cache.
+   * If revokeToken is true, actively revokes the OAuth2 token with Google.
    */
-  async disconnect(): Promise<void> {
+  async disconnect(revokeToken: boolean = false): Promise<void> {
+    try {
+      const auth = this.currentAuth || (await this.getSavedAuth());
+      if (revokeToken && auth?.accessToken) {
+        await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(auth.accessToken)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
+      }
+    } catch (err) {
+      console.warn('[GoogleDriveService] Token revocation notice (ignored):', err);
+    }
+
     this.currentAuth = null;
     this.folderCache = null;
     await AsyncStorage.removeItem(GOOGLE_DRIVE_CONFIG.storageKey);
@@ -167,6 +180,7 @@ class GoogleDriveService {
         }
 
         // Browser Fallback (if native is unavailable)
+
         const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
         if (authResponse.type === 'success' && authResponse.url) {
           const auth = this.extractTokenFromUrl(authResponse.url);
@@ -542,26 +556,9 @@ class GoogleDriveService {
 
     // Cache the original image for instant offline and refresh display
     ImageCacheService.set(fileId, imageUri).catch(() => {});
+    // 4. Return standard file reference (resolved privately via resolveDriveImageUrl with user auth)
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
 
-    // 4. Set public read permission if allowed (optional)
-    try {
-      await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role: 'reader',
-          type: 'anyone',
-        }),
-      });
-    } catch (permErr) {
-      console.warn('[GoogleDriveService] Setting public permission failed (optional):', permErr);
-    }
-
-    // Direct Google CDN image display link
-    return `https://lh3.googleusercontent.com/d/${fileId}`;
   }
 
   /**

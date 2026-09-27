@@ -14,5 +14,6 @@ export const GOOGLE_DRIVE_CONFIG = {
   imagesFolderName: 'Images',
   backupsFolderName: 'Backups',
   billsFolderName: 'Bills',
+  defaultFolderId: process.env.EXPO_PUBLIC_GOOGLE_DRIVE_DEFAULT_FOLDER_ID || '',
   storageKey: '@shopkeeper_google_drive_auth',
 };

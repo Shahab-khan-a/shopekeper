@@ -14,6 +14,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
+
 
 interface AuthModalProps {
   visible: boolean;
@@ -313,8 +315,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose }) => {
                 </Pressable>
 
                 <Text style={[styles.privacyNote, { color: theme.textMuted }]}>
-                  🔒 Encrypted and secured via Firebase Authentication & Cloud Firestore.
+                  🔒 Encrypted and secured via Firebase Authentication.
                 </Text>
+
+                <View style={styles.legalRow}>
+                  <Text style={[styles.legalText, { color: theme.textMuted }]}>By continuing, you agree to our </Text>
+                  <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}>
+                    <Text style={[styles.legalLink, { color: theme.primary }]}>Privacy Policy</Text>
+                  </Pressable>
+                  <Text style={[styles.legalText, { color: theme.textMuted }]}> & </Text>
+                  <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}>
+                    <Text style={[styles.legalLink, { color: theme.primary }]}>Terms</Text>
+                  </Pressable>
+                </View>
+
               </View>
             )}
           </ScrollView>
@@ -487,6 +501,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: -4,
   },
+  legalRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -2,
+  },
+  legalText: {
+    fontSize: 11,
+  },
+  legalLink: {
+    fontSize: 11,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+
   // Signed in view
   signedInContent: {
     gap: Spacing.lg,
