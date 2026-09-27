@@ -20,7 +20,6 @@ import { CameraModal } from '@/components/CameraModal';
 import { buildImportTemplateJSON } from '@/constants/sampleData';
 import * as Linking from 'expo-linking';
 import { googleDriveService, GoogleDriveAuth } from '@/services/googleDriveService';
-import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
 import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

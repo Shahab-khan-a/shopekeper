@@ -140,11 +140,11 @@
         <li>Tap <strong>Delete Account &amp; Cloud Data</strong>.</li>
         <li>Confirm your decision in the confirmation dialog.</li>
       </ol>
-      <p><em>Your account and all associated cloud collections are deleted immediately from Firebase.</em></p>
+      <p><em>When deletion succeeds, your Firebase Auth account, Firestore shop data, and Firebase Storage files under <code>shops/{userId}/</code> are removed immediately. If Storage cleanup fails, deletion is aborted so you can retry. Google Drive backups already in your personal Drive are not removed by the app.</em></p>
     </div>
 
     <h2>Option 2: Web Deletion Request (If App is Uninstalled)</h2>
-    <p>If you uninstalled the application or cannot access your device, submit your registered Google email address below or email our support team directly.</p>
+    <p>If you uninstalled the application or cannot access your device, submit your registered Google email address below. This opens an email to our support team (it is a request, not an automated instant purge). We process confirmed requests within about 48 hours.</p>
 
     <form onsubmit="handleRequest(event)">
       <div class="form-group">
@@ -159,7 +159,7 @@
     </form>
 
     <div id="statusMessage" style="display:none; margin-top: 16px; padding: 12px; background: #DCFCE7; color: #166534; border-radius: 8px; font-weight: 500;">
-      Your deletion request has been received. Our data privacy officer will purge your cloud store data within 48 hours and send a confirmation to your email address.
+      Your email draft to support has been opened. After we receive and confirm your request, we will purge your Firebase Auth, Firestore, and Storage shop data within about 48 hours and reply to your email.
     </div>
 
     <h2>What Data Will Be Deleted:</h2>
@@ -168,12 +168,12 @@
       <li><strong>Store Profile:</strong> Shop name, contact phone number, address, and profile logo.</li>
       <li><strong>Inventory &amp; Sales:</strong> All product listings, barcodes, sales history, and invoices.</li>
       <li><strong>Khata &amp; Ledger:</strong> All customer names, phone numbers, and credit balances.</li>
-      <li><strong>Firebase Cloud Storage:</strong> All store photos, product pictures, logos, and receipts stored under your account directory (`shops/{userId}/`) are permanently deleted.</li>
-      <li><strong>Google Drive Integration:</strong> The app's OAuth authorization is actively revoked on Google's servers. Files previously saved to your personal Google Drive (`Shopkeeper_Store_Data`) remain safely under your personal Google Drive account and can be managed or deleted directly by you in Google Drive.</li>
+      <li><strong>Firebase Cloud Storage:</strong> Store photos, product pictures, logos, and other files under your account directory (<code>shops/{userId}/</code>) are deleted as part of a successful in-app deletion. If that step fails, account deletion stops so you can try again.</li>
+      <li><strong>Google Drive Integration:</strong> On in-app deletion the app revokes its Google Drive OAuth access and clears the local Drive session. Files previously saved to your personal Google Drive (for example a <code>Shopkeeper_Store_Data</code> folder) remain in <em>your</em> Drive — the app does not delete those files. You can manage or delete them yourself in Google Drive.</li>
     </ul>
 
     <h2>Data Retention Timeline:</h2>
-    <p>Live databases are purged immediately upon in-app deletion or within 48 hours of a web request. Any encrypted cold backup archives are completely overwritten and destroyed within 30 days.</p>
+    <p>On a successful in-app deletion, Firestore, Firebase Storage (under your shop path), and Firebase Authentication data are removed from our systems immediately. We do not keep a separate encrypted cold-backup archive of your account after deletion. Web requests (Option 2) are processed manually from email within about 48 hours after we receive them. Google Drive files you already own stay in your Drive until you delete them.</p>
 
     <h2>Need Assistance?</h2>
     <p>Contact our support team directly at <a href="mailto:support@shopkeeperapp.com?subject=Shopkeeper%20POS%20Account%20Deletion%20Request">support@shopkeeperapp.com</a>.</p>

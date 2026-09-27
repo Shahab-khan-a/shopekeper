@@ -16,7 +16,6 @@ import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { auth } from '@/config/firebase';
-import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
 import { googleDriveService } from '@/services/googleDriveService';
 import { deleteAllUserCloudData } from '@/services/firestoreService';
 
@@ -281,10 +280,17 @@ export async function deleteCurrentUserAccount(): Promise<{ success: boolean; er
       return { success: false, error: 'User session expired during verification.' };
     }
 
-    // 2. Delete all Firestore records and Firebase Storage files while still authenticated
+    // 2. Delete all Firestore records and Firebase Storage files while still authenticated.
+    // Abort before Auth/Drive completion if cloud purge fails so the user can retry.
     const cloudResult = await deleteAllUserCloudData(confirmedUser.uid);
     if (!cloudResult.success) {
-      console.warn('[AuthService] Cloud data deletion warning:', cloudResult.error);
+      console.error('[AuthService] Cloud data deletion failed:', cloudResult.error);
+      return {
+        success: false,
+        error:
+          cloudResult.error ||
+          'Failed to delete cloud data. Your account was not deleted — please try again.',
+      };
     }
 
     // 3. Revoke Google Drive OAuth token and clear local Drive session
