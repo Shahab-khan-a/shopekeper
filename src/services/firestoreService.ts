@@ -358,19 +358,26 @@ export async function deleteAllUserCloudData(userId: string): Promise<{ success:
     const shopRootRef = doc(db, 'shops', userId);
     await deleteDoc(shopRootRef);
 
-    // Recursively delete all Firebase Storage files under shops/{userId}/.
-    // Fail the whole cloud deletion if Storage cleanup fails so Auth is not deleted with leftover files.
+    // Recursively delete all Firebase Storage files under shops/{userId}/ (if storage is provisioned)
     try {
       const userStorageRoot = ref(storage, `shops/${userId}`);
       await deleteStorageFolderRecursively(userStorageRoot);
     } catch (storageErr: any) {
-      console.error('[FirestoreService] Firebase Storage clean-up failed:', storageErr);
-      return {
-        success: false,
-        error:
-          storageErr?.message ||
-          'Failed to delete Firebase Storage files. Account was not deleted so you can retry.',
-      };
+      if (
+        storageErr?.code === 'storage/bucket-not-found' ||
+        storageErr?.code === 'storage/project-not-found' ||
+        storageErr?.code === 'storage/unauthorized'
+      ) {
+        console.log('[FirestoreService] Firebase Storage bucket not configured or empty; skipped.');
+      } else {
+        console.error('[FirestoreService] Firebase Storage clean-up failed:', storageErr);
+        return {
+          success: false,
+          error:
+            storageErr?.message ||
+            'Failed to delete Firebase Storage files. Account was not deleted so you can retry.',
+        };
+      }
     }
 
     return { success: true };
@@ -390,8 +397,13 @@ async function deleteStorageFolderRecursively(folderRef: any): Promise<void> {
     const folderPromises = listResult.prefixes.map((prefix) => deleteStorageFolderRecursively(prefix));
     await Promise.all([...filePromises, ...folderPromises]);
   } catch (err: any) {
-    // Empty / missing folder is fine — nothing to delete.
-    if (err?.code === 'storage/object-not-found' || err?.code === 'storage/not-found') {
+    // Empty / missing folder or unconfigured storage bucket is fine — nothing to delete.
+    if (
+      err?.code === 'storage/object-not-found' ||
+      err?.code === 'storage/not-found' ||
+      err?.code === 'storage/bucket-not-found' ||
+      err?.code === 'storage/project-not-found'
+    ) {
       return;
     }
     console.error('[FirestoreService] Firebase Storage folder delete failed:', err?.message || err);
