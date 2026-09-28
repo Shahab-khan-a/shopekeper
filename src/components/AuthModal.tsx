@@ -254,42 +254,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose }) => {
             ) : (
               // ── SIGNED OUT VIEW ─────────────────────────────────────
               <View style={styles.signedOutContent}>
-                {/* Benefits List */}
-                <View style={styles.benefitsList}>
-                  <View style={styles.benefitItem}>
-                    <View style={[styles.benefitIcon, { backgroundColor: '#E0F2FE' }]}>
-                      <Ionicons name="shield-checkmark" size={18} color="#0284C7" />
+                {/* 3 Compact Benefit Cards */}
+                <View style={styles.benefitsRow}>
+                  <View style={[styles.benefitMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                    <View style={[styles.benefitMiniIcon, { backgroundColor: '#E0F2FE' }]}>
+                      <Ionicons name="shield-checkmark" size={14} color="#0284C7" />
                     </View>
-                    <View style={styles.benefitTextWrap}>
-                      <Text style={[styles.benefitTitle, { color: theme.text }]}>Safe Cloud Backup</Text>
-                      <Text style={[styles.benefitDesc, { color: theme.textMuted }]}>
-                        Never lose store records if you lose your phone or switch devices.
-                      </Text>
-                    </View>
+                    <Text style={[styles.benefitMiniTitle, { color: theme.text }]} numberOfLines={1}>
+                      Safe Cloud
+                    </Text>
                   </View>
 
-                  <View style={styles.benefitItem}>
-                    <View style={[styles.benefitIcon, { backgroundColor: '#DCFCE7' }]}>
-                      <Ionicons name="sync" size={18} color="#15803D" />
+                  <View style={[styles.benefitMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                    <View style={[styles.benefitMiniIcon, { backgroundColor: '#DCFCE7' }]}>
+                      <Ionicons name="sync" size={14} color="#15803D" />
                     </View>
-                    <View style={styles.benefitTextWrap}>
-                      <Text style={[styles.benefitTitle, { color: theme.text }]}>Automatic Cloud Sync</Text>
-                      <Text style={[styles.benefitDesc, { color: theme.textMuted }]}>
-                        Every sale, product addition, and Khata payment backs up in real-time.
-                      </Text>
-                    </View>
+                    <Text style={[styles.benefitMiniTitle, { color: theme.text }]} numberOfLines={1}>
+                      Auto Sync
+                    </Text>
                   </View>
 
-                  <View style={styles.benefitItem}>
-                    <View style={[styles.benefitIcon, { backgroundColor: '#FEF3C7' }]}>
-                      <Ionicons name="phone-portrait-outline" size={18} color="#D97706" />
+                  <View style={[styles.benefitMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                    <View style={[styles.benefitMiniIcon, { backgroundColor: '#FEF3C7' }]}>
+                      <Ionicons name="phone-portrait-outline" size={14} color="#D97706" />
                     </View>
-                    <View style={styles.benefitTextWrap}>
-                      <Text style={[styles.benefitTitle, { color: theme.text }]}>Multi-Device Access</Text>
-                      <Text style={[styles.benefitDesc, { color: theme.textMuted }]}>
-                        Log in on your counter tablet, phone, or laptop browser with one account.
-                      </Text>
-                    </View>
+                    <Text style={[styles.benefitMiniTitle, { color: theme.text }]} numberOfLines={1}>
+                      Multi-Device
+                    </Text>
                   </View>
                 </View>
 
@@ -442,52 +433,54 @@ const styles = StyleSheet.create({
   signedOutContent: {
     gap: 14,
   },
-  benefitsList: {
-    gap: 8,
-  },
-  benefitItem: {
+  benefitsRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    width: '100%',
   },
-  benefitIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: BorderRadius.sm,
+  benefitMiniCard: {
+    flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    gap: 4,
   },
-  benefitTextWrap: {
-    flex: 1,
+  benefitMiniIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  benefitTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  benefitDesc: {
+  benefitMiniTitle: {
     fontSize: 11,
-    marginTop: 1,
-    lineHeight: 15,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   googleLoginBtn: {
-    backgroundColor: '#1E293B',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: BorderRadius.md,
+    backgroundColor: '#0F172A',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: BorderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.sm,
+    ...Shadows.md,
   },
   googleBtnInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
   },
   googleIconBox: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     borderRadius: BorderRadius.full,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -495,9 +488,9 @@ const styles = StyleSheet.create({
   },
   googleLoginBtnText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
-    letterSpacing: 0.1,
+    letterSpacing: 0.2,
   },
   privacyNote: {
     fontSize: 10,

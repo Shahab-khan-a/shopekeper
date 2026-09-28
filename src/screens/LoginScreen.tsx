@@ -133,48 +133,33 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
             </View>
           ) : null}
 
-          {/* Key Features Grid */}
-          <View style={styles.featuresContainer}>
-            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureIcon, { backgroundColor: '#E0F2FE' }]}>
-                <Ionicons name="flash-outline" size={16} color="#0284C7" />
+          {/* 3 Compact Feature Cards */}
+          <View style={styles.featuresRow}>
+            <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={[styles.featureMiniIconWrap, { backgroundColor: '#E0F2FE' }]}>
+                <Ionicons name="flash" size={14} color="#0284C7" />
               </View>
-              <View style={styles.featureTextWrap}>
-                <Text style={[styles.featureTitle, { color: theme.text }]}>
-                  {isUrdu ? 'فوری بلنگ اور رسیدیں' : 'Fast Billing & Receipts'}
-                </Text>
-                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
-                  {isUrdu ? 'تھرمل رسیدیں پرنٹ اور واٹس ایپ کریں' : 'Instant thermal print & WhatsApp receipts'}
-                </Text>
-              </View>
+              <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
+                {isUrdu ? 'فوری بلنگ' : 'Fast Billing'}
+              </Text>
             </View>
 
-            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureIcon, { backgroundColor: '#FEF3C7' }]}>
-                <Ionicons name="book-outline" size={16} color="#D97706" />
+            <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={[styles.featureMiniIconWrap, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="book" size={14} color="#D97706" />
               </View>
-              <View style={styles.featureTextWrap}>
-                <Text style={[styles.featureTitle, { color: theme.text }]}>
-                  {isUrdu ? 'گاہک ادھار کھاتہ' : 'Customer Udhaar Khata'}
-                </Text>
-                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
-                  {isUrdu ? 'بقایا جات اور ادائیگیوں کا مکمل ریکارڈ' : 'Track customer dues, payments & reminders'}
-                </Text>
-              </View>
+              <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
+                {isUrdu ? 'ادھار کھاتہ' : 'Udhaar Khata'}
+              </Text>
             </View>
 
-            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureIcon, { backgroundColor: '#DCFCE7' }]}>
-                <Ionicons name="cloud-done-outline" size={16} color="#15803D" />
+            <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={[styles.featureMiniIconWrap, { backgroundColor: '#DCFCE7' }]}>
+                <Ionicons name="cloud-done" size={14} color="#15803D" />
               </View>
-              <View style={styles.featureTextWrap}>
-                <Text style={[styles.featureTitle, { color: theme.text }]}>
-                  {isUrdu ? 'گوگل کلاؤڈ بیک اپ' : 'Firebase Cloud Sync'}
-                </Text>
-                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
-                  {isUrdu ? 'موبائل گم یا تبدیل ہونے پر ڈیٹا محفوظ' : 'Real-time backup, access on phone or PC'}
-                </Text>
-              </View>
+              <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
+                {isUrdu ? 'کلاؤڈ بیک اپ' : 'Cloud Sync'}
+              </Text>
             </View>
           </View>
 
@@ -390,54 +375,54 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
   },
-  featuresContainer: {
-    gap: 6,
-    marginBottom: 14,
-  },
-  featureCard: {
+  featuresRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    padding: 9,
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 14,
+    width: '100%',
+  },
+  featureMiniCard: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
+    gap: 4,
   },
-  featureIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: BorderRadius.sm,
+  featureMiniIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  featureTextWrap: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  featureDesc: {
+  featureMiniText: {
     fontSize: 11,
-    marginTop: 1,
-    lineHeight: 14,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   actionSection: {
     gap: 8,
   },
   googleBtn: {
     backgroundColor: '#0F172A',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: BorderRadius.md,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: BorderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.sm,
+    ...Shadows.md,
   },
   googleBtnInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
   },
   loadingRow: {
     flexDirection: 'row',
@@ -446,8 +431,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   googleIconCircle: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     borderRadius: BorderRadius.full,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -455,9 +440,9 @@ const styles = StyleSheet.create({
   },
   googleBtnText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
-    letterSpacing: 0.1,
+    letterSpacing: 0.2,
   },
   dividerRow: {
     flexDirection: 'row',
