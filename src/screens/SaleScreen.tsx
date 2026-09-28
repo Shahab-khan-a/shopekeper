@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { Product, CartItem, PaymentMethod, ProductCategory, CustomerKhata } from
 import { useShop } from '@/context/ShopContext';
 import { BarcodeModal } from '@/components/BarcodeModal';
 import { QuickItemModal } from '@/components/QuickItemModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
@@ -40,17 +41,28 @@ const CATEGORIES: ProductCategory[] = [
 const CASH_DENOMINATIONS = [100, 500, 1000, 5000];
 const DISCOUNT_SHORTCUTS = [10, 20, 50, 100];
 
-export const SaleScreen: React.FC = () => {
+export interface SaleScreenProps {
+  isModal?: boolean;
+  onClose?: () => void;
+}
+
+export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const { width } = useWindowDimensions();
   const isWideScreen = width >= 860;
 
-  const { products, khata, completeSale, settings, t, language } = useShop();
+  // W3-3: Responsive grid — 2 col narrow, 3 col medium, 4 col wide
+  const catalogWidth = isWideScreen ? width * 0.55 : width;
+  const gridCols = catalogWidth >= 700 ? 4 : catalogWidth >= 480 ? 3 : 2;
+  const gridGap = 8;
+  const gridColWidth = (catalogWidth - Spacing.lg * 2 - gridGap * (gridCols - 1)) / gridCols;
+
+  const { products, khata, sales, completeSale, settings, t, language, setActiveReceipt } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   // Cart state
   const [cart, setCart] = useState<CartItem[]>([]);
   const [discount, setDiscount] = useState<string>('');
-  const [discountType] = useState<'fixed' | 'percent'>('fixed');
+  const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed');
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
@@ -69,7 +81,78 @@ export const SaleScreen: React.FC = () => {
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Filtered products
+  // W2-2: Hold/Park cart state
+  const [heldCarts, setHeldCarts] = useState<{ id: string; ts: number; items: CartItem[]; total: number }[]>([]);
+
+  // Load held carts from storage on mount
+  React.useEffect(() => {
+    AsyncStorage.getItem('@sk_held_carts').then((raw) => {
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        const now = Date.now();
+        const valid = parsed.filter((h: any) => now - h.ts < 4 * 60 * 60 * 1000); // 4hr expiry
+        setHeldCarts(valid);
+        if (valid.length !== parsed.length) {
+          AsyncStorage.setItem('@sk_held_carts', JSON.stringify(valid)).catch(() => {});
+        }
+      } catch {}
+    }).catch(() => {});
+  }, []);
+
+  const holdCart = async () => {
+    if (cart.length === 0) return;
+    const newHold = { id: Date.now().toString(), ts: Date.now(), items: cart, total: grandTotal };
+    const updated = [...heldCarts, newHold].slice(-3); // max 3 holds
+    setHeldCarts(updated);
+    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(updated)).catch(() => {});
+    clearCart();
+  };
+
+  const restoreHold = async (holdId: string) => {
+    const hold = heldCarts.find((h) => h.id === holdId);
+    if (!hold) return;
+    if (cart.length > 0) {
+      const msg = language === 'ur' ? 'موجودہ بل ہٹ جائے گا۔ جاری رکھیں؟' : 'Current bill will be replaced. Proceed?';
+      const confirmed = Platform.OS === 'web'
+        ? window.confirm(msg)
+        : await new Promise<boolean>((resolve) => {
+            Alert.alert(language === 'ur' ? 'بل بحال کریں' : 'Restore Held Order', msg, [
+              { text: t('cancel'), onPress: () => resolve(false), style: 'cancel' },
+              { text: language === 'ur' ? 'جاری رکھیں' : 'Proceed', onPress: () => resolve(true) },
+            ]);
+          });
+      if (!confirmed) return;
+    }
+    setCart(hold.items);
+    const remaining = heldCarts.filter((h) => h.id !== holdId);
+    setHeldCarts(remaining);
+    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(remaining)).catch(() => {});
+  };
+
+  // W1-3: Success toast — stores last completed sale for explicit receipt view
+  const [lastCompletedSale, setLastCompletedSale] = useState<any>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // W2-3: Top 8 products by sales frequency for the Favorites row
+  const topProducts = useMemo(() => {
+    const freq: Record<string, number> = {};
+    sales.forEach((sale) => {
+      sale.items?.forEach((item: any) => {
+        const id = item.product?.id || item.productId;
+        if (id) freq[id] = (freq[id] || 0) + item.quantity;
+      });
+    });
+    const sorted = [...products]
+      .filter((p) => p.stock > 0)
+      .sort((a, b) => (freq[b.id] || 0) - (freq[a.id] || 0));
+    // If no sales history yet, show top-stocked items
+    if (Object.keys(freq).length === 0) {
+      return [...products].filter((p) => p.stock > 0).slice(0, 8);
+    }
+    return sorted.slice(0, 8);
+  }, [products, sales]);
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchSearch =
@@ -281,6 +364,16 @@ export const SaleScreen: React.FC = () => {
         return;
       }
 
+      // W1-3: Store the completed sale for manual receipt viewing
+      setLastCompletedSale(result.sale);
+      setShowSuccessToast(true);
+
+      // Auto-dismiss toast after 8 seconds
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 8000);
+
       // Clear cart and close drawer
       clearCart();
     } catch (e: any) {
@@ -309,12 +402,44 @@ export const SaleScreen: React.FC = () => {
 
         <View style={styles.drawerHeaderActions}>
           {cart.length > 0 ? (
-            <Pressable onPress={clearCart} style={styles.clearBtn}>
+            <Pressable
+              onPress={() => {
+                if (Platform.OS === 'web') {
+                  if (window.confirm(t('clearCartConfirm'))) clearCart();
+                } else {
+                  Alert.alert(
+                    t('clearCart'),
+                    t('clearCartConfirm'),
+                    [
+                      { text: t('cancel'), style: 'cancel' },
+                      { text: t('clearAll'), style: 'destructive', onPress: clearCart },
+                    ]
+                  );
+                }
+              }}
+              accessibilityLabel={t('clearCart')}
+              accessibilityRole="button"
+              accessibilityHint="Removes all items from the current bill"
+              style={styles.clearBtn}>
               <Text style={[styles.clearBtnText, { color: theme.danger }]}>
                 {t('clearAll')}
               </Text>
             </Pressable>
           ) : null}
+
+          {/* Hold / Park current cart */}
+          {cart.length > 0 && heldCarts.length < 3 && (
+            <Pressable
+              onPress={holdCart}
+              accessibilityLabel="Hold cart for later"
+              accessibilityRole="button"
+              style={[styles.holdBtn, { backgroundColor: theme.warningLight, borderColor: theme.warning }]}>
+              <Ionicons name="pause-circle-outline" size={14} color={theme.warning} />
+              <Text style={[styles.holdBtnText, { color: theme.warning }]}>
+                {language === 'ur' ? 'روکیں' : 'Hold'}
+              </Text>
+            </Pressable>
+          )}
 
           {!isWideScreen && (
             <Pressable
@@ -325,6 +450,26 @@ export const SaleScreen: React.FC = () => {
           )}
         </View>
       </View>
+
+      {/* Held Orders Restore Strip */}
+      {heldCarts.length > 0 && (
+        <View style={[styles.heldOrdersBar, { backgroundColor: theme.warningLight, borderBottomColor: theme.warning }]}>
+          <Ionicons name="pause-circle" size={14} color={theme.warning} />
+          <Text style={[styles.heldOrdersLabel, { color: theme.warning }]}>
+            {language === 'ur' ? 'رکے ہوئے آرڈر:' : 'Held:'} {heldCarts.length}
+          </Text>
+          {heldCarts.map((hold) => (
+            <Pressable
+              key={hold.id}
+              onPress={() => restoreHold(hold.id)}
+              style={[styles.heldOrderChip, { backgroundColor: theme.warning }]}>
+              <Text style={styles.heldOrderChipText}>
+                {settings.currencySymbol}{hold.total} ({hold.items.length})
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
 
       <ScrollView
         style={styles.drawerScroll}
@@ -365,6 +510,8 @@ export const SaleScreen: React.FC = () => {
                 <View style={styles.itemStepperWrap}>
                   <Pressable
                     onPress={() => updateQuantity(item.product.id, -1)}
+                    accessibilityLabel={`Decrease quantity of ${item.product.name}`}
+                    accessibilityRole="button"
                     style={[styles.smallStepBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
                     <Ionicons name="remove" size={16} color={theme.text} />
                   </Pressable>
@@ -373,11 +520,15 @@ export const SaleScreen: React.FC = () => {
                   </Text>
                   <Pressable
                     onPress={() => updateQuantity(item.product.id, 1)}
+                    accessibilityLabel={`Increase quantity of ${item.product.name}`}
+                    accessibilityRole="button"
                     style={[styles.smallStepBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
                     <Ionicons name="add" size={16} color={theme.text} />
                   </Pressable>
                   <Pressable
                     onPress={() => removeFromCart(item.product.id)}
+                    accessibilityLabel={`Remove ${item.product.name} from bill`}
+                    accessibilityRole="button"
                     style={styles.trashBtn}>
                     <Ionicons name="trash-outline" size={16} color={theme.danger} />
                   </Pressable>
@@ -621,7 +772,69 @@ export const SaleScreen: React.FC = () => {
           </View>
         )}
 
-        {/* Optional Collapsible: Customer WhatsApp & Discount (for Cash/Online) */}
+        {/* ── Always-Visible Discount Row ── */}
+        {cart.length > 0 && (
+          <View style={[styles.discountRow, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+            <View style={styles.discountRowHeader}>
+              <Ionicons name="pricetag-outline" size={14} color={theme.textSecondary} />
+              <Text style={[styles.discountRowLabel, { color: theme.textSecondary }]}>
+                {t('discount')}
+              </Text>
+              {discountAmount > 0 && (
+                <Text style={[styles.discountSavedBadge, { color: theme.success, backgroundColor: theme.successLight }]}>
+                  -{settings.currencySymbol}{discountAmount}
+                </Text>
+              )}
+            </View>
+            <View style={styles.discountInputRow}>
+              {/* Fixed / % toggle */}
+              <Pressable
+                onPress={() => {
+                  setDiscountType(prev => prev === 'fixed' ? 'percent' : 'fixed');
+                  setDiscount('');
+                }}
+                accessibilityLabel={discountType === 'fixed' ? 'Switch to percent discount' : 'Switch to fixed discount'}
+                accessibilityRole="button"
+                style={[styles.discTypeToggle, { backgroundColor: theme.primary }]}>
+                <Text style={styles.discTypeToggleText}>
+                  {discountType === 'fixed' ? settings.currencySymbol : '%'}
+                </Text>
+              </Pressable>
+              <TextInput
+                style={[
+                  styles.formInput,
+                  styles.discountInput,
+                  { backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
+                ]}
+                placeholder={discountType === 'fixed' ? '0' : '0%'}
+                placeholderTextColor={theme.textMuted}
+                keyboardType="numeric"
+                value={discount}
+                onChangeText={setDiscount}
+              />
+              <View style={styles.discShortcuts}>
+                {DISCOUNT_SHORTCUTS.map((amt) => (
+                  <Pressable
+                    key={amt}
+                    onPress={() => setDiscount(amt.toString())}
+                    style={[
+                      styles.discShortcutBtn,
+                      {
+                        backgroundColor: discount === amt.toString() ? theme.primaryLight : theme.card,
+                        borderColor: discount === amt.toString() ? theme.primary : theme.border,
+                      },
+                    ]}>
+                    <Text style={[styles.discShortcutText, { color: discount === amt.toString() ? theme.primary : theme.textSecondary }]}>
+                      {discountType === 'fixed' ? `-${amt}` : `${amt}%`}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Optional Collapsible: Customer WhatsApp for receipt (Cash/Online only) */}
         {paymentMethod !== 'udhaar' && (
           <View style={styles.collapsibleWrap}>
             <Pressable
@@ -634,80 +847,27 @@ export const SaleScreen: React.FC = () => {
                   color={theme.textSecondary}
                 />
                 <Text style={[styles.collapsibleTitle, { color: theme.textSecondary }]}>
-                  {t('optionalDetails')}
+                  {language === 'ur' ? 'گاہک کا نمبر (اختیاری)' : 'Customer Phone for Receipt (Optional)'}
                 </Text>
               </View>
-              {(customerPhone || discountAmount > 0) && (
+              {customerPhone ? (
                 <View style={[styles.activeDot, { backgroundColor: theme.primary }]} />
-              )}
+              ) : null}
             </Pressable>
 
             {showOptionalDetails && (
               <View style={[styles.optionalContent, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                {/* Customer Phone for WhatsApp Receipt */}
-                <View style={styles.inputSubgroup}>
-                  <Text style={[styles.inputSubLabel, { color: theme.textSecondary }]}>
-                    {t('customerPhone')}
-                  </Text>
-                  <TextInput
-                    style={[
-                      styles.formInput,
-                      { backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
-                    ]}
-                    placeholder="WhatsApp (0300...)"
-                    placeholderTextColor={theme.textMuted}
-                    keyboardType="phone-pad"
-                    value={customerPhone}
-                    onChangeText={setCustomerPhone}
-                  />
-                </View>
-
-                {/* Discount */}
-                <View style={styles.inputSubgroup}>
-                  <Text style={[styles.inputSubLabel, { color: theme.textSecondary }]}>
-                    {t('discount')} ({settings.currencySymbol})
-                  </Text>
-                  <View style={styles.discountInputRow}>
-                    <TextInput
-                      style={[
-                        styles.formInput,
-                        { flex: 1, backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
-                      ]}
-                      placeholder="0"
-                      placeholderTextColor={theme.textMuted}
-                      keyboardType="numeric"
-                      value={discount}
-                      onChangeText={setDiscount}
-                    />
-                    <View style={styles.discShortcuts}>
-                      {DISCOUNT_SHORTCUTS.map((amt) => (
-                        <Pressable
-                          key={amt}
-                          onPress={() => setDiscount(amt.toString())}
-                          style={[
-                            styles.discShortcutBtn,
-                            {
-                              backgroundColor:
-                                discount === amt.toString() ? theme.primaryLight : theme.card,
-                              borderColor:
-                                discount === amt.toString() ? theme.primary : theme.border,
-                            },
-                          ]}>
-                          <Text
-                            style={[
-                              styles.discShortcutText,
-                              {
-                                color:
-                                  discount === amt.toString() ? theme.primary : theme.textSecondary,
-                              },
-                            ]}>
-                            -{amt}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-                </View>
+                <TextInput
+                  style={[
+                    styles.formInput,
+                    { backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
+                  ]}
+                  placeholder="WhatsApp (0300...)"
+                  placeholderTextColor={theme.textMuted}
+                  keyboardType="phone-pad"
+                  value={customerPhone}
+                  onChangeText={setCustomerPhone}
+                />
               </View>
             )}
           </View>
@@ -716,6 +876,30 @@ export const SaleScreen: React.FC = () => {
 
       {/* Bill Total & Primary Action Button */}
       <View style={[styles.checkoutFooter, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+
+        {/* W1-3: Sale Success Toast Banner */}
+        {showSuccessToast && lastCompletedSale && (
+          <View style={[styles.successToast, { backgroundColor: theme.successLight, borderColor: theme.success }]}>
+            <View style={styles.successToastLeft}>
+              <Ionicons name="checkmark-circle" size={20} color={theme.success} />
+              <Text style={[styles.successToastText, { color: theme.success }]}>
+                {t('saleSavedToast')}
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => {
+                setActiveReceipt(lastCompletedSale);
+                setShowSuccessToast(false);
+              }}
+              accessibilityLabel={t('saleViewReceiptBtn')}
+              accessibilityRole="button"
+              style={[styles.successToastBtn, { backgroundColor: theme.success }]}>
+              <Ionicons name="receipt-outline" size={14} color="#FFFFFF" />
+              <Text style={styles.successToastBtnText}>{t('saleViewReceiptBtn')}</Text>
+            </Pressable>
+          </View>
+        )}
+
         <View style={styles.totalBar}>
           <View>
             <Text style={[styles.subtotalLine, { color: theme.textSecondary }]}>
@@ -759,6 +943,37 @@ export const SaleScreen: React.FC = () => {
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: theme.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {isModal && (
+        <View style={[styles.modalTopHeader, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
+          <Pressable
+            onPress={onClose}
+            accessibilityLabel={t('cancel')}
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.modalCloseBtn,
+              pressed && { opacity: 0.7 },
+            ]}>
+            <Ionicons name="close" size={24} color={theme.text} />
+          </Pressable>
+          <View style={styles.modalHeaderTitleWrap}>
+            <Ionicons name="cart" size={20} color={theme.primary} />
+            <Text style={[styles.modalHeaderTitle, { color: theme.text }]}>
+              {t('sale')}
+            </Text>
+          </View>
+          <Pressable
+            onPress={onClose}
+            style={({ pressed }) => [
+              styles.modalDoneBtn,
+              { backgroundColor: theme.primaryLight },
+              pressed && { opacity: 0.7 },
+            ]}>
+            <Text style={[styles.modalDoneBtnText, { color: theme.primary }]}>
+              {language === 'ur' ? 'مکمل' : 'Done'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
       <View style={styles.mainLayout}>
         {/* ================= Catalog Section (Full Screen on Mobile) ================= */}
         <View style={styles.catalogSection}>
@@ -815,6 +1030,56 @@ export const SaleScreen: React.FC = () => {
               </Pressable>
             </View>
           </View>
+
+          {/* ⚡ Favorites / Quick-Add Row — Top 8 Most-Sold Products */}
+          {topProducts.length > 0 && !searchQuery && (
+            <View style={styles.favRowWrap}>
+              <View style={styles.favRowHeader}>
+                <Ionicons name="flash" size={12} color={theme.accent} />
+                <Text style={[styles.favRowTitle, { color: theme.textSecondary }]}>
+                  {language === 'ur' ? 'اکثر بکنے والے' : 'Quick Add'}
+                </Text>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.favRowContent}>
+                {topProducts.map((product) => {
+                  const isOut = product.stock <= 0;
+                  const inCart = cart.find((it) => it.product.id === product.id);
+                  return (
+                    <Pressable
+                      key={product.id}
+                      disabled={isOut}
+                      onPress={() => addToCart(product)}
+                      accessibilityLabel={`Quick add ${product.name}`}
+                      accessibilityRole="button"
+                      style={({ pressed }) => [
+                        styles.favChip,
+                        {
+                          backgroundColor: inCart ? theme.primaryLight : theme.card,
+                          borderColor: inCart ? theme.primary : theme.border,
+                          opacity: isOut ? 0.4 : 1,
+                        },
+                        pressed && !isOut && { transform: [{ scale: 0.95 }] },
+                      ]}>
+                      <Text style={[styles.favChipName, { color: inCart ? theme.primary : theme.text }]} numberOfLines={1}>
+                        {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                      </Text>
+                      <Text style={[styles.favChipPrice, { color: inCart ? theme.primary : theme.textSecondary }]}>
+                        {settings.currencySymbol}{product.price}
+                      </Text>
+                      {inCart && (
+                        <View style={[styles.favChipBadge, { backgroundColor: theme.primary }]}>
+                          <Text style={styles.favChipBadgeText}>{inCart.quantity}</Text>
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
 
           {/* Category Filter Pills */}
           <ScrollView
@@ -940,6 +1205,7 @@ export const SaleScreen: React.FC = () => {
                   style={({ pressed }) => [
                     styles.gridCard,
                     {
+                      width: gridColWidth,
                       backgroundColor: theme.card,
                       borderColor: inCartItem ? theme.primary : theme.border,
                       borderWidth: inCartItem ? 2 : 1,
@@ -1180,6 +1446,59 @@ const styles = StyleSheet.create({
     gap: 6,
     alignItems: 'center',
   },
+
+  // W2-3: Favorites / Quick-Add row
+  favRowWrap: {
+    marginBottom: 6,
+  },
+  favRowHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  favRowTitle: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  favRowContent: {
+    gap: 6,
+    paddingRight: 4,
+  },
+  favChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1.5,
+    position: 'relative',
+  },
+  favChipName: {
+    fontSize: 12,
+    fontWeight: '700',
+    maxWidth: 90,
+  },
+  favChipPrice: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  favChipBadge: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 2,
+  },
+  favChipBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
   categoryPill: {
     paddingHorizontal: 13,
     paddingVertical: 6,
@@ -1199,7 +1518,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
   gridCard: {
-    width: Platform.OS === 'web' ? ('calc(50% - 6px)' as any) : '48%',
+    // width is set dynamically inline (W3-3 responsive grid)
     borderRadius: BorderRadius.xl,
     padding: Spacing.md,
     justifyContent: 'space-between',
@@ -1487,6 +1806,43 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
+  // W2-2: Hold cart styles
+  holdBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  holdBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  heldOrdersBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    flexWrap: 'wrap',
+  },
+  heldOrdersLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  heldOrderChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+  },
+  heldOrderChipText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+  },
   closeDrawerBtn: {
     width: 32,
     height: 32,
@@ -1536,8 +1892,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   smallStepBtn: {
-    width: 28,
-    height: 28,
+    width: 36,
+    height: 36,
+    minWidth: 36,
+    minHeight: 36,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
     alignItems: 'center',
@@ -1546,12 +1904,16 @@ const styles = StyleSheet.create({
   smallStepQty: {
     fontSize: 13,
     fontWeight: '800',
-    minWidth: 18,
+    minWidth: 22,
     textAlign: 'center',
   },
   trashBtn: {
-    padding: 4,
-    marginLeft: 4,
+    padding: 8,
+    marginLeft: 2,
+    minWidth: 36,
+    minHeight: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Payment Selection
@@ -1739,6 +2101,49 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  // Always-visible discount row (W2-1 / W2-4)
+  discountRow: {
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    gap: 6,
+  },
+  discountRowHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  discountRowLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    flex: 1,
+  },
+  discountSavedBadge: {
+    fontSize: 11,
+    fontWeight: '800',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  discTypeToggle: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  discTypeToggleText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  discountInput: {
+    flex: 1,
+    height: 36,
+  },
+
   // Checkout Footer
   checkoutFooter: {
     paddingHorizontal: Spacing.lg,
@@ -1776,5 +2181,78 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 14,
     letterSpacing: 0.2,
+  },
+
+  // W1-3: Sale success toast
+  successToast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    marginBottom: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  successToastLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  successToastText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  successToastBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.md,
+    minHeight: 32,
+  },
+  successToastBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  // Modal header for in-home sale window
+  modalTopHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    zIndex: 15,
+  },
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalHeaderTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  modalHeaderTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  modalDoneBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.md,
+  },
+  modalDoneBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

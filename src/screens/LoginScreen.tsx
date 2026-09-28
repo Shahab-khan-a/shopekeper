@@ -158,7 +158,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
                   {isUrdu ? 'گاہک ادھار کھاتہ' : 'Customer Udhaar Khata'}
                 </Text>
                 <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
-                  {isUrdu ? 'بقایا جات اور ادائیگیوں کا مکمل ریکارڈ' : 'Track customer dues, payments & reminders'}
+                  {isUrdu ? 'بقایا جات اور ادائیگیوں کا مکمل ریکارڈ' : 'Track dues, payments & WhatsApp follow-up'}
                 </Text>
               </View>
             </View>

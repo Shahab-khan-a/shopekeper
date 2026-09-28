@@ -53,7 +53,7 @@ export const BarcodeModal: React.FC<BarcodeModalProps> = ({
           <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
             <View style={styles.headerTitleWrap}>
               <Ionicons name="barcode-outline" size={24} color={theme.primary} />
-              <Text style={[styles.modalTitle, { color: theme.text }]}>Barcode Scanner & Search</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>Barcode Lookup</Text>
             </View>
             <Pressable onPress={onClose} style={styles.closeBtn}>
               <Ionicons name="close" size={24} color={theme.textSecondary} />
@@ -62,11 +62,10 @@ export const BarcodeModal: React.FC<BarcodeModalProps> = ({
 
           {/* Body */}
           <View style={styles.body}>
-            {/* Scanner Visual Frame */}
+            {/* Barcode Input Frame */}
             <View style={[styles.scannerBox, { backgroundColor: '#0F172A' }]}>
-              <View style={styles.scannerLine} />
-              <Ionicons name="scan-outline" size={80} color="#10B981" />
-              <Text style={styles.scannerPrompt}>Scanner Ready / Enter Code Below</Text>
+              <Ionicons name="barcode-outline" size={64} color="#10B981" />
+              <Text style={styles.scannerPrompt}>Type or paste barcode to find product</Text>
             </View>
 
             {/* Input Row */}
