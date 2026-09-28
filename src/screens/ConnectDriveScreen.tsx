@@ -177,12 +177,12 @@ export const ConnectDriveScreen: React.FC<ConnectDriveScreenProps> = ({ user, on
                 </View>
                 <View style={styles.featureTextWrap}>
                   <Text style={[styles.featureItemTitle, { color: theme.text }]}>
-                    {isUrdu ? 'خودکار دکان بیک اپ' : 'Automated Daily Backups'}
+                    {isUrdu ? 'کلاؤڈ اسٹور بیک اپ' : 'Secure Cloud Backup'}
                   </Text>
                   <Text style={[styles.featureItemDesc, { color: theme.textMuted }]}>
                     {isUrdu
-                      ? 'سیلز، کھاتہ اور پروڈکٹس کا ڈیٹا موبائل تبدیل ہونے پر بھی محفوظ'
-                      : 'Sales, inventory, and Khata records remain safe from loss'}
+                      ? 'سیلز، کھاتہ اور پروڈکٹس کا ڈیٹا کلاؤڈ میں محفوظ'
+                      : 'Safeguard your sales, inventory, and Khata records in the cloud'}
                   </Text>
                 </View>
               </View>
