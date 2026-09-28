@@ -12,10 +12,9 @@ import {
   reauthenticateWithPopup,
   reauthenticateWithCredential,
 } from 'firebase/auth';
-import { Platform } from 'react-native';
+import { Platform, TurboModuleRegistry } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '@/config/firebase';
 import { googleDriveService } from '@/services/googleDriveService';
 import { deleteAllUserCloudData } from '@/services/firestoreService';
@@ -29,15 +28,43 @@ googleProvider.addScope('profile');
 googleProvider.addScope('email');
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-// Configure Native Google Sign-In for Mobile (Android & iOS)
-if (Platform.OS !== 'web') {
+let GoogleSigninModule: any = null;
+let googleSigninConfigured = false;
+
+/**
+ * Safely retrieves the native GoogleSignin TurboModule if available in the compiled binary.
+ * If running in Expo Go or without native custom client, returns null without crashing the bundle.
+ */
+function getNativeGoogleSignin(): any | null {
+  if (Platform.OS === 'web') return null;
+  if (GoogleSigninModule) return GoogleSigninModule;
+
+  // Preemptively check if the native TurboModule is actually registered in the binary.
+  // In Expo Go or standard dev environments, this avoids TurboModuleRegistry.getEnforcing throwing an Invariant Violation.
   try {
-    GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-      scopes: ['profile', 'email'],
-    });
+    if (TurboModuleRegistry?.get && !TurboModuleRegistry.get('RNGoogleSignin')) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require('@react-native-google-signin/google-signin');
+    const GoogleSignin = mod?.GoogleSignin;
+    if (GoogleSignin && !googleSigninConfigured) {
+      GoogleSignin.configure({
+        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        scopes: ['profile', 'email'],
+      });
+      googleSigninConfigured = true;
+    }
+    GoogleSigninModule = GoogleSignin;
+    return GoogleSigninModule;
   } catch (err) {
-    console.warn('[AuthService] GoogleSignin.configure error:', err);
+    // Native TurboModule 'RNGoogleSignin' not registered in current binary
+    return null;
   }
 }
 
@@ -112,16 +139,19 @@ export async function signInWithGoogle(): Promise<AuthResult> {
       }
     } else {
       // --- Mobile (Android & iOS): Native Google Play Services ---
-      try {
-        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-        const signInResponse = await GoogleSignin.signIn();
-        const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
+      const NativeGoogleSignin = getNativeGoogleSignin();
+      if (NativeGoogleSignin) {
+        try {
+          await NativeGoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+          const signInResponse = await NativeGoogleSignin.signIn();
+          const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
 
-        if (idToken) {
-          return await signInWithGoogleIdToken(idToken);
+          if (idToken) {
+            return await signInWithGoogleIdToken(idToken);
+          }
+        } catch (nativeErr) {
+          console.warn('[AuthService] Native Google Sign-In fallback to WebBrowser:', nativeErr);
         }
-      } catch (nativeErr) {
-        console.warn('[AuthService] Native Google Sign-In fallback to WebBrowser:', nativeErr);
       }
 
       // Mobile Browser Fallback
@@ -191,7 +221,10 @@ export async function signOutUser(): Promise<{ success: boolean; error?: string 
   try {
     if (Platform.OS !== 'web') {
       try {
-        await GoogleSignin.signOut();
+        const NativeGoogleSignin = getNativeGoogleSignin();
+        if (NativeGoogleSignin) {
+          await NativeGoogleSignin.signOut();
+        }
       } catch (e) {
         console.warn('[AuthService] GoogleSignin.signOut warning:', e);
       }
@@ -233,17 +266,20 @@ export async function reauthenticateCurrentUser(): Promise<{ success: boolean; e
       return { success: true };
     } else {
       // Try native SDK first
-      try {
-        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-        const signInResponse = await GoogleSignin.signIn();
-        const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
-        if (idToken) {
-          const credential = GoogleAuthProvider.credential(idToken);
-          await reauthenticateWithCredential(user, credential);
-          return { success: true };
+      const NativeGoogleSignin = getNativeGoogleSignin();
+      if (NativeGoogleSignin) {
+        try {
+          await NativeGoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+          const signInResponse = await NativeGoogleSignin.signIn();
+          const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
+          if (idToken) {
+            const credential = GoogleAuthProvider.credential(idToken);
+            await reauthenticateWithCredential(user, credential);
+            return { success: true };
+          }
+        } catch (nativeErr) {
+          console.warn('[AuthService] Native reauth fallback to WebBrowser:', nativeErr);
         }
-      } catch (nativeErr) {
-        console.warn('[AuthService] Native reauth fallback to WebBrowser:', nativeErr);
       }
 
       // Fallback via AuthSession / WebBrowser
