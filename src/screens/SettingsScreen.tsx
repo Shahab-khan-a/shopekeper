@@ -21,6 +21,7 @@ import { buildImportTemplateJSON } from '@/constants/sampleData';
 import * as Linking from 'expo-linking';
 import { googleDriveService, GoogleDriveAuth } from '@/services/googleDriveService';
 import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
+import { ProductImage } from '@/components/ProductImage';
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -146,7 +147,7 @@ export const SettingsScreen: React.FC = () => {
   }, []);
 
   // Profile fields (shop logo & store identity)
-  const isGoogleAvatar = (url?: string | null) => !!url && url.includes('googleusercontent.com') && !url.includes('/d/');
+  const isGoogleAvatar = (url?: string | null) => !!url && url.includes('googleusercontent.com/a/');
   const cleanInitialPhoto = settings.profileImage && !isGoogleAvatar(settings.profileImage) ? settings.profileImage : '';
   const [profileImage, setProfileImage] = useState(cleanInitialPhoto);
   const [shopName, setShopName] = useState(settings.shopName);
@@ -213,24 +214,44 @@ export const SettingsScreen: React.FC = () => {
     }
   };
 
-  const handleLogoSelected = (localUri: string) => {
-    setProfileImage(localUri);
+  const toPersistentDataUrl = async (uri: string): Promise<string> => {
+    if (!uri || uri.startsWith('data:')) return uri;
+    try {
+      const res = await fetch(uri);
+      const blob = await res.blob();
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve((reader.result as string) || uri);
+        reader.onerror = () => resolve(uri);
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return uri;
+    }
+  };
 
-    // Upload directly to 5 TB Google Drive if connected
-    googleDriveService
-      .getSavedAuth()
-      .then((auth) => {
-        if (auth) {
-          googleDriveService
-            .uploadProfileLogo(localUri)
-            .then((driveUrl) => {
+  const handleLogoSelected = async (localUri: string) => {
+    try {
+      const persistentUri = await toPersistentDataUrl(localUri);
+      setProfileImage(persistentUri);
+      await updateSettings({ profileImage: persistentUri });
+
+      // Upload directly to 5 TB Google Drive if connected
+      const auth = await googleDriveService.getSavedAuth();
+      if (auth) {
+        googleDriveService
+          .uploadProfileLogo(persistentUri)
+          .then(async (driveUrl) => {
+            if (driveUrl) {
               setProfileImage(driveUrl);
-              updateSettings({ profileImage: driveUrl }).catch(console.warn);
-            })
-            .catch((e) => console.warn('[SettingsScreen] Drive logo upload error:', e));
-        }
-      })
-      .catch(() => {});
+              await updateSettings({ profileImage: driveUrl });
+            }
+          })
+          .catch((e) => console.warn('[SettingsScreen] Drive logo upload error:', e));
+      }
+    } catch (e) {
+      console.warn('[SettingsScreen] Logo select error:', e);
+    }
   };
 
   const handleSave = async () => {
@@ -684,7 +705,15 @@ export const SettingsScreen: React.FC = () => {
             <View style={styles.avatarRow}>
               <Pressable onPress={pickImage} style={styles.avatarTapArea}>
                 {profileImage && !isGoogleAvatar(profileImage) ? (
-                  <Image source={{ uri: profileImage }} style={[styles.avatar, { borderColor: theme.primary }]} />
+                  <ProductImage
+                    uri={profileImage}
+                    style={[styles.avatar, { borderColor: theme.primary }]}
+                    fallbackIcon={
+                      <View style={[styles.avatarFallback, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
+                        <Ionicons name="storefront" size={34} color={theme.primary} />
+                      </View>
+                    }
+                  />
                 ) : (
                   <View style={[styles.avatarFallback, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
                     <Ionicons name="storefront" size={34} color={theme.primary} />
@@ -754,7 +783,10 @@ export const SettingsScreen: React.FC = () => {
               </Pressable>
               {profileImage && !isGoogleAvatar(profileImage) ? (
                 <Pressable
-                  onPress={() => setProfileImage('')}
+                  onPress={async () => {
+                    setProfileImage('');
+                    await updateSettings({ profileImage: undefined });
+                  }}
                   style={[styles.photoBtn, { backgroundColor: theme.dangerLight }]}
                 >
                   <Ionicons name="trash-outline" size={14} color={theme.danger} />

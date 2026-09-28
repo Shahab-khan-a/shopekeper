@@ -60,7 +60,7 @@ export function getDynamicSettings(
   const resolvedShopName = (!isDummyShop && existing?.shopName) ? existing.shopName : (displayName ? `${displayName}'s Store` : (existing?.shopName || 'My Store'));
   const resolvedShopNameUrdu = (!isDummyShopUrdu && existing?.shopNameUrdu) ? existing.shopNameUrdu : (displayName ? `${displayName} اسٹور` : (existing?.shopNameUrdu || 'میری دکان'));
   const resolvedEmail = (!isDummyEmail && existing?.email) ? existing.email : (email || existing?.email || '');
-  const isGoogleAvatar = existing?.profileImage?.includes('googleusercontent.com');
+  const isGoogleAvatar = existing?.profileImage?.includes('googleusercontent.com/a/');
   const resolvedPhoto = (!isGoogleAvatar && existing?.profileImage?.trim()) ? existing.profileImage.trim() : undefined;
 
   return {

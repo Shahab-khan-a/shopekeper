@@ -44,6 +44,31 @@ class GoogleDriveService {
         this.currentAuth = parsed;
         return parsed;
       }
+      // Expired token: on native mobile, try refreshing accessToken with GoogleSignin
+      if (Platform.OS !== 'web') {
+        try {
+          const hasNative =
+            TurboModuleRegistry?.get ? TurboModuleRegistry.get('RNGoogleSignin') != null : false;
+          if (hasNative) {
+            const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+            const webClientId =
+              process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+              process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+              GOOGLE_DRIVE_CONFIG.clientId;
+            GoogleSignin.configure({ webClientId, scopes: GOOGLE_DRIVE_CONFIG.scopes });
+            const tokens = await GoogleSignin.getTokens();
+            if (tokens?.accessToken) {
+              parsed.accessToken = tokens.accessToken;
+              parsed.expiresAt = Date.now() + 3500 * 1000;
+              await this.saveAuth(parsed);
+              this.currentAuth = parsed;
+              return parsed;
+            }
+          }
+        } catch {
+          // If silent refresh fails, continue to disconnect
+        }
+      }
       // Expired token
       await this.disconnect();
       return null;
@@ -85,6 +110,11 @@ class GoogleDriveService {
           TurboModuleRegistry?.get ? TurboModuleRegistry.get('RNGoogleSignin') != null : false;
         if (hasNative) {
           const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+          const webClientId =
+            process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+            process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+            GOOGLE_DRIVE_CONFIG.clientId;
+          GoogleSignin.configure({ webClientId, scopes: GOOGLE_DRIVE_CONFIG.scopes });
           try {
             const tokens = await GoogleSignin.getTokens();
             if (tokens?.accessToken) {
@@ -111,30 +141,42 @@ class GoogleDriveService {
     await AsyncStorage.removeItem(FOLDER_CACHE_KEY);
   }
 
+  private connectPromise: Promise<{ success: boolean; error?: string; user?: GoogleDriveAuth }> | null = null;
+
   /**
-   * Connect with Google Drive OAuth2
+   * Connect with Google Drive OAuth2 (with concurrency guard)
    */
   async connect(): Promise<{ success: boolean; error?: string; user?: GoogleDriveAuth }> {
+    if (this.connectPromise) {
+      return this.connectPromise;
+    }
+    this.connectPromise = this._connectInternal();
     try {
-      const redirectUri = AuthSession.makeRedirectUri({
-        scheme: 'shopkeeperapp',
-        preferLocalhost: Platform.OS === 'web',
-      });
+      return await this.connectPromise;
+    } finally {
+      this.connectPromise = null;
+    }
+  }
 
-      // Log exact redirect URI so you can register it in Google Cloud Console:
-      // console.cloud.google.com -> OAuth 2.0 Client -> Authorized redirect URIs
-      console.log('[GoogleDriveService] OAuth redirectUri:', redirectUri);
-
-      const scopeString = GOOGLE_DRIVE_CONFIG.scopes.join(' ');
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${encodeURIComponent(GOOGLE_DRIVE_CONFIG.clientId)}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=token` +
-        `&scope=${encodeURIComponent(scopeString)}` +
-        `&prompt=consent%20select_account`;
-
+  private async _connectInternal(): Promise<{ success: boolean; error?: string; user?: GoogleDriveAuth }> {
+    try {
       if (Platform.OS === 'web') {
+        const redirectUri = AuthSession.makeRedirectUri({
+          scheme: 'shopkeeperapp',
+          preferLocalhost: true,
+        });
+
+        console.log('[GoogleDriveService] OAuth redirectUri:', redirectUri);
+
+        const scopeString = GOOGLE_DRIVE_CONFIG.scopes.join(' ');
+        const authUrl =
+          `https://accounts.google.com/o/oauth2/v2/auth?` +
+          `client_id=${encodeURIComponent(GOOGLE_DRIVE_CONFIG.clientId)}` +
+          `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+          `&response_type=token` +
+          `&scope=${encodeURIComponent(scopeString)}` +
+          `&prompt=consent%20select_account`;
+
         try {
           const { signInWithPopup, GoogleAuthProvider } = await import('firebase/auth');
           const { auth } = await import('@/config/firebase');
@@ -180,26 +222,60 @@ class GoogleDriveService {
         if (hasNativeGoogleSignin) {
           try {
             const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+
+            const webClientId =
+              process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+              process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+              GOOGLE_DRIVE_CONFIG.clientId;
+
+            GoogleSignin.configure({
+              webClientId,
+              scopes: GOOGLE_DRIVE_CONFIG.scopes,
+            });
+
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
-            try {
-              await GoogleSignin.addScopes({
-                scopes: GOOGLE_DRIVE_CONFIG.scopes,
-              });
-            } catch (scopeErr) {
-              console.warn('[GoogleDriveService] addScopes fallback, attempting signIn:', scopeErr);
-              await GoogleSignin.signIn();
+            let userData: any = null;
+
+            // 1. If previously signed in, check if Drive scopes are already granted
+            if (GoogleSignin.hasPreviousSignIn()) {
+              try {
+                const silentRes = await GoogleSignin.signInSilently();
+                if (silentRes && silentRes.type === 'success') {
+                  const hasDriveScope = silentRes.data.scopes?.some((s: string) =>
+                    s.toLowerCase().includes('drive')
+                  );
+                  if (hasDriveScope) {
+                    userData = silentRes.data;
+                  }
+                }
+              } catch {
+                // Silent sign-in not available or extra scopes needed
+              }
+            }
+
+            // 2. If not signed in with Drive scope, launch interactive sign-in
+            if (!userData) {
+              // Sign out from native client first so the account selector & consent screen are shown reliably
+              try {
+                await GoogleSignin.signOut();
+              } catch {}
+
+              const signInResponse = await GoogleSignin.signIn();
+              if (signInResponse.type === 'cancelled') {
+                return { success: false, error: 'Google Drive authorization was cancelled.' };
+              }
+              userData = signInResponse.data;
             }
 
             const tokens = await GoogleSignin.getTokens();
-            const currentUser = GoogleSignin.getCurrentUser();
 
             if (tokens.accessToken) {
               const driveUser: GoogleDriveAuth = {
                 accessToken: tokens.accessToken,
-                email: currentUser?.user?.email || undefined,
-                name: currentUser?.user?.name || undefined,
-                picture: currentUser?.user?.photo || undefined,
+                email: userData?.user?.email || undefined,
+                name: userData?.user?.name || undefined,
+                picture: userData?.user?.photo || undefined,
                 expiresAt: Date.now() + 3500 * 1000,
               };
               await this.saveAuth(driveUser);
@@ -212,6 +288,31 @@ class GoogleDriveService {
         }
 
         // Browser Fallback (if native is unavailable)
+        const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '';
+        const redirectUri =
+          Platform.OS === 'android' && ANDROID_CLIENT_ID
+            ? AuthSession.makeRedirectUri({
+                native: `com.googleusercontent.apps.${ANDROID_CLIENT_ID.split('.apps.')[0]}:/oauth2redirect/google`,
+              })
+            : AuthSession.makeRedirectUri({
+                scheme: 'shopkeeperapp',
+              });
+
+        const clientId =
+          Platform.OS === 'android' && ANDROID_CLIENT_ID
+            ? ANDROID_CLIENT_ID
+            : GOOGLE_DRIVE_CONFIG.clientId || process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '';
+
+        const scopeString = GOOGLE_DRIVE_CONFIG.scopes.join(' ');
+        const authUrl =
+          `https://accounts.google.com/o/oauth2/v2/auth?` +
+          `client_id=${encodeURIComponent(clientId)}` +
+          `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+          `&response_type=token` +
+          `&scope=${encodeURIComponent(scopeString)}` +
+          `&prompt=consent%20select_account`;
+
+        console.log('[GoogleDriveService] OAuth fallback redirectUri:', redirectUri);
 
         const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
         if (authResponse.type === 'success' && authResponse.url) {

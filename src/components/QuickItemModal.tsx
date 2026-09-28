@@ -9,8 +9,10 @@ import {
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 
@@ -44,6 +46,8 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (visible) {
@@ -55,10 +59,35 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
     }
   }, [visible]);
 
+  // Android modals are edge-to-edge, so the keyboard overlaps the sheet instead of resizing it.
+  // Track the keyboard height and lift the sheet ourselves (one update per show/hide, no layout loop).
+  useEffect(() => {
+    if (!visible || Platform.OS !== 'android') return;
+    setKeyboardHeight(Keyboard.isVisible() ? (Keyboard.metrics()?.height ?? 0) : 0);
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) =>
+      setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [visible]);
+
+  // RN reports the Android keyboard height minus the nav bar, but the edge-to-edge sheet
+  // extends behind the nav bar, so add that inset back when the keyboard is open.
+  const keyboardOffset = keyboardHeight > 0 ? keyboardHeight + insets.bottom : 0;
+
   const handleSelectPreset = (preset: typeof COMMON_PRESETS[0]) => {
     setName(preset.name);
     setNameUrdu(preset.nameUrdu);
     setError('');
+  };
+
+  // Dismiss the keyboard first so it doesn't resize the sheet while the modal is sliding out
+  const handleClose = () => {
+    Keyboard.dismiss();
+    onClose();
   };
 
   const handleAdd = () => {
@@ -76,7 +105,7 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
       quantity: Math.max(1, quantity),
     });
 
-    onClose();
+    handleClose();
   };
 
   return (
@@ -84,11 +113,11 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
       visible={visible}
       animationType="slide"
       transparent={true}
-      onRequestClose={onClose}>
+      onRequestClose={handleClose}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={[styles.overlay, { paddingBottom: keyboardOffset }]}>
+        <Pressable style={styles.backdrop} onPress={handleClose} />
         <View
           style={[
             styles.sheetContainer,
@@ -110,7 +139,7 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
               </View>
             </View>
             <Pressable
-              onPress={onClose}
+              onPress={handleClose}
               style={[styles.closeBtn, { backgroundColor: theme.surfaceSubtle }]}>
               <Ionicons name="close" size={20} color={theme.textSecondary} />
             </Pressable>
@@ -273,8 +302,17 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
                 </Text>
               </View>
             ) : null}
+          </ScrollView>
 
-            {/* Submit Button */}
+          {/* Submit Button — pinned below the scroll area so the keyboard never hides it */}
+          <View
+            style={[
+              styles.footer,
+              {
+                borderTopColor: theme.border,
+                paddingBottom: Spacing.md + (keyboardOffset > 0 ? 0 : insets.bottom),
+              },
+            ]}>
             <Pressable
               onPress={handleAdd}
               style={({ pressed }) => [
@@ -285,7 +323,7 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
               <Ionicons name="cart-outline" size={20} color="#FFFFFF" />
               <Text style={styles.submitBtnText}>{t('addItemToBill')}</Text>
             </Pressable>
-          </ScrollView>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -349,11 +387,16 @@ const styles = StyleSheet.create({
   },
   scrollArea: {
     flexGrow: 0,
+    flexShrink: 1,
   },
   scrollContent: {
     padding: Spacing.lg,
     gap: Spacing.md,
-    paddingBottom: Spacing.xxxl,
+  },
+  footer: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
   },
   sectionLabel: {
     fontSize: 12,
@@ -478,7 +521,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: Spacing.xs,
     ...Shadows.md,
   },
   submitBtnText: {

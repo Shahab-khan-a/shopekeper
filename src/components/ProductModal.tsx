@@ -28,19 +28,46 @@ interface ProductModalProps {
   productToEdit?: Product | null;
 }
 
-const CATEGORIES: ProductCategory[] = [
-  'Kiryana',
-  'Grocery',
-  'Beverages',
-  'Dairy',
-  'Snacks',
-  'Spices',
-  'Personal Care',
-  'Bakery',
-  'Others',
+export interface CategoryOption {
+  key: ProductCategory;
+  labelEn: string;
+  labelUrdu: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  subtitle: string;
+}
+
+export const CATEGORY_OPTIONS: CategoryOption[] = [
+  { key: 'Kiryana', labelEn: 'Kiryana', labelUrdu: 'کریانہ', icon: 'storefront-outline', subtitle: 'General Store' },
+  { key: 'Grocery', labelEn: 'Grocery', labelUrdu: 'گروسری', icon: 'cart-outline', subtitle: 'Pulses, Flour, Oil' },
+  { key: 'Beverages', labelEn: 'Beverages', labelUrdu: 'مشروبات', icon: 'wine-outline', subtitle: 'Cold Drinks, Juices, Tea' },
+  { key: 'Dairy', labelEn: 'Dairy', labelUrdu: 'دودھ و دہی', icon: 'nutrition-outline', subtitle: 'Milk, Yogurt, Butter, Eggs' },
+  { key: 'Snacks', labelEn: 'Snacks', labelUrdu: 'اسنیکس و بسکٹ', icon: 'pizza-outline', subtitle: 'Chips, Biscuits, Nimko' },
+  { key: 'Spices', labelEn: 'Spices', labelUrdu: 'مصالحہ جات', icon: 'flame-outline', subtitle: 'Spices, Salt, Masalas' },
+  { key: 'Personal Care', labelEn: 'Personal Care', labelUrdu: 'صابن و سرف', icon: 'sparkles-outline', subtitle: 'Soaps, Shampoos, Detergent' },
+  { key: 'Bakery', labelEn: 'Bakery', labelUrdu: 'بیکری', icon: 'cafe-outline', subtitle: 'Bread, Rusk, Cakes' },
+  { key: 'Others', labelEn: 'Others', labelUrdu: 'دیگر', icon: 'grid-outline', subtitle: 'General & Miscellaneous' },
 ];
 
-const UNITS: ProductUnit[] = ['piece', 'kg', 'packet', 'litre', 'dozen', 'box', 'gram'];
+export interface UnitOption {
+  key: ProductUnit;
+  labelEn: string;
+  labelUrdu: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  shortCode: string;
+}
+
+export const UNIT_OPTIONS: UnitOption[] = [
+  { key: 'piece', labelEn: 'Piece', labelUrdu: 'پیس / عدد', icon: 'cube-outline', shortCode: 'pc' },
+  { key: 'kg', labelEn: 'Kilogram', labelUrdu: 'کلوگرام', icon: 'scale-outline', shortCode: 'kg' },
+  { key: 'packet', labelEn: 'Packet', labelUrdu: 'پیکٹ', icon: 'bag-handle-outline', shortCode: 'pkt' },
+  { key: 'litre', labelEn: 'Litre', labelUrdu: 'لیٹر', icon: 'water-outline', shortCode: 'L' },
+  { key: 'dozen', labelEn: 'Dozen', labelUrdu: 'درجن (12)', icon: 'apps-outline', shortCode: 'dz' },
+  { key: 'box', labelEn: 'Box / Carton', labelUrdu: 'ڈبہ / کاٹن', icon: 'archive-outline', shortCode: 'box' },
+  { key: 'gram', labelEn: 'Gram', labelUrdu: 'گرام', icon: 'speedometer-outline', shortCode: 'g' },
+];
+
+const CATEGORIES: ProductCategory[] = CATEGORY_OPTIONS.map((c) => c.key);
+const UNITS: ProductUnit[] = UNIT_OPTIONS.map((u) => u.key);
 
 const PRESET_IMAGES = [
   { label: 'Oil / گھی', url: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop&q=80' },
@@ -70,6 +97,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState<ProductCategory>('Kiryana');
   const [unit, setUnit] = useState<ProductUnit>('piece');
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isUnitOpen, setIsUnitOpen] = useState(false);
   const [barcode, setBarcode] = useState('');
   const [image, setImage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,6 +113,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   }, [visible]);
 
   useEffect(() => {
+    setIsCategoryOpen(false);
+    setIsUnitOpen(false);
     if (productToEdit) {
       setName(productToEdit.name);
       setNameUrdu(productToEdit.nameUrdu || '');
@@ -107,12 +138,19 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setStock('');
     setCategory('Kiryana');
     setUnit('piece');
+    setIsCategoryOpen(false);
+    setIsUnitOpen(false);
     setBarcode('');
     setImage('');
     setIsSubmitting(false);
     setIsCameraOpen(false);
     setIsUploadingToDrive(false);
   };
+
+  const activeCategoryMeta =
+    CATEGORY_OPTIONS.find((c) => c.key === category) || CATEGORY_OPTIONS[0];
+  const activeUnitMeta =
+    UNIT_OPTIONS.find((u) => u.key === unit) || UNIT_OPTIONS[0];
 
   // Live profit calculation
   const parsedPrice = parseFloat(price) || 0;
@@ -523,58 +561,270 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     />
                   </View>
 
-                  {/* Category Pills */}
+                  {/* Category Dropdown */}
                   <View style={styles.inputWrap}>
-                    <Text style={[styles.inputLabel, { color: theme.text }]}>{t('category')}</Text>
-                    <View style={styles.chipsWrap}>
-                      {CATEGORIES.map((cat) => (
-                        <Pressable
-                          key={cat}
-                          onPress={() => setCategory(cat)}
-                          style={[
-                            styles.chipBtn,
-                            {
-                              backgroundColor: category === cat ? theme.primary : theme.card,
-                              borderColor: category === cat ? theme.primary : theme.border,
-                            },
-                          ]}>
-                          <Text
-                            style={[
-                              styles.chipBtnText,
-                              { color: category === cat ? '#FFFFFF' : theme.textSecondary },
-                            ]}>
-                            {cat}
-                          </Text>
-                        </Pressable>
-                      ))}
+                    <View style={styles.fieldLabelRow}>
+                      <Text style={[styles.inputLabel, { color: theme.text }]}>
+                        {t('category')} *
+                      </Text>
+                      <Text style={[styles.fieldHintUrdu, { color: theme.textMuted }]}>
+                        {language === 'ur' ? 'کیٹیگری منتخب کریں' : activeCategoryMeta.labelUrdu}
+                      </Text>
                     </View>
+
+                    <Pressable
+                      onPress={() => {
+                        setIsCategoryOpen((prev) => !prev);
+                        setIsUnitOpen(false);
+                      }}
+                      style={({ pressed }) => [
+                        styles.dropdownTrigger,
+                        {
+                          backgroundColor: theme.card,
+                          borderColor: isCategoryOpen ? theme.primary : theme.border,
+                        },
+                        pressed && { opacity: 0.85 },
+                      ]}>
+                      <View style={styles.dropdownTriggerLeft}>
+                        <View style={[styles.dropdownIconWrap, { backgroundColor: theme.primaryLight }]}>
+                          <Ionicons name={activeCategoryMeta.icon} size={18} color={theme.primary} />
+                        </View>
+                        <View style={styles.dropdownValueCol}>
+                          <Text style={[styles.dropdownValuePrimary, { color: theme.text }]}>
+                            {language === 'ur' ? activeCategoryMeta.labelUrdu : activeCategoryMeta.labelEn}
+                          </Text>
+                          <Text style={[styles.dropdownValueSecondary, { color: theme.textMuted }]}>
+                            {language === 'ur'
+                              ? `${activeCategoryMeta.labelEn} • ${activeCategoryMeta.subtitle}`
+                              : `${activeCategoryMeta.labelUrdu} • ${activeCategoryMeta.subtitle}`}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.dropdownTriggerRight}>
+                        <View style={[styles.dropdownBadge, { backgroundColor: theme.primaryLight }]}>
+                          <Text style={[styles.dropdownBadgeText, { color: theme.primary }]}>
+                            {activeCategoryMeta.labelEn}
+                          </Text>
+                        </View>
+                        <Ionicons
+                          name={isCategoryOpen ? 'chevron-up' : 'chevron-down'}
+                          size={18}
+                          color={isCategoryOpen ? theme.primary : theme.textSecondary}
+                        />
+                      </View>
+                    </Pressable>
+
+                    {isCategoryOpen && (
+                      <View style={[styles.dropdownMenu, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                        <View style={[styles.dropdownMenuHeader, { borderBottomColor: theme.border }]}>
+                          <Text style={[styles.dropdownMenuHeaderTitle, { color: theme.textSecondary }]}>
+                            {language === 'ur' ? 'کیٹیگری منتخب کریں' : 'SELECT CATEGORY'}
+                          </Text>
+                        </View>
+
+                        <ScrollView
+                          style={styles.dropdownList}
+                          contentContainerStyle={styles.dropdownListContent}
+                          nestedScrollEnabled
+                          keyboardShouldPersistTaps="handled"
+                          showsVerticalScrollIndicator>
+                          {CATEGORY_OPTIONS.map((opt) => {
+                            const isSelected = category === opt.key;
+                            return (
+                              <Pressable
+                                key={opt.key}
+                                onPress={() => {
+                                  setCategory(opt.key);
+                                  setIsCategoryOpen(false);
+                                }}
+                                style={({ pressed }) => [
+                                  styles.dropdownItem,
+                                  isSelected && { backgroundColor: theme.primaryLight },
+                                  pressed && { opacity: 0.75 },
+                                ]}>
+                                <View
+                                  style={[
+                                    styles.dropdownItemIconWrap,
+                                    { backgroundColor: isSelected ? theme.primary : theme.surfaceSubtle },
+                                  ]}>
+                                  <Ionicons
+                                    name={opt.icon}
+                                    size={13}
+                                    color={isSelected ? '#FFFFFF' : theme.textSecondary}
+                                  />
+                                </View>
+
+                                <View style={styles.dropdownItemTextCol}>
+                                  <Text
+                                    style={[
+                                      styles.dropdownItemTitle,
+                                      {
+                                        color: isSelected ? theme.primary : theme.text,
+                                        fontWeight: isSelected ? '700' : '600',
+                                      },
+                                    ]}>
+                                    {opt.labelEn}
+                                  </Text>
+                                  <Text style={[styles.dropdownItemSub, { color: theme.textMuted }]}>
+                                    {opt.subtitle}
+                                  </Text>
+                                </View>
+
+                                <Text
+                                  style={[
+                                    styles.dropdownItemUrdu,
+                                    { color: isSelected ? theme.primary : theme.textMuted },
+                                  ]}>
+                                  {opt.labelUrdu}
+                                </Text>
+
+                                {isSelected && (
+                                  <Ionicons
+                                    name="checkmark-circle"
+                                    size={15}
+                                    color={theme.primary}
+                                    style={{ marginLeft: 4 }}
+                                  />
+                                )}
+                              </Pressable>
+                            );
+                          })}
+                        </ScrollView>
+                      </View>
+                    )}
                   </View>
 
-                  {/* Unit Selector */}
+                  {/* Unit Dropdown */}
                   <View style={styles.inputWrap}>
-                    <Text style={[styles.inputLabel, { color: theme.text }]}>{t('unit')}</Text>
-                    <View style={styles.chipsWrap}>
-                      {UNITS.map((u) => (
-                        <Pressable
-                          key={u}
-                          onPress={() => setUnit(u)}
-                          style={[
-                            styles.chipBtn,
-                            {
-                              backgroundColor: unit === u ? theme.primary : theme.card,
-                              borderColor: unit === u ? theme.primary : theme.border,
-                            },
-                          ]}>
-                          <Text
-                            style={[
-                              styles.chipBtnText,
-                              { color: unit === u ? '#FFFFFF' : theme.textSecondary },
-                            ]}>
-                            {u}
-                          </Text>
-                        </Pressable>
-                      ))}
+                    <View style={styles.fieldLabelRow}>
+                      <Text style={[styles.inputLabel, { color: theme.text }]}>
+                        {t('unit')} *
+                      </Text>
+                      <Text style={[styles.fieldHintUrdu, { color: theme.textMuted }]}>
+                        {language === 'ur' ? 'اکائی / پیمائش' : activeUnitMeta.labelUrdu}
+                      </Text>
                     </View>
+
+                    <Pressable
+                      onPress={() => {
+                        setIsUnitOpen((prev) => !prev);
+                        setIsCategoryOpen(false);
+                      }}
+                      style={({ pressed }) => [
+                        styles.dropdownTrigger,
+                        {
+                          backgroundColor: theme.card,
+                          borderColor: isUnitOpen ? theme.primary : theme.border,
+                        },
+                        pressed && { opacity: 0.85 },
+                      ]}>
+                      <View style={styles.dropdownTriggerLeft}>
+                        <View style={[styles.dropdownIconWrap, { backgroundColor: theme.primaryLight }]}>
+                          <Ionicons name={activeUnitMeta.icon} size={18} color={theme.primary} />
+                        </View>
+                        <View style={styles.dropdownValueCol}>
+                          <Text style={[styles.dropdownValuePrimary, { color: theme.text }]}>
+                            {activeUnitMeta.labelEn} ({activeUnitMeta.shortCode})
+                          </Text>
+                          <Text style={[styles.dropdownValueSecondary, { color: theme.textMuted }]}>
+                            {activeUnitMeta.labelUrdu}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.dropdownTriggerRight}>
+                        <View style={[styles.dropdownBadge, { backgroundColor: theme.primaryLight }]}>
+                          <Text style={[styles.dropdownBadgeText, { color: theme.primary }]}>
+                            {activeUnitMeta.shortCode}
+                          </Text>
+                        </View>
+                        <Ionicons
+                          name={isUnitOpen ? 'chevron-up' : 'chevron-down'}
+                          size={18}
+                          color={isUnitOpen ? theme.primary : theme.textSecondary}
+                        />
+                      </View>
+                    </Pressable>
+
+                    {isUnitOpen && (
+                      <View style={[styles.dropdownMenu, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                        <View style={[styles.dropdownMenuHeader, { borderBottomColor: theme.border }]}>
+                          <Text style={[styles.dropdownMenuHeaderTitle, { color: theme.textSecondary }]}>
+                            {language === 'ur' ? 'اکائی منتخب کریں' : 'SELECT MEASUREMENT UNIT'}
+                          </Text>
+                        </View>
+
+                        <ScrollView
+                          style={styles.dropdownList}
+                          contentContainerStyle={styles.dropdownListContent}
+                          nestedScrollEnabled
+                          keyboardShouldPersistTaps="handled"
+                          showsVerticalScrollIndicator>
+                          {UNIT_OPTIONS.map((opt) => {
+                            const isSelected = unit === opt.key;
+                            return (
+                              <Pressable
+                                key={opt.key}
+                                onPress={() => {
+                                  setUnit(opt.key);
+                                  setIsUnitOpen(false);
+                                }}
+                                style={({ pressed }) => [
+                                  styles.dropdownItem,
+                                  isSelected && { backgroundColor: theme.primaryLight },
+                                  pressed && { opacity: 0.75 },
+                                ]}>
+                                <View
+                                  style={[
+                                    styles.dropdownItemIconWrap,
+                                    { backgroundColor: isSelected ? theme.primary : theme.surfaceSubtle },
+                                  ]}>
+                                  <Ionicons
+                                    name={opt.icon}
+                                    size={13}
+                                    color={isSelected ? '#FFFFFF' : theme.textSecondary}
+                                  />
+                                </View>
+
+                                <View style={styles.dropdownItemTextCol}>
+                                  <Text
+                                    style={[
+                                      styles.dropdownItemTitle,
+                                      {
+                                        color: isSelected ? theme.primary : theme.text,
+                                        fontWeight: isSelected ? '700' : '600',
+                                      },
+                                    ]}>
+                                    {opt.labelEn}
+                                  </Text>
+                                  <Text style={[styles.dropdownItemSub, { color: theme.textMuted }]}>
+                                    Short: {opt.shortCode}
+                                  </Text>
+                                </View>
+
+                                <Text
+                                  style={[
+                                    styles.dropdownItemUrdu,
+                                    { color: isSelected ? theme.primary : theme.textMuted },
+                                  ]}>
+                                  {opt.labelUrdu}
+                                </Text>
+
+                                {isSelected && (
+                                  <Ionicons
+                                    name="checkmark-circle"
+                                    size={15}
+                                    color={theme.primary}
+                                    style={{ marginLeft: 4 }}
+                                  />
+                                )}
+                              </Pressable>
+                            );
+                          })}
+                        </ScrollView>
+                      </View>
+                    )}
                   </View>
                 </View>
 
@@ -956,6 +1206,113 @@ const styles = StyleSheet.create({
   },
   chipBtnText: {
     fontSize: 12,
+    fontWeight: '600',
+  },
+  fieldLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  fieldHintUrdu: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  dropdownTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 50,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  dropdownTriggerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  dropdownIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dropdownValueCol: {
+    flex: 1,
+  },
+  dropdownValuePrimary: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  dropdownValueSecondary: {
+    fontSize: 11,
+    marginTop: 1,
+  },
+  dropdownTriggerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dropdownBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
+  },
+  dropdownBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  dropdownMenu: {
+    marginTop: 6,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    overflow: 'hidden',
+    ...Shadows.sm,
+  },
+  dropdownMenuHeader: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+  },
+  dropdownMenuHeaderTitle: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  dropdownList: {
+    maxHeight: 190,
+  },
+  dropdownListContent: {
+    paddingVertical: 2,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    gap: 8,
+  },
+  dropdownItemIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dropdownItemTextCol: {
+    flex: 1,
+  },
+  dropdownItemTitle: {
+    fontSize: 12,
+  },
+  dropdownItemSub: {
+    fontSize: 9,
+  },
+  dropdownItemUrdu: {
+    fontSize: 11,
     fontWeight: '600',
   },
   rowInputs: {

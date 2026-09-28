@@ -56,7 +56,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const gridGap = 8;
   const gridColWidth = (catalogWidth - Spacing.lg * 2 - gridGap * (gridCols - 1)) / gridCols;
 
-  const { products, khata, sales, completeSale, settings, t, language, setActiveReceipt } = useShop();
+  const { products, khata, sales, completeSale, settings, t, language, setActiveReceipt, setIsAddProductOpen } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   // Cart state
@@ -1097,16 +1097,88 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             ))}
           </ScrollView>
 
-          {/* Products List / Grid */}
-          <ScrollView
-            style={styles.catalogScroll}
-            contentContainerStyle={[
-              viewMode === 'grid' ? styles.catalogGrid : styles.catalogList,
-              // Leave space at bottom for floating cart bar on mobile
-              !isWideScreen && cart.length > 0 && { paddingBottom: 85 },
-            ]}
-            keyboardShouldPersistTaps="handled">
-            {filteredProducts.map((product) => {
+          {/* Products List / Grid or Empty State */}
+          {products.length === 0 ? (
+            <View style={styles.catalogEmptyContainer}>
+              <View style={[styles.catalogEmptyIconBox, { backgroundColor: theme.primaryLight }]}>
+                <Ionicons name="cube-outline" size={50} color={theme.primary} />
+              </View>
+              <Text style={[styles.catalogEmptyTitle, { color: theme.text }]}>
+                {language === 'ur' ? 'انوینٹری میں کوئی پروڈکٹ نہیں ہے' : 'No Products in Inventory'}
+              </Text>
+              <Text style={[styles.catalogEmptySub, { color: theme.textSecondary }]}>
+                {language === 'ur'
+                  ? 'سیل کرنے کے لیے پہلے پروڈکٹ شامل کریں، یا فوری آئٹم (Quick Item) سے بغیر کیٹلاگ کے بل بنائیں۔'
+                  : 'Add products to build your catalog, or tap Quick Item to sell unlisted loose items immediately.'}
+              </Text>
+
+              <View style={styles.catalogEmptyBtnRow}>
+                <Pressable
+                  onPress={() => setIsAddProductOpen(true)}
+                  style={({ pressed }) => [
+                    styles.catalogEmptyPrimaryBtn,
+                    { backgroundColor: theme.primary },
+                    pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
+                  ]}>
+                  <Ionicons name="add-circle" size={18} color="#FFFFFF" />
+                  <Text style={styles.catalogEmptyPrimaryBtnText}>
+                    {t('addProductBtn')}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setIsQuickItemOpen(true)}
+                  style={({ pressed }) => [
+                    styles.catalogEmptySecondaryBtn,
+                    { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                  ]}>
+                  <Ionicons name="flash" size={16} color={theme.accent} />
+                  <Text style={[styles.catalogEmptySecondaryBtnText, { color: theme.text }]}>
+                    {t('quickItem')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : filteredProducts.length === 0 ? (
+            <View style={styles.catalogEmptyContainer}>
+              <View style={[styles.catalogEmptyIconBox, { backgroundColor: theme.surfaceSubtle }]}>
+                <Ionicons name="search-outline" size={42} color={theme.textMuted} />
+              </View>
+              <Text style={[styles.catalogEmptyTitle, { color: theme.text }]}>
+                {language === 'ur' ? 'کوئی پروڈکٹ نہیں ملا' : 'No Matching Products'}
+              </Text>
+              <Text style={[styles.catalogEmptySub, { color: theme.textSecondary }]}>
+                {language === 'ur'
+                  ? 'آپ کی تلاش یا کیٹیگری کے مطابق کوئی چیز نہیں ملی۔'
+                  : 'No items match your search or category filter.'}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All');
+                }}
+                style={({ pressed }) => [
+                  styles.catalogEmptySecondaryBtn,
+                  { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                  pressed && { opacity: 0.8 },
+                ]}>
+                <Ionicons name="refresh-outline" size={16} color={theme.text} />
+                <Text style={[styles.catalogEmptySecondaryBtnText, { color: theme.text }]}>
+                  {language === 'ur' ? 'تمام مصنوعات دکھائیں' : 'Clear Search & Show All'}
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <ScrollView
+              style={styles.catalogScroll}
+              contentContainerStyle={[
+                viewMode === 'grid' ? styles.catalogGrid : styles.catalogList,
+                // Leave space at bottom for floating cart bar on mobile
+                !isWideScreen && cart.length > 0 && { paddingBottom: 85 },
+              ]}
+              keyboardShouldPersistTaps="handled">
+              {filteredProducts.map((product) => {
               const isOut = product.stock <= 0;
               const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
               const inCartItem = cart.find((it) => it.product.id === product.id);
@@ -1312,6 +1384,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               );
             })}
           </ScrollView>
+          )}
 
           {/* ================= Mobile Sticky Floating Cart Bar ================= */}
           {!isWideScreen && cart.length > 0 && (
@@ -2252,6 +2325,69 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
   },
   modalDoneBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  catalogEmptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xxl * 1.5,
+    minHeight: 380,
+  },
+  catalogEmptyIconBox: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
+  catalogEmptyTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  catalogEmptySub: {
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 19,
+    maxWidth: 340,
+    marginBottom: Spacing.xl,
+  },
+  catalogEmptyBtnRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  catalogEmptyPrimaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: BorderRadius.xl,
+    ...Shadows.md,
+  },
+  catalogEmptyPrimaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  catalogEmptySecondaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+  },
+  catalogEmptySecondaryBtnText: {
     fontSize: 13,
     fontWeight: '700',
   },

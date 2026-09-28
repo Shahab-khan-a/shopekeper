@@ -136,36 +136,44 @@ export const ProductsScreen: React.FC = () => {
 
         {/* ── Financial Investment Summary Bar ── */}
         <View style={[styles.financeSummaryBar, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <View style={styles.financeSummaryItem}>
-            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]}>
-              {t('totalInvestment')}
-            </Text>
-            <Text style={[styles.financeSummaryVal, { color: theme.text }]}>
-              {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
-            </Text>
-          </View>
-
-          <View style={[styles.financeSummaryDivider, { backgroundColor: theme.border }]} />
-
-          <View style={styles.financeSummaryItem}>
-            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]}>
-              {t('stockRetailValue')}
-            </Text>
-            <Text style={[styles.financeSummaryVal, { color: theme.text }]}>
-              {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
-            </Text>
-          </View>
-
-          <View style={[styles.financeSummaryDivider, { backgroundColor: theme.border }]} />
-
-          <View style={styles.financeSummaryItem}>
-            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]}>
-              {t('expectedStockProfit')}
-            </Text>
-            <Text style={[styles.financeSummaryVal, { color: '#059669' }]}>
-              +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
-            </Text>
-          </View>
+          {[
+            {
+              label: t('totalInvestment'),
+              value: `${settings.currencySymbol} ${totalInventoryInvestment.toLocaleString()}`,
+              color: theme.text,
+            },
+            {
+              label: t('stockRetailValue'),
+              value: `${settings.currencySymbol} ${totalInventoryRetailValue.toLocaleString()}`,
+              color: theme.text,
+            },
+            {
+              label: t('expectedStockProfit'),
+              value: `+${settings.currencySymbol} ${totalExpectedStockProfit.toLocaleString()}`,
+              color: '#059669',
+            },
+          ].map((stat, index) => (
+            <React.Fragment key={stat.label}>
+              {index > 0 && (
+                <View style={[styles.financeSummaryDivider, { backgroundColor: theme.border }]} />
+              )}
+              <View style={styles.financeSummaryItem}>
+                {/* Labels reserve two lines so all three values sit on the same row */}
+                <Text
+                  style={[styles.financeSummaryLabel, { color: theme.textMuted }]}
+                  numberOfLines={2}>
+                  {stat.label}
+                </Text>
+                <Text
+                  style={[styles.financeSummaryVal, { color: stat.color }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}>
+                  {stat.value}
+                </Text>
+              </View>
+            </React.Fragment>
+          ))}
         </View>
 
         {/* ── Products Display ── */}
@@ -387,10 +395,9 @@ const styles = StyleSheet.create({
   // Finance Summary Bar
   financeSummaryBar: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'stretch',
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xs,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
     marginBottom: Spacing.md,
@@ -399,20 +406,28 @@ const styles = StyleSheet.create({
   financeSummaryItem: {
     flex: 1,
     alignItems: 'center',
-    gap: 2,
+    justifyContent: 'space-between',
+    paddingHorizontal: 6,
+    gap: 4,
   },
   financeSummaryLabel: {
     fontSize: 10,
+    lineHeight: 13,
+    minHeight: 26,
     fontWeight: '600',
+    textAlign: 'center',
+    textAlignVertical: 'center',
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },
   financeSummaryVal: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
+    textAlign: 'center',
+    alignSelf: 'stretch',
   },
   financeSummaryDivider: {
     width: 1,
-    height: 24,
+    marginVertical: 2,
   },
 });

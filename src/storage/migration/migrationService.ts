@@ -257,7 +257,7 @@ export const MigrationService = {
         cleanSettings.email = '';
         settingsChanged = true;
       }
-      if (cleanSettings.profileImage && cleanSettings.profileImage.includes('googleusercontent.com') && !cleanSettings.profileImage.includes('/d/')) {
+      if (cleanSettings.profileImage && cleanSettings.profileImage.includes('googleusercontent.com/a/')) {
         cleanSettings.profileImage = undefined;
         settingsChanged = true;
       }

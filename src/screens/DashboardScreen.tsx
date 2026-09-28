@@ -18,6 +18,7 @@ import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { ProductImage } from '@/components/ProductImage';
 
 export const DashboardScreen: React.FC = () => {
   const {
@@ -133,8 +134,12 @@ export const DashboardScreen: React.FC = () => {
               pressed && { opacity: 0.85, transform: [{ scale: 0.95 }] },
             ]}>
             <View style={[styles.heroIconCircle, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
-              {settings.profileImage && (!settings.profileImage.includes('googleusercontent.com') || settings.profileImage.includes('/d/')) ? (
-                <Image source={{ uri: settings.profileImage }} style={styles.heroAvatarImg} />
+              {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
+                <ProductImage
+                  uri={settings.profileImage}
+                  style={styles.heroAvatarImg}
+                  fallbackIcon={<Ionicons name="storefront" size={30} color="rgba(255,255,255,0.9)" />}
+                />
               ) : (
                 <Ionicons name="storefront" size={30} color="rgba(255,255,255,0.9)" />
               )}
@@ -362,32 +367,6 @@ export const DashboardScreen: React.FC = () => {
         </View>
       )}
 
-      {/* ── Quick Actions ── */}
-      <SectionHeader title={t('quickActions')} />
-
-      <View style={styles.quickGrid}>
-        {[
-          { label: t('addProductBtn'), icon: 'add-circle' as const, color: theme.secondary, onPress: () => setIsAddProductOpen(true) },
-          { label: t('products'), icon: 'cube' as const, color: theme.primary, onPress: () => setActiveTab('products') },
-          { label: t('khataBtn'), icon: 'book' as const, color: theme.accent, onPress: () => setActiveTab('khata') },
-          { label: t('history'), icon: 'time' as const, color: '#7C3AED', onPress: () => setActiveTab('history') },
-        ].map((tile) => (
-          <Pressable
-            key={tile.label}
-            onPress={tile.onPress}
-            style={({ pressed }) => [
-              styles.quickTile,
-              { backgroundColor: tile.color },
-              pressed && { transform: [{ scale: 0.96 }], opacity: 0.92 },
-            ]}>
-            <View style={styles.quickTileShine} />
-            <View style={[styles.quickTileIconWrap, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
-              <Ionicons name={tile.icon} size={26} color="#FFFFFF" />
-            </View>
-            <Text style={styles.quickTileText}>{tile.label}</Text>
-          </Pressable>
-        ))}
-      </View>
 
       {/* ── Recent Sales ── */}
       <SectionHeader

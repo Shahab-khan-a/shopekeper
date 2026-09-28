@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, Image, Platform, Alert } from 'react
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { ProductImage } from '@/components/ProductImage';
 
 export const ShopHeader: React.FC = () => {
   const {
@@ -113,8 +114,16 @@ export const ShopHeader: React.FC = () => {
           pressed && { opacity: 0.75, transform: [{ scale: 0.99 }] },
         ]}>
         <View style={[styles.logoBadge, { backgroundColor: theme.primaryLight }]}>
-          {settings.profileImage && (!settings.profileImage.includes('googleusercontent.com') || settings.profileImage.includes('/d/')) ? (
-            <Image source={{ uri: settings.profileImage }} style={styles.logoImage} />
+          {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
+            <ProductImage
+              uri={settings.profileImage}
+              style={styles.logoImage}
+              fallbackIcon={
+                <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
+                  <Ionicons name="storefront" size={22} color="#FFFFFF" />
+                </View>
+              }
+            />
           ) : (
             <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
               <Ionicons name="storefront" size={22} color="#FFFFFF" />
