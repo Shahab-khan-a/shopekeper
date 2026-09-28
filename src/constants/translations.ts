@@ -221,7 +221,7 @@ export const Translations = {
 
     // Google Drive Storage
     googleDriveTitle: 'Google Drive Storage',
-    googleDriveDesc: 'Store high-resolution product photos and automated shop backups directly in your Google Drive.',
+    googleDriveDesc: 'Store high-resolution product photos and backups directly in your Google Drive — syncs when store data changes.',
     connectDrive: 'Connect Google Drive',
     disconnectDrive: 'Disconnect Google Drive',
     driveConnected: 'Google Drive Connected',
@@ -477,7 +477,7 @@ export const Translations = {
 
     // Google Drive Storage
     googleDriveTitle: 'گوگل ڈرائیو (کلاؤڈ اسٹوریج)',
-    googleDriveDesc: 'پروڈکٹس کی تصاویر اور دکان کا مکمل بیک اپ اپنی گوگل ڈرائیو میں محفوظ کریں۔',
+    googleDriveDesc: 'پروڈکٹس کی تصاویر اور بیک اپ اپنی گوگل ڈرائیو میں محفوظ کریں — دکان کا ڈیٹا تبدیل ہونے پر خودکار ہم آہنگ۔',
     connectDrive: 'گوگل ڈرائیو کنیکٹ کریں',
     disconnectDrive: 'گوگل ڈرائیو منقطع کریں',
     driveConnected: 'گوگل ڈرائیو منسلک ہے',
