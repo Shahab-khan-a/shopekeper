@@ -133,32 +133,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
             </View>
           ) : null}
 
-          {/* 3 Compact Feature Cards */}
+          {/* 2 Simple Feature Highlights */}
           <View style={styles.featuresRow}>
             <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureMiniIconWrap, { backgroundColor: '#E0F2FE' }]}>
-                <Ionicons name="flash" size={14} color="#0284C7" />
-              </View>
+              <Ionicons name="flash-outline" size={15} color={theme.primary} />
               <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
-                {isUrdu ? 'فوری بلنگ' : 'Fast Billing'}
+                {isUrdu ? 'بلنگ اور کھاتہ' : 'Billing & Khata'}
               </Text>
             </View>
 
             <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureMiniIconWrap, { backgroundColor: '#FEF3C7' }]}>
-                <Ionicons name="book" size={14} color="#D97706" />
-              </View>
+              <Ionicons name="cloud-done-outline" size={15} color="#0284C7" />
               <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
-                {isUrdu ? 'ادھار کھاتہ' : 'Udhaar Khata'}
-              </Text>
-            </View>
-
-            <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureMiniIconWrap, { backgroundColor: '#DCFCE7' }]}>
-                <Ionicons name="cloud-done" size={14} color="#15803D" />
-              </View>
-              <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
-                {isUrdu ? 'کلاؤڈ بیک اپ' : 'Cloud Sync'}
+                {isUrdu ? 'کلاؤڈ بیک اپ' : 'Cloud Backup'}
               </Text>
             </View>
           </View>
@@ -378,33 +365,24 @@ const styles = StyleSheet.create({
   featuresRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 8,
     marginBottom: 14,
     width: '100%',
   },
   featureMiniCard: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    gap: 4,
-  },
-  featureMiniIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: 6,
   },
   featureMiniText: {
     fontSize: 11,
-    fontWeight: '700',
-    textAlign: 'center',
+    fontWeight: '600',
   },
   actionSection: {
     gap: 8,

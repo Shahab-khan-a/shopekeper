@@ -254,32 +254,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose }) => {
             ) : (
               // ── SIGNED OUT VIEW ─────────────────────────────────────
               <View style={styles.signedOutContent}>
-                {/* 3 Compact Benefit Cards */}
+                {/* 2 Simple Benefit Highlights */}
                 <View style={styles.benefitsRow}>
                   <View style={[styles.benefitMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                    <View style={[styles.benefitMiniIcon, { backgroundColor: '#E0F2FE' }]}>
-                      <Ionicons name="shield-checkmark" size={14} color="#0284C7" />
-                    </View>
+                    <Ionicons name="shield-checkmark-outline" size={15} color={theme.primary} />
                     <Text style={[styles.benefitMiniTitle, { color: theme.text }]} numberOfLines={1}>
-                      Safe Cloud
+                      Safe Cloud Backup
                     </Text>
                   </View>
 
                   <View style={[styles.benefitMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                    <View style={[styles.benefitMiniIcon, { backgroundColor: '#DCFCE7' }]}>
-                      <Ionicons name="sync" size={14} color="#15803D" />
-                    </View>
+                    <Ionicons name="sync-outline" size={15} color="#0284C7" />
                     <Text style={[styles.benefitMiniTitle, { color: theme.text }]} numberOfLines={1}>
-                      Auto Sync
-                    </Text>
-                  </View>
-
-                  <View style={[styles.benefitMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                    <View style={[styles.benefitMiniIcon, { backgroundColor: '#FEF3C7' }]}>
-                      <Ionicons name="phone-portrait-outline" size={14} color="#D97706" />
-                    </View>
-                    <Text style={[styles.benefitMiniTitle, { color: theme.text }]} numberOfLines={1}>
-                      Multi-Device
+                      Real-time Sync
                     </Text>
                   </View>
                 </View>
@@ -436,32 +423,23 @@ const styles = StyleSheet.create({
   benefitsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 8,
     width: '100%',
   },
   benefitMiniCard: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    gap: 4,
-  },
-  benefitMiniIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: 6,
   },
   benefitMiniTitle: {
     fontSize: 11,
-    fontWeight: '700',
-    textAlign: 'center',
+    fontWeight: '600',
   },
   googleLoginBtn: {
     backgroundColor: '#0F172A',
