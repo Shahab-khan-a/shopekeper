@@ -133,20 +133,48 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
             </View>
           ) : null}
 
-          {/* 2 Simple Feature Highlights */}
-          <View style={styles.featuresRow}>
-            <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <Ionicons name="flash-outline" size={15} color={theme.primary} />
-              <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
-                {isUrdu ? 'بلنگ اور کھاتہ' : 'Billing & Khata'}
-              </Text>
+          {/* Key Features Grid */}
+          <View style={styles.featuresContainer}>
+            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={[styles.featureIcon, { backgroundColor: '#E0F2FE' }]}>
+                <Ionicons name="flash-outline" size={16} color="#0284C7" />
+              </View>
+              <View style={styles.featureTextWrap}>
+                <Text style={[styles.featureTitle, { color: theme.text }]}>
+                  {isUrdu ? 'فوری بلنگ اور رسیدیں' : 'Fast Billing & Receipts'}
+                </Text>
+                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
+                  {isUrdu ? 'تھرمل رسیدیں پرنٹ اور واٹس ایپ کریں' : 'Instant thermal print & WhatsApp receipts'}
+                </Text>
+              </View>
             </View>
 
-            <View style={[styles.featureMiniCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <Ionicons name="cloud-done-outline" size={15} color="#0284C7" />
-              <Text style={[styles.featureMiniText, { color: theme.text }]} numberOfLines={1}>
-                {isUrdu ? 'کلاؤڈ بیک اپ' : 'Cloud Backup'}
-              </Text>
+            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={[styles.featureIcon, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="book-outline" size={16} color="#D97706" />
+              </View>
+              <View style={styles.featureTextWrap}>
+                <Text style={[styles.featureTitle, { color: theme.text }]}>
+                  {isUrdu ? 'گاہک ادھار کھاتہ' : 'Customer Udhaar Khata'}
+                </Text>
+                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
+                  {isUrdu ? 'بقایا جات اور ادائیگیوں کا مکمل ریکارڈ' : 'Track customer dues, payments & reminders'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={[styles.featureIcon, { backgroundColor: '#DCFCE7' }]}>
+                <Ionicons name="cloud-done-outline" size={16} color="#15803D" />
+              </View>
+              <View style={styles.featureTextWrap}>
+                <Text style={[styles.featureTitle, { color: theme.text }]}>
+                  {isUrdu ? 'گوگل کلاؤڈ بیک اپ' : 'Firebase Cloud Sync'}
+                </Text>
+                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
+                  {isUrdu ? 'موبائل گم یا تبدیل ہونے پر ڈیٹا محفوظ' : 'Real-time backup, access on phone or PC'}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -362,45 +390,54 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
   },
-  featuresRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  featuresContainer: {
+    gap: 6,
     marginBottom: 14,
-    width: '100%',
   },
-  featureMiniCard: {
-    flex: 1,
+  featureCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 7,
-    paddingHorizontal: 8,
+    gap: 10,
+    padding: 9,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    gap: 6,
   },
-  featureMiniText: {
+  featureIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: BorderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureTextWrap: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  featureDesc: {
     fontSize: 11,
-    fontWeight: '600',
+    marginTop: 1,
+    lineHeight: 14,
   },
   actionSection: {
     gap: 8,
   },
   googleBtn: {
     backgroundColor: '#0F172A',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.md,
+    ...Shadows.sm,
   },
   googleBtnInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 8,
   },
   loadingRow: {
     flexDirection: 'row',
@@ -409,8 +446,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   googleIconCircle: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     borderRadius: BorderRadius.full,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -418,9 +455,9 @@ const styles = StyleSheet.create({
   },
   googleBtnText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 0.2,
+    letterSpacing: 0.1,
   },
   dividerRow: {
     flexDirection: 'row',
