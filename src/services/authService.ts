@@ -143,6 +143,10 @@ export async function signInWithGoogle(): Promise<AuthResult> {
       if (NativeGoogleSignin) {
         try {
           await NativeGoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+          // Ensure account chooser dialog is always shown instead of silent auto-login
+          try {
+            await NativeGoogleSignin.signOut();
+          } catch {}
           const signInResponse = await NativeGoogleSignin.signIn();
           const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
 
@@ -223,6 +227,9 @@ export async function signOutUser(): Promise<{ success: boolean; error?: string 
       try {
         const NativeGoogleSignin = getNativeGoogleSignin();
         if (NativeGoogleSignin) {
+          try {
+            await NativeGoogleSignin.revokeAccess();
+          } catch {}
           await NativeGoogleSignin.signOut();
         }
       } catch (e) {
@@ -380,7 +387,28 @@ export async function deleteCurrentUserAccount(): Promise<{ success: boolean; er
       console.warn('[AuthService] Drive disconnect warning during account deletion:', driveErr);
     }
 
-    // 4. Delete Firebase Auth user (guaranteed fresh credentials from step 1)
+    // 4. Revoke and sign out of Native Google Sign-In SDK so account picker will appear next time
+    if (Platform.OS !== 'web') {
+      try {
+        const NativeGoogleSignin = getNativeGoogleSignin();
+        if (NativeGoogleSignin) {
+          try {
+            await NativeGoogleSignin.revokeAccess();
+          } catch (e) {
+            console.warn('[AuthService] Native Google Sign-In revokeAccess notice:', e);
+          }
+          try {
+            await NativeGoogleSignin.signOut();
+          } catch (e) {
+            console.warn('[AuthService] Native Google Sign-In signOut notice:', e);
+          }
+        }
+      } catch (e) {
+        console.warn('[AuthService] Native Google Sign-In cleanup notice:', e);
+      }
+    }
+
+    // 5. Delete Firebase Auth user (guaranteed fresh credentials from step 1)
     await deleteUser(confirmedUser);
 
     return { success: true };

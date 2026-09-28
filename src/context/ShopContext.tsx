@@ -432,9 +432,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
           refreshPendingCount(),
         ]);
 
-        setActiveReceipt(result.sale);
+        setActiveReceipt(null); // W1-3: Do NOT auto-show receipt; let SaleScreen success toast handle it on explicit user tap
 
-        // Upload individual bill receipt to 5 TB Google Drive in background (silent & non-blocking)
+        // Upload individual bill receipt to Google Drive in background (silent & non-blocking)
         googleDriveService
           .uploadBillToDrive(result.sale, settings)
           .catch(() => {});
@@ -703,6 +703,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.run('DELETE FROM customers');
     await db.run('DELETE FROM products');
     await db.run('DELETE FROM sync_queue');
+    await db.run("DELETE FROM settings WHERE key = 'shop_profile_settings'");
+    await SettingsRepository.saveSettings(INITIAL_SETTINGS);
+    setSettings(INITIAL_SETTINGS);
     await SettingsRepository.setInvoiceCounter(1001);
     await Promise.all([
       refreshProducts(),
@@ -725,7 +728,10 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('[ShopContext] Error clearing drive onboarding flag:', e);
       }
     }
+    await AsyncStorage.removeItem('@sk_held_carts').catch(() => {});
     await clearStoreData();
+    await SettingsRepository.saveSettings(INITIAL_SETTINGS);
+    setSettings(INITIAL_SETTINGS);
     await SettingsRepository.setGuestMode(false).catch(() => {});
     setUser(null);
     setIsGuestMode(false);

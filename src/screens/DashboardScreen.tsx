@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,13 @@ import {
   ScrollView,
   Pressable,
   Image,
+  Modal,
+  Animated,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { SaleScreen } from '@/screens/SaleScreen';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -41,6 +46,53 @@ export const DashboardScreen: React.FC = () => {
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const recentSales = sales.slice(0, 5);
 
+  // In-home Sale Modal
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
+
+  // Pulse animation for floating New Sale button
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1800,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [pulseAnim]);
+
+  const pulseScale = pulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.35],
+  });
+
+  const pulseOpacity = pulseAnim.interpolate({
+    inputRange: [0, 0.45, 1],
+    outputRange: [0.5, 0.2, 0],
+  });
+
+  // W2-5: Day-end summary modal
+  const [showDayEnd, setShowDayEnd] = useState(false);
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const todaySales = sales.filter((s) => new Date(s.date) >= todayStart && !s.refundedAt);
+  const todayCash = todaySales.filter((s) => s.paymentMethod === 'cash').reduce((a, b) => a + b.grandTotal, 0);
+  const todayOnline = todaySales.filter((s) => s.paymentMethod === 'online').reduce((a, b) => a + b.grandTotal, 0);
+  const todayUdhaar = todaySales.filter((s) => s.paymentMethod === 'udhaar').reduce((a, b) => a + b.grandTotal, 0);
+  const todayGrossProfit = todaySales.reduce((a, s) => {
+    const cost = s.items.reduce((c: number, it: any) => c + ((it.costPrice || 0) * it.quantity), 0);
+    return a + (s.grandTotal - cost);
+  }, 0);
+
   const getPayColor = (method: string) => {
     if (method === 'cash') return theme.success;
     if (method === 'online') return theme.secondary;
@@ -48,10 +100,11 @@ export const DashboardScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <View style={[styles.rootContainer, { backgroundColor: theme.background }]}>
+      <ScrollView
+        style={[styles.container, { backgroundColor: theme.background }]}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Hero Welcome Banner ── */}
       <View style={[styles.heroBanner, { backgroundColor: theme.heroBg }]}>
@@ -396,11 +449,115 @@ export const DashboardScreen: React.FC = () => {
           })}
         </View>
       )}
+
+      {/* ── W2-5: Day-End Summary Card ── */}
+      <Pressable
+        onPress={() => setShowDayEnd(true)}
+        style={({ pressed }) => [
+          styles.dayEndCard,
+          { backgroundColor: theme.primary, borderColor: theme.primaryDark },
+          pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+        ]}>
+        <View style={styles.dayEndLeft}>
+          <Ionicons name="moon-outline" size={20} color="rgba(255,255,255,0.9)" />
+          <View>
+            <Text style={styles.dayEndTitle}>
+              {language === 'ur' ? 'دن کا خلاصہ دیکھیں' : 'Day-End Summary'}
+            </Text>
+            <Text style={styles.dayEndSub}>
+              {todaySales.length} {language === 'ur' ? 'بل آج' : 'bills today'} · {settings.currencySymbol}{todaySalesTotal.toLocaleString()}
+            </Text>
+          </View>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
+      </Pressable>
+
+      {/* Day-End Modal */}
+      <Modal visible={showDayEnd} transparent animationType="slide" onRequestClose={() => setShowDayEnd(false)}>
+        <Pressable style={styles.dayEndOverlay} onPress={() => setShowDayEnd(false)}>
+          <Pressable style={[styles.dayEndModal, { backgroundColor: theme.surface }]} onPress={(e) => e.stopPropagation()}>
+            <View style={[styles.dayEndModalHeader, { borderBottomColor: theme.border }]}>
+              <View style={styles.dayEndModalTitleRow}>
+                <Ionicons name="moon" size={20} color={theme.primary} />
+                <Text style={[styles.dayEndModalTitle, { color: theme.text }]}>
+                  {language === 'ur' ? 'آج کا خلاصہ' : "Today's Summary"}
+                </Text>
+              </View>
+              <Pressable onPress={() => setShowDayEnd(false)} style={styles.dayEndClose}>
+                <Ionicons name="close" size={22} color={theme.textSecondary} />
+              </Pressable>
+            </View>
+            <View style={styles.dayEndBody}>
+              {[
+                { label: language === 'ur' ? 'کل بل' : 'Total Bills', value: `${todaySales.length}`, icon: 'receipt-outline', color: theme.primary },
+                { label: language === 'ur' ? 'نقد وصول' : 'Cash Collected', value: `${settings.currencySymbol}${todayCash.toLocaleString()}`, icon: 'cash-outline', color: theme.success },
+                { label: language === 'ur' ? 'آن لائن' : 'Online', value: `${settings.currencySymbol}${todayOnline.toLocaleString()}`, icon: 'phone-portrait-outline', color: theme.secondary },
+                { label: language === 'ur' ? 'ادھار دیا' : 'Udhaar Given', value: `${settings.currencySymbol}${todayUdhaar.toLocaleString()}`, icon: 'book-outline', color: theme.danger },
+                { label: language === 'ur' ? 'تخمینی منافع' : 'Est. Profit', value: `${settings.currencySymbol}${Math.max(0, todayGrossProfit).toLocaleString()}`, icon: 'trending-up-outline', color: theme.success },
+              ].map((row) => (
+                <View key={row.label} style={[styles.dayEndRow, { borderBottomColor: theme.border }]}>
+                  <View style={[styles.dayEndRowIcon, { backgroundColor: row.color + '20' }]}>
+                    <Ionicons name={row.icon as any} size={16} color={row.color} />
+                  </View>
+                  <Text style={[styles.dayEndRowLabel, { color: theme.textSecondary }]}>{row.label}</Text>
+                  <Text style={[styles.dayEndRowValue, { color: theme.text }]}>{row.value}</Text>
+                </View>
+              ))}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
     </ScrollView>
+
+      {/* ── Floating Action Button (New Sale) with Pulse Effect ── */}
+      <View style={styles.floatingFabWrapper} pointerEvents="box-none">
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.floatingSalePulse,
+            {
+              backgroundColor: settings.darkMode ? 'rgba(52, 211, 153, 0.28)' : '#A7F3D0',
+              transform: [{ scale: pulseScale }],
+              opacity: pulseOpacity,
+            },
+          ]}
+        />
+        <Pressable
+          onPress={() => setIsSaleModalOpen(true)}
+          accessibilityLabel={t('sale')}
+          accessibilityRole="button"
+          accessibilityHint="Open new sale window directly on home"
+          style={({ pressed }) => [
+            styles.floatingSaleFab,
+            { backgroundColor: theme.primary },
+            Shadows.xl,
+            pressed && { transform: [{ scale: 0.94 }], opacity: 0.92 },
+          ]}>
+          <Ionicons name="cart" size={22} color="#FFFFFF" />
+          <Text style={styles.floatingSaleFabText}>{t('sale')}</Text>
+        </Pressable>
+      </View>
+
+      {/* ── Direct New Sale Window on Home ── */}
+      <Modal
+        visible={isSaleModalOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setIsSaleModalOpen(false)}>
+        <SafeAreaView style={[styles.saleModalContainer, { backgroundColor: theme.background }]}>
+          <SaleScreen isModal onClose={() => setIsSaleModalOpen(false)} />
+        </SafeAreaView>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    position: 'relative',
+  },
   container: { flex: 1 },
   content: {
     padding: Spacing.lg,
@@ -408,6 +565,40 @@ const styles = StyleSheet.create({
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
+  },
+  floatingFabWrapper: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 50,
+  },
+  floatingSalePulse: {
+    position: 'absolute',
+    top: -4,
+    left: -4,
+    right: -4,
+    bottom: -4,
+    borderRadius: BorderRadius.full,
+  },
+  floatingSaleFab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: BorderRadius.full,
+    elevation: 8,
+  },
+  floatingSaleFabText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  saleModalContainer: {
+    flex: 1,
   },
 
   // Hero Banner
@@ -640,5 +831,93 @@ const styles = StyleSheet.create({
   financeSubStatValue: {
     fontSize: 13,
     fontWeight: '700',
+  },
+
+  // W2-5: Day-End Summary card + modal
+  dayEndCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
+    ...Shadows.md,
+  },
+  dayEndLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  dayEndTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  dayEndSub: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  dayEndOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  dayEndModal: {
+    borderTopLeftRadius: BorderRadius.xxl,
+    borderTopRightRadius: BorderRadius.xxl,
+    overflow: 'hidden',
+    ...Shadows.xl,
+  },
+  dayEndModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+  },
+  dayEndModalTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dayEndModalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  dayEndClose: {
+    padding: 4,
+  },
+  dayEndBody: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    gap: 0,
+  },
+  dayEndRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    gap: Spacing.md,
+    borderBottomWidth: 1,
+  },
+  dayEndRowIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayEndRowLabel: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  dayEndRowValue: {
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

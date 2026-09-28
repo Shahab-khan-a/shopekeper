@@ -78,6 +78,33 @@ class GoogleDriveService {
       console.warn('[GoogleDriveService] Token revocation notice (ignored):', err);
     }
 
+    // Clear Native Google Sign-In Drive session on mobile
+    if (Platform.OS !== 'web') {
+      try {
+        const hasNative =
+          TurboModuleRegistry?.get ? TurboModuleRegistry.get('RNGoogleSignin') != null : false;
+        if (hasNative) {
+          const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+          try {
+            const tokens = await GoogleSignin.getTokens();
+            if (tokens?.accessToken) {
+              await GoogleSignin.clearCachedAccessToken(tokens.accessToken);
+            }
+          } catch {}
+          if (revokeToken) {
+            try {
+              await GoogleSignin.revokeAccess();
+            } catch {}
+          }
+          try {
+            await GoogleSignin.signOut();
+          } catch {}
+        }
+      } catch (nativeErr) {
+        console.warn('[GoogleDriveService] Native cleanup notice:', nativeErr);
+      }
+    }
+
     this.currentAuth = null;
     this.folderCache = null;
     await AsyncStorage.removeItem(GOOGLE_DRIVE_CONFIG.storageKey);
@@ -105,7 +132,7 @@ class GoogleDriveService {
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&response_type=token` +
         `&scope=${encodeURIComponent(scopeString)}` +
-        `&prompt=select_account`;
+        `&prompt=consent%20select_account`;
 
       if (Platform.OS === 'web') {
         try {
@@ -113,7 +140,7 @@ class GoogleDriveService {
           const { auth } = await import('@/config/firebase');
           const googleProvider = new GoogleAuthProvider();
           googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
-          googleProvider.setCustomParameters({ prompt: 'select_account' });
+          googleProvider.setCustomParameters({ prompt: 'consent select_account' });
 
           const fbResult = await signInWithPopup(auth, googleProvider);
           const credential = GoogleAuthProvider.credentialFromResult(fbResult);
