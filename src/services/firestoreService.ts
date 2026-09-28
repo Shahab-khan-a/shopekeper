@@ -365,10 +365,9 @@ export async function deleteAllUserCloudData(userId: string): Promise<{ success:
     } catch (storageErr: any) {
       if (
         storageErr?.code === 'storage/bucket-not-found' ||
-        storageErr?.code === 'storage/project-not-found' ||
-        storageErr?.code === 'storage/unauthorized'
+        storageErr?.code === 'storage/project-not-found'
       ) {
-        console.log('[FirestoreService] Firebase Storage bucket not configured or empty; skipped.');
+        console.log('[FirestoreService] Firebase Storage bucket not configured on project; skipped.');
       } else {
         console.error('[FirestoreService] Firebase Storage clean-up failed:', storageErr);
         return {

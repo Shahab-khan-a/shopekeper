@@ -18,6 +18,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
+      "versionCode": 1,
       "permissions": [],
       "package": "com.shahabkhan34.ShopkeeperApp",
       "googleServicesFile": "./google-services.json",
