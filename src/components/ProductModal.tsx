@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -99,6 +99,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [unit, setUnit] = useState<ProductUnit>('piece');
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isUnitOpen, setIsUnitOpen] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [unitSearch, setUnitSearch] = useState('');
   const [barcode, setBarcode] = useState('');
   const [image, setImage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,6 +117,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   useEffect(() => {
     setIsCategoryOpen(false);
     setIsUnitOpen(false);
+    setCategorySearch('');
+    setUnitSearch('');
     if (productToEdit) {
       setName(productToEdit.name);
       setNameUrdu(productToEdit.nameUrdu || '');
@@ -140,6 +144,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setUnit('piece');
     setIsCategoryOpen(false);
     setIsUnitOpen(false);
+    setCategorySearch('');
+    setUnitSearch('');
     setBarcode('');
     setImage('');
     setIsSubmitting(false);
@@ -151,6 +157,28 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     CATEGORY_OPTIONS.find((c) => c.key === category) || CATEGORY_OPTIONS[0];
   const activeUnitMeta =
     UNIT_OPTIONS.find((u) => u.key === unit) || UNIT_OPTIONS[0];
+
+  const filteredCategoryOptions = useMemo(() => {
+    const q = categorySearch.trim().toLowerCase();
+    if (!q) return CATEGORY_OPTIONS;
+    return CATEGORY_OPTIONS.filter((c) => {
+      const matchEn = c.labelEn.toLowerCase().includes(q);
+      const matchUr = (c.labelUrdu || '').toLowerCase().includes(q);
+      const matchSub = (c.subtitle || '').toLowerCase().includes(q);
+      return matchEn || matchUr || matchSub;
+    });
+  }, [categorySearch]);
+
+  const filteredUnitOptions = useMemo(() => {
+    const q = unitSearch.trim().toLowerCase();
+    if (!q) return UNIT_OPTIONS;
+    return UNIT_OPTIONS.filter((u) => {
+      const matchEn = u.labelEn.toLowerCase().includes(q);
+      const matchUr = (u.labelUrdu || '').toLowerCase().includes(q);
+      const matchCode = (u.shortCode || '').toLowerCase().includes(q);
+      return matchEn || matchUr || matchCode;
+    });
+  }, [unitSearch]);
 
   // Live profit calculation
   const parsedPrice = parseFloat(price) || 0;
@@ -621,6 +649,28 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                           <Text style={[styles.dropdownMenuHeaderTitle, { color: theme.textSecondary }]}>
                             {language === 'ur' ? 'کیٹیگری منتخب کریں' : 'SELECT CATEGORY'}
                           </Text>
+                          {categorySearch.length > 0 && (
+                            <Text style={{ fontSize: 10, color: theme.primary, fontWeight: '700' }}>
+                              {filteredCategoryOptions.length} {language === 'ur' ? 'نتائج' : 'found'}
+                            </Text>
+                          )}
+                        </View>
+
+                        {/* Search Input for Category */}
+                        <View style={[styles.dropdownSearchWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                          <Ionicons name="search" size={14} color={theme.textMuted} />
+                          <TextInput
+                            style={[styles.dropdownSearchInput, { color: theme.text }]}
+                            placeholder={language === 'ur' ? 'کیٹیگری تلاش کریں...' : 'Search category...'}
+                            placeholderTextColor={theme.textMuted}
+                            value={categorySearch}
+                            onChangeText={setCategorySearch}
+                          />
+                          {categorySearch.length > 0 && (
+                            <Pressable onPress={() => setCategorySearch('')} hitSlop={6}>
+                              <Ionicons name="close-circle" size={15} color={theme.textMuted} />
+                            </Pressable>
+                          )}
                         </View>
 
                         <ScrollView
@@ -629,67 +679,77 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                           nestedScrollEnabled
                           keyboardShouldPersistTaps="handled"
                           showsVerticalScrollIndicator>
-                          {CATEGORY_OPTIONS.map((opt) => {
-                            const isSelected = category === opt.key;
-                            return (
-                              <Pressable
-                                key={opt.key}
-                                onPress={() => {
-                                  setCategory(opt.key);
-                                  setIsCategoryOpen(false);
-                                }}
-                                style={({ pressed }) => [
-                                  styles.dropdownItem,
-                                  isSelected && { backgroundColor: theme.primaryLight },
-                                  pressed && { opacity: 0.75 },
-                                ]}>
-                                <View
-                                  style={[
-                                    styles.dropdownItemIconWrap,
-                                    { backgroundColor: isSelected ? theme.primary : theme.surfaceSubtle },
+                          {filteredCategoryOptions.length > 0 ? (
+                            filteredCategoryOptions.map((opt) => {
+                              const isSelected = category === opt.key;
+                              return (
+                                <Pressable
+                                  key={opt.key}
+                                  onPress={() => {
+                                    setCategory(opt.key);
+                                    setIsCategoryOpen(false);
+                                    setCategorySearch('');
+                                  }}
+                                  style={({ pressed }) => [
+                                    styles.dropdownItem,
+                                    isSelected && { backgroundColor: theme.primaryLight },
+                                    pressed && { opacity: 0.75 },
                                   ]}>
-                                  <Ionicons
-                                    name={opt.icon}
-                                    size={13}
-                                    color={isSelected ? '#FFFFFF' : theme.textSecondary}
-                                  />
-                                </View>
+                                  <View
+                                    style={[
+                                      styles.dropdownItemIconWrap,
+                                      { backgroundColor: isSelected ? theme.primary : theme.surfaceSubtle },
+                                    ]}>
+                                    <Ionicons
+                                      name={opt.icon}
+                                      size={13}
+                                      color={isSelected ? '#FFFFFF' : theme.textSecondary}
+                                    />
+                                  </View>
 
-                                <View style={styles.dropdownItemTextCol}>
+                                  <View style={styles.dropdownItemTextCol}>
+                                    <Text
+                                      style={[
+                                        styles.dropdownItemTitle,
+                                        {
+                                          color: isSelected ? theme.primary : theme.text,
+                                          fontWeight: isSelected ? '700' : '600',
+                                        },
+                                      ]}>
+                                      {opt.labelEn}
+                                    </Text>
+                                    <Text style={[styles.dropdownItemSub, { color: theme.textMuted }]}>
+                                      {opt.subtitle}
+                                    </Text>
+                                  </View>
+
                                   <Text
                                     style={[
-                                      styles.dropdownItemTitle,
-                                      {
-                                        color: isSelected ? theme.primary : theme.text,
-                                        fontWeight: isSelected ? '700' : '600',
-                                      },
+                                      styles.dropdownItemUrdu,
+                                      { color: isSelected ? theme.primary : theme.textMuted },
                                     ]}>
-                                    {opt.labelEn}
+                                    {opt.labelUrdu}
                                   </Text>
-                                  <Text style={[styles.dropdownItemSub, { color: theme.textMuted }]}>
-                                    {opt.subtitle}
-                                  </Text>
-                                </View>
 
-                                <Text
-                                  style={[
-                                    styles.dropdownItemUrdu,
-                                    { color: isSelected ? theme.primary : theme.textMuted },
-                                  ]}>
-                                  {opt.labelUrdu}
-                                </Text>
-
-                                {isSelected && (
-                                  <Ionicons
-                                    name="checkmark-circle"
-                                    size={15}
-                                    color={theme.primary}
-                                    style={{ marginLeft: 4 }}
-                                  />
-                                )}
-                              </Pressable>
-                            );
-                          })}
+                                  {isSelected && (
+                                    <Ionicons
+                                      name="checkmark-circle"
+                                      size={15}
+                                      color={theme.primary}
+                                      style={{ marginLeft: 4 }}
+                                    />
+                                  )}
+                                </Pressable>
+                              );
+                            })
+                          ) : (
+                            <View style={styles.dropdownEmptyState}>
+                              <Ionicons name="search-outline" size={18} color={theme.textMuted} />
+                              <Text style={[styles.dropdownEmptyText, { color: theme.textMuted }]}>
+                                {language === 'ur' ? 'کوئی کیٹیگری نہیں ملی' : 'No matching category found'}
+                              </Text>
+                            </View>
+                          )}
                         </ScrollView>
                       </View>
                     )}
@@ -753,6 +813,28 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                           <Text style={[styles.dropdownMenuHeaderTitle, { color: theme.textSecondary }]}>
                             {language === 'ur' ? 'اکائی منتخب کریں' : 'SELECT MEASUREMENT UNIT'}
                           </Text>
+                          {unitSearch.length > 0 && (
+                            <Text style={{ fontSize: 10, color: theme.primary, fontWeight: '700' }}>
+                              {filteredUnitOptions.length} {language === 'ur' ? 'نتائج' : 'found'}
+                            </Text>
+                          )}
+                        </View>
+
+                        {/* Search Input for Unit */}
+                        <View style={[styles.dropdownSearchWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                          <Ionicons name="search" size={14} color={theme.textMuted} />
+                          <TextInput
+                            style={[styles.dropdownSearchInput, { color: theme.text }]}
+                            placeholder={language === 'ur' ? 'اکائی تلاش کریں (kg, piece, L وغیرہ)...' : 'Search unit (kg, piece, L, etc.)...'}
+                            placeholderTextColor={theme.textMuted}
+                            value={unitSearch}
+                            onChangeText={setUnitSearch}
+                          />
+                          {unitSearch.length > 0 && (
+                            <Pressable onPress={() => setUnitSearch('')} hitSlop={6}>
+                              <Ionicons name="close-circle" size={15} color={theme.textMuted} />
+                            </Pressable>
+                          )}
                         </View>
 
                         <ScrollView
@@ -761,67 +843,77 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                           nestedScrollEnabled
                           keyboardShouldPersistTaps="handled"
                           showsVerticalScrollIndicator>
-                          {UNIT_OPTIONS.map((opt) => {
-                            const isSelected = unit === opt.key;
-                            return (
-                              <Pressable
-                                key={opt.key}
-                                onPress={() => {
-                                  setUnit(opt.key);
-                                  setIsUnitOpen(false);
-                                }}
-                                style={({ pressed }) => [
-                                  styles.dropdownItem,
-                                  isSelected && { backgroundColor: theme.primaryLight },
-                                  pressed && { opacity: 0.75 },
-                                ]}>
-                                <View
-                                  style={[
-                                    styles.dropdownItemIconWrap,
-                                    { backgroundColor: isSelected ? theme.primary : theme.surfaceSubtle },
+                          {filteredUnitOptions.length > 0 ? (
+                            filteredUnitOptions.map((opt) => {
+                              const isSelected = unit === opt.key;
+                              return (
+                                <Pressable
+                                  key={opt.key}
+                                  onPress={() => {
+                                    setUnit(opt.key);
+                                    setIsUnitOpen(false);
+                                    setUnitSearch('');
+                                  }}
+                                  style={({ pressed }) => [
+                                    styles.dropdownItem,
+                                    isSelected && { backgroundColor: theme.primaryLight },
+                                    pressed && { opacity: 0.75 },
                                   ]}>
-                                  <Ionicons
-                                    name={opt.icon}
-                                    size={13}
-                                    color={isSelected ? '#FFFFFF' : theme.textSecondary}
-                                  />
-                                </View>
+                                  <View
+                                    style={[
+                                      styles.dropdownItemIconWrap,
+                                      { backgroundColor: isSelected ? theme.primary : theme.surfaceSubtle },
+                                    ]}>
+                                    <Ionicons
+                                      name={opt.icon}
+                                      size={13}
+                                      color={isSelected ? '#FFFFFF' : theme.textSecondary}
+                                    />
+                                  </View>
 
-                                <View style={styles.dropdownItemTextCol}>
+                                  <View style={styles.dropdownItemTextCol}>
+                                    <Text
+                                      style={[
+                                        styles.dropdownItemTitle,
+                                        {
+                                          color: isSelected ? theme.primary : theme.text,
+                                          fontWeight: isSelected ? '700' : '600',
+                                        },
+                                      ]}>
+                                      {opt.labelEn}
+                                    </Text>
+                                    <Text style={[styles.dropdownItemSub, { color: theme.textMuted }]}>
+                                      Short: {opt.shortCode}
+                                    </Text>
+                                  </View>
+
                                   <Text
                                     style={[
-                                      styles.dropdownItemTitle,
-                                      {
-                                        color: isSelected ? theme.primary : theme.text,
-                                        fontWeight: isSelected ? '700' : '600',
-                                      },
+                                      styles.dropdownItemUrdu,
+                                      { color: isSelected ? theme.primary : theme.textMuted },
                                     ]}>
-                                    {opt.labelEn}
+                                    {opt.labelUrdu}
                                   </Text>
-                                  <Text style={[styles.dropdownItemSub, { color: theme.textMuted }]}>
-                                    Short: {opt.shortCode}
-                                  </Text>
-                                </View>
 
-                                <Text
-                                  style={[
-                                    styles.dropdownItemUrdu,
-                                    { color: isSelected ? theme.primary : theme.textMuted },
-                                  ]}>
-                                  {opt.labelUrdu}
-                                </Text>
-
-                                {isSelected && (
-                                  <Ionicons
-                                    name="checkmark-circle"
-                                    size={15}
-                                    color={theme.primary}
-                                    style={{ marginLeft: 4 }}
-                                  />
-                                )}
-                              </Pressable>
-                            );
-                          })}
+                                  {isSelected && (
+                                    <Ionicons
+                                      name="checkmark-circle"
+                                      size={15}
+                                      color={theme.primary}
+                                      style={{ marginLeft: 4 }}
+                                    />
+                                  )}
+                                </Pressable>
+                              );
+                            })
+                          ) : (
+                            <View style={styles.dropdownEmptyState}>
+                              <Ionicons name="search-outline" size={18} color={theme.textMuted} />
+                              <Text style={[styles.dropdownEmptyText, { color: theme.textMuted }]}>
+                                {language === 'ur' ? 'کوئی اکائی نہیں ملی' : 'No matching unit found'}
+                              </Text>
+                            </View>
+                          )}
                         </ScrollView>
                       </View>
                     )}
@@ -1314,6 +1406,33 @@ const styles = StyleSheet.create({
   dropdownItemUrdu: {
     fontSize: 11,
     fontWeight: '600',
+  },
+  dropdownSearchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginHorizontal: 8,
+    marginVertical: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  dropdownSearchInput: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '500',
+    padding: 0,
+  },
+  dropdownEmptyState: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  dropdownEmptyText: {
+    fontSize: 12,
+    fontStyle: 'italic',
   },
   rowInputs: {
     flexDirection: 'row',

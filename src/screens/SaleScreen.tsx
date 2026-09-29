@@ -281,12 +281,42 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     nameUrdu,
     price,
     quantity,
+    productId,
   }: {
     name: string;
     nameUrdu?: string;
     price: number;
     quantity: number;
+    productId?: string;
   }) => {
+    if (productId) {
+      const existingProduct = products.find((p) => p.id === productId);
+      if (existingProduct) {
+        const inCart = cart.find((item) => item.product.id === productId);
+        if (inCart) {
+          const newQty = inCart.quantity + quantity;
+          setCart(
+            cart.map((item) =>
+              item.product.id === productId
+                ? { ...item, quantity: newQty, unitPrice: price, total: newQty * price }
+                : item
+            )
+          );
+        } else {
+          setCart([
+            ...cart,
+            {
+              product: existingProduct,
+              quantity,
+              unitPrice: price,
+              total: price * quantity,
+            },
+          ]);
+        }
+        return;
+      }
+    }
+
     const customProduct: Product = {
       id: 'custom-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
       name,

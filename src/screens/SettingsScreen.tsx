@@ -17,6 +17,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useShop } from '@/context/ShopContext';
 import { Colors, ThemeColors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { CameraModal } from '@/components/CameraModal';
+import { CurrencyPickerModal } from '@/components/CurrencyPickerModal';
+import { findCurrency } from '@/constants/currencies';
 import { buildImportTemplateJSON } from '@/constants/sampleData';
 import * as Linking from 'expo-linking';
 import { googleDriveService, GoogleDriveAuth } from '@/services/googleDriveService';
@@ -129,6 +131,7 @@ export const SettingsScreen: React.FC = () => {
 
   const [activeSegment, setActiveSegment] = useState<Segment>('profile');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
@@ -163,8 +166,8 @@ export const SettingsScreen: React.FC = () => {
   const [paymentDetails, setPaymentDetails] = useState(settings.paymentDetails || '');
   const [businessHours, setBusinessHours] = useState(settings.businessHours || '');
 
-  // Preferences fields
-  const [currencySymbol, setCurrencySymbol] = useState(settings.currencySymbol);
+  // Preferences fields (currency is saved straight from the picker)
+  const selectedCurrency = findCurrency(settings.currencyCode, settings.currencySymbol);
   const [footerNote, setFooterNote] = useState(settings.footerNote);
   const [footerNoteUrdu, setFooterNoteUrdu] = useState(settings.footerNoteUrdu);
   const [lowStockThreshold, setLowStockThreshold] = useState(settings.lowStockThreshold.toString());
@@ -184,7 +187,6 @@ export const SettingsScreen: React.FC = () => {
     setTaxNumber(settings.taxNumber || '');
     setPaymentDetails(settings.paymentDetails || '');
     setBusinessHours(settings.businessHours || '');
-    setCurrencySymbol(settings.currencySymbol);
     setFooterNote(settings.footerNote);
     setFooterNoteUrdu(settings.footerNoteUrdu);
     setLowStockThreshold(settings.lowStockThreshold.toString());
@@ -271,7 +273,6 @@ export const SettingsScreen: React.FC = () => {
         taxNumber: taxNumber.trim(),
         paymentDetails: paymentDetails.trim(),
         businessHours: businessHours.trim(),
-        currencySymbol: currencySymbol.trim(),
         footerNote: footerNote.trim(),
         footerNoteUrdu: footerNoteUrdu.trim(),
         lowStockThreshold: parseInt(lowStockThreshold, 10) || 5,
@@ -939,8 +940,27 @@ export const SettingsScreen: React.FC = () => {
 
           {/* Billing */}
           <Section title={t('billingSection')} theme={theme}>
-            <RowItem icon="cash-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('currencyLabel')} theme={theme}>
-              <InlineField value={currencySymbol} onChangeText={setCurrencySymbol} placeholder="Rs" theme={theme} />
+            <RowItem
+              icon="cash-outline"
+              iconColor="#059669"
+              iconBg="#D1FAE5"
+              label={t('currencyLabel')}
+              sublabel={
+                selectedCurrency
+                  ? language === 'ur' ? selectedCurrency.nameUrdu : selectedCurrency.name
+                  : undefined
+              }
+              onPress={() => setIsCurrencyPickerOpen(true)}
+              theme={theme}
+            >
+              <View style={styles.currencyValueRow}>
+                <Text style={[styles.currencyValueText, { color: theme.text }]} numberOfLines={1}>
+                  {selectedCurrency
+                    ? `${selectedCurrency.flag} ${selectedCurrency.code} · ${settings.currencySymbol}`
+                    : settings.currencySymbol}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+              </View>
             </RowItem>
             <RowItem icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('lowStockThresholdLabel')} theme={theme}>
               <InlineField value={lowStockThreshold} onChangeText={setLowStockThreshold} keyboardType="numeric" placeholder="5" theme={theme} />
@@ -1357,6 +1377,12 @@ export const SettingsScreen: React.FC = () => {
       {/* Bottom padding */}
       <View style={{ height: 40 }} />
 
+      <CurrencyPickerModal
+        visible={isCurrencyPickerOpen}
+        onClose={() => setIsCurrencyPickerOpen(false)}
+        onSelect={({ code, symbol }) => updateSettings({ currencyCode: code, currencySymbol: symbol })}
+      />
+
       {/* Camera Modal */}
       <CameraModal
         visible={isCameraOpen}
@@ -1554,6 +1580,8 @@ const styles = StyleSheet.create({
   rowLabel: { fontSize: 15, fontWeight: '500' },
   rowSub: { fontSize: 12, marginTop: 1 },
   rowRight: { flex: 1, maxWidth: '65%', alignItems: 'flex-end' },
+  currencyValueRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  currencyValueText: { fontSize: 14, fontWeight: '700' },
 
   // Inline input
   inlineInput: {

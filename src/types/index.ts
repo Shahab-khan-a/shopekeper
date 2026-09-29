@@ -150,6 +150,7 @@ export interface ShopSettings {
   paymentDetails?: string; // EasyPaisa / JazzCash / Bank info for vasooli
   businessHours?: string; // e.g. 08:00 AM - 11:30 PM
   currencySymbol: string; // e.g., 'Rs.' or 'PKR'
+  currencyCode?: string; // ISO code picked in Settings (e.g. 'PKR'); '' = custom symbol, undefined = legacy
   footerNote: string;
   footerNoteUrdu: string;
   lowStockThreshold: number; // e.g., 5

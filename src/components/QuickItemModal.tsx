@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,21 +15,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { Product } from '@/types';
+import { ProductImage } from '@/components/ProductImage';
+import { ImageService } from '@/services/imageService';
+import { useKeyboardOffset } from '@/hooks/use-keyboard-offset';
 
 interface QuickItemModalProps {
   visible: boolean;
   onClose: () => void;
-  onAddItem: (item: { name: string; nameUrdu?: string; price: number; quantity: number }) => void;
+  onAddItem: (item: {
+    name: string;
+    nameUrdu?: string;
+    price: number;
+    quantity: number;
+    productId?: string;
+  }) => void;
 }
-
-const COMMON_PRESETS = [
-  { name: 'Fresh Milk', nameUrdu: 'کھلا دودھ', icon: 'water-outline' },
-  { name: 'Eggs (Dozen)', nameUrdu: 'انڈے (درجن)', icon: 'egg-outline' },
-  { name: 'Bread', nameUrdu: 'ڈبل روٹی', icon: 'nutrition-outline' },
-  { name: 'Yogurt', nameUrdu: 'دہی', icon: 'restaurant-outline' },
-  { name: 'Loose Sugar', nameUrdu: 'کھلی چینی', icon: 'cube-outline' },
-  { name: 'Misc Item', nameUrdu: 'متفرق آئٹم', icon: 'pricetag-outline' },
-];
 
 const PRICE_PRESETS = [50, 100, 150, 200, 300, 500];
 
@@ -38,16 +39,18 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
   onClose,
   onAddItem,
 }) => {
-  const { settings, t, language } = useShop();
+  const { settings, t, language, products } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [name, setName] = useState('');
   const [nameUrdu, setNameUrdu] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState('');
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const insets = useSafeAreaInsets();
+  const keyboardOffset = useKeyboardOffset(visible);
 
   useEffect(() => {
     if (visible) {
@@ -55,38 +58,42 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
       setNameUrdu('');
       setPrice('');
       setQuantity(1);
+      setSelectedProduct(null);
+      setIsDropdownOpen(false);
       setError('');
     }
   }, [visible]);
 
-  // Android modals are edge-to-edge, so the keyboard overlaps the sheet instead of resizing it.
-  // Track the keyboard height and lift the sheet ourselves (one update per show/hide, no layout loop).
-  useEffect(() => {
-    if (!visible || Platform.OS !== 'android') return;
-    setKeyboardHeight(Keyboard.isVisible() ? (Keyboard.metrics()?.height ?? 0) : 0);
-    const showSub = Keyboard.addListener('keyboardDidShow', (e) =>
-      setKeyboardHeight(e.endCoordinates.height)
-    );
-    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, [visible]);
+  // Filter products for the searchable dropdown
+  const filteredProducts = useMemo(() => {
+    const q = name.trim().toLowerCase();
+    if (!q) {
+      return products.slice(0, 20);
+    }
+    return products
+      .filter((p) => {
+        const matchEn = p.name.toLowerCase().includes(q);
+        const matchUr = (p.nameUrdu || '').toLowerCase().includes(q);
+        const matchCat = (p.category || '').toLowerCase().includes(q);
+        const matchBarcode = (p.barcode || '').toLowerCase().includes(q);
+        return matchEn || matchUr || matchCat || matchBarcode;
+      })
+      .slice(0, 30);
+  }, [products, name]);
 
-  // RN reports the Android keyboard height minus the nav bar, but the edge-to-edge sheet
-  // extends behind the nav bar, so add that inset back when the keyboard is open.
-  const keyboardOffset = keyboardHeight > 0 ? keyboardHeight + insets.bottom : 0;
-
-  const handleSelectPreset = (preset: typeof COMMON_PRESETS[0]) => {
-    setName(preset.name);
-    setNameUrdu(preset.nameUrdu);
+  const handleSelectProduct = (p: Product) => {
+    setSelectedProduct(p);
+    setName(p.name);
+    setNameUrdu(p.nameUrdu || '');
+    setPrice(p.price.toString());
+    setIsDropdownOpen(false);
     setError('');
+    Keyboard.dismiss();
   };
 
-  // Dismiss the keyboard first so it doesn't resize the sheet while the modal is sliding out
   const handleClose = () => {
     Keyboard.dismiss();
+    setIsDropdownOpen(false);
     onClose();
   };
 
@@ -103,6 +110,7 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
       nameUrdu: nameUrdu.trim() || undefined,
       price: Math.round(parsedPrice),
       quantity: Math.max(1, quantity),
+      productId: selectedProduct?.id,
     });
 
     handleClose();
@@ -134,7 +142,9 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
                   {t('addCustomItem')}
                 </Text>
                 <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-                  {t('customItemHint')}
+                  {language === 'ur'
+                    ? 'انوینٹری سے منتخب کریں یا نیا آئٹم شامل کریں'
+                    : 'Select from your items or enter custom'}
                 </Text>
               </View>
             </View>
@@ -149,58 +159,202 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
             style={styles.scrollArea}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled">
-            {/* Quick Presets */}
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-              {language === 'ur' ? 'عام اشیاء (فوری سلیکٹ کریں)' : 'Common Loose Items (Quick Tap)'}
-            </Text>
-            <View style={styles.presetChipsWrap}>
-              {COMMON_PRESETS.map((p) => {
-                const isSelected = name === p.name;
-                return (
-                  <Pressable
-                    key={p.name}
-                    onPress={() => handleSelectPreset(p)}
-                    style={[
-                      styles.presetChip,
-                      {
-                        backgroundColor: isSelected ? theme.primary : theme.surfaceSubtle,
-                        borderColor: isSelected ? theme.primary : theme.border,
-                      },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.presetChipText,
-                        { color: isSelected ? '#FFFFFF' : theme.text },
-                      ]}>
-                      {language === 'ur' && p.nameUrdu ? p.nameUrdu : p.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {/* Custom Name Input */}
+            {/* Searchable Dropdown for Item Name */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>
-                {t('customItemName')}
-              </Text>
-              <TextInput
+              <View style={styles.labelRow}>
+                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>
+                  {language === 'ur' ? 'آئٹم کا نام (تلاش کریں یا ٹائپ کریں)' : 'Item Name (Search or Type)'} *
+                </Text>
+                {selectedProduct ? (
+                  <View style={[styles.selectedBadge, { backgroundColor: theme.primaryLight }]}>
+                    <Ionicons name="checkmark-circle" size={13} color={theme.primary} />
+                    <Text style={[styles.selectedBadgeText, { color: theme.primary }]}>
+                      {language === 'ur' ? 'انوینٹری سے' : 'Inventory Item'}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+
+              {/* Search / Dropdown Input */}
+              <View
                 style={[
-                  styles.textInput,
+                  styles.searchInputContainer,
                   {
                     backgroundColor: theme.surfaceSubtle,
-                    color: theme.text,
-                    borderColor: theme.border,
+                    borderColor: isDropdownOpen ? theme.primary : theme.border,
                   },
-                ]}
-                placeholder={language === 'ur' ? 'مثلاً: انڈے، ڈبل روٹی، چینی وغیرہ' : 'e.g., Bread, Milk, Eggs...'}
-                placeholderTextColor={theme.textMuted}
-                value={language === 'ur' && nameUrdu ? nameUrdu : name}
-                onChangeText={(text) => {
-                  setName(text);
-                  setNameUrdu(text);
-                }}
-              />
+                ]}>
+                <Ionicons
+                  name="search-outline"
+                  size={18}
+                  color={theme.textMuted}
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  style={[styles.searchInput, { color: theme.text }]}
+                  placeholder={
+                    language === 'ur'
+                      ? 'پراڈکٹ تلاش کریں یا نیا نام لکھیں...'
+                      : 'Search your items or type name...'
+                  }
+                  placeholderTextColor={theme.textMuted}
+                  value={language === 'ur' && nameUrdu && !name ? nameUrdu : name}
+                  onChangeText={(text) => {
+                    setName(text);
+                    setNameUrdu(text);
+                    setIsDropdownOpen(true);
+                    if (selectedProduct && selectedProduct.name !== text) {
+                      setSelectedProduct(null);
+                    }
+                    setError('');
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                />
+                {name.length > 0 && (
+                  <Pressable
+                    onPress={() => {
+                      setName('');
+                      setNameUrdu('');
+                      setSelectedProduct(null);
+                      setIsDropdownOpen(true);
+                    }}
+                    hitSlop={8}
+                    style={styles.clearBtn}>
+                    <Ionicons name="close-circle" size={18} color={theme.textMuted} />
+                  </Pressable>
+                )}
+                <Pressable
+                  onPress={() => setIsDropdownOpen(!isDropdownOpen)}
+                  hitSlop={8}
+                  style={styles.dropdownToggleBtn}>
+                  <Ionicons
+                    name={isDropdownOpen ? 'chevron-up' : 'chevron-down'}
+                    size={20}
+                    color={theme.textSecondary}
+                  />
+                </Pressable>
+              </View>
+
+              {/* Dropdown Options List */}
+              {isDropdownOpen && (
+                <View
+                  style={[
+                    styles.dropdownBox,
+                    {
+                      backgroundColor: theme.surface,
+                      borderColor: theme.border,
+                    },
+                  ]}>
+                  <View style={[styles.dropdownHeader, { borderBottomColor: theme.border }]}>
+                    <Text style={[styles.dropdownHeaderText, { color: theme.textSecondary }]}>
+                      {name.trim()
+                        ? language === 'ur'
+                          ? `ملتی جلتی اشیاء (${filteredProducts.length})`
+                          : `Matching Items (${filteredProducts.length})`
+                        : language === 'ur'
+                        ? `آپ کی انوینٹری (${products.length})`
+                        : `Your Inventory Items (${products.length})`}
+                    </Text>
+                    <Pressable onPress={() => setIsDropdownOpen(false)} hitSlop={6}>
+                      <Text style={[styles.dropdownCloseText, { color: theme.primary }]}>
+                        {language === 'ur' ? 'بند کریں' : 'Done'}
+                      </Text>
+                    </Pressable>
+                  </View>
+
+                  <ScrollView
+                    style={styles.dropdownScroll}
+                    nestedScrollEnabled={true}
+                    keyboardShouldPersistTaps="always">
+                    {filteredProducts.length > 0 ? (
+                      filteredProducts.map((p) => {
+                        const isCurrentSelected = selectedProduct?.id === p.id;
+                        const isOutOfStock = p.stock <= 0;
+                        return (
+                          <Pressable
+                            key={p.id}
+                            onPress={() => handleSelectProduct(p)}
+                            style={({ pressed }) => [
+                              styles.dropdownItem,
+                              {
+                                backgroundColor: isCurrentSelected
+                                  ? theme.primaryLight
+                                  : pressed
+                                  ? theme.surfaceSubtle
+                                  : 'transparent',
+                                borderBottomColor: theme.border,
+                              },
+                            ]}>
+                            <View
+                              style={[
+                                styles.itemImageThumb,
+                                { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                              ]}>
+                              <ProductImage
+                                uri={p.imageUri || p.image}
+                                style={styles.itemThumbImg}
+                                fallbackIcon={
+                                  <Ionicons
+                                    name={ImageService.getCategoryIcon(p.category) as any}
+                                    size={16}
+                                    color={theme.primary}
+                                  />
+                                }
+                              />
+                            </View>
+                            <View style={styles.dropdownItemInfo}>
+                              <Text
+                                style={[
+                                  styles.dropdownItemName,
+                                  {
+                                    color: theme.text,
+                                    fontWeight: isCurrentSelected ? '800' : '600',
+                                  },
+                                ]}
+                                numberOfLines={1}>
+                                {language === 'ur' && p.nameUrdu ? p.nameUrdu : p.name}
+                              </Text>
+                              <View style={styles.dropdownItemMeta}>
+                                <Text style={[styles.dropdownItemCat, { color: theme.textMuted }]}>
+                                  {p.category}
+                                </Text>
+                                <Text style={{ color: theme.textMuted, fontSize: 10 }}>•</Text>
+                                <Text
+                                  style={[
+                                    styles.dropdownItemStock,
+                                    { color: isOutOfStock ? theme.danger : theme.success },
+                                  ]}>
+                                  {language === 'ur'
+                                    ? `اسٹاک: ${p.stock}`
+                                    : `Stock: ${p.stock}`}
+                                </Text>
+                              </View>
+                            </View>
+                            <View
+                              style={[
+                                styles.dropdownItemPriceWrap,
+                                { backgroundColor: theme.primaryLight },
+                              ]}>
+                              <Text style={[styles.dropdownItemPrice, { color: theme.primaryDark }]}>
+                                {settings.currencySymbol}{p.price}
+                              </Text>
+                            </View>
+                          </Pressable>
+                        );
+                      })
+                    ) : (
+                      <View style={styles.emptyDropdownWrap}>
+                        <Ionicons name="cube-outline" size={24} color={theme.textMuted} />
+                        <Text style={[styles.emptyDropdownText, { color: theme.textSecondary }]}>
+                          {language === 'ur'
+                            ? `"${name}" انوینٹری میں موجود نہیں۔ یہ متفرق آئٹم کے طور پر شامل ہو جائے گا۔`
+                            : `"${name}" not found in inventory. Will be added as a custom item.`}
+                        </Text>
+                      </View>
+                    )}
+                  </ScrollView>
+                </View>
+              )}
             </View>
 
             {/* Price Input & Quick Price Buttons */}
@@ -233,7 +387,6 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
                     setPrice(val);
                     setError('');
                   }}
-                  autoFocus={true}
                 />
               </View>
 
@@ -304,7 +457,7 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
             ) : null}
           </ScrollView>
 
-          {/* Submit Button — pinned below the scroll area so the keyboard never hides it */}
+          {/* Submit Button */}
           <View
             style={[
               styles.footer,
@@ -343,7 +496,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: BorderRadius.xxl,
     borderTopRightRadius: BorderRadius.xxl,
     borderTopWidth: 1,
-    maxHeight: '85%',
+    maxHeight: '90%',
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
@@ -398,25 +551,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     borderTopWidth: 1,
   },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  presetChipsWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  presetChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  presetChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   inputGroup: {
     gap: 6,
   },
@@ -429,18 +563,135 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  selectedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
+  },
+  selectedBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
   errorText: {
     color: '#DC2626',
     fontSize: 11,
     fontWeight: '600',
   },
-  textInput: {
-    height: 46,
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 48,
     borderRadius: BorderRadius.lg,
     borderWidth: 1.5,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+  },
+  searchIcon: {
+    marginRight: 6,
+    marginLeft: 4,
+  },
+  searchInput: {
+    flex: 1,
     fontSize: 14,
+    fontWeight: '600',
+    paddingVertical: 8,
+  },
+  clearBtn: {
+    padding: 4,
+  },
+  dropdownToggleBtn: {
+    padding: 6,
+    marginLeft: 2,
+  },
+  dropdownBox: {
+    borderWidth: 1.5,
+    borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    marginTop: 4,
+    ...Shadows.md,
+  },
+  dropdownHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+  },
+  dropdownHeaderText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  dropdownCloseText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  dropdownScroll: {
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+    gap: 10,
+  },
+  itemImageThumb: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  itemThumbImg: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
+  },
+  dropdownItemInfo: {
+    flex: 1,
+  },
+  dropdownItemName: {
+    fontSize: 13,
+  },
+  dropdownItemMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2,
+  },
+  dropdownItemCat: {
+    fontSize: 11,
     fontWeight: '500',
+  },
+  dropdownItemStock: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  dropdownItemPriceWrap: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.sm,
+  },
+  dropdownItemPrice: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  emptyDropdownWrap: {
+    padding: Spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  emptyDropdownText: {
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 16,
   },
   priceInputBox: {
     flexDirection: 'row',
