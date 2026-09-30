@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
     zIndex: 30,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0, 0, 0, 0.06)',
+    marginBottom: 16,
   },
   container: {
     width: '100%',

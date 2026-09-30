@@ -1,29 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Alert,
-  Platform,
-  Image,
-  Switch,
-  TextInput,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { useShop } from '@/context/ShopContext';
-import { Colors, ThemeColors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { CameraModal } from '@/components/CameraModal';
 import { CurrencyPickerModal } from '@/components/CurrencyPickerModal';
-import { findCurrency } from '@/constants/currencies';
-import { buildImportTemplateJSON } from '@/constants/sampleData';
-import * as Linking from 'expo-linking';
-import { googleDriveService, GoogleDriveAuth } from '@/services/googleDriveService';
-import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
 import { ProductImage } from '@/components/ProductImage';
+import { findCurrency } from '@/constants/currencies';
+import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
+import { buildImportTemplateJSON } from '@/constants/sampleData';
+import { BorderRadius, Colors, Shadows, Spacing, ThemeColors } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { GoogleDriveAuth, googleDriveService } from '@/services/googleDriveService';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import * as Linking from 'expo-linking';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Image,
+  LayoutChangeEvent,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -102,6 +103,102 @@ const Section: React.FC<{ title: string; theme: ThemeColors; children: React.Rea
   </View>
 );
 
+// ─── Language Toggle ─────────────────────────────────────────────────────────
+const TOGGLE_W = 160;
+const TOGGLE_H = 36;
+const TOGGLE_PAD = 3;
+const PILL_W = (TOGGLE_W - TOGGLE_PAD * 2) / 2;
+
+const LangToggle: React.FC<{ value: 'en' | 'ur'; onChange: (l: 'en' | 'ur') => void; theme: ThemeColors }> = ({ value, onChange, theme }) => {
+  const anim = useRef(new Animated.Value(value === 'en' ? 0 : 1)).current;
+  const handlePress = (lang: 'en' | 'ur') => {
+    if (lang === value) return;
+    onChange(lang);
+    Animated.spring(anim, { toValue: lang === 'en' ? 0 : 1, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  };
+  useEffect(() => {
+    Animated.spring(anim, { toValue: value === 'en' ? 0 : 1, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  }, [value]);
+  const pillX = anim.interpolate({ inputRange: [0, 1], outputRange: [0, PILL_W] });
+  return (
+    <View style={[toggleStyles.track, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, width: TOGGLE_W }]}>
+      <Animated.View pointerEvents="none" style={[toggleStyles.pill, { backgroundColor: theme.primary, width: PILL_W, height: TOGGLE_H - TOGGLE_PAD * 2, transform: [{ translateX: pillX }] }]} />
+      {(['en', 'ur'] as const).map((lang) => (
+        <Pressable key={lang} onPress={() => handlePress(lang)} style={toggleStyles.option}>
+          <Text style={[toggleStyles.optionText, { color: value === lang ? '#fff' : theme.textMuted }]}>
+            {lang === 'en' ? '🇬🇧 English' : '🇵🇰 اردو'}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+};
+
+// ─── Dark Mode Toggle ─────────────────────────────────────────────────────────
+const DM_W = 160;
+const DM_H = 36;
+const DM_PAD = 3;
+const DM_PILL_W = (DM_W - DM_PAD * 2) / 2;
+
+const DarkToggle: React.FC<{ value: boolean; onChange: (v: boolean) => void; theme: ThemeColors }> = ({ value, onChange, theme }) => {
+  const anim = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const handlePress = (dark: boolean) => {
+    if (dark === value) return;
+    onChange(dark);
+    Animated.spring(anim, { toValue: dark ? 1 : 0, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  };
+  useEffect(() => {
+    Animated.spring(anim, { toValue: value ? 1 : 0, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  }, [value]);
+  const pillX = anim.interpolate({ inputRange: [0, 1], outputRange: [0, DM_PILL_W] });
+  const lightActive = !value;
+  const darkActive = value;
+  return (
+    <View style={[toggleStyles.track, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, width: DM_W}]}>
+      <Animated.View pointerEvents="none" style={[toggleStyles.pill, { backgroundColor: darkActive ? '#6366F1' : theme.primary, width: DM_PILL_W, height: DM_H - DM_PAD * 2, transform: [{ translateX: pillX }] }]} />
+      <Pressable onPress={() => handlePress(false)} style={toggleStyles.option}>
+        <Ionicons name="sunny" size={13} color={lightActive ? '#fff' : theme.textMuted} />
+        <Text style={[toggleStyles.optionText, { color: lightActive ? '#fff' : theme.textMuted }]}>Light</Text>
+      </Pressable>
+      <Pressable onPress={() => handlePress(true)} style={toggleStyles.option}>
+        <Ionicons name="moon" size={13} color={darkActive ? '#fff' : theme.textMuted} />
+        <Text style={[toggleStyles.optionText, { color: darkActive ? '#fff' : theme.textMuted }]}>Dark</Text>
+      </Pressable>
+    </View>
+  );
+};
+
+const toggleStyles = StyleSheet.create({
+  track: {
+    flexDirection: 'row',
+    borderRadius: 999,
+    borderWidth: 1,
+    padding: TOGGLE_PAD,
+    position: 'relative',
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  pill: {
+    position: 'absolute',
+    top: TOGGLE_PAD,
+    left: TOGGLE_PAD,
+    borderRadius: 999,
+  },
+  option: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    zIndex: 1,
+    height: TOGGLE_H - TOGGLE_PAD * 2,
+  },
+  optionText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+});
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export const SettingsScreen: React.FC = () => {
   const {
@@ -130,6 +227,21 @@ export const SettingsScreen: React.FC = () => {
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [activeSegment, setActiveSegment] = useState<Segment>('profile');
+  const [segContainerWidth, setSegContainerWidth] = useState(0);
+  const segAnim = useRef(new Animated.Value(0)).current;
+
+  const handleSegmentPress = (seg: Segment) => {
+    if (seg === activeSegment) return;
+    setActiveSegment(seg);
+    const toValue = seg === 'profile' ? 0 : 1;
+    Animated.spring(segAnim, {
+      toValue,
+      damping: 18,
+      stiffness: 200,
+      mass: 0.7,
+      useNativeDriver: false,
+    }).start();
+  };
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -669,37 +781,42 @@ export const SettingsScreen: React.FC = () => {
       </Pressable>
 
       {/* ── Segment Switcher ─────────────────────────────────────────────── */}
-      <View style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+      <View
+        style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}
+        onLayout={(e: LayoutChangeEvent) => setSegContainerWidth(e.nativeEvent.layout.width)}
+      >
+        {/* Animated sliding pill */}
+        {segContainerWidth > 0 && (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.segPill,
+              {
+                backgroundColor: theme.primary,
+                width: (segContainerWidth - 10) / 2,
+                transform: [{
+                  translateX: segAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, (segContainerWidth - 10) / 2],
+                  }),
+                }],
+              },
+            ]}
+          />
+        )}
         {([
-          { key: 'profile', icon: 'storefront' as const, label: t('profileTab') },
-          { key: 'settings', icon: 'options' as const, label: t('preferencesTab') },
+          { key: 'profile', icon: 'storefront' as const, label: t('profileTab'), activeAt: 0 },
+          { key: 'settings', icon: 'options' as const, label: t('preferencesTab'), activeAt: 1 },
         ] as const).map((seg) => {
           const isActive = activeSegment === seg.key;
           return (
             <Pressable
               key={seg.key}
-              onPress={() => setActiveSegment(seg.key)}
-              style={({ pressed }) => [
-                styles.segBtn,
-                isActive && [
-                  styles.segBtnActive,
-                  { backgroundColor: theme.primary },
-                ],
-                pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
-              ]}
+              onPress={() => handleSegmentPress(seg.key)}
+              style={styles.segBtn}
             >
-              <Ionicons
-                name={seg.icon}
-                size={16}
-                color={isActive ? '#FFFFFF' : theme.textMuted}
-              />
-              <Text
-                style={[
-                  styles.segBtnText,
-                  { color: isActive ? '#FFFFFF' : theme.textMuted },
-                  isActive && { fontWeight: '800' },
-                ]}
-              >
+              <Ionicons name={seg.icon} size={16} color={isActive ? '#FFFFFF' : theme.textMuted} />
+              <Text style={[styles.segBtnText, { color: isActive ? '#FFFFFF' : theme.textMuted }]}>
                 {seg.label}
               </Text>
             </Pressable>
@@ -915,36 +1032,13 @@ export const SettingsScreen: React.FC = () => {
           {/* Appearance */}
           <Section title="Appearance" theme={theme}>
             {/* Language */}
-            <RowItem icon="language-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('languageLabel')} sublabel="English / اردو" theme={theme}>
-              <View style={styles.langToggle}>
-                {(['en', 'ur'] as const).map((lang) => (
-                  <Pressable
-                    key={lang}
-                    onPress={() => setLanguage(lang)}
-                    style={[
-                      styles.langChip,
-                      {
-                        backgroundColor: language === lang ? theme.primary : theme.surfaceSubtle,
-                        borderColor: language === lang ? theme.primary : theme.border,
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.langChipText, { color: language === lang ? '#fff' : theme.textSecondary }]}>
-                      {lang === 'en' ? 'EN' : 'اردو'}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+            <RowItem icon="language-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('languageLabel')} theme={theme}>
+              <LangToggle value={language} onChange={setLanguage} theme={theme} />
             </RowItem>
 
             {/* Dark Mode */}
-            <RowItem icon="moon-outline" iconColor="#6366F1" iconBg="#E0E7FF" label={t('darkModeLabel')} sublabel={settings.darkMode ? 'Dark' : 'Light'} theme={theme} last>
-              <Switch
-                value={settings.darkMode}
-                onValueChange={(val) => updateSettings({ darkMode: val })}
-                trackColor={{ false: theme.border, true: theme.primary }}
-                thumbColor="#fff"
-              />
+            <RowItem icon="moon-outline" iconColor="#6366F1" iconBg="#E0E7FF" label={t('darkModeLabel')} theme={theme} last>
+              <DarkToggle value={settings.darkMode} onChange={(val) => updateSettings({ darkMode: val })} theme={theme} />
             </RowItem>
           </Section>
 
@@ -1452,7 +1546,15 @@ const styles = StyleSheet.create({
     padding: 5,
     borderWidth: 1,
     marginBottom: Spacing.lg,
-    gap: 4,
+    position: 'relative',
+  },
+  segPill: {
+    position: 'absolute',
+    top: 5,
+    left: 5,
+    bottom: 5,
+    borderRadius: BorderRadius.full,
+    ...Shadows.sm,
   },
   segBtn: {
     flex: 1,
@@ -1463,13 +1565,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderRadius: BorderRadius.full,
-  },
-  segBtnActive: {
-    ...Shadows.sm,
+    zIndex: 1,
   },
   segBtnText: {
     fontSize: 13.5,
-    fontWeight: '600',
+    fontWeight: '700',
     letterSpacing: -0.1,
   },
 
@@ -1628,17 +1728,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Language chips
-  langToggle: { flexDirection: 'row', gap: 6 },
-  langChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
-  },
-  langChipText: { fontSize: 12, fontWeight: '700' },
-
-  // Save button
+// Save button
   fullSaveBtn: {
     flexDirection: 'row',
     alignItems: 'center',

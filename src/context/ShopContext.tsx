@@ -707,8 +707,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await db.run('DELETE FROM products');
     await db.run('DELETE FROM sync_queue');
     await db.run("DELETE FROM settings WHERE key = 'shop_profile_settings'");
-    await SettingsRepository.saveSettings(INITIAL_SETTINGS);
-    setSettings(INITIAL_SETTINGS);
+    const resetSettings = { ...INITIAL_SETTINGS, language: settings.language, darkMode: settings.darkMode };
+    await SettingsRepository.saveSettings(resetSettings);
+    setSettings(resetSettings);
     await SettingsRepository.setInvoiceCounter(1001);
     await Promise.all([
       refreshProducts(),

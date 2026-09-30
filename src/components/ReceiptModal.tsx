@@ -1,24 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  ScrollView,
-  Pressable,
-  Platform,
-  Linking,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { googleDriveService } from '@/services/googleDriveService';
+import { Sale } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { captureRef } from 'react-native-view-shot';
-import { Sale } from '@/types';
-import { useShop } from '@/context/ShopContext';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
-import { googleDriveService } from '@/services/googleDriveService';
 
 interface ReceiptModalProps {
   sale: Sale | null;
@@ -67,8 +67,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
     sale.paymentMethod === 'udhaar'
       ? '(Udhaar / Credit)'
       : sale.paymentMethod === 'cash'
-      ? '(Cash / نقد)'
-      : '(Online / آن لائن)';
+        ? '(Cash / نقد)'
+        : '(Online / آن لائن)';
 
   // Helper to generate a realistic SVG Barcode for HTML printing
   const generateBarcodeSVG = (code: string) => {
@@ -110,11 +110,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
           </td>
           <td style="padding: 10px 8px; vertical-align: top; text-align: left;">
             <div style="font-size: 13px; font-weight: 800; color: #111827;">${it.product.name}</div>
-            ${
-              it.product.nameUrdu
-                ? `<div style="font-size: 12px; color: #4a5568; margin-top: 2px;">(${it.product.nameUrdu})</div>`
-                : ''
-            }
+            ${it.product.nameUrdu
+            ? `<div style="font-size: 12px; color: #4a5568; margin-top: 2px;">(${it.product.nameUrdu})</div>`
+            : ''
+          }
             <div style="font-size: 11px; color: #718096; margin-top: 2px;">${it.quantity} ${it.product.unit}</div>
           </td>
           <td style="padding: 10px 6px; font-size: 13px; font-weight: 600; text-align: center; vertical-align: top; color: #111827;">
@@ -500,16 +499,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
                   <span>Subtotal / سب ٹوٹل</span>
                   <span style="font-weight: 800;">Rs.${sale.subtotal}</span>
                 </div>
-                ${
-                  sale.discount > 0
-                    ? `
+                ${sale.discount > 0
+        ? `
                   <div class="calc-row" style="color: #dc2626;">
                     <span>Discount / ڈسکاؤنٹ</span>
                     <span style="font-weight: 800;">- Rs.${sale.discount}</span>
                   </div>
                 `
-                    : ''
-                }
+        : ''
+      }
                 <div class="calc-divider"></div>
                 <div class="grand-total-row">
                   <span>Grand Total / کل رقم</span>
@@ -596,8 +594,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
       sale.paymentMethod === 'cash'
         ? 'نقد (Cash)'
         : sale.paymentMethod === 'online'
-        ? 'آن لائن (Online)'
-        : 'ادھار (Udhaar / Credit)';
+          ? 'آن لائن (Online)'
+          : 'ادھار (Udhaar / Credit)';
 
     return `
 🧾 ${shopHeader}
@@ -631,8 +629,8 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
       const formatted = cleanPhone.startsWith('92')
         ? cleanPhone
         : cleanPhone.startsWith('0')
-        ? '92' + cleanPhone.slice(1)
-        : cleanPhone;
+          ? '92' + cleanPhone.slice(1)
+          : cleanPhone;
       return `https://api.whatsapp.com/send?phone=${formatted}&text=${encoded}`;
     }
     return `https://api.whatsapp.com/send?text=${encoded}`;
@@ -1436,94 +1434,89 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
             </View>
           </ScrollView>
 
-          {/* Action Buttons Bar - Row 1: Primary WhatsApp Image + Close */}
+          {/* Action Buttons Bar */}
           <View style={[styles.actionButtonsWrap, { borderTopColor: theme.border }]}>
-            {/* Primary: WhatsApp Image Button */}
-            <Pressable
-              onPress={handleShareWhatsAppImage}
-              disabled={isGeneratingImage}
-              style={({ pressed }) => [
-                styles.actionBtnPrimary,
-                styles.whatsappBtn,
-                pressed && { transform: [{ scale: 0.96 }] },
-              ]}>
-              {isGeneratingImage ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Ionicons name="logo-whatsapp" size={19} color="#FFFFFF" />
-                  <Text style={styles.actionBtnTextWhite} numberOfLines={1}>WhatsApp</Text>
-                </>
-              )}
-            </Pressable>
 
-            {/* Secondary: WhatsApp Text Button */}
-            <Pressable
-              onPress={handleShareWhatsAppText}
-              style={({ pressed }) => [
-                styles.actionBtnSecondary,
-                styles.whatsappTextBtn,
-                pressed && { transform: [{ scale: 0.96 }] },
-              ]}>
-              <Ionicons name="chatbubble-ellipses-outline" size={16} color="#006837" />
-              <Text style={styles.whatsappTextBtnLabel} numberOfLines={1}>WA Text</Text>
-            </Pressable>
+            {/* Row 1: Full-width WhatsApp Image hero CTA */}
+            <View style={styles.actionRow}>
+              <Pressable
+                onPress={handleShareWhatsAppImage}
+                disabled={isGeneratingImage}
+                style={({ pressed }) => [
+                  styles.actionBtnFull,
+                  styles.whatsappBtn,
+                  pressed && { transform: [{ scale: 0.98 }], opacity: 0.92 },
+                ]}>
+                {isGeneratingImage ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
+                    <Text style={styles.actionBtnTextWhite}>WhatsApp (Image)</Text>
+                  </>
+                )}
+              </Pressable>
+            </View>
 
-            {/* Download/Save Image Button */}
-            <Pressable
-              onPress={handleDownloadImage}
-              disabled={isGeneratingImage}
-              style={({ pressed }) => [
-                styles.actionBtnSecondary,
-                styles.imageDownloadBtn,
-                pressed && { transform: [{ scale: 0.96 }] },
-              ]}>
-              <Ionicons name="image-outline" size={17} color="#FFFFFF" />
-              <Text style={styles.actionBtnTextWhite} numberOfLines={1}>Image</Text>
-            </Pressable>
+            {/* Row 2: WA Text + Save Image */}
+            <View style={styles.actionRow}>
+              <Pressable
+                onPress={handleShareWhatsAppText}
+                style={({ pressed }) => [
+                  styles.actionBtnHalf,
+                  styles.whatsappTextBtn,
+                  pressed && { transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons name="chatbubble-ellipses-outline" size={17} color="#006837" />
+                <Text style={styles.whatsappTextBtnLabel}>WhatsApp Text</Text>
+              </Pressable>
 
-            {/* Share PDF Button */}
-            <Pressable
-              onPress={handleSharePDF}
-              disabled={isGeneratingPDF}
-              style={({ pressed }) => [
-                styles.actionBtnSecondary,
-                styles.pdfShareBtn,
-                pressed && { transform: [{ scale: 0.96 }] },
-              ]}>
-              {isGeneratingPDF ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Ionicons name="document-text" size={17} color="#FFFFFF" />
-                  <Text style={styles.actionBtnTextWhite} numberOfLines={1}>PDF</Text>
-                </>
-              )}
-            </Pressable>
+              <Pressable
+                onPress={handleDownloadImage}
+                disabled={isGeneratingImage}
+                style={({ pressed }) => [
+                  styles.actionBtnHalf,
+                  styles.imageDownloadBtn,
+                  pressed && { transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons name="image-outline" size={17} color="#FFFFFF" />
+                <Text style={styles.actionBtnTextWhite}>Save Image</Text>
+              </Pressable>
+            </View>
 
-            {/* Print Button */}
-            <Pressable
-              onPress={handlePrint}
-              style={({ pressed }) => [
-                styles.actionBtnSecondary,
-                styles.printBtn,
-                pressed && { transform: [{ scale: 0.96 }] },
-              ]}>
-              <Ionicons name="print-outline" size={17} color="#FFFFFF" />
-              <Text style={styles.actionBtnTextWhite} numberOfLines={1}>{t('printBill')}</Text>
-            </Pressable>
+            {/* Row 3: PDF + Print */}
+            <View style={styles.actionRow}>
+              <Pressable
+                onPress={handlePrint}
+                style={({ pressed }) => [
+                  styles.actionBtnHalf,
+                  styles.printBtn,
+                  pressed && { transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons name="print-outline" size={17} color="#FFFFFF" />
+                <Text style={styles.actionBtnTextWhite}>{t('printBill')}</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleSharePDF}
+                disabled={isGeneratingPDF}
+                style={({ pressed }) => [
+                  styles.actionBtnHalf,
+                  styles.pdfShareBtn,
+                  pressed && { transform: [{ scale: 0.96 }] },
+                ]}>
+                {isGeneratingPDF ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Ionicons name="document-text" size={17} color="#FFFFFF" />
+                    <Text style={styles.actionBtnTextWhite}>Share as PDF</Text>
+                  </>
+                )}
+              </Pressable>
 
-            {/* Close Button */}
-            <Pressable
-              onPress={onClose}
-              style={({ pressed }) => [
-                styles.actionBtnSecondary,
-                styles.doneBtn,
-                { backgroundColor: theme.surfaceSubtle },
-                pressed && { opacity: 0.7 },
-              ]}>
-              <Text style={[styles.doneBtnText, { color: theme.textSecondary }]} numberOfLines={1}>{t('close')}</Text>
-            </Pressable>
+
+            </View>
+
           </View>
 
           {/* Web WhatsApp Instructions Card */}
@@ -1846,16 +1839,49 @@ const styles = StyleSheet.create({
     borderTopColor: '#FFFFFF',
   },
   actionButtonsWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    gap: 6,
+    gap: 8,
     borderTopWidth: 1,
-    flexWrap: 'nowrap',
   },
-  // Primary full-size button (WhatsApp Image - the hero CTA)
+  // Each row of buttons
+  actionRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  // Full-width button (Row 1 hero)
+  actionBtnFull: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: BorderRadius.lg,
+  },
+  // Half-width buttons (Rows 2 & 3 — 2 buttons per row)
+  actionBtnHalf: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.lg,
+  },
+  // Legacy aliases kept for safety
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.lg,
+    flex: 1,
+  },
   actionBtnPrimary: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1866,7 +1892,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     flex: 1.6,
   },
-  // Secondary compact buttons
   actionBtnSecondary: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1874,17 +1899,6 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 11,
     paddingHorizontal: 8,
-    borderRadius: BorderRadius.lg,
-    flex: 1,
-  },
-  // Keep actionBtn alias for any legacy usage
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
     borderRadius: BorderRadius.lg,
     flex: 1,
   },

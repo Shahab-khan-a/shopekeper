@@ -368,19 +368,7 @@ export const HistoryScreen: React.FC = () => {
                         </Pressable>
                       )}
 
-                      {/* Direct Phone Call Button */}
-                      {sale.customerPhone ? (
-                        <Pressable
-                          onPress={() => handleCallCustomer(sale.customerPhone)}
-                          accessibilityLabel={`Call ${sale.customerName || 'Customer'}`}
-                          style={({ pressed }) => [
-                            styles.actionIconBtn,
-                            { backgroundColor: settings.darkMode ? 'rgba(2, 132, 199, 0.2)' : '#E0F2FE' },
-                            pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-                          ]}>
-                          <Ionicons name="call" size={15} color="#0284C7" />
-                        </Pressable>
-                      ) : null}
+
                     </View>
                   </View>
                 </View>
