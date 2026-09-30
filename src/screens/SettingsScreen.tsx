@@ -724,22 +724,8 @@ export const SettingsScreen: React.FC = () => {
           {t('settingsTitle')}
         </Text>
 
-        <Pressable
-          onPress={handleSave}
-          disabled={isSaving}
-          style={({ pressed }) => [
-            styles.saveBtn,
-            { backgroundColor: theme.primary },
-            (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.97 }] },
-          ]}
-        >
-          <Ionicons
-            name={isSaving ? 'hourglass-outline' : 'checkmark'}
-            size={15}
-            color="#FFFFFF"
-          />
-          <Text style={styles.saveBtnText}>{isSaving ? '...' : t('save')}</Text>
-        </Pressable>
+        {/* Spacer to keep title centred */}
+        <View style={styles.headerSpacer} />
       </View>
 
       {/* ── Google Cloud Quick Status Banner ─────────────────────────────── */}
@@ -954,30 +940,6 @@ export const SettingsScreen: React.FC = () => {
             </RowItem>
           </Section>
 
-          {/* Quick Save Store Identity Action */}
-          <View style={styles.quickSaveContainer}>
-            <Pressable
-              onPress={handleSave}
-              disabled={isSaving}
-              style={({ pressed }) => [
-                styles.quickSaveBannerBtn,
-                { backgroundColor: theme.primary },
-                pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
-              ]}
-            >
-              {isSaving ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
-                  <Text style={styles.quickSaveBannerBtnText}>
-                    {language === 'ur' ? 'دکان کا نام محفوظ کریں' : 'Save Store Name'}
-                  </Text>
-                </>
-              )}
-            </Pressable>
-          </View>
-
           {/* Contact */}
           <Section title={t('contactSection')} theme={theme}>
             <RowItem icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('phoneLabel')} theme={theme}>
@@ -1010,18 +972,24 @@ export const SettingsScreen: React.FC = () => {
             </RowItem>
           </Section>
 
-          {/* Save */}
+          {/* ── Save Profile Button ── */}
           <Pressable
             onPress={handleSave}
             disabled={isSaving}
             style={({ pressed }) => [
               styles.fullSaveBtn,
               { backgroundColor: theme.primary },
-              (pressed || isSaving) && { opacity: 0.8 },
+              (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
             ]}
           >
-            <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-            <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Ionicons name="checkmark-circle" size={22} color="#fff" />
+                <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
+              </>
+            )}
           </Pressable>
         </>
       )}
@@ -1077,18 +1045,24 @@ export const SettingsScreen: React.FC = () => {
             </RowItem>
           </Section>
 
-          {/* Save Preferences */}
+          {/* ── Save Settings Button ── */}
           <Pressable
             onPress={handleSave}
             disabled={isSaving}
             style={({ pressed }) => [
               styles.fullSaveBtn,
               { backgroundColor: theme.primary },
-              (pressed || isSaving) && { opacity: 0.8 },
+              (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
             ]}
           >
-            <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-            <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Ionicons name="checkmark-circle" size={22} color="#fff" />
+                <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
+              </>
+            )}
           </Pressable>
 
           {/* Google Cloud Backup & Account Section */}
@@ -1539,6 +1513,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  // Spacer matching backBtn width to keep title centred
+  headerSpacer: {
+    width: 38,
+  },
+
   // Segment
   segmentWrap: {
     flexDirection: 'row',
@@ -1728,18 +1707,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-// Save button
+// Save button — single prominent CTA at bottom of each tab
   fullSaveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 15,
-    borderRadius: BorderRadius.full,
+    gap: 10,
+    paddingVertical: 16,
+    borderRadius: BorderRadius.xl,
     marginBottom: Spacing.lg,
     ...Shadows.lg,
   },
-  fullSaveBtnText: { color: '#fff', fontSize: 15, fontWeight: '800' },
+  fullSaveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.2 },
 
   // Import box
   importBox: {

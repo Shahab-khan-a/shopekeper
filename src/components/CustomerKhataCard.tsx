@@ -244,7 +244,8 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
             <Ionicons name="location-outline" size={12} color={theme.textMuted} />
             <Text
               style={[styles.metaChipText, { color: theme.textSecondary }]}
-              numberOfLines={1}>
+              numberOfLines={1}
+              ellipsizeMode="tail">
               {customer.address}
             </Text>
           </View>
@@ -561,6 +562,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 6,
     marginTop: Spacing.sm,
+    overflow: 'hidden',
   },
   metaChip: {
     flexDirection: 'row',
@@ -573,11 +575,15 @@ const styles = StyleSheet.create({
   },
   metaChipFlex: {
     flex: 1,
-    minWidth: 100,
+    flexShrink: 1,
+    minWidth: 80,
+    maxWidth: '100%',
+    overflow: 'hidden',
   },
   metaChipText: {
     fontSize: 11,
     fontWeight: '600',
+    flexShrink: 1,
   },
   actionsRow: {
     flexDirection: 'row',
