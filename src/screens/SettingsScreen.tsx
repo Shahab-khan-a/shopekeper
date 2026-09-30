@@ -668,33 +668,43 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </Pressable>
 
-      {/* ── Segment Switcher ───────────────────────────────────────────────── */}
+      {/* ── Segment Switcher ─────────────────────────────────────────────── */}
       <View style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-        {(['profile', 'settings'] as const).map((seg) => (
-          <Pressable
-            key={seg}
-            onPress={() => setActiveSegment(seg)}
-            style={[
-              styles.segBtn,
-              activeSegment === seg && [styles.segBtnActive, { backgroundColor: theme.surface, ...Shadows.sm }],
-            ]}
-          >
-            <Ionicons
-              name={seg === 'profile' ? 'person' : 'settings'}
-              size={15}
-              color={activeSegment === seg ? theme.primary : theme.textMuted}
-            />
-            <Text
-              style={[
-                styles.segBtnText,
-                { color: activeSegment === seg ? theme.primary : theme.textMuted },
-                activeSegment === seg && { fontWeight: '700' },
+        {([
+          { key: 'profile', icon: 'storefront' as const, label: t('profileTab') },
+          { key: 'settings', icon: 'options' as const, label: t('preferencesTab') },
+        ] as const).map((seg) => {
+          const isActive = activeSegment === seg.key;
+          return (
+            <Pressable
+              key={seg.key}
+              onPress={() => setActiveSegment(seg.key)}
+              style={({ pressed }) => [
+                styles.segBtn,
+                isActive && [
+                  styles.segBtnActive,
+                  { backgroundColor: theme.primary },
+                ],
+                pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
               ]}
             >
-              {seg === 'profile' ? t('profileTab') : t('preferencesTab')}
-            </Text>
-          </Pressable>
-        ))}
+              <Ionicons
+                name={seg.icon}
+                size={16}
+                color={isActive ? '#FFFFFF' : theme.textMuted}
+              />
+              <Text
+                style={[
+                  styles.segBtnText,
+                  { color: isActive ? '#FFFFFF' : theme.textMuted },
+                  isActive && { fontWeight: '800' },
+                ]}
+              >
+                {seg.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* ════════════════════════ PROFILE TAB ════════════════════════════════ */}
@@ -1439,7 +1449,7 @@ const styles = StyleSheet.create({
   segmentWrap: {
     flexDirection: 'row',
     borderRadius: BorderRadius.full,
-    padding: 4,
+    padding: 5,
     borderWidth: 1,
     marginBottom: Spacing.lg,
     gap: 4,
@@ -1449,14 +1459,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
+    gap: 7,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: BorderRadius.full,
   },
-  segBtnActive: {},
+  segBtnActive: {
+    ...Shadows.sm,
+  },
   segBtnText: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '600',
+    letterSpacing: -0.1,
   },
 
   // Avatar Card

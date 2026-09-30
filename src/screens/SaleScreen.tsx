@@ -1,30 +1,28 @@
-import React, { useState, useMemo, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  Pressable,
-  Alert,
-  Platform,
-  Image,
-  KeyboardAvoidingView,
-  useWindowDimensions,
-  Modal,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Product, CartItem, PaymentMethod, ProductCategory, CustomerKhata } from '@/types';
-import { useShop } from '@/context/ShopContext';
 import { BarcodeModal } from '@/components/BarcodeModal';
-import { QuickItemModal } from '@/components/QuickItemModal';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
-import { SearchBar } from '@/components/ui/SearchBar';
-import { FilterChip } from '@/components/ui/FilterChip';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { ProductImage } from '@/components/ProductImage';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { FilterChip } from '@/components/ui/FilterChip';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { CartItem, CustomerKhata, PaymentMethod, Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useMemo, useRef, useState } from 'react';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View
+} from 'react-native';
 
 const CATEGORIES: ProductCategory[] = [
   'All',
@@ -119,10 +117,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         const valid = parsed.filter((h: any) => now - h.ts < 4 * 60 * 60 * 1000); // 4hr expiry
         setHeldCarts(valid);
         if (valid.length !== parsed.length) {
-          AsyncStorage.setItem('@sk_held_carts', JSON.stringify(valid)).catch(() => {});
+          AsyncStorage.setItem('@sk_held_carts', JSON.stringify(valid)).catch(() => { });
         }
-      } catch {}
-    }).catch(() => {});
+      } catch { }
+    }).catch(() => { });
   }, []);
 
   const holdCart = async () => {
@@ -130,7 +128,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     const newHold = { id: Date.now().toString(), ts: Date.now(), items: cart, total: grandTotal };
     const updated = [...heldCarts, newHold].slice(-3); // max 3 holds
     setHeldCarts(updated);
-    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(updated)).catch(() => {});
+    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(updated)).catch(() => { });
     clearCart();
   };
 
@@ -142,17 +140,17 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       const confirmed = Platform.OS === 'web'
         ? window.confirm(msg)
         : await new Promise<boolean>((resolve) => {
-            Alert.alert(language === 'ur' ? 'بل بحال کریں' : 'Restore Held Order', msg, [
-              { text: t('cancel'), onPress: () => resolve(false), style: 'cancel' },
-              { text: language === 'ur' ? 'جاری رکھیں' : 'Proceed', onPress: () => resolve(true) },
-            ]);
-          });
+          Alert.alert(language === 'ur' ? 'بل بحال کریں' : 'Restore Held Order', msg, [
+            { text: t('cancel'), onPress: () => resolve(false), style: 'cancel' },
+            { text: language === 'ur' ? 'جاری رکھیں' : 'Proceed', onPress: () => resolve(true) },
+          ]);
+        });
       if (!confirmed) return;
     }
     setCart(hold.items);
     const remaining = heldCarts.filter((h) => h.id !== holdId);
     setHeldCarts(remaining);
-    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(remaining)).catch(() => {});
+    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(remaining)).catch(() => { });
   };
 
   // W1-3: Success toast — stores last completed sale for explicit receipt view
@@ -1084,6 +1082,44 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
             {/* Action Buttons Row */}
             <View style={styles.topBarActions}>
+              {/* Discard cart — visible when cart has items */}
+              {cart.length > 0 && (
+                <Pressable
+                  onPress={() => {
+                    if (Platform.OS === 'web') {
+                      if (window.confirm(t('clearCartConfirm'))) clearCart();
+                    } else {
+                      Alert.alert(
+                        language === 'ur' ? 'بل خارج کریں' : 'Discard Cart',
+                        language === 'ur'
+                          ? `${totalItemsCount} آئٹم ہیں، کیا آپ بل خارج کرنا چاہتے ہیں؟`
+                          : `Discard ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} from the current bill?`,
+                        [
+                          { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
+                          {
+                            text: language === 'ur' ? 'خارج کریں' : 'Discard',
+                            style: 'destructive',
+                            onPress: clearCart,
+                          },
+                        ]
+                      );
+                    }
+                  }}
+                  style={({ pressed }) => [
+                    styles.discardCartBtn,
+                    {
+                      backgroundColor: settings.darkMode ? 'rgba(239,68,68,0.15)' : '#FEF2F2',
+                      borderColor: settings.darkMode ? 'rgba(239,68,68,0.4)' : '#FECACA',
+                    },
+                    pressed && { opacity: 0.75, transform: [{ scale: 0.96 }] },
+                  ]}>
+                  <Ionicons name="trash-outline" size={17} color={theme.danger} />
+                  <Text style={[styles.discardCartBtnText, { color: theme.danger }]}>
+                    {totalItemsCount}
+                  </Text>
+                </Pressable>
+              )}
+
               {/* View Mode Toggle (Grid vs List) */}
               <Pressable
                 onPress={() => setViewMode((m) => (m === 'grid' ? 'list' : 'grid'))}
@@ -1121,18 +1157,18 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   const chipBg = inCart
                     ? theme.primaryLight
                     : settings.darkMode
-                    ? colorScheme.bgDark
-                    : colorScheme.bgLight;
+                      ? colorScheme.bgDark
+                      : colorScheme.bgLight;
                   const chipBorder = inCart
                     ? theme.primary
                     : settings.darkMode
-                    ? colorScheme.borderDark
-                    : colorScheme.borderLight;
+                      ? colorScheme.borderDark
+                      : colorScheme.borderLight;
                   const chipText = inCart
                     ? theme.primary
                     : settings.darkMode
-                    ? colorScheme.textDark
-                    : colorScheme.textLight;
+                      ? colorScheme.textDark
+                      : colorScheme.textLight;
 
                   return (
                     <Pressable
@@ -1277,122 +1313,277 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               ]}
               keyboardShouldPersistTaps="handled">
               {filteredProducts.map((product) => {
-              const isOut = product.stock <= 0;
-              const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
-              const inCartItem = cart.find((it) => it.product.id === product.id);
+                const isOut = product.stock <= 0;
+                const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
+                const inCartItem = cart.find((it) => it.product.id === product.id);
 
-              if (viewMode === 'list') {
-                // ================= Enhanced Modern List Row =================
+                if (viewMode === 'list') {
+                  // ================= Enhanced Modern List Row =================
+                  return (
+                    <Pressable
+                      key={product.id}
+                      disabled={isOut}
+                      onPress={() => !inCartItem && addToCart(product)}
+                      style={({ pressed }) => [
+                        styles.listRow,
+                        {
+                          backgroundColor: theme.card,
+                          borderColor: inCartItem ? theme.primary : theme.border,
+                          borderWidth: inCartItem ? 1.5 : 1,
+                          opacity: isOut ? 0.6 : 1,
+                        },
+                        pressed && !isOut && !inCartItem && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+                      ]}>
+                      {/* Left: Thumbnail Image */}
+                      <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
+                        <ProductImage
+                          uri={product.image || product.imageUri}
+                          style={styles.listThumb}
+                          resizeMode="cover"
+                          fallbackColor={theme.textMuted}
+                          fallbackSize={24}
+                        />
+                      </View>
+
+                      {/* Middle: Name, Category badge & Stock Pill */}
+                      <View style={styles.listRowContent}>
+                        <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
+                          {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                        </Text>
+                        <View style={styles.listRowBadgeRow}>
+                          <View style={[styles.listCategoryBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
+                            <Text style={[styles.listCategoryText, { color: theme.textSecondary }]}>
+                              {product.category}
+                            </Text>
+                          </View>
+                          <View
+                            style={[
+                              styles.listStockBadge,
+                              {
+                                backgroundColor: isOut
+                                  ? theme.dangerLight
+                                  : isLow
+                                    ? theme.warningLight
+                                    : theme.successLight,
+                              },
+                            ]}>
+                            <Ionicons
+                              name={isOut ? 'alert-circle' : isLow ? 'warning' : 'cube-outline'}
+                              size={11}
+                              color={isOut ? theme.danger : isLow ? theme.warning : theme.success}
+                            />
+                            <Text
+                              style={[
+                                styles.listStockText,
+                                { color: isOut ? theme.danger : isLow ? theme.warning : theme.success },
+                              ]}>
+                              {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+
+                      {/* Right: Price & Stepper / Add button */}
+                      <View style={styles.listRowRight}>
+                        <Text
+                          style={[styles.listRowPrice, { color: theme.primary }]}
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.75}>
+                          {settings.currencySymbol}{formatCompactPrice(product.price)}
+                        </Text>
+
+                        {inCartItem ? (
+                          <View style={[styles.inlineStepper, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
+                            <Pressable
+                              onPress={() => updateQuantity(product.id, -1)}
+                              style={({ pressed }) => [styles.inlineStepBtn, pressed && { opacity: 0.7 }]}
+                              hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}>
+                              <Ionicons name="remove" size={17} color={theme.primaryDark} />
+                            </Pressable>
+                            <Text style={[styles.inlineStepQty, { color: theme.primaryDark, fontWeight: '800' }]}>
+                              {inCartItem.quantity}
+                            </Text>
+                            <Pressable
+                              onPress={() => addToCart(product, 1)}
+                              style={({ pressed }) => [styles.inlineStepBtn, pressed && { opacity: 0.7 }]}
+                              hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}>
+                              <Ionicons name="add" size={17} color={theme.primaryDark} />
+                            </Pressable>
+                          </View>
+                        ) : (
+                          <Pressable
+                            disabled={isOut}
+                            onPress={() => addToCart(product)}
+                            style={({ pressed }) => [
+                              styles.listAddBtn,
+                              {
+                                backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
+                                borderColor: isOut ? theme.border : theme.primary,
+                              },
+                              pressed && !isOut && { opacity: 0.8 },
+                            ]}>
+                            <Ionicons
+                              name="add-circle"
+                              size={16}
+                              color={isOut ? theme.textMuted : theme.primary}
+                            />
+                            <Text
+                              style={[
+                                styles.listAddBtnText,
+                                { color: isOut ? theme.textMuted : theme.primaryDark },
+                              ]}>
+                              {t('addItemToBill')}
+                            </Text>
+                          </Pressable>
+                        )}
+                      </View>
+                    </Pressable>
+                  );
+                }
+
+                // ================= Clean Card Grid =================
                 return (
                   <Pressable
                     key={product.id}
                     disabled={isOut}
                     onPress={() => !inCartItem && addToCart(product)}
                     style={({ pressed }) => [
-                      styles.listRow,
+                      styles.gridCard,
                       {
+                        width: gridColWidth,
                         backgroundColor: theme.card,
                         borderColor: inCartItem ? theme.primary : theme.border,
-                        borderWidth: inCartItem ? 1.5 : 1,
+                        borderWidth: inCartItem ? 2 : 1,
                         opacity: isOut ? 0.6 : 1,
                       },
-                      pressed && !isOut && !inCartItem && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+                      pressed && !isOut && !inCartItem && { transform: [{ scale: 0.98 }] },
                     ]}>
-                    {/* Left: Thumbnail Image */}
-                    <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
-                      <ProductImage
-                        uri={product.image || product.imageUri}
-                        style={styles.listThumb}
-                        resizeMode="cover"
-                        fallbackColor={theme.textMuted}
-                        fallbackSize={24}
-                      />
+                    {/* Stock pill */}
+                    <View
+                      style={[
+                        styles.stockTag,
+                        {
+                          backgroundColor: isOut
+                            ? theme.dangerLight
+                            : isLow
+                              ? theme.warningLight
+                              : theme.successLight,
+                        },
+                      ]}>
+                      <Text
+                        style={[
+                          styles.stockTagText,
+                          {
+                            color: isOut
+                              ? theme.danger
+                              : isLow
+                                ? theme.warning
+                                : theme.success,
+                          },
+                        ]}>
+                        {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
+                      </Text>
                     </View>
 
-                    {/* Middle: Name, Category badge & Stock Pill */}
-                    <View style={styles.listRowContent}>
-                      <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
-                        {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
-                      </Text>
-                      <View style={styles.listRowBadgeRow}>
-                        <View style={[styles.listCategoryBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
-                          <Text style={[styles.listCategoryText, { color: theme.textSecondary }]}>
-                            {product.category}
-                          </Text>
-                        </View>
-                        <View
-                          style={[
-                            styles.listStockBadge,
-                            {
-                              backgroundColor: isOut
-                                ? theme.dangerLight
-                                : isLow
-                                ? theme.warningLight
-                                : theme.successLight,
-                            },
-                          ]}>
-                          <Ionicons
-                            name={isOut ? 'alert-circle' : isLow ? 'warning' : 'cube-outline'}
-                            size={11}
-                            color={isOut ? theme.danger : isLow ? theme.warning : theme.success}
-                          />
-                          <Text
-                            style={[
-                              styles.listStockText,
-                              { color: isOut ? theme.danger : isLow ? theme.warning : theme.success },
-                            ]}>
-                            {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
-                          </Text>
-                        </View>
+                    <View style={styles.gridCardTop}>
+                      <View style={[styles.gridThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
+                        <ProductImage
+                          uri={product.image || product.imageUri}
+                          style={styles.gridThumb}
+                          resizeMode="cover"
+                          fallbackColor={theme.textMuted}
+                          fallbackSize={24}
+                        />
+                      </View>
+                      <View style={styles.gridTextContainer}>
+                        <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>
+                          {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                        </Text>
+                        <Text style={[styles.gridCategory, { color: theme.textMuted }]} numberOfLines={1}>
+                          {product.category}
+                        </Text>
                       </View>
                     </View>
 
-                    {/* Right: Price & Stepper / Add button */}
-                    <View style={styles.listRowRight}>
+                    <View style={styles.gridCardBottom}>
                       <Text
-                        style={[styles.listRowPrice, { color: theme.primary }]}
+                        style={[styles.gridPrice, { color: theme.primary }]}
                         numberOfLines={1}
                         adjustsFontSizeToFit
                         minimumFontScale={0.75}>
                         {settings.currencySymbol}{formatCompactPrice(product.price)}
                       </Text>
 
+                      {/* Stepper on card if in cart (attached flush at bottom right corner like design spec) */}
                       {inCartItem ? (
-                        <View style={[styles.inlineStepper, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                        <View
+                          style={[
+                            styles.cardStepperContainer,
+                            {
+                              borderColor: settings.darkMode ? 'rgba(255,255,255,0.18)' : '#CBD5E1',
+                            },
+                          ]}>
                           <Pressable
                             onPress={() => updateQuantity(product.id, -1)}
-                            style={styles.inlineStepBtn}>
-                            <Ionicons name="remove" size={15} color={theme.text} />
+                            style={({ pressed }) => [
+                              styles.cardStepBtnMinus,
+                              {
+                                backgroundColor: settings.darkMode
+                                  ? 'rgba(255,255,255,0.08)'
+                                  : '#F1F5F9',
+                              },
+                              pressed && { opacity: 0.6 },
+                            ]}
+                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 2 }}>
+                            <Ionicons name="remove" size={18} color={theme.text} />
                           </Pressable>
-                          <Text style={[styles.inlineStepQty, { color: theme.primary, fontWeight: '800' }]}>
-                            {inCartItem.quantity}
-                          </Text>
+                          <View
+                            style={[
+                              styles.cardStepQtyBox,
+                              {
+                                backgroundColor: settings.darkMode ? theme.card : '#FFFFFF',
+                                borderColor: settings.darkMode ? 'rgba(255,255,255,0.18)' : '#CBD5E1',
+                              },
+                            ]}>
+                            <Text style={[styles.cardStepQtyText, { color: theme.text }]}>
+                              {inCartItem.quantity}
+                            </Text>
+                          </View>
                           <Pressable
                             onPress={() => addToCart(product, 1)}
-                            style={styles.inlineStepBtn}>
-                            <Ionicons name="add" size={15} color={theme.text} />
+                            style={({ pressed }) => [
+                              styles.cardStepBtnPlus,
+                              {
+                                backgroundColor: settings.darkMode
+                                  ? 'rgba(255,255,255,0.08)'
+                                  : '#F1F5F9',
+                              },
+                              pressed && { opacity: 0.6 },
+                            ]}
+                            hitSlop={{ top: 6, bottom: 6, left: 2, right: 6 }}>
+                            <Ionicons name="add" size={18} color={theme.text} />
                           </Pressable>
                         </View>
                       ) : (
                         <Pressable
                           disabled={isOut}
                           onPress={() => addToCart(product)}
-                          style={({ pressed }) => [
-                            styles.listAddBtn,
+                          style={[
+                            styles.cardAddBtn,
                             {
                               backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
                               borderColor: isOut ? theme.border : theme.primary,
                             },
-                            pressed && !isOut && { opacity: 0.8 },
                           ]}>
                           <Ionicons
-                            name="add-circle"
-                            size={16}
+                            name="add"
+                            size={13}
                             color={isOut ? theme.textMuted : theme.primary}
                           />
                           <Text
                             style={[
-                              styles.listAddBtnText,
+                              styles.cardAddBtnText,
                               { color: isOut ? theme.textMuted : theme.primaryDark },
                             ]}>
                             {t('addItemToBill')}
@@ -1402,133 +1593,42 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                     </View>
                   </Pressable>
                 );
-              }
-
-              // ================= Clean Card Grid =================
-              return (
-                <Pressable
-                  key={product.id}
-                  disabled={isOut}
-                  onPress={() => !inCartItem && addToCart(product)}
-                  style={({ pressed }) => [
-                    styles.gridCard,
-                    {
-                      width: gridColWidth,
-                      backgroundColor: theme.card,
-                      borderColor: inCartItem ? theme.primary : theme.border,
-                      borderWidth: inCartItem ? 2 : 1,
-                      opacity: isOut ? 0.6 : 1,
-                    },
-                    pressed && !isOut && !inCartItem && { transform: [{ scale: 0.98 }] },
-                  ]}>
-                  {/* Stock pill */}
-                  <View
-                    style={[
-                      styles.stockTag,
-                      {
-                        backgroundColor: isOut
-                          ? theme.dangerLight
-                          : isLow
-                          ? theme.warningLight
-                          : theme.successLight,
-                      },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.stockTagText,
-                        {
-                          color: isOut
-                            ? theme.danger
-                            : isLow
-                            ? theme.warning
-                            : theme.success,
-                        },
-                      ]}>
-                      {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
-                    </Text>
-                  </View>
-
-                  <View style={styles.gridCardTop}>
-                    <View style={[styles.gridThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                      <ProductImage
-                        uri={product.image || product.imageUri}
-                        style={styles.gridThumb}
-                        resizeMode="cover"
-                        fallbackColor={theme.textMuted}
-                        fallbackSize={24}
-                      />
-                    </View>
-                    <View style={styles.gridTextContainer}>
-                      <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>
-                        {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
-                      </Text>
-                      <Text style={[styles.gridCategory, { color: theme.textMuted }]} numberOfLines={1}>
-                        {product.category}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.gridCardBottom}>
-                    <Text
-                      style={[styles.gridPrice, { color: theme.primary }]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.75}>
-                      {settings.currencySymbol}{formatCompactPrice(product.price)}
-                    </Text>
-
-                    {/* Stepper on card if in cart, otherwise + Add button */}
-                    {inCartItem ? (
-                      <View style={[styles.cardStepper, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                        <Pressable
-                          onPress={() => updateQuantity(product.id, -1)}
-                          style={styles.cardStepBtn}>
-                          <Ionicons name="remove" size={14} color={theme.text} />
-                        </Pressable>
-                        <Text style={[styles.cardStepQty, { color: theme.text }]}>
-                          {inCartItem.quantity}
-                        </Text>
-                        <Pressable
-                          onPress={() => addToCart(product, 1)}
-                          style={styles.cardStepBtn}>
-                          <Ionicons name="add" size={14} color={theme.text} />
-                        </Pressable>
-                      </View>
-                    ) : (
-                      <Pressable
-                        disabled={isOut}
-                        onPress={() => addToCart(product)}
-                        style={[
-                          styles.cardAddBtn,
-                          {
-                            backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
-                            borderColor: isOut ? theme.border : theme.primary,
-                          },
-                        ]}>
-                        <Ionicons
-                          name="add"
-                          size={16}
-                          color={isOut ? theme.textMuted : theme.primary}
-                        />
-                        <Text
-                          style={[
-                            styles.cardAddBtnText,
-                            { color: isOut ? theme.textMuted : theme.primaryDark },
-                          ]}>
-                          {t('addItemToBill')}
-                        </Text>
-                      </Pressable>
-                    )}
-                  </View>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+              })}
+            </ScrollView>
           )}
 
           {/* ================= Mobile Sticky Floating Cart Bar ================= */}
           {!isWideScreen && cart.length > 0 && (
             <View style={styles.floatingBarContainer}>
+              {/* Quick Discard — tap to clear cart without opening drawer */}
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS === 'web') {
+                    if (window.confirm(t('clearCartConfirm'))) clearCart();
+                  } else {
+                    Alert.alert(
+                      language === 'ur' ? 'بل خارج کریں' : 'Discard Cart',
+                      language === 'ur'
+                        ? `${totalItemsCount} آئٹم ہیں، کیا آپ بل خارج کرنا چاہتے ہیں؟`
+                        : `Discard ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} from the current bill?`,
+                      [
+                        { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
+                        {
+                          text: language === 'ur' ? 'خارج کریں' : 'Discard',
+                          style: 'destructive',
+                          onPress: clearCart,
+                        },
+                      ]
+                    );
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.floatingDiscardBtn,
+                  pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
+                ]}>
+                <Ionicons name="close" size={22} color={theme.danger} />
+              </Pressable>
+
               <Pressable
                 onPress={() => setIsCheckoutDrawerOpen(true)}
                 style={({ pressed }) => [
@@ -1744,6 +1844,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 125,
     position: 'relative',
+    overflow: 'hidden',
     ...Shadows.md,
   },
   stockTag: {
@@ -1805,32 +1906,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
   },
   cardAddBtnText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 10,
+    fontWeight: '700',
   },
-  cardStepper: {
+  cardStepperContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: BorderRadius.full,
     borderWidth: 1,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    gap: 6,
+    borderRadius: 0,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    height: 38,
+    marginRight: -Spacing.md,
+    marginBottom: -Spacing.md,
   },
-  cardStepBtn: {
-    padding: 3,
+  cardStepBtnMinus: {
+    width: 34,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  cardStepQty: {
-    fontSize: 13,
+  cardStepQtyBox: {
+    width: 36,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+  },
+  cardStepQtyText: {
+    fontSize: 15,
     fontWeight: '800',
-    minWidth: 16,
-    textAlign: 'center',
+  },
+  cardStepBtnPlus: {
+    width: 34,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // List View Styles
@@ -1922,19 +2043,24 @@ const styles = StyleSheet.create({
   inlineStepper: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
+    borderWidth: 1.5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    minHeight: 34,
     gap: 6,
   },
   inlineStepBtn: {
-    padding: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   inlineStepQty: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
-    minWidth: 18,
+    minWidth: 22,
     textAlign: 'center',
   },
   listAddBtn: {
@@ -1958,8 +2084,23 @@ const styles = StyleSheet.create({
     left: Spacing.md,
     right: Spacing.md,
     zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  floatingDiscardBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#FEF2F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    ...Shadows.md,
   },
   floatingBar: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -2016,6 +2157,21 @@ const styles = StyleSheet.create({
   },
   floatingBarActionText: {
     color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+
+  // Discard cart button (top bar, desktop)
+  discardCartBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    height: 46,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1.5,
+  },
+  discardCartBtnText: {
     fontSize: 13,
     fontWeight: '800',
   },
