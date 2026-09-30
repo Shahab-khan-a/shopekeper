@@ -1436,14 +1436,14 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
             </View>
           </ScrollView>
 
-          {/* Action Buttons Bar */}
+          {/* Action Buttons Bar - Row 1: Primary WhatsApp Image + Close */}
           <View style={[styles.actionButtonsWrap, { borderTopColor: theme.border }]}>
             {/* Primary: WhatsApp Image Button */}
             <Pressable
               onPress={handleShareWhatsAppImage}
               disabled={isGeneratingImage}
               style={({ pressed }) => [
-                styles.actionBtn,
+                styles.actionBtnPrimary,
                 styles.whatsappBtn,
                 pressed && { transform: [{ scale: 0.96 }] },
               ]}>
@@ -1452,7 +1452,7 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               ) : (
                 <>
                   <Ionicons name="logo-whatsapp" size={19} color="#FFFFFF" />
-                  <Text style={styles.actionBtnTextWhite}>WhatsApp (Image)</Text>
+                  <Text style={styles.actionBtnTextWhite} numberOfLines={1}>WhatsApp</Text>
                 </>
               )}
             </Pressable>
@@ -1461,12 +1461,12 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
             <Pressable
               onPress={handleShareWhatsAppText}
               style={({ pressed }) => [
-                styles.actionBtn,
+                styles.actionBtnSecondary,
                 styles.whatsappTextBtn,
                 pressed && { transform: [{ scale: 0.96 }] },
               ]}>
               <Ionicons name="chatbubble-ellipses-outline" size={16} color="#006837" />
-              <Text style={styles.whatsappTextBtnLabel}>WA Text</Text>
+              <Text style={styles.whatsappTextBtnLabel} numberOfLines={1}>WA Text</Text>
             </Pressable>
 
             {/* Download/Save Image Button */}
@@ -1474,12 +1474,12 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               onPress={handleDownloadImage}
               disabled={isGeneratingImage}
               style={({ pressed }) => [
-                styles.actionBtn,
+                styles.actionBtnSecondary,
                 styles.imageDownloadBtn,
                 pressed && { transform: [{ scale: 0.96 }] },
               ]}>
               <Ionicons name="image-outline" size={17} color="#FFFFFF" />
-              <Text style={styles.actionBtnTextWhite}>Image</Text>
+              <Text style={styles.actionBtnTextWhite} numberOfLines={1}>Image</Text>
             </Pressable>
 
             {/* Share PDF Button */}
@@ -1487,7 +1487,7 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               onPress={handleSharePDF}
               disabled={isGeneratingPDF}
               style={({ pressed }) => [
-                styles.actionBtn,
+                styles.actionBtnSecondary,
                 styles.pdfShareBtn,
                 pressed && { transform: [{ scale: 0.96 }] },
               ]}>
@@ -1496,7 +1496,7 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               ) : (
                 <>
                   <Ionicons name="document-text" size={17} color="#FFFFFF" />
-                  <Text style={styles.actionBtnTextWhite}>PDF</Text>
+                  <Text style={styles.actionBtnTextWhite} numberOfLines={1}>PDF</Text>
                 </>
               )}
             </Pressable>
@@ -1505,24 +1505,24 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
             <Pressable
               onPress={handlePrint}
               style={({ pressed }) => [
-                styles.actionBtn,
+                styles.actionBtnSecondary,
                 styles.printBtn,
                 pressed && { transform: [{ scale: 0.96 }] },
               ]}>
               <Ionicons name="print-outline" size={17} color="#FFFFFF" />
-              <Text style={styles.actionBtnTextWhite}>{t('printBill')}</Text>
+              <Text style={styles.actionBtnTextWhite} numberOfLines={1}>{t('printBill')}</Text>
             </Pressable>
 
             {/* Close Button */}
             <Pressable
               onPress={onClose}
               style={({ pressed }) => [
-                styles.actionBtn,
+                styles.actionBtnSecondary,
                 styles.doneBtn,
                 { backgroundColor: theme.surfaceSubtle },
                 pressed && { opacity: 0.7 },
               ]}>
-              <Text style={[styles.doneBtnText, { color: theme.textSecondary }]}>{t('close')}</Text>
+              <Text style={[styles.doneBtnText, { color: theme.textSecondary }]} numberOfLines={1}>{t('close')}</Text>
             </Pressable>
           </View>
 
@@ -1849,11 +1849,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: Spacing.md,
-    gap: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    gap: 6,
     borderTopWidth: 1,
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
   },
+  // Primary full-size button (WhatsApp Image - the hero CTA)
+  actionBtnPrimary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    borderRadius: BorderRadius.lg,
+    flex: 1.6,
+  },
+  // Secondary compact buttons
+  actionBtnSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 11,
+    paddingHorizontal: 8,
+    borderRadius: BorderRadius.lg,
+    flex: 1,
+  },
+  // Keep actionBtn alias for any legacy usage
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1863,7 +1887,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: BorderRadius.lg,
     flex: 1,
-    minWidth: 100,
   },
   whatsappBtn: {
     backgroundColor: '#25D366',

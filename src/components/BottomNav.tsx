@@ -43,6 +43,11 @@ const WAVE_SLICES = Array.from({ length: COLUMN_COUNT }, (_, i) => {
 
 export const BottomNav: React.FC = () => {
   const { activeTab, setActiveTab, t, settings, lowStockProducts } = useShop();
+
+  if (activeTab === 'settings') {
+    return null;
+  }
+
   const insets = useSafeAreaInsets();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 

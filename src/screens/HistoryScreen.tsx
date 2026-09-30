@@ -7,6 +7,7 @@ import {
   Pressable,
   Alert,
   Platform,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Sale } from '@/types';
@@ -25,6 +26,16 @@ export const HistoryScreen: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<HistoryFilter>('all');
+  
+  // Track expanded item tables (default all collapsed or expanded, using card ID)
+  const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
+
+  const toggleCardCollapse = (saleId: string) => {
+    setCollapsedCards((prev) => ({
+      ...prev,
+      [saleId]: !prev[saleId],
+    }));
+  };
 
   const filteredSales = useMemo(() => {
     const now = new Date();
@@ -90,16 +101,31 @@ export const HistoryScreen: React.FC = () => {
     }
   };
 
+  const handleCallCustomer = (phone?: string) => {
+    if (!phone) return;
+    const cleanPhone = phone.replace(/[^0-9+]/g, '');
+    const url = `tel:${cleanPhone}`;
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url);
+        } else if (Platform.OS === 'web') {
+          window.open(url);
+        }
+      })
+      .catch(() => {});
+  };
+
   const getPayColor = (method: string) => {
-    if (method === 'cash') return theme.success;
-    if (method === 'online') return theme.secondary;
-    return theme.danger;
+    if (method === 'cash') return theme.primary;
+    if (method === 'online') return '#0284C7'; // Sky Blue
+    return '#D97706'; // Amber / Udhaar
   };
 
   const getPayBg = (method: string) => {
-    if (method === 'cash') return theme.successLight;
-    if (method === 'online') return theme.surfaceSubtle;
-    return theme.dangerLight;
+    if (method === 'cash') return settings.darkMode ? 'rgba(5, 150, 105, 0.18)' : '#DCFCE7';
+    if (method === 'online') return settings.darkMode ? 'rgba(2, 132, 199, 0.18)' : '#E0F2FE';
+    return settings.darkMode ? 'rgba(217, 119, 6, 0.18)' : '#FEF3C7';
   };
 
   const filterOptions: { key: HistoryFilter; label: string }[] = [
@@ -182,8 +208,19 @@ export const HistoryScreen: React.FC = () => {
             {filteredSales.map((sale) => {
               const payColor = getPayColor(sale.paymentMethod);
               const payBg = getPayBg(sale.paymentMethod);
-
               const isRefunded = sale.status === 'refunded';
+              const isCollapsed = collapsedCards[sale.id];
+
+              const saleDate = new Date(sale.date);
+              const formattedDate = saleDate.toLocaleDateString([], {
+                month: 'numeric',
+                day: 'numeric',
+                year: '2-digit',
+              });
+              const formattedTime = saleDate.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              });
 
               return (
                 <View
@@ -192,16 +229,16 @@ export const HistoryScreen: React.FC = () => {
                     styles.billCard,
                     {
                       backgroundColor: theme.card,
-                      borderColor: isRefunded ? theme.border : theme.border,
+                      borderColor: theme.border,
                       borderLeftColor: isRefunded ? theme.textMuted : payColor,
-                      opacity: isRefunded ? 0.75 : 1,
+                      opacity: isRefunded ? 0.78 : 1,
                     },
                   ]}>
-                  {/* Header */}
+                  {/* Top Header Row */}
                   <View style={styles.billCardTop}>
                     <View style={styles.billBadgeWrap}>
                       <Text style={[styles.billNoText, { color: isRefunded ? theme.textMuted : theme.primary }]}>
-                        #{sale.billNumber}
+                        #INV-{sale.billNumber}
                       </Text>
                       <StatusBadge
                         label={sale.paymentMethod.toUpperCase()}
@@ -217,12 +254,12 @@ export const HistoryScreen: React.FC = () => {
                         />
                       )}
                     </View>
-                    <Text style={[styles.billDateText, { color: theme.textSecondary }]}>
-                      {new Date(sale.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                    <Text style={[styles.billDateText, { color: theme.textMuted }]}>
+                      {formattedDate}, {formattedTime}
                     </Text>
                   </View>
 
-                  {/* Customer */}
+                  {/* Customer Row */}
                   {sale.customerName ? (
                     <View style={styles.custRow}>
                       <Ionicons name="person-outline" size={14} color={theme.textSecondary} />
@@ -232,60 +269,118 @@ export const HistoryScreen: React.FC = () => {
                     </View>
                   ) : null}
 
-                  {/* Items */}
-                  <View style={[styles.itemsSummaryBox, { backgroundColor: theme.surfaceSubtle }]}>
-                    {sale.items.map((it, idx) => (
-                      <Text key={idx} style={[styles.itemSummaryLine, { color: theme.textSecondary }]}>
-                        • {it.product.name} ({it.quantity} {it.product.unit} × {settings.currencySymbol}{it.unitPrice})
+                  {/* Accordion Toggle Pill */}
+                  <Pressable
+                    onPress={() => toggleCardCollapse(sale.id)}
+                    style={({ pressed }) => [
+                      styles.accordionHeader,
+                      { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                      pressed && { opacity: 0.8 },
+                    ]}>
+                    <View style={styles.accordionHeaderLeft}>
+                      <Ionicons
+                        name={isCollapsed ? 'chevron-down' : 'chevron-up'}
+                        size={15}
+                        color={theme.textSecondary}
+                      />
+                      <Text style={[styles.accordionHeaderText, { color: theme.textSecondary }]}>
+                        {language === 'ur' ? 'اشیاء تفصیلات' : 'Item details'} ({sale.items?.length || 0})
                       </Text>
-                    ))}
-                  </View>
+                    </View>
+                  </Pressable>
 
-                  {/* Footer */}
+                  {/* Clean Items Table */}
+                  {!isCollapsed && (
+                    <View style={styles.tableContainer}>
+                      {/* Table Column Headers */}
+                      <View style={[styles.tableHeaderRow, { borderBottomColor: theme.border }]}>
+                        <Text style={[styles.thColName, { color: theme.textSecondary }]}>
+                          {language === 'ur' ? 'نام' : 'Item Name'}
+                        </Text>
+                        <Text style={[styles.thColQtyPrice, { color: theme.textSecondary }]}>
+                          {language === 'ur' ? 'مقدار × قیمت' : 'Qty × Price'}
+                        </Text>
+                        <Text style={[styles.thColTotal, { color: theme.textSecondary }]}>
+                          {language === 'ur' ? 'کل' : 'Item Total'}
+                        </Text>
+                      </View>
+
+                      {/* Table Item Rows */}
+                      {sale.items.map((it, idx) => (
+                        <View key={idx} style={styles.tableBodyRow}>
+                          <Text style={[styles.tdColName, { color: theme.text }]} numberOfLines={1}>
+                            {idx + 1}. {it.product.name}
+                          </Text>
+                          <Text style={[styles.tdColQtyPrice, { color: theme.textSecondary }]} numberOfLines={1}>
+                            | {it.quantity} {it.product.unit || 'pc'} | {settings.currencySymbol} {it.unitPrice}
+                          </Text>
+                          <Text style={[styles.tdColTotal, { color: theme.text }]}>
+                            {settings.currencySymbol} {it.total}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Footer Row */}
                   <View style={[styles.billCardBottom, { borderTopColor: theme.border }]}>
                     <View>
                       <Text style={[styles.totalLabel, { color: theme.textSecondary }]}>{t('grandTotal')}</Text>
-                      <Text style={[
-                        styles.totalAmount, 
-                        { color: isRefunded ? theme.textMuted : theme.text },
-                        isRefunded && { textDecorationLine: 'line-through' }
-                      ]}>
-                        {settings.currencySymbol} {sale.grandTotal}
+                      <Text
+                        style={[
+                          styles.totalAmount,
+                          { color: isRefunded ? theme.textMuted : theme.text },
+                          isRefunded && { textDecorationLine: 'line-through' },
+                        ]}>
+                        {settings.currencySymbol} {sale.grandTotal.toLocaleString()}
                       </Text>
                     </View>
 
+                    {/* Action Buttons Row */}
                     <View style={styles.billActions}>
+                      {/* Main View Receipt Button */}
                       <Pressable
                         onPress={() => setActiveReceipt(sale)}
                         style={({ pressed }) => [
-                          styles.viewBtn,
-                          { backgroundColor: theme.primaryLight },
-                          pressed && { opacity: 0.8 },
+                          styles.viewReceiptBtn,
+                          { backgroundColor: theme.primary },
+                          pressed && { opacity: 0.88, transform: [{ scale: 0.97 }] },
                         ]}>
-                        <Ionicons name="eye-outline" size={16} color={theme.primary} />
-                        <Text style={[styles.viewBtnText, { color: theme.primary }]}>
-                          {t('viewReceipt')}
-                        </Text>
+                        <Ionicons name="eye-outline" size={16} color="#FFFFFF" />
+                        <Text style={styles.viewReceiptBtnText}>{t('viewReceipt')}</Text>
                       </Pressable>
 
+                      {/* Quick Refund / Void Button */}
                       {isRefunded ? (
                         <View style={[styles.refundedTag, { backgroundColor: theme.surfaceSubtle }]}>
                           <Ionicons name="refresh-circle" size={16} color={theme.danger} />
-                          <Text style={[styles.refundedTagText, { color: theme.danger }]}>
-                            {language === 'ur' ? 'واپس شدہ' : 'Refunded'}
-                          </Text>
                         </View>
                       ) : (
                         <Pressable
                           onPress={() => handleRefundSale(sale)}
+                          accessibilityLabel="Refund bill"
                           style={({ pressed }) => [
-                            styles.deleteBtn,
+                            styles.actionIconBtn,
                             { backgroundColor: theme.dangerLight },
-                            pressed && { opacity: 0.8 },
+                            pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
                           ]}>
-                          <Ionicons name="return-down-back-outline" size={16} color={theme.danger} />
+                          <Ionicons name="return-down-back" size={16} color={theme.danger} />
                         </Pressable>
                       )}
+
+                      {/* Direct Phone Call Button */}
+                      {sale.customerPhone ? (
+                        <Pressable
+                          onPress={() => handleCallCustomer(sale.customerPhone)}
+                          accessibilityLabel={`Call ${sale.customerName || 'Customer'}`}
+                          style={({ pressed }) => [
+                            styles.actionIconBtn,
+                            { backgroundColor: settings.darkMode ? 'rgba(2, 132, 199, 0.2)' : '#E0F2FE' },
+                            pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
+                          ]}>
+                          <Ionicons name="call" size={15} color="#0284C7" />
+                        </Pressable>
+                      ) : null}
                     </View>
                   </View>
                 </View>
@@ -330,6 +425,8 @@ const styles = StyleSheet.create({
   },
   billsScroll: { flex: 1 },
   billsList: { gap: Spacing.md, paddingBottom: 100 },
+
+  // Card Structure
   billCard: {
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
@@ -341,15 +438,91 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   billBadgeWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   billNoText: { fontSize: 15, fontWeight: '800' },
   billDateText: { fontSize: 11, fontWeight: '500' },
-  custRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  custRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   custName: { fontSize: 13, fontWeight: '600' },
-  itemsSummaryBox: { padding: Spacing.sm, borderRadius: BorderRadius.md, marginVertical: 6 },
-  itemSummaryLine: { fontSize: 11, lineHeight: 17 },
+
+  // Accordion Pill Header
+  accordionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  accordionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  accordionHeaderText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  // Structured Items Table
+  tableContainer: {
+    marginBottom: 8,
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+  },
+  thColName: {
+    flex: 2,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  thColQtyPrice: {
+    flex: 2.2,
+    fontSize: 11,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  thColTotal: {
+    flex: 1.2,
+    fontSize: 11,
+    fontWeight: '700',
+    textAlign: 'right',
+  },
+
+  tableBodyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  tdColName: {
+    flex: 2,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tdColQtyPrice: {
+    flex: 2.2,
+    fontSize: 11,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  tdColTotal: {
+    flex: 1.2,
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'right',
+  },
+
+  // Footer Row
   billCardBottom: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -358,26 +531,37 @@ const styles = StyleSheet.create({
     marginTop: 4,
     borderTopWidth: 1,
   },
-  totalLabel: { fontSize: 10, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.4 },
-  totalAmount: { fontSize: 20, fontWeight: '900', letterSpacing: -0.3 },
-  billActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  viewBtn: {
+  totalLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
+  totalAmount: { fontSize: 22, fontWeight: '900', letterSpacing: -0.4 },
+  billActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  
+  // Action Buttons
+  viewReceiptBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: BorderRadius.full,
+    ...Shadows.sm,
   },
-  viewBtnText: { fontSize: 12, fontWeight: '700' },
-  deleteBtn: { padding: 8, borderRadius: BorderRadius.full, alignItems: 'center', justifyContent: 'center' },
-  refundedTag: {
-    flexDirection: 'row',
+  viewReceiptBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  actionIconBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.full,
+    justifyContent: 'center',
   },
-  refundedTagText: { fontSize: 11, fontWeight: '700' },
+  refundedTag: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

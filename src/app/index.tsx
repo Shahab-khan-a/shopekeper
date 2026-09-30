@@ -206,8 +206,8 @@ export default function App() {
         {/* Dynamic Screen Component */}
         <View style={styles.screenWrapper}>{renderActiveScreen()}</View>
 
-        {/* Persistent Bottom Navigation */}
-        <BottomNav />
+        {/* Bottom Navigation (Hidden on Settings screen) */}
+        {activeTab !== 'settings' && <BottomNav />}
 
         {/* Global Product Add / Edit Modal */}
         <ProductModal

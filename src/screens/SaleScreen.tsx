@@ -1394,21 +1394,52 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         </Text>
 
                         {inCartItem ? (
-                          <View style={[styles.inlineStepper, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
+                          <View
+                            style={[
+                              styles.listStepperContainer,
+                              {
+                                borderColor: settings.darkMode ? 'rgba(255,255,255,0.18)' : '#CBD5E1',
+                              },
+                            ]}>
                             <Pressable
                               onPress={() => updateQuantity(product.id, -1)}
-                              style={({ pressed }) => [styles.inlineStepBtn, pressed && { opacity: 0.7 }]}
-                              hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}>
-                              <Ionicons name="remove" size={17} color={theme.primaryDark} />
+                              style={({ pressed }) => [
+                                styles.listStepBtnMinus,
+                                {
+                                  backgroundColor: settings.darkMode
+                                    ? 'rgba(255,255,255,0.08)'
+                                    : '#F1F5F9',
+                                },
+                                pressed && { opacity: 0.6 },
+                              ]}
+                              hitSlop={{ top: 6, bottom: 6, left: 6, right: 2 }}>
+                              <Ionicons name="remove" size={16} color={theme.text} />
                             </Pressable>
-                            <Text style={[styles.inlineStepQty, { color: theme.primaryDark, fontWeight: '800' }]}>
-                              {inCartItem.quantity}
-                            </Text>
+                            <View
+                              style={[
+                                styles.listStepQtyBox,
+                                {
+                                  backgroundColor: settings.darkMode ? theme.card : '#FFFFFF',
+                                  borderColor: settings.darkMode ? 'rgba(255,255,255,0.18)' : '#CBD5E1',
+                                },
+                              ]}>
+                              <Text style={[styles.listStepQtyText, { color: theme.text }]}>
+                                {inCartItem.quantity}
+                              </Text>
+                            </View>
                             <Pressable
                               onPress={() => addToCart(product, 1)}
-                              style={({ pressed }) => [styles.inlineStepBtn, pressed && { opacity: 0.7 }]}
-                              hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}>
-                              <Ionicons name="add" size={17} color={theme.primaryDark} />
+                              style={({ pressed }) => [
+                                styles.listStepBtnPlus,
+                                {
+                                  backgroundColor: settings.darkMode
+                                    ? 'rgba(255,255,255,0.08)'
+                                    : '#F1F5F9',
+                                },
+                                pressed && { opacity: 0.6 },
+                              ]}
+                              hitSlop={{ top: 6, bottom: 6, left: 2, right: 6 }}>
+                              <Ionicons name="add" size={16} color={theme.text} />
                             </Pressable>
                           </View>
                         ) : (
@@ -1969,6 +2000,8 @@ const styles = StyleSheet.create({
     gap: 10,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
+    overflow: 'hidden',
+    position: 'relative',
   },
   listThumbWrap: {
     width: 50,
@@ -2033,35 +2066,51 @@ const styles = StyleSheet.create({
   listRowRight: {
     flexDirection: 'column',
     alignItems: 'flex-end',
-    gap: 6,
+    justifyContent: 'space-between',
+    alignSelf: 'stretch',
   },
   listRowPrice: {
     fontSize: 15,
     fontWeight: '900',
     letterSpacing: -0.3,
   },
-  inlineStepper: {
+  listStepperContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minHeight: 34,
-    gap: 6,
+    borderWidth: 1,
+    borderRadius: 0,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    height: 36,
+    marginRight: -12,
+    marginBottom: -12,
   },
-  inlineStepBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+  listStepBtnMinus: {
+    width: 32,
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  inlineStepQty: {
+  listStepQtyBox: {
+    width: 34,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+  },
+  listStepQtyText: {
     fontSize: 14,
     fontWeight: '800',
-    minWidth: 22,
-    textAlign: 'center',
+  },
+  listStepBtnPlus: {
+    width: 32,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   listAddBtn: {
     flexDirection: 'row',
