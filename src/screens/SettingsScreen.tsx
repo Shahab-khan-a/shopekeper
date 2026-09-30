@@ -68,7 +68,7 @@ const RowItem: React.FC<{
   </Pressable>
 );
 
-/** Inline editable field inside a RowItem */
+/** Inline editable field inside a RowItem (kept for legacy/non-text rows) */
 const InlineField: React.FC<{
   value: string;
   onChangeText: (t: string) => void;
@@ -88,6 +88,93 @@ const InlineField: React.FC<{
     textAlign="right"
   />
 );
+
+/**
+ * StackedField — label on top row (icon + text), full-width input below.
+ * Best-practice pattern for mobile settings forms.
+ */
+const StackedField: React.FC<{
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  iconBg: string;
+  label: string;
+  value: string;
+  onChangeText: (t: string) => void;
+  placeholder?: string;
+  keyboardType?: 'default' | 'phone-pad' | 'email-address' | 'numeric';
+  multiline?: boolean;
+  theme: ThemeColors;
+  last?: boolean;
+}> = ({ icon, iconColor, iconBg, label, value, onChangeText, placeholder, keyboardType = 'default', multiline = false, theme, last }) => (
+  <View
+    style={[
+      stackedStyles.fieldWrap,
+      !last && { borderBottomWidth: 1, borderBottomColor: theme.border },
+    ]}
+  >
+    {/* Label row */}
+    <View style={stackedStyles.labelRow}>
+      <View style={[stackedStyles.fieldIcon, { backgroundColor: iconBg }]}>
+        <Ionicons name={icon} size={14} color={iconColor} />
+      </View>
+      <Text style={[stackedStyles.fieldLabel, { color: theme.textSecondary }]}>{label}</Text>
+    </View>
+    {/* Full-width input */}
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor={theme.textMuted}
+      keyboardType={keyboardType}
+      multiline={multiline}
+      style={[
+        stackedStyles.fieldInput,
+        {
+          color: theme.text,
+          backgroundColor: theme.background,
+          borderColor: theme.border,
+        },
+        multiline && { minHeight: 70, textAlignVertical: 'top' },
+      ]}
+    />
+  </View>
+);
+
+const stackedStyles = StyleSheet.create({
+  fieldWrap: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+    gap: 6,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  fieldIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    textTransform: 'uppercase',
+  },
+  fieldInput: {
+    width: '100%',
+    fontSize: 15,
+    fontWeight: '500',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+});
 
 /** Section card wrapper */
 const Section: React.FC<{ title: string; theme: ThemeColors; children: React.ReactNode }> = ({
@@ -928,49 +1015,106 @@ export const SettingsScreen: React.FC = () => {
           </View>
 
           {/* Store Info */}
-          <Section title={t('identitySection')} theme={theme}>
-            <RowItem icon="storefront-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('ownerNameLabel')} theme={theme}>
-              <InlineField value={ownerName} onChangeText={setOwnerName} onSubmitEditing={handleSave} placeholder={user?.displayName || "e.g. Shop Owner"} theme={theme} />
-            </RowItem>
-            <RowItem icon="business-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('shopNameLabel')} theme={theme}>
-              <InlineField value={shopName} onChangeText={setShopName} onSubmitEditing={handleSave} placeholder={user?.displayName ? `${user.displayName}'s Store` : "e.g. My Store"} theme={theme} />
-            </RowItem>
-            <RowItem icon="text-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('shopNameUrduLabel')} theme={theme} last>
-              <InlineField value={shopNameUrdu} onChangeText={setShopNameUrdu} onSubmitEditing={handleSave} placeholder={user?.displayName ? `${user.displayName} اسٹور` : "مثلاً: میری دکان"} theme={theme} />
-            </RowItem>
-          </Section>
+          <View style={styles.sectionWrap}>
+            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('identitySection').toUpperCase()}</Text>
+            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <StackedField
+                icon="storefront-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                label={t('ownerNameLabel')}
+                value={ownerName} onChangeText={setOwnerName}
+                placeholder={user?.displayName || 'e.g. Shop Owner'}
+                theme={theme}
+              />
+              <StackedField
+                icon="business-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                label={t('shopNameLabel')}
+                value={shopName} onChangeText={setShopName}
+                placeholder={user?.displayName ? `${user.displayName}'s Store` : 'e.g. My Store'}
+                theme={theme}
+              />
+              <StackedField
+                icon="text-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                label={t('shopNameUrduLabel')}
+                value={shopNameUrdu} onChangeText={setShopNameUrdu}
+                placeholder={user?.displayName ? `${user.displayName} اسٹور` : 'مثلاً: میری دکان'}
+                theme={theme}
+                last
+              />
+            </View>
+          </View>
 
           {/* Contact */}
-          <Section title={t('contactSection')} theme={theme}>
-            <RowItem icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('phoneLabel')} theme={theme}>
-              <InlineField value={phone} onChangeText={setPhone} placeholder="0300-1234567" keyboardType="phone-pad" theme={theme} />
-            </RowItem>
-            <RowItem icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('altPhoneLabel')} theme={theme}>
-              <InlineField value={alternatePhone} onChangeText={setAlternatePhone} placeholder="0321-9876543" keyboardType="phone-pad" theme={theme} />
-            </RowItem>
-            <RowItem icon="mail-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('emailLabel')} theme={theme}>
-              <InlineField value={email} onChangeText={setEmail} placeholder="store@gmail.com" keyboardType="email-address" theme={theme} />
-            </RowItem>
-            <RowItem icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('cityLabel')} theme={theme}>
-              <InlineField value={city} onChangeText={setCity} placeholder="e.g. Lahore" theme={theme} />
-            </RowItem>
-            <RowItem icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('addressLabel')} theme={theme} last>
-              <InlineField value={address} onChangeText={setAddress} placeholder="Shop #14, Market" theme={theme} />
-            </RowItem>
-          </Section>
+          <View style={styles.sectionWrap}>
+            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('contactSection').toUpperCase()}</Text>
+            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <StackedField
+                icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('phoneLabel')}
+                value={phone} onChangeText={setPhone}
+                placeholder="0300-1234567" keyboardType="phone-pad"
+                theme={theme}
+              />
+              <StackedField
+                icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('altPhoneLabel')}
+                value={alternatePhone} onChangeText={setAlternatePhone}
+                placeholder="0321-9876543" keyboardType="phone-pad"
+                theme={theme}
+              />
+              <StackedField
+                icon="mail-outline" iconColor="#7C3AED" iconBg="#EDE9FE"
+                label={t('emailLabel')}
+                value={email} onChangeText={setEmail}
+                placeholder="store@gmail.com" keyboardType="email-address"
+                theme={theme}
+              />
+              <StackedField
+                icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                label={t('cityLabel')}
+                value={city} onChangeText={setCity}
+                placeholder="e.g. Lahore"
+                theme={theme}
+              />
+              <StackedField
+                icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                label={t('addressLabel')}
+                value={address} onChangeText={setAddress}
+                placeholder="Shop #14, Main Market"
+                multiline
+                theme={theme}
+                last
+              />
+            </View>
+          </View>
 
           {/* Payment & Tax */}
-          <Section title={t('paymentSection')} theme={theme}>
-            <RowItem icon="wallet-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('paymentDetailsLabel')} theme={theme}>
-              <InlineField value={paymentDetails} onChangeText={setPaymentDetails} placeholder="EasyPaisa: 0300-…" theme={theme} />
-            </RowItem>
-            <RowItem icon="document-text-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('taxNumberLabel')} theme={theme}>
-              <InlineField value={taxNumber} onChangeText={setTaxNumber} placeholder="NTN-XXXXXXX-X" theme={theme} />
-            </RowItem>
-            <RowItem icon="time-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('businessHoursLabel')} theme={theme} last>
-              <InlineField value={businessHours} onChangeText={setBusinessHours} placeholder="08:00 AM – 11:30 PM" theme={theme} />
-            </RowItem>
-          </Section>
+          <View style={styles.sectionWrap}>
+            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('paymentSection').toUpperCase()}</Text>
+            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <StackedField
+                icon="wallet-outline" iconColor="#059669" iconBg="#D1FAE5"
+                label={t('paymentDetailsLabel')}
+                value={paymentDetails} onChangeText={setPaymentDetails}
+                placeholder="EasyPaisa: 0300-…"
+                theme={theme}
+              />
+              <StackedField
+                icon="document-text-outline" iconColor="#059669" iconBg="#D1FAE5"
+                label={t('taxNumberLabel')}
+                value={taxNumber} onChangeText={setTaxNumber}
+                placeholder="NTN-XXXXXXX-X"
+                theme={theme}
+              />
+              <StackedField
+                icon="time-outline" iconColor="#059669" iconBg="#D1FAE5"
+                label={t('businessHoursLabel')}
+                value={businessHours} onChangeText={setBusinessHours}
+                placeholder="08:00 AM – 11:30 PM"
+                theme={theme}
+                last
+              />
+            </View>
+          </View>
 
           {/* ── Save Profile Button ── */}
           <Pressable
@@ -1011,39 +1155,56 @@ export const SettingsScreen: React.FC = () => {
           </Section>
 
           {/* Billing */}
-          <Section title={t('billingSection')} theme={theme}>
-            <RowItem
-              icon="cash-outline"
-              iconColor="#059669"
-              iconBg="#D1FAE5"
-              label={t('currencyLabel')}
-              sublabel={
-                selectedCurrency
-                  ? language === 'ur' ? selectedCurrency.nameUrdu : selectedCurrency.name
-                  : undefined
-              }
-              onPress={() => setIsCurrencyPickerOpen(true)}
-              theme={theme}
-            >
-              <View style={styles.currencyValueRow}>
-                <Text style={[styles.currencyValueText, { color: theme.text }]} numberOfLines={1}>
-                  {selectedCurrency
-                    ? `${selectedCurrency.flag} ${selectedCurrency.code} · ${settings.currencySymbol}`
-                    : settings.currencySymbol}
-                </Text>
-                <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
-              </View>
-            </RowItem>
-            <RowItem icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('lowStockThresholdLabel')} theme={theme}>
-              <InlineField value={lowStockThreshold} onChangeText={setLowStockThreshold} keyboardType="numeric" placeholder="5" theme={theme} />
-            </RowItem>
-            <RowItem icon="receipt-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('billFooterLabel')} theme={theme}>
-              <InlineField value={footerNote} onChangeText={setFooterNote} placeholder="Thank you!" theme={theme} />
-            </RowItem>
-            <RowItem icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('billFooterUrduLabel')} theme={theme} last>
-              <InlineField value={footerNoteUrdu} onChangeText={setFooterNoteUrdu} placeholder="شکریہ" theme={theme} />
-            </RowItem>
-          </Section>
+          <View style={styles.sectionWrap}>
+            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('billingSection').toUpperCase()}</Text>
+            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              {/* Currency — keep as RowItem (opens picker, not a text input) */}
+              <RowItem
+                icon="cash-outline"
+                iconColor="#059669"
+                iconBg="#D1FAE5"
+                label={t('currencyLabel')}
+                sublabel={
+                  selectedCurrency
+                    ? language === 'ur' ? selectedCurrency.nameUrdu : selectedCurrency.name
+                    : undefined
+                }
+                onPress={() => setIsCurrencyPickerOpen(true)}
+                theme={theme}
+              >
+                <View style={styles.currencyValueRow}>
+                  <Text style={[styles.currencyValueText, { color: theme.text }]} numberOfLines={1}>
+                    {selectedCurrency
+                      ? `${selectedCurrency.flag} ${selectedCurrency.code} · ${settings.currencySymbol}`
+                      : settings.currencySymbol}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+                </View>
+              </RowItem>
+              <StackedField
+                icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                label={t('lowStockThresholdLabel')}
+                value={lowStockThreshold} onChangeText={setLowStockThreshold}
+                keyboardType="numeric" placeholder="5"
+                theme={theme}
+              />
+              <StackedField
+                icon="receipt-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('billFooterLabel')}
+                value={footerNote} onChangeText={setFooterNote}
+                placeholder="Thank you for shopping!"
+                theme={theme}
+              />
+              <StackedField
+                icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('billFooterUrduLabel')}
+                value={footerNoteUrdu} onChangeText={setFooterNoteUrdu}
+                placeholder="خریداری کا شکریہ!"
+                theme={theme}
+                last
+              />
+            </View>
+          </View>
 
           {/* ── Save Settings Button ── */}
           <Pressable
