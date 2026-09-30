@@ -194,7 +194,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.surface }]}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: theme.surface }]}>
       <StatusBar
         barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
         backgroundColor={theme.surface}
