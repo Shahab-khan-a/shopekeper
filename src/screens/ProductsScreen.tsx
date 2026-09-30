@@ -5,11 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Image,
+  Alert,
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ProductCategory } from '@/types';
+import { ProductCategory, Product } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { ProductCard } from '@/components/ProductCard';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
@@ -18,6 +18,8 @@ import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { IconButton } from '@/components/ui/IconButton';
 import { ProductImage } from '@/components/ProductImage';
+import { ProductDetailsDrawer } from '@/components/ProductDetailsDrawer';
+import { formatCompactPrice } from '@/utils/formatters';
 
 const CATEGORIES: (ProductCategory | 'LowStock')[] = [
   'All',
@@ -55,6 +57,12 @@ export const ProductsScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock'>('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
+
+  const activeProduct = useMemo(() => {
+    if (!selectedProductDetails) return null;
+    return products.find((p) => p.id === selectedProductDetails.id) || selectedProductDetails;
+  }, [products, selectedProductDetails]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -135,45 +143,68 @@ export const ProductsScreen: React.FC = () => {
         </ScrollView>
 
         {/* ── Financial Investment Summary Bar ── */}
-        <View style={[styles.financeSummaryBar, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          {[
+        <View
+          style={[
+            styles.financeSummaryBar,
             {
-              label: t('totalInvestment'),
-              value: `${settings.currencySymbol} ${totalInventoryInvestment.toLocaleString()}`,
-              color: theme.text,
+              backgroundColor: settings.darkMode ? '#161F30' : '#FFFFFF',
+              borderColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
             },
-            {
-              label: t('stockRetailValue'),
-              value: `${settings.currencySymbol} ${totalInventoryRetailValue.toLocaleString()}`,
-              color: theme.text,
-            },
-            {
-              label: t('expectedStockProfit'),
-              value: `+${settings.currencySymbol} ${totalExpectedStockProfit.toLocaleString()}`,
-              color: '#059669',
-            },
-          ].map((stat, index) => (
-            <React.Fragment key={stat.label}>
-              {index > 0 && (
-                <View style={[styles.financeSummaryDivider, { backgroundColor: theme.border }]} />
-              )}
-              <View style={styles.financeSummaryItem}>
-                {/* Labels reserve two lines so all three values sit on the same row */}
-                <Text
-                  style={[styles.financeSummaryLabel, { color: theme.textMuted }]}
-                  numberOfLines={2}>
-                  {stat.label}
-                </Text>
-                <Text
-                  style={[styles.financeSummaryVal, { color: stat.color }]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.7}>
-                  {stat.value}
-                </Text>
-              </View>
-            </React.Fragment>
-          ))}
+          ]}>
+          {/* Stat 1: Total Investment */}
+          <View style={styles.financeSummaryItem}>
+            <View style={styles.statLabelRow}>
+              <View style={[styles.statDot, { backgroundColor: theme.textMuted }]} />
+              <Text style={[styles.financeSummaryLabel, { color: theme.textSecondary }]} numberOfLines={2}>
+                {t('totalInvestment')}
+              </Text>
+            </View>
+            <Text
+              style={[styles.financeSummaryVal, { color: theme.text }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}>
+              {settings.currencySymbol}{totalInventoryInvestment.toLocaleString()}
+            </Text>
+          </View>
+
+          <View style={[styles.financeSummaryDivider, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]} />
+
+          {/* Stat 2: Retail Value */}
+          <View style={styles.financeSummaryItem}>
+            <View style={styles.statLabelRow}>
+              <View style={[styles.statDot, { backgroundColor: theme.primary }]} />
+              <Text style={[styles.financeSummaryLabel, { color: theme.textSecondary }]} numberOfLines={2}>
+                {t('stockRetailValue')}
+              </Text>
+            </View>
+            <Text
+              style={[styles.financeSummaryVal, { color: theme.text }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}>
+              {settings.currencySymbol}{totalInventoryRetailValue.toLocaleString()}
+            </Text>
+          </View>
+
+          <View style={[styles.financeSummaryDivider, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]} />
+
+          {/* Stat 3: Expected Profit */}
+          <View style={styles.financeSummaryItem}>
+            <View style={styles.statLabelRow}>
+              <View style={[styles.statDot, { backgroundColor: '#10B981' }]} />
+              <Text style={[styles.financeSummaryLabel, { color: '#059669' }]} numberOfLines={2}>
+                {t('expectedStockProfit')}
+              </Text>
+            </View>
+            <Text
+              style={[styles.financeSummaryVal, { color: '#059669' }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}>
+              +{settings.currencySymbol}{totalExpectedStockProfit.toLocaleString()}
+            </Text>
+          </View>
         </View>
 
         {/* ── Products Display ── */}
@@ -207,10 +238,7 @@ export const ProductsScreen: React.FC = () => {
               return (
                 <Pressable
                   key={product.id}
-                  onPress={() => {
-                    setEditingProduct(product);
-                    setIsAddProductOpen(true);
-                  }}
+                  onPress={() => setSelectedProductDetails(product)}
                   style={({ pressed }) => [
                     styles.listRowCard,
                     {
@@ -218,27 +246,38 @@ export const ProductsScreen: React.FC = () => {
                       borderColor: isLow ? theme.warning : isOut ? theme.danger : theme.border,
                       borderWidth: isLow || isOut ? 1.5 : 1,
                     },
-                    pressed && { opacity: 0.85 },
+                    pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
                   ]}>
-                  {/* Left: Thumbnail + Name */}
-                  <View style={styles.listRowLeft}>
-                    <View style={[styles.listThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                      <ProductImage
-                        uri={product.image || product.imageUri}
-                        style={styles.listThumb}
-                        resizeMode="cover"
-                        fallbackColor={theme.textMuted}
-                        fallbackSize={20}
-                      />
+                  {/* Thumbnail Image */}
+                  <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
+                    <ProductImage
+                      uri={product.image || product.imageUri}
+                      style={styles.listThumb}
+                      resizeMode="cover"
+                      fallbackColor={theme.textMuted}
+                      fallbackSize={24}
+                    />
+                  </View>
+
+                  {/* Middle: Name + meta row */}
+                  <View style={styles.listRowContent}>
+                    <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
+                      {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                    </Text>
+                    {/* Row 1: category + stock */}
+                    <View style={styles.listRowBadgeRow}>
+                      <View style={[styles.listCategoryBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
+                        <Text style={[styles.listCategoryText, { color: theme.textSecondary }]}>
+                          {product.category}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
-                        {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                    {/* Row 2: barcode on its own line */}
+                    {product.barcode ? (
+                      <Text style={[styles.listBarcodeText, { color: theme.textMuted }]} numberOfLines={1}>
+                        # {product.barcode}
                       </Text>
-                      <Text style={[styles.listRowCat, { color: theme.textMuted }]}>
-                        {product.category}
-                      </Text>
-                    </View>
+                    ) : null}
                   </View>
 
                   {/* Stock Badge */}
@@ -253,6 +292,11 @@ export const ProductsScreen: React.FC = () => {
                           : theme.successLight,
                       },
                     ]}>
+                    <Ionicons
+                      name={isOut ? 'alert-circle' : isLow ? 'warning' : 'cube-outline'}
+                      size={12}
+                      color={isOut ? theme.danger : isLow ? theme.warning : theme.success}
+                    />
                     <Text
                       style={[
                         styles.listStockText,
@@ -262,23 +306,55 @@ export const ProductsScreen: React.FC = () => {
                     </Text>
                   </View>
 
-                  {/* Pricing & Actions */}
+                  {/* Pricing & Profit */}
                   <View style={styles.listRowRight}>
-                    <Text style={[styles.listRowPrice, { color: theme.primary }]}>
-                      {settings.currencySymbol}{product.price}
+                    <Text
+                      style={[styles.listRowPrice, { color: theme.primary }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}>
+                      {settings.currencySymbol}{formatCompactPrice(product.price)}
                     </Text>
-                    <Text style={[styles.listRowMargin, { color: theme.textMuted }]}>
-                      {margin}% {language === 'ur' ? 'منافع' : 'margin'}
-                    </Text>
+                    {margin > 0 ? (
+                      <View style={[styles.listMarginChip, { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.15)' : '#ECFDF5' }]}>
+                        <Text style={[styles.listMarginText, { color: '#059669' }]}>+{margin}%</Text>
+                      </View>
+                    ) : null}
                   </View>
 
-                  <View style={styles.listRowActions}>
-                    <Pressable
-                      onPress={() => deleteProduct(product.id)}
-                      style={[styles.smallActionBtn, { backgroundColor: theme.dangerLight }]}>
-                      <Ionicons name="trash-outline" size={13} color={theme.danger} />
-                    </Pressable>
-                  </View>
+                  {/* Delete Action */}
+                  <Pressable
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      const productName = language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name;
+                      if (Platform.OS === 'web') {
+                        if (window.confirm(`Delete "${productName}"? This cannot be undone.`)) {
+                          deleteProduct(product.id);
+                        }
+                      } else {
+                        Alert.alert(
+                          language === 'ur' ? 'پروڈکٹ حذف کریں' : 'Delete Product',
+                          language === 'ur'
+                            ? `کیا آپ "${productName}" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔`
+                            : `Delete "${productName}"? This cannot be undone.`,
+                          [
+                            { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
+                            {
+                              text: language === 'ur' ? 'حذف کریں' : 'Delete',
+                              style: 'destructive',
+                              onPress: () => deleteProduct(product.id),
+                            },
+                          ]
+                        );
+                      }
+                    }}
+                    style={({ pressed }) => [
+                      styles.smallActionBtn,
+                      { backgroundColor: theme.dangerLight },
+                      pressed && { opacity: 0.7 },
+                    ]}>
+                    <Ionicons name="trash-outline" size={14} color={theme.danger} />
+                  </Pressable>
                 </Pressable>
               );
             })}
@@ -293,6 +369,7 @@ export const ProductsScreen: React.FC = () => {
               <View key={product.id} style={styles.cardContainer}>
                 <ProductCard
                   product={product}
+                  onPress={(p) => setSelectedProductDetails(p)}
                   onEdit={(p) => {
                     setEditingProduct(p);
                     setIsAddProductOpen(true);
@@ -304,6 +381,22 @@ export const ProductsScreen: React.FC = () => {
           </ScrollView>
         )}
       </View>
+
+      {/* ── Animated Product Details Sidebar ── */}
+      <ProductDetailsDrawer
+        visible={!!selectedProductDetails}
+        product={activeProduct}
+        onClose={() => setSelectedProductDetails(null)}
+        onEdit={(p) => {
+          setSelectedProductDetails(null);
+          setEditingProduct(p);
+          setIsAddProductOpen(true);
+        }}
+        onDelete={(p) => {
+          setSelectedProductDetails(null);
+          deleteProduct(p.id);
+        }}
+      />
     </View>
   );
 };
@@ -331,9 +424,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    height: 44,
-    paddingHorizontal: 14,
-    borderRadius: BorderRadius.xl,
+    height: 46,
+    paddingHorizontal: 15,
+    borderRadius: 14,
     ...Shadows.md,
   },
   addProdText: { color: '#FFFFFF', fontWeight: '800', fontSize: 13 },
@@ -359,36 +452,87 @@ const styles = StyleSheet.create({
   listRowCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.xl,
-    gap: Spacing.sm,
-    ...Shadows.sm,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    minHeight: 74,
+    borderRadius: 18,
+    gap: 12,
   },
-  listRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 2 },
-  listThumb: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.md,
-  },
-  listThumbFallback: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.md,
+  listThumbWrap: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  listRowName: { fontSize: 13, fontWeight: '800' },
-  listRowCat: { fontSize: 11, marginTop: 2 },
-  listStockBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: BorderRadius.full },
-  listStockText: { fontSize: 10, fontWeight: '700' },
-  listRowRight: { alignItems: 'flex-end' },
-  listRowPrice: { fontSize: 14, fontWeight: '800' },
-  listRowMargin: { fontSize: 10, marginTop: 1 },
-  listRowActions: { flexDirection: 'row', gap: 4 },
-  smallActionBtn: {
-    width: 28,
-    height: 28,
+  listThumb: {
+    width: '100%',
+    height: '100%',
+  },
+  listRowContent: {
+    flex: 1,
+    gap: 4,
+    justifyContent: 'center',
+  },
+  listRowName: {
+    fontSize: 14.5,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  listRowBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  listCategoryBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  listCategoryText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  listBarcodeText: {
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  listStockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
     borderRadius: BorderRadius.full,
+  },
+  listStockText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+  listRowRight: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  listRowPrice: {
+    fontSize: 15.5,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+  },
+  listMarginChip: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  listMarginText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+  },
+  smallActionBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -396,9 +540,9 @@ const styles = StyleSheet.create({
   financeSummaryBar: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.xs,
-    borderRadius: BorderRadius.xl,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 16,
     borderWidth: 1,
     marginBottom: Spacing.md,
     ...Shadows.sm,
@@ -406,28 +550,36 @@ const styles = StyleSheet.create({
   financeSummaryItem: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 6,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
     gap: 4,
   },
+  statLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
   financeSummaryLabel: {
-    fontSize: 10,
-    lineHeight: 13,
-    minHeight: 26,
-    fontWeight: '600',
+    fontSize: 9.5,
+    fontWeight: '700',
     textAlign: 'center',
-    textAlignVertical: 'center',
     textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
+    flexShrink: 1,
   },
   financeSummaryVal: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '800',
     textAlign: 'center',
     alignSelf: 'stretch',
   },
   financeSummaryDivider: {
     width: 1,
-    marginVertical: 2,
+    marginVertical: 4,
   },
 });

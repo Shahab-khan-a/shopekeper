@@ -341,9 +341,8 @@ export async function reauthenticateCurrentUser(): Promise<{ success: boolean; e
  * Permanently delete the user's account and cloud data:
  * 1. Re-authenticates with Google first to ensure fresh credentials (avoids auth/requires-recent-login failure)
  * 2. Purges Firestore shops/{userId} collections and document
- * 3. Purges Firebase Storage folder shops/{userId}/
- * 4. Revokes Google Drive OAuth token and disconnects Drive
- * 5. Deletes Firebase Auth user
+ * 3. Revokes Google Drive OAuth token and disconnects Drive
+ * 4. Deletes Firebase Auth user
  * Complies with Google Play Account Deletion policy.
  */
 export async function deleteCurrentUserAccount(): Promise<{ success: boolean; error?: string }> {
@@ -367,7 +366,7 @@ export async function deleteCurrentUserAccount(): Promise<{ success: boolean; er
       return { success: false, error: 'User session expired during verification.' };
     }
 
-    // 2. Delete all Firestore records and Firebase Storage files while still authenticated.
+    // 2. Delete all Firestore records while still authenticated.
     // Abort before Auth/Drive completion if cloud purge fails so the user can retry.
     const cloudResult = await deleteAllUserCloudData(confirmedUser.uid);
     if (!cloudResult.success) {

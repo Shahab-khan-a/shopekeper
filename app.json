@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ShopkeeperApp",
-    "slug": "ShopkeeperApp",
+    "slug": "shopkeeper",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,9 @@
       },
       "predictiveBackGestureEnabled": false,
       "versionCode": 1,
-      "permissions": [],
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
       "package": "com.shahabkhan34.ShopkeeperApp",
       "googleServicesFile": "./google-services.json",
       "intentFilters": [
@@ -33,7 +35,10 @@
               "path": "/google"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -62,7 +67,8 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to allow adding product pictures.",
-          "cameraPermission": "The app accesses your camera to take pictures of products."
+          "cameraPermission": "The app accesses your camera to take pictures of products.",
+          "microphonePermission": false
         }
       ],
       "expo-sqlite"
@@ -74,8 +80,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "ddde81c7-0e9b-4741-b303-f1894ef8ad09"
+        "projectId": "c5e727f7-385a-49d5-9a76-b7c2d68840a8"
       }
-    }
+    },
+    "owner": "techflow-studio"
   }
 }

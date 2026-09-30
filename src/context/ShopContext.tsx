@@ -25,7 +25,9 @@ import { NetworkService } from '@/services/networkService';
 import { SyncQueueService } from '@/services/syncQueueService';
 import { MergeService } from '@/services/mergeService';
 import { googleDriveService } from '@/services/googleDriveService';
+import { saveProductToCloud, saveSaleToCloud, saveCustomerToCloud } from '@/services/firestoreService';
 import { INITIAL_SETTINGS } from '@/constants/sampleData';
+import { SAMPLE_PRODUCTS, SAMPLE_KHATA, generateDemoSales } from '@/services/demoDataService';
 import { Translations, Language, TranslationKey } from '@/constants/translations';
 import { User } from 'firebase/auth';
 import { 
@@ -96,6 +98,7 @@ interface ShopContextType {
   settings: ShopSettings;
   updateSettings: (newSettings: Partial<ShopSettings>) => Promise<void>;
   resetToSampleData: () => Promise<void>;
+  loadDemoData: () => Promise<void>;
   clearStoreData: () => Promise<void>;
   exportDataJSON: () => string;
   importDataJSON: (jsonString: string) => Promise<boolean>;
@@ -739,17 +742,55 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   }, [user?.uid, clearStoreData]);
 
-  const resetToSampleData = useCallback(async () => {
-    await MigrationService.purgeDummyDataIfNeeded();
-    await SyncQueueService.clear();
-    await Promise.all([
-      refreshProducts(),
-      refreshSales(),
-      refreshKhata(),
-      refreshSettings(),
-      refreshPendingCount(),
-    ]);
-  }, [refreshProducts, refreshSales, refreshKhata, refreshSettings, refreshPendingCount]);
+  const loadDemoData = useCallback(async () => {
+    try {
+      for (const p of SAMPLE_PRODUCTS) {
+        await ProductRepository.insert(p, 'synced');
+      }
+      for (const c of SAMPLE_KHATA) {
+        await CustomerRepository.insert(c, 'synced');
+        if (c.transactions && c.transactions.length > 0) {
+          for (const tx of c.transactions) {
+            await CustomerRepository.addTransaction(tx, 'synced');
+          }
+        }
+      }
+      const demoSales = generateDemoSales(SAMPLE_PRODUCTS);
+      for (const s of demoSales) {
+        // SaleRepository has no bare insert — use completeSaleTransaction per sale
+        await SaleRepository.completeSaleTransaction({
+          items: s.items,
+          paymentMethod: s.paymentMethod ?? 'cash',
+          discount: s.discount ?? 0,
+          discountType: s.discountType ?? 'fixed',
+          customerName: s.customerName,
+          customerPhone: s.customerPhone,
+        });
+      }
+
+      // If user is logged in, push directly to Firebase Firestore cloud tenant
+      if (user?.uid) {
+        for (const p of SAMPLE_PRODUCTS) {
+          await saveProductToCloud(user.uid, p).catch(() => {});
+        }
+        for (const c of SAMPLE_KHATA) {
+          await saveCustomerToCloud(user.uid, c).catch(() => {});
+        }
+        for (const s of demoSales) {
+          await saveSaleToCloud(user.uid, s).catch(() => {});
+        }
+      }
+
+      await Promise.all([
+        refreshProducts(),
+        refreshSales(),
+        refreshKhata(),
+        refreshPendingCount(),
+      ]);
+    } catch (err) {
+      console.error('[ShopContext] Error loading demo data:', err);
+    }
+  }, [user?.uid, refreshProducts, refreshSales, refreshKhata, refreshPendingCount]);
 
   const exportDataJSON = useCallback(() => {
     return JSON.stringify(
@@ -792,7 +833,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [refreshProducts, refreshSales, refreshKhata, refreshSettings]
   );
 
-  // Silent automatic store backup to 5 TB Google Drive whenever catalog, sales, or khata change
+  // Silent automatic store backup to Google Drive whenever catalog, sales, or khata change
   const driveAutoSyncTimer = useRef<any>(null);
   useEffect(() => {
     if (!isLoaded) return;
@@ -951,7 +992,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       getDashboardStats,
       settings,
       updateSettings,
-      resetToSampleData,
+      resetToSampleData: loadDemoData,
+      loadDemoData,
       clearStoreData,
       exportDataJSON,
       importDataJSON,
@@ -1018,7 +1060,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       getDashboardStats,
       settings,
       updateSettings,
-      resetToSampleData,
+      loadDemoData,
       clearStoreData,
       exportDataJSON,
       importDataJSON,

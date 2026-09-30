@@ -140,7 +140,7 @@
     <h2>4. Third-Party Services & Cloud Infrastructure</h2>
     <p>Shopkeeper POS integrates with trusted service providers to deliver cloud backup services:</p>
     <ul>
-      <li><strong>Google Firebase (Authentication, Cloud Firestore, Firebase Storage):</strong> Used for secure user authentication and cloud synchronization. All data transferred between the app and Firebase is encrypted in transit using industry-standard TLS/HTTPS.</li>
+      <li><strong>Google Firebase (Authentication, Cloud Firestore):</strong> Used for secure user authentication and cloud synchronization. All data transferred between the app and Firebase is encrypted in transit using industry-standard TLS/HTTPS.</li>
       <li><strong>Google Drive API:</strong> If you connect Google Drive, data and image backups are stored in your private Google Drive account. We do not expose your Google Drive files to the public.</li>
     </ul>
 
@@ -148,7 +148,7 @@
     <p>We apply robust security safeguards to protect your business records:</p>
     <ul>
       <li>All cloud communications utilize HTTPS with TLS 1.2+ encryption.</li>
-      <li>Firestore and Storage rules enforce strict tenant isolation: each merchant can only read and write data belonging to their verified Firebase User ID (`shops/{userId}`).</li>
+      <li>Firestore security rules enforce strict tenant isolation: each merchant can only read and write data belonging to their verified Firebase User ID (<code>shops/{userId}</code>).</li>
       <li>Offline records are stored in private app sandboxed storage on your device.</li>
     </ul>
 
@@ -159,7 +159,7 @@
       <li><strong>In-App Deletion:</strong> You can permanently delete your account, business profile, inventory, sales, and Khata records at any time by going to <em>Settings &gt; Google Cloud Backup &gt; Delete Account &amp; Cloud Data</em>.</li>
       <li><strong>Web Deletion Portal:</strong> If you have uninstalled the app or cannot access your device, you can request account deletion online at <a href="delete-account.html">Account Deletion Portal</a>.</li>
     </ul>
-    <p>On a successful in-app deletion, records under your Firebase account (<code>shops/{userId}</code> in Firestore and Firebase Storage) and your Firebase Authentication profile are permanently purged. If Storage cleanup fails, deletion is aborted so you can retry. Web portal requests are handled manually (usually within about 48 hours). Google Drive OAuth access is revoked on successful in-app deletion; any files already saved in your personal Google Drive remain under your control and are not deleted by the app.</p>
+    <p>On a successful in-app deletion, records under your Firebase account (<code>shops/{userId}</code> in Firestore) and your Firebase Authentication profile are permanently purged. Web portal requests are handled manually (usually within about 48 hours). Google Drive OAuth access is revoked on successful in-app deletion; any files already saved in your personal Google Drive remain under your control and are not deleted by the app.</p>
 
     <h2>7. Children's Privacy</h2>
     <p>Shopkeeper POS is intended for business owners and retail operators. It is not directed at or designed for children under the age of 13. We do not knowingly collect personal information from children.</p>

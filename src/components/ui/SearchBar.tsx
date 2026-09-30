@@ -18,8 +18,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   height = 46,
 }) => {
   const { settings } = useShop();
-  const theme = settings.darkMode ? Colors.dark : Colors.light;
   const [focused, setFocused] = useState(false);
+  const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const softBg = settings.darkMode ? '#1E293B' : '#F1F5F9';
+  const focusedBg = settings.darkMode ? '#0F172A' : '#FFFFFF';
+  const softBorder = settings.darkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
 
   return (
     <View
@@ -27,9 +30,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         styles.container,
         {
           height,
-          backgroundColor: theme.surface,
-          borderColor: focused ? theme.borderFocus : theme.border,
-          borderWidth: focused ? 1.5 : 1,
+          backgroundColor: focused ? focusedBg : softBg,
+          borderColor: focused ? theme.primary : softBorder,
+          borderWidth: 1.5,
         },
       ]}>
       <Ionicons
@@ -62,14 +65,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.xl,
+    paddingHorizontal: 14,
+    borderRadius: 14,
     gap: 8,
-    ...Shadows.sm,
   },
   input: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 14.5,
+    fontWeight: '600',
   },
 });

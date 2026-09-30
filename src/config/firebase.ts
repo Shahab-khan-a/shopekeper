@@ -3,7 +3,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { Platform } from 'react-native';
 import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const firebaseConfig = {
@@ -69,5 +68,4 @@ try {
   db = getFirestore(app);
 }
 
-export const storage = getStorage(app);
 export { db };

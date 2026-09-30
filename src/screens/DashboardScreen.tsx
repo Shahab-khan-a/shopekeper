@@ -9,6 +9,7 @@ import {
   Modal,
   Animated,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -42,6 +43,7 @@ export const DashboardScreen: React.FC = () => {
     user,
     t,
     language,
+    loadDemoData,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -49,6 +51,42 @@ export const DashboardScreen: React.FC = () => {
 
   // In-home Sale Modal
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+
+  const handleLoadDemo = async () => {
+    const msg = language === 'ur'
+      ? 'کیا آپ فائر بیس فائر اسٹور (Firebase Firestore) پر سیمپل ٹیسٹ ڈیٹا (پروڈکٹس، سیلز ہسٹری، کھاتہ کسٹمرز) اپ لوڈ کرنا چاہتے ہیں؟'
+      : 'Push sample test data (products, sales history, and Khata customers) directly to Firebase Firestore?';
+    
+    const confirm = Platform.OS === 'web'
+      ? window.confirm(msg)
+      : await new Promise<boolean>((resolve) => {
+          Alert.alert(
+            language === 'ur' ? 'فائر بیس ڈیٹا اپ لوڈ کریں' : 'Push Firebase Test Data',
+            msg,
+            [
+              { text: t('cancel'), onPress: () => resolve(false), style: 'cancel' },
+              { text: language === 'ur' ? 'ہاں، اپ لوڈ کریں' : 'Yes, Push to Firebase', onPress: () => resolve(true) },
+            ]
+          );
+        });
+
+    if (!confirm) return;
+
+    setIsLoadingDemo(true);
+    try {
+      await loadDemoData();
+      const successMsg = language === 'ur'
+        ? 'سیمپل ٹیسٹ ڈیٹا کامیابی سے فائر بیس پر اپ لوڈ ہو گیا ہے!'
+        : 'Demo test data pushed to Firebase Firestore & synced successfully!';
+      if (Platform.OS === 'web') window.alert(successMsg);
+      else Alert.alert('Success', successMsg);
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      setIsLoadingDemo(false);
+    }
+  };
 
   // Pulse animation for floating New Sale button
   const pulseAnim = useRef(new Animated.Value(0)).current;
@@ -146,6 +184,22 @@ export const DashboardScreen: React.FC = () => {
             </View>
           </Pressable>
         </View>
+
+        {/* 🧪 Demo Test Data Trigger Banner Button */}
+        <Pressable
+          onPress={handleLoadDemo}
+          disabled={isLoadingDemo}
+          style={({ pressed }) => [
+            styles.demoDataBannerBtn,
+            pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+          ]}>
+          <Ionicons name="flask" size={14} color="#FFFFFF" />
+          <Text style={styles.demoDataBannerBtnText}>
+            {isLoadingDemo
+              ? (language === 'ur' ? 'فائر بیس پر اپ لوڈ ہو رہا ہے...' : 'Pushing to Firebase...')
+              : (language === 'ur' ? '⚡ فائر بیس سیمپل ڈیٹا اپ لوڈ کریں' : '⚡ Push Sample Data to Firebase')}
+          </Text>
+        </Pressable>
       </View>
 
 
@@ -636,6 +690,25 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   heroCTAText: { fontWeight: '800', fontSize: 13, letterSpacing: 0.2 },
+  demoDataBannerBtn: {
+    marginTop: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    alignSelf: 'flex-start',
+  },
+  demoDataBannerBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
 
   // Metrics Grid
   metricsGrid: {

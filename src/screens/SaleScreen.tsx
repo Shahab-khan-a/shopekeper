@@ -24,6 +24,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ProductImage } from '@/components/ProductImage';
+import { formatCompactPrice } from '@/utils/formatters';
 
 const CATEGORIES: ProductCategory[] = [
   'All',
@@ -37,6 +38,30 @@ const CATEGORIES: ProductCategory[] = [
   'Bakery',
   'Others',
 ];
+
+const QUICK_ADD_COLORS = [
+  { bgLight: '#EEF2FF', borderLight: '#C7D2FE', textLight: '#4F46E5', bgDark: 'rgba(99, 102, 241, 0.18)', borderDark: 'rgba(99, 102, 241, 0.35)', textDark: '#818CF8' },
+  { bgLight: '#ECFDF5', borderLight: '#A7F3D0', textLight: '#059669', bgDark: 'rgba(16, 185, 129, 0.18)', borderDark: 'rgba(16, 185, 129, 0.35)', textDark: '#34D399' },
+  { bgLight: '#FFFBEB', borderLight: '#FDE68A', textLight: '#D97706', bgDark: 'rgba(245, 158, 11, 0.18)', borderDark: 'rgba(245, 158, 11, 0.35)', textDark: '#FBBF24' },
+  { bgLight: '#FFF1F2', borderLight: '#FECDD3', textLight: '#E11D48', bgDark: 'rgba(244, 63, 94, 0.18)', borderDark: 'rgba(244, 63, 94, 0.35)', textDark: '#FB7185' },
+  { bgLight: '#F3E8FF', borderLight: '#E9D5FF', textLight: '#9333EA', bgDark: 'rgba(168, 85, 247, 0.18)', borderDark: 'rgba(168, 85, 247, 0.35)', textDark: '#C084FC' },
+  { bgLight: '#F0FDFA', borderLight: '#99F6E4', textLight: '#0D9488', bgDark: 'rgba(20, 184, 166, 0.18)', borderDark: 'rgba(20, 184, 166, 0.35)', textDark: '#2DD4BF' },
+  { bgLight: '#FFF7ED', borderLight: '#FED7AA', textLight: '#EA580C', bgDark: 'rgba(249, 115, 22, 0.18)', borderDark: 'rgba(249, 115, 22, 0.35)', textDark: '#FB923C' },
+  { bgLight: '#ECFEFF', borderLight: '#A5F3FC', textLight: '#0891B2', bgDark: 'rgba(6, 182, 212, 0.18)', borderDark: 'rgba(6, 182, 212, 0.35)', textDark: '#22D3EE' },
+];
+
+const CATEGORY_TAG_COLORS: Record<string, { bgLight: string; borderLight: string; textLight: string; bgDark: string; borderDark: string; textDark: string }> = {
+  All: { bgLight: '#EEF2FF', borderLight: '#C7D2FE', textLight: '#4F46E5', bgDark: 'rgba(99, 102, 241, 0.16)', borderDark: 'rgba(99, 102, 241, 0.3)', textDark: '#A5B4FC' },
+  Kiryana: { bgLight: '#FEF3C7', borderLight: '#FDE68A', textLight: '#B45309', bgDark: 'rgba(245, 158, 11, 0.16)', borderDark: 'rgba(245, 158, 11, 0.3)', textDark: '#FCD34D' },
+  Grocery: { bgLight: '#D1FAE5', borderLight: '#A7F3D0', textLight: '#047857', bgDark: 'rgba(16, 185, 129, 0.16)', borderDark: 'rgba(16, 185, 129, 0.3)', textDark: '#6EE7B7' },
+  Beverages: { bgLight: '#CFFAFE', borderLight: '#A5F3FC', textLight: '#0E7490', bgDark: 'rgba(6, 182, 212, 0.16)', borderDark: 'rgba(6, 182, 212, 0.3)', textDark: '#67E8F9' },
+  Dairy: { bgLight: '#DBEAFE', borderLight: '#BFDBFE', textLight: '#1D4ED8', bgDark: 'rgba(59, 130, 246, 0.16)', borderDark: 'rgba(59, 130, 246, 0.3)', textDark: '#93C5FD' },
+  Snacks: { bgLight: '#FFEDD5', borderLight: '#FED7AA', textLight: '#C2410C', bgDark: 'rgba(249, 115, 22, 0.16)', borderDark: 'rgba(249, 115, 22, 0.3)', textDark: '#FDBA74' },
+  Spices: { bgLight: '#FFE4E6', borderLight: '#FECDD3', textLight: '#BE123C', bgDark: 'rgba(244, 63, 94, 0.16)', borderDark: 'rgba(244, 63, 94, 0.3)', textDark: '#FDA4AF' },
+  'Personal Care': { bgLight: '#F3E8FF', borderLight: '#E9D5FF', textLight: '#6D28D9', bgDark: 'rgba(168, 85, 247, 0.16)', borderDark: 'rgba(168, 85, 247, 0.3)', textDark: '#D8B4FE' },
+  Bakery: { bgLight: '#FEF9C3', borderLight: '#FEF08A', textLight: '#A16207', bgDark: 'rgba(234, 179, 8, 0.16)', borderDark: 'rgba(234, 179, 8, 0.3)', textDark: '#FDE047' },
+  Others: { bgLight: '#F3F4F6', borderLight: '#E5E7EB', textLight: '#4B5563', bgDark: 'rgba(107, 114, 128, 0.16)', borderDark: 'rgba(107, 114, 128, 0.3)', textDark: '#D1D5DB' },
+};
 
 const CASH_DENOMINATIONS = [100, 500, 1000, 5000];
 const DISCOUNT_SHORTCUTS = [10, 20, 50, 100];
@@ -154,11 +179,13 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     return sorted.slice(0, 8);
   }, [products, sales]);
   const filteredProducts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     return products.filter((p) => {
       const matchSearch =
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.nameUrdu && p.nameUrdu.includes(searchQuery)) ||
-        (p.barcode && p.barcode.includes(searchQuery));
+        !query ||
+        p.name.toLowerCase().includes(query) ||
+        (p.nameUrdu && p.nameUrdu.toLowerCase().includes(query)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(query));
       const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
       return matchSearch && matchCat;
     });
@@ -421,10 +448,17 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   // ---------------- Render Checkout Content ----------------
   const renderCheckoutContent = () => (
     <View style={styles.checkoutInner}>
+      {/* Mobile Drawer Handle */}
+      {!isWideScreen && (
+        <View style={[styles.drawerHandle, { backgroundColor: theme.border }]} />
+      )}
+
       {/* Header */}
       <View style={[styles.drawerHeader, { borderBottomColor: theme.border }]}>
         <View style={styles.drawerHeaderTitle}>
-          <Ionicons name="receipt-outline" size={22} color={theme.primary} />
+          <View style={[styles.drawerIconWrap, { backgroundColor: theme.primaryLight }]}>
+            <Ionicons name="receipt" size={17} color={theme.primary} />
+          </View>
           <Text style={[styles.drawerTitle, { color: theme.text }]}>
             {t('cart')} ({totalItemsCount})
           </Text>
@@ -843,22 +877,33 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 onChangeText={setDiscount}
               />
               <View style={styles.discShortcuts}>
-                {DISCOUNT_SHORTCUTS.map((amt) => (
-                  <Pressable
-                    key={amt}
-                    onPress={() => setDiscount(amt.toString())}
-                    style={[
-                      styles.discShortcutBtn,
-                      {
-                        backgroundColor: discount === amt.toString() ? theme.primaryLight : theme.card,
-                        borderColor: discount === amt.toString() ? theme.primary : theme.border,
-                      },
-                    ]}>
-                    <Text style={[styles.discShortcutText, { color: discount === amt.toString() ? theme.primary : theme.textSecondary }]}>
-                      {discountType === 'fixed' ? `-${amt}` : `${amt}%`}
-                    </Text>
-                  </Pressable>
-                ))}
+                {DISCOUNT_SHORTCUTS.map((amt) => {
+                  const isSelected = discount === amt.toString();
+                  return (
+                    <Pressable
+                      key={amt}
+                      onPress={() => setDiscount(amt.toString())}
+                      style={({ pressed }) => [
+                        styles.discShortcutBtn,
+                        {
+                          backgroundColor: isSelected ? theme.primary : theme.card,
+                          borderColor: isSelected ? theme.primary : 'transparent',
+                        },
+                        pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+                      ]}>
+                      <Text
+                        style={[
+                          styles.discShortcutText,
+                          {
+                            color: isSelected ? '#FFFFFF' : theme.textSecondary,
+                            fontWeight: isSelected ? '800' : '600',
+                          },
+                        ]}>
+                        {discountType === 'fixed' ? `-${amt}` : `${amt}%`}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
           </View>
@@ -1009,41 +1054,36 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         <View style={styles.catalogSection}>
           {/* Top Control Bar: Search + Barcode + Quick Item + View Toggle */}
           <View style={styles.topControlBar}>
-            {/* Search Box */}
+            {/* Search Box & Inline Barcode Scanner */}
             <View style={styles.searchFlex}>
-              <SearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder={t('searchAndAdd')}
-                height={46}
-              />
+              <View style={styles.searchInlineRow}>
+                <View style={{ flex: 1 }}>
+                  <SearchBar
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder={language === 'ur' ? 'نام یا بارکوڈ سے تلاش کریں...' : 'Search name or barcode...'}
+                    height={46}
+                  />
+                </View>
+
+                {/* Inline Barcode Scanner Button */}
+                <Pressable
+                  onPress={() => setIsBarcodeOpen(true)}
+                  style={({ pressed }) => [
+                    styles.searchBarcodeBtn,
+                    {
+                      backgroundColor: settings.darkMode ? 'rgba(99, 102, 241, 0.16)' : '#EEF2FF',
+                      borderColor: settings.darkMode ? 'rgba(99, 102, 241, 0.35)' : '#C7D2FE',
+                    },
+                    pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
+                  ]}>
+                  <Ionicons name="barcode-outline" size={22} color={theme.primary} />
+                </Pressable>
+              </View>
             </View>
 
             {/* Action Buttons Row */}
             <View style={styles.topBarActions}>
-              {/* ⚡ Quick Item Button */}
-              <Pressable
-                onPress={() => setIsQuickItemOpen(true)}
-                style={({ pressed }) => [
-                  styles.quickItemBtn,
-                  { backgroundColor: theme.accent, borderColor: theme.accent },
-                  pressed && { opacity: 0.85 },
-                ]}>
-                <Ionicons name="flash" size={16} color="#FFFFFF" />
-                <Text style={styles.quickItemBtnText}>{t('quickItem')}</Text>
-              </Pressable>
-
-              {/* Barcode Scanner */}
-              <Pressable
-                onPress={() => setIsBarcodeOpen(true)}
-                style={({ pressed }) => [
-                  styles.iconSquareBtn,
-                  { backgroundColor: theme.surface, borderColor: theme.border },
-                  pressed && { opacity: 0.8 },
-                ]}>
-                <Ionicons name="barcode-outline" size={22} color={theme.primary} />
-              </Pressable>
-
               {/* View Mode Toggle (Grid vs List) */}
               <Pressable
                 onPress={() => setViewMode((m) => (m === 'grid' ? 'list' : 'grid'))}
@@ -1074,9 +1114,26 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.favRowContent}>
-                {topProducts.map((product) => {
+                {topProducts.map((product, idx) => {
                   const isOut = product.stock <= 0;
                   const inCart = cart.find((it) => it.product.id === product.id);
+                  const colorScheme = QUICK_ADD_COLORS[idx % QUICK_ADD_COLORS.length];
+                  const chipBg = inCart
+                    ? theme.primaryLight
+                    : settings.darkMode
+                    ? colorScheme.bgDark
+                    : colorScheme.bgLight;
+                  const chipBorder = inCart
+                    ? theme.primary
+                    : settings.darkMode
+                    ? colorScheme.borderDark
+                    : colorScheme.borderLight;
+                  const chipText = inCart
+                    ? theme.primary
+                    : settings.darkMode
+                    ? colorScheme.textDark
+                    : colorScheme.textLight;
+
                   return (
                     <Pressable
                       key={product.id}
@@ -1087,17 +1144,17 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       style={({ pressed }) => [
                         styles.favChip,
                         {
-                          backgroundColor: inCart ? theme.primaryLight : theme.card,
-                          borderColor: inCart ? theme.primary : theme.border,
+                          backgroundColor: chipBg,
+                          borderColor: chipBorder,
                           opacity: isOut ? 0.4 : 1,
                         },
                         pressed && !isOut && { transform: [{ scale: 0.95 }] },
                       ]}>
-                      <Text style={[styles.favChipName, { color: inCart ? theme.primary : theme.text }]} numberOfLines={1}>
+                      <Text style={[styles.favChipName, { color: chipText }]} numberOfLines={1}>
                         {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
                       </Text>
-                      <Text style={[styles.favChipPrice, { color: inCart ? theme.primary : theme.textSecondary }]}>
-                        {settings.currencySymbol}{product.price}
+                      <Text style={[styles.favChipPrice, { color: chipText, opacity: inCart ? 1 : 0.8 }]}>
+                        {settings.currencySymbol}{formatCompactPrice(product.price)}
                       </Text>
                       {inCart && (
                         <View style={[styles.favChipBadge, { backgroundColor: theme.primary }]}>
@@ -1117,14 +1174,25 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             showsHorizontalScrollIndicator={false}
             style={styles.categoryScroll}
             contentContainerStyle={styles.categoryScrollContent}>
-            {CATEGORIES.map((cat) => (
-              <FilterChip
-                key={cat}
-                label={cat === 'All' ? t('allCategories') : cat}
-                isActive={selectedCategory === cat}
-                onPress={() => setSelectedCategory(cat)}
-              />
-            ))}
+            {CATEGORIES.map((cat) => {
+              const colorInfo = CATEGORY_TAG_COLORS[cat] || CATEGORY_TAG_COLORS.Others;
+              const inactiveBg = settings.darkMode ? colorInfo.bgDark : colorInfo.bgLight;
+              const inactiveBorder = settings.darkMode ? colorInfo.borderDark : colorInfo.borderLight;
+              const inactiveColor = settings.darkMode ? colorInfo.textDark : colorInfo.textLight;
+
+              return (
+                <FilterChip
+                  key={cat}
+                  label={cat === 'All' ? t('allCategories') : cat}
+                  isActive={selectedCategory === cat}
+                  onPress={() => setSelectedCategory(cat)}
+                  activeBg={theme.primary}
+                  inactiveBg={inactiveBg}
+                  inactiveBorder={inactiveBorder}
+                  inactiveColor={inactiveColor}
+                />
+              );
+            })}
           </ScrollView>
 
           {/* Products List / Grid or Empty State */}
@@ -1214,11 +1282,13 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               const inCartItem = cart.find((it) => it.product.id === product.id);
 
               if (viewMode === 'list') {
-                // ================= Fast Compact List Row =================
+                // ================= Enhanced Modern List Row =================
                 return (
-                  <View
+                  <Pressable
                     key={product.id}
-                    style={[
+                    disabled={isOut}
+                    onPress={() => !inCartItem && addToCart(product)}
+                    style={({ pressed }) => [
                       styles.listRow,
                       {
                         backgroundColor: theme.card,
@@ -1226,61 +1296,97 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         borderWidth: inCartItem ? 1.5 : 1,
                         opacity: isOut ? 0.6 : 1,
                       },
+                      pressed && !isOut && !inCartItem && { opacity: 0.9, transform: [{ scale: 0.99 }] },
                     ]}>
-                    <View style={styles.listRowLeft}>
-                      <View style={[styles.listThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                        <ProductImage
-                          uri={product.image || product.imageUri}
-                          style={styles.listThumb}
-                          resizeMode="cover"
-                          fallbackColor={theme.textMuted}
-                          fallbackSize={18}
-                        />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
-                          {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
-                        </Text>
-                        <Text style={[styles.listRowMeta, { color: theme.textMuted }]}>
-                          {product.category} • {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
-                        </Text>
+                    {/* Left: Thumbnail Image */}
+                    <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
+                      <ProductImage
+                        uri={product.image || product.imageUri}
+                        style={styles.listThumb}
+                        resizeMode="cover"
+                        fallbackColor={theme.textMuted}
+                        fallbackSize={24}
+                      />
+                    </View>
+
+                    {/* Middle: Name, Category badge & Stock Pill */}
+                    <View style={styles.listRowContent}>
+                      <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
+                        {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                      </Text>
+                      <View style={styles.listRowBadgeRow}>
+                        <View style={[styles.listCategoryBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
+                          <Text style={[styles.listCategoryText, { color: theme.textSecondary }]}>
+                            {product.category}
+                          </Text>
+                        </View>
+                        <View
+                          style={[
+                            styles.listStockBadge,
+                            {
+                              backgroundColor: isOut
+                                ? theme.dangerLight
+                                : isLow
+                                ? theme.warningLight
+                                : theme.successLight,
+                            },
+                          ]}>
+                          <Ionicons
+                            name={isOut ? 'alert-circle' : isLow ? 'warning' : 'cube-outline'}
+                            size={11}
+                            color={isOut ? theme.danger : isLow ? theme.warning : theme.success}
+                          />
+                          <Text
+                            style={[
+                              styles.listStockText,
+                              { color: isOut ? theme.danger : isLow ? theme.warning : theme.success },
+                            ]}>
+                            {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
+                          </Text>
+                        </View>
                       </View>
                     </View>
 
+                    {/* Right: Price & Stepper / Add button */}
                     <View style={styles.listRowRight}>
-                      <Text style={[styles.listRowPrice, { color: theme.primary }]}>
-                        {settings.currencySymbol}{product.price}
+                      <Text
+                        style={[styles.listRowPrice, { color: theme.primary }]}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.75}>
+                        {settings.currencySymbol}{formatCompactPrice(product.price)}
                       </Text>
 
                       {inCartItem ? (
-                        <View style={[styles.inlineStepper, { backgroundColor: theme.surfaceSubtle }]}>
+                        <View style={[styles.inlineStepper, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
                           <Pressable
                             onPress={() => updateQuantity(product.id, -1)}
                             style={styles.inlineStepBtn}>
-                            <Ionicons name="remove" size={16} color={theme.text} />
+                            <Ionicons name="remove" size={15} color={theme.text} />
                           </Pressable>
-                          <Text style={[styles.inlineStepQty, { color: theme.text }]}>
+                          <Text style={[styles.inlineStepQty, { color: theme.primary, fontWeight: '800' }]}>
                             {inCartItem.quantity}
                           </Text>
                           <Pressable
                             onPress={() => addToCart(product, 1)}
                             style={styles.inlineStepBtn}>
-                            <Ionicons name="add" size={16} color={theme.text} />
+                            <Ionicons name="add" size={15} color={theme.text} />
                           </Pressable>
                         </View>
                       ) : (
                         <Pressable
                           disabled={isOut}
                           onPress={() => addToCart(product)}
-                          style={[
+                          style={({ pressed }) => [
                             styles.listAddBtn,
                             {
                               backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
                               borderColor: isOut ? theme.border : theme.primary,
                             },
+                            pressed && !isOut && { opacity: 0.8 },
                           ]}>
                           <Ionicons
-                            name="add"
+                            name="add-circle"
                             size={16}
                             color={isOut ? theme.textMuted : theme.primary}
                           />
@@ -1294,7 +1400,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         </Pressable>
                       )}
                     </View>
-                  </View>
+                  </Pressable>
                 );
               }
 
@@ -1363,8 +1469,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   </View>
 
                   <View style={styles.gridCardBottom}>
-                    <Text style={[styles.gridPrice, { color: theme.primary }]}>
-                      {settings.currencySymbol}{product.price}
+                    <Text
+                      style={[styles.gridPrice, { color: theme.primary }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}>
+                      {settings.currencySymbol}{formatCompactPrice(product.price)}
                     </Text>
 
                     {/* Stepper on card if in cart, otherwise + Add button */}
@@ -1478,13 +1588,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           addToCart(p);
         }}
       />
-
-      {/* ⚡ Quick Item Modal */}
-      <QuickItemModal
-        visible={isQuickItemOpen}
-        onClose={() => setIsQuickItemOpen(false)}
-        onAddItem={handleAddQuickItem}
-      />
     </KeyboardAvoidingView>
   );
 };
@@ -1511,6 +1614,20 @@ const styles = StyleSheet.create({
   // Updated: search now uses SearchBar component (no inline styles needed)
   searchFlex: {
     flex: 1,
+  },
+  searchInlineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  searchBarcodeBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.sm,
   },
   topBarActions: {
     flexDirection: 'row',
@@ -1718,37 +1835,74 @@ const styles = StyleSheet.create({
 
   // List View Styles
   catalogList: {
-    gap: 6,
+    gap: 8,
     paddingBottom: Spacing.xl,
   },
   listRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    ...Shadows.sm,
-  },
-  listRowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    minHeight: 72,
     gap: 10,
-    flex: 1,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
   },
-  listThumb: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.sm,
-  },
-  listThumbFallback: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.sm,
+  listThumbWrap: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  listThumb: {
+    width: '100%',
+    height: '100%',
+  },
+  listThumbFallback: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listRowContent: {
+    flex: 1,
+    gap: 5,
+    justifyContent: 'center',
+  },
   listRowName: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  listRowBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    flexWrap: 'wrap',
+  },
+  listCategoryBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  listCategoryText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  listStockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: BorderRadius.full,
+  },
+  listStockText: {
+    fontSize: 10,
     fontWeight: '700',
   },
   listRowMeta: {
@@ -1756,18 +1910,20 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   listRowRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 6,
   },
   listRowPrice: {
-    fontSize: 14,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '900',
+    letterSpacing: -0.3,
   },
   inlineStepper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
     paddingHorizontal: 4,
     paddingVertical: 2,
     gap: 6,
@@ -1778,15 +1934,15 @@ const styles = StyleSheet.create({
   inlineStepQty: {
     fontSize: 13,
     fontWeight: '800',
-    minWidth: 16,
+    minWidth: 18,
     textAlign: 'center',
   },
   listAddBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 4,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
   },
@@ -1874,6 +2030,14 @@ const styles = StyleSheet.create({
   mobileModalContainer: {
     flex: 1,
   },
+  drawerHandle: {
+    width: 38,
+    height: 4.5,
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 4,
+  },
   checkoutInner: {
     flex: 1,
     display: 'flex',
@@ -1890,10 +2054,17 @@ const styles = StyleSheet.create({
   drawerHeaderTitle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
+  },
+  drawerIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   drawerTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '800',
   },
   drawerHeaderActions: {
@@ -1971,9 +2142,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   itemsCard: {
-    borderRadius: BorderRadius.lg,
+    borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: Spacing.md,
+    overflow: 'hidden',
   },
   cartItemRow: {
     flexDirection: 'row',
@@ -1982,7 +2154,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   cartItemName: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
   cartItemPriceInfo: {
@@ -1995,11 +2167,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   smallStepBtn: {
-    width: 36,
-    height: 36,
-    minWidth: 36,
-    minHeight: 36,
-    borderRadius: BorderRadius.full,
+    width: 32,
+    height: 32,
+    minWidth: 32,
+    minHeight: 32,
+    borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -2013,8 +2185,8 @@ const styles = StyleSheet.create({
   trashBtn: {
     padding: 8,
     marginLeft: 2,
-    minWidth: 36,
-    minHeight: 36,
+    minWidth: 32,
+    minHeight: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -2035,35 +2207,36 @@ const styles = StyleSheet.create({
   },
   payCard: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 6,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
     position: 'relative',
   },
   payCardEmoji: {
-    fontSize: 20,
+    fontSize: 22,
+    marginBottom: 2,
   },
   payCardLabel: {
-    fontSize: 11,
+    fontSize: 12,
     textAlign: 'center',
   },
   selectedCheckBadge: {
     position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    top: 6,
+    right: 6,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   // Context Panels
   contextPanel: {
-    borderRadius: BorderRadius.lg,
+    borderRadius: 14,
     borderWidth: 1,
     padding: Spacing.md,
     gap: 8,
@@ -2083,18 +2256,18 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   denomBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 12,
     borderWidth: 1,
   },
   denomText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   cashInput: {
-    height: 42,
-    borderRadius: BorderRadius.md,
+    height: 44,
+    borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: Spacing.md,
     fontSize: 15,
@@ -2105,7 +2278,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 14,
     borderWidth: 1.5,
   },
   changeBannerLabel: {
@@ -2194,22 +2367,22 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   discShortcutBtn: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: BorderRadius.md,
+    borderRadius: 10,
     borderWidth: 1,
   },
   discShortcutText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
 
   // Always-visible discount row (W2-1 / W2-4)
   discountRow: {
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    borderRadius: 14,
     borderWidth: 1,
-    gap: 6,
+    gap: 8,
   },
   discountRowHeader: {
     flexDirection: 'row',
@@ -2233,7 +2406,7 @@ const styles = StyleSheet.create({
   discTypeToggle: {
     width: 36,
     height: 36,
-    borderRadius: BorderRadius.md,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -2275,15 +2448,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 14,
-    borderRadius: BorderRadius.xl,
+    paddingVertical: 15,
+    borderRadius: 16,
     ...Shadows.md,
   },
   completeSaleBtnText: {
     color: '#FFFFFF',
     fontWeight: '800',
-    fontSize: 14,
-    letterSpacing: 0.2,
+    fontSize: 15,
+    letterSpacing: 0.3,
   },
 
   // W1-3: Sale success toast

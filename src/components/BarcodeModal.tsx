@@ -24,7 +24,7 @@ export const BarcodeModal: React.FC<BarcodeModalProps> = ({
   onClose,
   onSelectProduct,
 }) => {
-  const { products, settings } = useShop();
+  const { products, settings, language, t } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [inputCode, setInputCode] = useState('');
@@ -63,9 +63,23 @@ export const BarcodeModal: React.FC<BarcodeModalProps> = ({
           {/* Body */}
           <View style={styles.body}>
             {/* Barcode Input Frame */}
-            <View style={[styles.scannerBox, { backgroundColor: '#0F172A' }]}>
-              <Ionicons name="barcode-outline" size={64} color="#10B981" />
-              <Text style={styles.scannerPrompt}>Type or paste barcode to find product</Text>
+            <View
+              style={[
+                styles.scannerBox,
+                {
+                  backgroundColor: settings.darkMode ? '#0F172A' : '#F8FAFC',
+                  borderColor: theme.border,
+                  borderWidth: 1,
+                },
+              ]}>
+              <Ionicons name="barcode-outline" size={56} color={theme.primary} />
+              <Text
+                style={[
+                  styles.scannerPrompt,
+                  { color: settings.darkMode ? '#94A3B8' : '#475569' },
+                ]}>
+                {language === 'ur' ? 'پراڈکٹ کی تلاش کے لیے بارکوڈ لکھیں یا سکین کریں' : 'Type or scan barcode to find product'}
+              </Text>
             </View>
 
             {/* Input Row */}
@@ -75,7 +89,7 @@ export const BarcodeModal: React.FC<BarcodeModalProps> = ({
                   styles.barcodeInput,
                   { backgroundColor: theme.surfaceSubtle, color: theme.text, borderColor: theme.border },
                 ]}
-                placeholder="Scan or type barcode (e.g. 89640001001)..."
+                placeholder={language === 'ur' ? 'بارکوڈ درج یا سکین کریں...' : 'Type or scan barcode...'}
                 placeholderTextColor={theme.textMuted}
                 value={inputCode}
                 onChangeText={setInputCode}

@@ -34,13 +34,18 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showWebWhatsAppNotice, setShowWebWhatsAppNotice] = useState(false);
-  const [isDriveConnected, setIsDriveConnected] = useState(false);
+  const [driveSaved, setDriveSaved] = useState(false);
 
   useEffect(() => {
-    if (visible) {
-      googleDriveService.isConnected().then(setIsDriveConnected).catch(() => {});
+    // Reset on every open, then attempt the bill upload and track the real outcome
+    setDriveSaved(false);
+    if (visible && sale) {
+      googleDriveService
+        .uploadBillToDrive(sale, settings)
+        .then((result) => setDriveSaved(!!result?.id))
+        .catch(() => setDriveSaved(false));
     }
-  }, [visible]);
+  }, [visible, sale?.id]); // re-run only when a different sale opens
 
   if (!sale) return null;
 
@@ -1252,14 +1257,14 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               {/* Green Divider */}
               <View style={styles.previewGreenDivider} />
 
-              {/* 5 TB Google Drive Auto-Saved Indicator */}
-              {isDriveConnected && (
+              {/* Google Drive Auto-Saved Indicator – only shown after a real successful upload */}
+              {driveSaved && (
                 <View style={styles.driveStatusRow}>
                   <Ionicons name="cloud-done" size={13} color="#059669" />
                   <Text style={styles.driveStatusText}>
                     {language === 'ur'
                       ? '✓ گوگل ڈرائیو میں محفوظ'
-                      : '✓ Auto-Saved to Google Drive'}
+                      : '✓ Saved to Google Drive'}
                   </Text>
                 </View>
               )}

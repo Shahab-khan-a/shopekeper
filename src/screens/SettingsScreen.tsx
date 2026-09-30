@@ -139,7 +139,7 @@ export const SettingsScreen: React.FC = () => {
   const [importJsonText, setImportJsonText] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Google Drive (5 TB)
+  // Google Drive Backup
   const [driveAuth, setDriveAuth] = useState<GoogleDriveAuth | null>(null);
   const [driveLoading, setDriveLoading] = useState(false);
   const [driveBackupLoading, setDriveBackupLoading] = useState(false);
@@ -238,7 +238,7 @@ export const SettingsScreen: React.FC = () => {
       setProfileImage(persistentUri);
       await updateSettings({ profileImage: persistentUri });
 
-      // Upload directly to 5 TB Google Drive if connected
+      // Upload directly to Google Drive if connected
       const auth = await googleDriveService.getSavedAuth();
       if (auth) {
         googleDriveService
@@ -658,7 +658,7 @@ export const SettingsScreen: React.FC = () => {
             </Text>
             <Text style={[styles.cloudTopSub, { color: user ? '#16A34A' : theme.textMuted }]} numberOfLines={1}>
               {user
-                ? (syncStatus === 'syncing' ? 'Syncing with cloud...' : 'Connected & Backed Up to Firebase')
+                ? (syncStatus === 'syncing' ? 'Syncing with cloud...' : syncStatus === 'synced' ? 'Connected & Backed Up to Firebase' : 'Connected to Firebase (Pending Sync)')
                 : (language === 'ur' ? 'ڈیٹا محفوظ کرنے کیلئے گوگل سے لاگ ان کریں' : 'Tap to connect & sync your store records')}
             </Text>
           </View>
@@ -1152,7 +1152,7 @@ export const SettingsScreen: React.FC = () => {
             )}
           </Section>
 
-          {/* Google Drive (5 TB Storage) Section */}
+          {/* Google Drive Backup Section */}
           <Section title={t('googleDriveTitle')} theme={theme}>
             <View style={styles.driveCard}>
               <View style={styles.driveHeaderRow}>
@@ -1854,7 +1854,7 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
   },
 
-  // 5 TB Google Drive Styles
+  // Google Drive Styles
   driveCard: {
     padding: Spacing.lg,
     gap: Spacing.md,

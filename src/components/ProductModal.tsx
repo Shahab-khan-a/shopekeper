@@ -107,6 +107,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
   const [isDriveConnected, setIsDriveConnected] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  const softBorder = settings.darkMode ? 'rgba(255, 255, 255, 0.08)' : '#E2E8F0';
+  const sectionBg = settings.darkMode ? '#161F30' : '#F8FAFC';
+  const sectionBorder = settings.darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const inputBg = settings.darkMode ? '#1E293B' : '#FFFFFF';
 
   useEffect(() => {
     googleDriveService.getSavedAuth().then((auth) => {
@@ -220,7 +226,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     const persistentUri = await toPersistentDataUrl(rawUri);
     setImage(persistentUri);
 
-    // If Google Drive is connected, upload directly to 5 TB storage
+    // If Google Drive is connected, upload directly to Drive storage
     const driveAuth = await googleDriveService.getSavedAuth();
     if (driveAuth) {
       setIsUploadingToDrive(true);
@@ -231,7 +237,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         );
         setImage(driveUrl);
       } catch (err: any) {
-        console.error('[ProductModal] 5 TB Google Drive upload error:', err);
+        console.error('[ProductModal] Google Drive upload error:', err);
         const errMsg = err?.message || 'Upload to Google Drive failed.';
         if (errMsg.includes('Google Drive API has not been used') || errMsg.includes('disabled')) {
           if (Platform.OS === 'web') {
@@ -378,9 +384,16 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.kavContainer}>
           <View style={styles.modalOverlay}>
-            <View style={[styles.modalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.modalCard, { backgroundColor: theme.surface, borderColor: sectionBorder }]}>
+              {/* Sheet Drag Handle for Mobile */}
+              {Platform.OS !== 'web' && (
+                <View style={styles.sheetHandleWrap}>
+                  <View style={[styles.sheetHandle, { backgroundColor: settings.darkMode ? '#334155' : '#CBD5E1' }]} />
+                </View>
+              )}
+
               {/* Header */}
-              <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+              <View style={[styles.modalHeader, { borderBottomColor: softBorder }]}>
                 <View style={styles.modalHeaderLeft}>
                   <View style={[styles.headerIconWrap, { backgroundColor: theme.primaryLight }]}>
                     <Ionicons name="cube" size={20} color={theme.primary} />
@@ -396,20 +409,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </View>
 
                 <View style={styles.modalHeaderRight}>
-                  <Pressable
-                    onPress={handleSubmit}
-                    disabled={isSubmitting}
-                    style={({ pressed }) => [
-                      styles.headerSaveBtn,
-                      { backgroundColor: theme.primary },
-                      pressed && { opacity: 0.85 },
-                    ]}>
-                    <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-                    <Text style={styles.headerSaveText}>
-                      {isSubmitting ? '...' : t('saveProduct')}
-                    </Text>
-                  </Pressable>
-
                   <Pressable onPress={onClose} style={[styles.closeBtn, { backgroundColor: theme.surfaceSubtle }]}>
                     <Ionicons name="close" size={20} color={theme.textSecondary} />
                   </Pressable>
@@ -422,11 +421,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
                 {/* ── Photo Section ── */}
-                <View style={[styles.formSectionCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                <View style={[styles.formSectionCard, { backgroundColor: sectionBg, borderColor: sectionBorder }]}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                      {language === 'ur' ? 'پروڈکٹ کی تصویر' : 'Product Photo'}
-                    </Text>
+                    <View style={styles.sectionTitleRow}>
+                      <View style={[styles.sectionTitleIndicator, { backgroundColor: theme.primary }]} />
+                      <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
+                        {language === 'ur' ? 'پروڈکٹ کی تصویر' : 'Product Photo'}
+                      </Text>
+                    </View>
                     {isDriveConnected ? (
                       <View style={styles.driveStatusPill}>
                         <Ionicons name="cloud-done" size={12} color="#10B981" />
@@ -475,14 +477,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                           disabled={isUploadingToDrive}
                           style={[styles.overlayActionBtn, { backgroundColor: theme.primary }]}>
                           <Ionicons name="camera" size={14} color="#FFFFFF" />
-                          <Text style={styles.overlayActionText}>{t('takePhoto')}</Text>
+                          <Text style={styles.overlayActionText} numberOfLines={1}>{t('takePhoto')}</Text>
                         </Pressable>
                         <Pressable
                           onPress={pickImage}
                           disabled={isUploadingToDrive}
                           style={[styles.overlayActionBtn, { backgroundColor: theme.surface }]}>
                           <Ionicons name="images-outline" size={14} color={theme.text} />
-                          <Text style={[styles.overlayActionText, { color: theme.text }]}>{t('chooseGallery')}</Text>
+                          <Text style={[styles.overlayActionText, { color: theme.text }]} numberOfLines={1}>{t('chooseGallery')}</Text>
                         </Pressable>
                         <Pressable
                           onPress={() => setImage('')}
@@ -498,14 +500,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         onPress={takePhoto}
                         style={({ pressed }) => [
                           styles.photoPickCard,
-                          { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                          {
+                            backgroundColor: settings.darkMode ? 'rgba(99, 102, 241, 0.12)' : '#EEF2FF',
+                            borderColor: settings.darkMode ? 'rgba(99, 102, 241, 0.3)' : '#C7D2FE',
+                          },
                           pressed && { opacity: 0.8 },
                         ]}>
                         <Ionicons name="camera" size={24} color={theme.primary} />
-                        <Text style={[styles.photoPickTitle, { color: theme.primaryDark }]}>
+                        <Text style={[styles.photoPickTitle, { color: theme.primary }]}>
                           {t('takePhoto')}
                         </Text>
-                        <Text style={[styles.photoPickSub, { color: theme.primary }]}>
+                        <Text style={[styles.photoPickSub, { color: theme.primary + 'B0' }]}>
                           Live camera snap
                         </Text>
                       </Pressable>
@@ -514,7 +519,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         onPress={pickImage}
                         style={({ pressed }) => [
                           styles.photoPickCard,
-                          { backgroundColor: theme.card, borderColor: theme.border },
+                          {
+                            backgroundColor: inputBg,
+                            borderColor: softBorder,
+                          },
                           pressed && { opacity: 0.8 },
                         ]}>
                         <Ionicons name="images-outline" size={24} color={theme.textSecondary} />
@@ -541,8 +549,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                           style={[
                             styles.presetChip,
                             {
-                              backgroundColor: image === preset.url ? theme.primaryLight : theme.card,
-                              borderColor: image === preset.url ? theme.primary : theme.border,
+                              backgroundColor: image === preset.url ? theme.primaryLight : inputBg,
+                              borderColor: image === preset.url ? theme.primary : softBorder,
                             },
                           ]}>
                           <Image source={{ uri: preset.url }} style={styles.presetThumbImg} />
@@ -560,20 +568,32 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </View>
 
                 {/* ── Section 1: Basic Info ── */}
-                <View style={[styles.formSectionCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                  <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                    {language === 'ur' ? 'بنیادی تفصیلات' : '1. Basic Information'}
-                  </Text>
+                <View style={[styles.formSectionCard, { backgroundColor: sectionBg, borderColor: sectionBorder }]}>
+                  <View style={styles.sectionTitleRow}>
+                    <View style={[styles.sectionTitleIndicator, { backgroundColor: theme.primary }]} />
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
+                      {language === 'ur' ? 'بنیادی تفصیلات' : '1. Basic Information'}
+                    </Text>
+                  </View>
 
                   {/* Name (English) */}
                   <View style={styles.inputWrap}>
                     <Text style={[styles.inputLabel, { color: theme.text }]}>{t('productName')} *</Text>
                     <TextInput
-                      style={[styles.inputBox, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+                      style={[
+                        styles.inputBox,
+                        {
+                          backgroundColor: inputBg,
+                          color: theme.text,
+                          borderColor: focusedField === 'name' ? theme.primary : softBorder,
+                        },
+                      ]}
                       placeholder="e.g. Super Basmati Rice 1kg"
                       placeholderTextColor={theme.textMuted}
                       value={name}
                       onChangeText={setName}
+                      onFocus={() => setFocusedField('name')}
+                      onBlur={() => setFocusedField(null)}
                     />
                   </View>
 
@@ -581,11 +601,20 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   <View style={styles.inputWrap}>
                     <Text style={[styles.inputLabel, { color: theme.text }]}>{t('productNameUrdu')}</Text>
                     <TextInput
-                      style={[styles.inputBox, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+                      style={[
+                        styles.inputBox,
+                        {
+                          backgroundColor: inputBg,
+                          color: theme.text,
+                          borderColor: focusedField === 'nameUrdu' ? theme.primary : softBorder,
+                        },
+                      ]}
                       placeholder="مثلاً: باسمتی چاول 1 کلو"
                       placeholderTextColor={theme.textMuted}
                       value={nameUrdu}
                       onChangeText={setNameUrdu}
+                      onFocus={() => setFocusedField('nameUrdu')}
+                      onBlur={() => setFocusedField(null)}
                     />
                   </View>
 
@@ -608,8 +637,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       style={({ pressed }) => [
                         styles.dropdownTrigger,
                         {
-                          backgroundColor: theme.card,
-                          borderColor: isCategoryOpen ? theme.primary : theme.border,
+                          backgroundColor: inputBg,
+                          borderColor: isCategoryOpen ? theme.primary : softBorder,
                         },
                         pressed && { opacity: 0.85 },
                       ]}>
@@ -644,8 +673,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </Pressable>
 
                     {isCategoryOpen && (
-                      <View style={[styles.dropdownMenu, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                        <View style={[styles.dropdownMenuHeader, { borderBottomColor: theme.border }]}>
+                      <View style={[styles.dropdownMenu, { backgroundColor: inputBg, borderColor: softBorder }]}>
+                        <View style={[styles.dropdownMenuHeader, { borderBottomColor: softBorder }]}>
                           <Text style={[styles.dropdownMenuHeaderTitle, { color: theme.textSecondary }]}>
                             {language === 'ur' ? 'کیٹیگری منتخب کریں' : 'SELECT CATEGORY'}
                           </Text>
@@ -657,8 +686,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         </View>
 
                         {/* Search Input for Category */}
-                        <View style={[styles.dropdownSearchWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                          <Ionicons name="search" size={14} color={theme.textMuted} />
+                        <View style={[styles.dropdownSearchWrap, { backgroundColor: sectionBg, borderColor: softBorder }]}>
+                          <Ionicons name="search" size={17} color={theme.textMuted} />
                           <TextInput
                             style={[styles.dropdownSearchInput, { color: theme.text }]}
                             placeholder={language === 'ur' ? 'کیٹیگری تلاش کریں...' : 'Search category...'}
@@ -667,8 +696,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                             onChangeText={setCategorySearch}
                           />
                           {categorySearch.length > 0 && (
-                            <Pressable onPress={() => setCategorySearch('')} hitSlop={6}>
-                              <Ionicons name="close-circle" size={15} color={theme.textMuted} />
+                            <Pressable onPress={() => setCategorySearch('')} hitSlop={10}>
+                              <Ionicons name="close-circle" size={18} color={theme.textMuted} />
                             </Pressable>
                           )}
                         </View>
@@ -702,7 +731,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                                     ]}>
                                     <Ionicons
                                       name={opt.icon}
-                                      size={13}
+                                      size={16}
                                       color={isSelected ? '#FFFFFF' : theme.textSecondary}
                                     />
                                   </View>
@@ -734,7 +763,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                                   {isSelected && (
                                     <Ionicons
                                       name="checkmark-circle"
-                                      size={15}
+                                      size={17}
                                       color={theme.primary}
                                       style={{ marginLeft: 4 }}
                                     />
@@ -774,8 +803,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       style={({ pressed }) => [
                         styles.dropdownTrigger,
                         {
-                          backgroundColor: theme.card,
-                          borderColor: isUnitOpen ? theme.primary : theme.border,
+                          backgroundColor: inputBg,
+                          borderColor: isUnitOpen ? theme.primary : softBorder,
                         },
                         pressed && { opacity: 0.85 },
                       ]}>
@@ -808,8 +837,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </Pressable>
 
                     {isUnitOpen && (
-                      <View style={[styles.dropdownMenu, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                        <View style={[styles.dropdownMenuHeader, { borderBottomColor: theme.border }]}>
+                      <View style={[styles.dropdownMenu, { backgroundColor: inputBg, borderColor: softBorder }]}>
+                        <View style={[styles.dropdownMenuHeader, { borderBottomColor: softBorder }]}>
                           <Text style={[styles.dropdownMenuHeaderTitle, { color: theme.textSecondary }]}>
                             {language === 'ur' ? 'اکائی منتخب کریں' : 'SELECT MEASUREMENT UNIT'}
                           </Text>
@@ -821,8 +850,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         </View>
 
                         {/* Search Input for Unit */}
-                        <View style={[styles.dropdownSearchWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                          <Ionicons name="search" size={14} color={theme.textMuted} />
+                        <View style={[styles.dropdownSearchWrap, { backgroundColor: sectionBg, borderColor: softBorder }]}>
+                          <Ionicons name="search" size={17} color={theme.textMuted} />
                           <TextInput
                             style={[styles.dropdownSearchInput, { color: theme.text }]}
                             placeholder={language === 'ur' ? 'اکائی تلاش کریں (kg, piece, L وغیرہ)...' : 'Search unit (kg, piece, L, etc.)...'}
@@ -831,8 +860,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                             onChangeText={setUnitSearch}
                           />
                           {unitSearch.length > 0 && (
-                            <Pressable onPress={() => setUnitSearch('')} hitSlop={6}>
-                              <Ionicons name="close-circle" size={15} color={theme.textMuted} />
+                            <Pressable onPress={() => setUnitSearch('')} hitSlop={10}>
+                              <Ionicons name="close-circle" size={18} color={theme.textMuted} />
                             </Pressable>
                           )}
                         </View>
@@ -866,7 +895,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                                     ]}>
                                     <Ionicons
                                       name={opt.icon}
-                                      size={13}
+                                      size={16}
                                       color={isSelected ? '#FFFFFF' : theme.textSecondary}
                                     />
                                   </View>
@@ -898,7 +927,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                                   {isSelected && (
                                     <Ionicons
                                       name="checkmark-circle"
-                                      size={15}
+                                      size={17}
                                       color={theme.primary}
                                       style={{ marginLeft: 4 }}
                                     />
@@ -921,10 +950,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </View>
 
                 {/* ── Section 2: Pricing & Profit Calculator ── */}
-                <View style={[styles.formSectionCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                  <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                    {language === 'ur' ? 'قیمت اور منافع' : '2. Pricing & Profit Margin'}
-                  </Text>
+                <View style={[styles.formSectionCard, { backgroundColor: sectionBg, borderColor: sectionBorder }]}>
+                  <View style={styles.sectionTitleRow}>
+                    <View style={[styles.sectionTitleIndicator, { backgroundColor: theme.primary }]} />
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
+                      {language === 'ur' ? 'قیمت اور منافع' : '2. Pricing & Profit Margin'}
+                    </Text>
+                  </View>
 
                   <View style={styles.rowInputs}>
                     <View style={{ flex: 1 }}>
@@ -935,13 +967,19 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         style={[
                           styles.inputBox,
                           styles.priceInputBold,
-                          { backgroundColor: theme.card, color: theme.primary, borderColor: theme.border },
+                          {
+                            backgroundColor: inputBg,
+                            color: theme.primary,
+                            borderColor: focusedField === 'price' ? theme.primary : softBorder,
+                          },
                         ]}
                         placeholder="350"
                         placeholderTextColor={theme.textMuted}
                         keyboardType="numeric"
                         value={price}
                         onChangeText={setPrice}
+                        onFocus={() => setFocusedField('price')}
+                        onBlur={() => setFocusedField(null)}
                       />
                     </View>
 
@@ -950,19 +988,35 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         {t('cost')} ({settings.currencySymbol})
                       </Text>
                       <TextInput
-                        style={[styles.inputBox, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+                        style={[
+                          styles.inputBox,
+                          {
+                            backgroundColor: inputBg,
+                            color: theme.text,
+                            borderColor: focusedField === 'costPrice' ? theme.primary : softBorder,
+                          },
+                        ]}
                         placeholder="280"
                         placeholderTextColor={theme.textMuted}
                         keyboardType="numeric"
                         value={costPrice}
                         onChangeText={setCostPrice}
+                        onFocus={() => setFocusedField('costPrice')}
+                        onBlur={() => setFocusedField(null)}
                       />
                     </View>
                   </View>
 
                   {/* Live Profit Banner */}
                   {parsedPrice > 0 ? (
-                    <View style={[styles.profitBanner, { backgroundColor: theme.successLight, borderColor: theme.success }]}>
+                    <View
+                      style={[
+                        styles.profitBanner,
+                        {
+                          backgroundColor: settings.darkMode ? 'rgba(16, 185, 129, 0.12)' : '#ECFDF5',
+                          borderColor: settings.darkMode ? 'rgba(16, 185, 129, 0.25)' : '#A7F3D0',
+                        },
+                      ]}>
                       <Ionicons name="trending-up" size={20} color={theme.success} />
                       <View style={{ flex: 1 }}>
                         <Text style={[styles.profitBannerTitle, { color: theme.success }]}>
@@ -977,10 +1031,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </View>
 
                 {/* ── Section 3: Stock & Barcode ── */}
-                <View style={[styles.formSectionCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                  <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                    {language === 'ur' ? 'اسٹاک اور بارکوڈ' : '3. Inventory & Barcode'}
-                  </Text>
+                <View style={[styles.formSectionCard, { backgroundColor: sectionBg, borderColor: sectionBorder }]}>
+                  <View style={styles.sectionTitleRow}>
+                    <View style={[styles.sectionTitleIndicator, { backgroundColor: theme.primary }]} />
+                    <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
+                      {language === 'ur' ? 'اسٹاک اور بارکوڈ' : '3. Inventory & Barcode'}
+                    </Text>
+                  </View>
 
                   {/* Stock Input & Shortcuts */}
                   <View style={styles.inputWrap}>
@@ -989,25 +1046,41 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       <TextInput
                         style={[
                           styles.inputBox,
-                          { flex: 1, backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
+                          {
+                            flex: 1,
+                            backgroundColor: inputBg,
+                            color: theme.text,
+                            borderColor: focusedField === 'stock' ? theme.primary : softBorder,
+                          },
                         ]}
                         placeholder="25"
                         placeholderTextColor={theme.textMuted}
                         keyboardType="numeric"
                         value={stock}
                         onChangeText={setStock}
+                        onFocus={() => setFocusedField('stock')}
+                        onBlur={() => setFocusedField(null)}
                       />
                       {/* Stock shortcuts */}
-                      <View style={{ flexDirection: 'row', gap: 4 }}>
+                      <View style={{ flexDirection: 'row', gap: 6 }}>
                         {STOCK_SHORTCUTS.map((amt) => (
                           <Pressable
                             key={amt}
                             onPress={() => setStock(amt.toString())}
-                            style={[
+                            style={({ pressed }) => [
                               styles.shortcutPill,
-                              { backgroundColor: theme.card, borderColor: theme.border },
+                              {
+                                backgroundColor: stock === amt.toString() ? theme.primaryLight : (settings.darkMode ? '#1E293B' : '#EDF2F7'),
+                              },
+                              pressed && { opacity: 0.8 },
                             ]}>
-                            <Text style={[styles.shortcutPillText, { color: theme.textSecondary }]}>
+                            <Text
+                              style={[
+                                styles.shortcutPillText,
+                                {
+                                  color: stock === amt.toString() ? theme.primary : theme.textSecondary,
+                                },
+                              ]}>
                               {amt}
                             </Text>
                           </Pressable>
@@ -1023,21 +1096,28 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       <TextInput
                         style={[
                           styles.inputBox,
-                          { flex: 1, backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
+                          {
+                            flex: 1,
+                            backgroundColor: inputBg,
+                            color: theme.text,
+                            borderColor: focusedField === 'barcode' ? theme.primary : softBorder,
+                          },
                         ]}
                         placeholder="8964000..."
                         placeholderTextColor={theme.textMuted}
                         value={barcode}
                         onChangeText={setBarcode}
+                        onFocus={() => setFocusedField('barcode')}
+                        onBlur={() => setFocusedField(null)}
                       />
                       <Pressable
                         onPress={generateRandomSku}
                         style={({ pressed }) => [
                           styles.autoSkuBtn,
-                          { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                          { backgroundColor: theme.primaryLight },
                           pressed && { opacity: 0.8 },
                         ]}>
-                        <Ionicons name="sparkles" size={14} color={theme.primary} />
+                        <Ionicons name="sparkles" size={15} color={theme.primary} />
                         <Text style={[styles.autoSkuText, { color: theme.primaryDark }]}>Auto SKU</Text>
                       </Pressable>
                     </View>
@@ -1046,10 +1126,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               </ScrollView>
 
               {/* Action Footer */}
-              <View style={[styles.modalFooter, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+              <View style={[styles.modalFooter, { backgroundColor: theme.surface, borderTopColor: softBorder }]}>
                 <Pressable
                   onPress={onClose}
-                  style={[styles.footerCancelBtn, { borderColor: theme.border }]}>
+                  style={({ pressed }) => [
+                    styles.footerCancelBtn,
+                    {
+                      borderColor: softBorder,
+                      backgroundColor: settings.darkMode ? 'rgba(255, 255, 255, 0.04)' : '#F8FAFC',
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}>
                   <Text style={[styles.footerCancelText, { color: theme.textSecondary }]}>
                     {t('cancel')}
                   </Text>
@@ -1099,26 +1186,40 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    justifyContent: 'center',
+    justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end',
     alignItems: 'center',
-    padding: Spacing.sm,
+    padding: Platform.OS === 'web' ? Spacing.sm : 0,
   },
   modalCard: {
     width: '100%',
     maxWidth: 580,
-    height: '92%',
-    maxHeight: 780,
-    borderRadius: BorderRadius.xxl,
+    height: Platform.OS === 'web' ? '92%' : '94%',
+    maxHeight: 840,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderBottomLeftRadius: Platform.OS === 'web' ? BorderRadius.xxl : 0,
+    borderBottomRightRadius: Platform.OS === 'web' ? BorderRadius.xxl : 0,
     overflow: 'hidden',
-    borderWidth: 1,
+    borderWidth: Platform.OS === 'web' ? 1 : 0,
     ...Shadows.xl,
+  },
+  sheetHandleWrap: {
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  sheetHandle: {
+    width: 38,
+    height: 4.5,
+    borderRadius: 3,
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
   },
   modalHeaderLeft: {
@@ -1128,18 +1229,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: BorderRadius.full,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalTitle: {
     fontSize: 16,
     fontWeight: '800',
+    letterSpacing: -0.3,
   },
   modalSubtitle: {
-    fontSize: 11,
+    fontSize: 11.5,
     marginTop: 1,
   },
   modalHeaderRight: {
@@ -1147,23 +1249,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  headerSaveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: BorderRadius.full,
-  },
-  headerSaveText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-  },
   closeBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: BorderRadius.full,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1176,26 +1265,37 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xxl,
   },
   formSectionCard: {
-    padding: Spacing.md,
-    borderRadius: BorderRadius.xl,
+    padding: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    gap: Spacing.sm,
+    gap: 12,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  sectionTitleIndicator: {
+    width: 3.5,
+    height: 12,
+    borderRadius: 2,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   photoChoiceGrid: {
     flexDirection: 'row',
-    gap: Spacing.sm,
+    gap: 10,
   },
   photoPickCard: {
     flex: 1,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1.5,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
@@ -1234,11 +1334,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: BorderRadius.full,
+    flexShrink: 1,
   },
   overlayActionText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#FFFFFF',
+    flexShrink: 1,
   },
   presetHeader: {
     fontSize: 11,
@@ -1255,7 +1357,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
-    marginRight: 6,
+    marginRight: 8,
   },
   presetThumbImg: {
     width: 22,
@@ -1267,19 +1369,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inputWrap: {
-    gap: 4,
+    gap: 6,
   },
   inputLabel: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
+    letterSpacing: 0.1,
   },
   inputBox: {
-    height: 44,
-    borderRadius: BorderRadius.lg,
+    height: 48,
+    borderRadius: 14,
     borderWidth: 1.5,
     paddingHorizontal: Spacing.md,
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 14.5,
+    fontWeight: '600',
   },
   priceInputBold: {
     fontSize: 17,
@@ -1313,11 +1416,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 50,
-    borderRadius: BorderRadius.lg,
+    minHeight: 52,
+    borderRadius: 14,
     borderWidth: 1.5,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
   },
   dropdownTriggerLeft: {
     flexDirection: 'row',
@@ -1326,9 +1429,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dropdownIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1358,39 +1461,42 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dropdownMenu: {
-    marginTop: 6,
-    borderRadius: BorderRadius.lg,
+    marginTop: 8,
+    borderRadius: 18,
     borderWidth: 1,
     overflow: 'hidden',
-    ...Shadows.sm,
+    ...Shadows.md,
   },
   dropdownMenuHeader: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderBottomWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   dropdownMenuHeaderTitle: {
-    fontSize: 9,
+    fontSize: 10.5,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   dropdownList: {
-    maxHeight: 190,
+    maxHeight: 260,
   },
   dropdownListContent: {
-    paddingVertical: 2,
+    paddingVertical: 4,
   },
   dropdownItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 12,
   },
   dropdownItemIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1398,30 +1504,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dropdownItemTitle: {
-    fontSize: 12,
+    fontSize: 13.5,
+    fontWeight: '700',
   },
   dropdownItemSub: {
-    fontSize: 9,
+    fontSize: 11,
+    marginTop: 1,
   },
   dropdownItemUrdu: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '600',
   },
   dropdownSearchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginHorizontal: 8,
-    marginVertical: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.md,
+    gap: 8,
+    height: 42,
+    marginHorizontal: 10,
+    marginVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     borderWidth: 1,
   },
   dropdownSearchInput: {
     flex: 1,
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 13.5,
+    fontWeight: '600',
     padding: 0,
   },
   dropdownEmptyState: {
@@ -1441,9 +1549,9 @@ const styles = StyleSheet.create({
   profitBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    gap: 12,
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
   },
   profitBannerTitle: {
@@ -1451,30 +1559,31 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   profitBannerSub: {
-    fontSize: 11,
-    marginTop: 1,
+    fontSize: 11.5,
+    marginTop: 2,
   },
   shortcutPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    borderRadius: 12,
+    borderWidth: 0,
   },
   shortcutPillText: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
   },
   autoSkuBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    gap: 5,
+    paddingHorizontal: 14,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 0,
     justifyContent: 'center',
   },
   autoSkuText: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '700',
   },
   modalFooter: {
@@ -1482,14 +1591,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingVertical: 14,
     borderTopWidth: 1,
     gap: Spacing.md,
   },
   footerCancelBtn: {
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: BorderRadius.xl,
+    paddingHorizontal: 20,
+    paddingVertical: 13,
+    borderRadius: 14,
     borderWidth: 1,
   },
   footerCancelText: {
@@ -1501,9 +1610,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 8,
     paddingVertical: 13,
-    borderRadius: BorderRadius.xl,
+    borderRadius: 14,
     ...Shadows.md,
   },
   footerSaveText: {

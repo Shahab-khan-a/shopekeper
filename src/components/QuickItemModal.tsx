@@ -49,6 +49,7 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState('');
+  const [focusedField, setFocusedField] = useState<'search' | 'price' | null>(null);
   const insets = useSafeAreaInsets();
   const keyboardOffset = useKeyboardOffset(visible);
 
@@ -61,6 +62,7 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
       setSelectedProduct(null);
       setIsDropdownOpen(false);
       setError('');
+      setFocusedField(null);
     }
   }, [visible]);
 
@@ -131,6 +133,9 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
             styles.sheetContainer,
             { backgroundColor: theme.surface, borderColor: theme.border },
           ]}>
+          {/* Bottom Sheet Handle */}
+          <View style={[styles.sheetHandle, { backgroundColor: theme.border }]} />
+
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: theme.border }]}>
             <View style={styles.headerTitleRow}>
@@ -139,12 +144,12 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
               </View>
               <View>
                 <Text style={[styles.title, { color: theme.text }]}>
-                  {t('addCustomItem')}
+                  {language === 'ur' ? 'کسٹم / کھلی چیز شامل کریں' : 'Add Custom / Loose Item'}
                 </Text>
                 <Text style={[styles.subtitle, { color: theme.textMuted }]}>
                   {language === 'ur'
-                    ? 'انوینٹری سے منتخب کریں یا نیا آئٹم شامل کریں'
-                    : 'Select from your items or enter custom'}
+                    ? 'غیر درج شدہ آئٹم کا نام اور قیمت درج کریں'
+                    : 'Enter custom item name and price for this sale'}
                 </Text>
               </View>
             </View>
@@ -159,43 +164,37 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
             style={styles.scrollArea}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled">
-            {/* Searchable Dropdown for Item Name */}
+            {/* Searchable Input for Custom Item Name */}
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}>
                 <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>
-                  {language === 'ur' ? 'آئٹم کا نام (تلاش کریں یا ٹائپ کریں)' : 'Item Name (Search or Type)'} *
+                  {language === 'ur' ? 'آئٹم کا نام (مثلاً کھلی چینی، کسٹم آئٹم)' : 'Item Name (e.g. Open Rice, Custom Item)'}
                 </Text>
-                {selectedProduct ? (
-                  <View style={[styles.selectedBadge, { backgroundColor: theme.primaryLight }]}>
-                    <Ionicons name="checkmark-circle" size={13} color={theme.primary} />
-                    <Text style={[styles.selectedBadgeText, { color: theme.primary }]}>
-                      {language === 'ur' ? 'انوینٹری سے' : 'Inventory Item'}
-                    </Text>
-                  </View>
-                ) : null}
               </View>
 
-              {/* Search / Dropdown Input */}
+              {/* Search / Input Container */}
               <View
                 style={[
                   styles.searchInputContainer,
                   {
                     backgroundColor: theme.surfaceSubtle,
-                    borderColor: isDropdownOpen ? theme.primary : theme.border,
+                    borderColor:
+                      focusedField === 'search' || isDropdownOpen ? theme.primary : theme.border,
+                    borderWidth: focusedField === 'search' || isDropdownOpen ? 1.5 : 1,
                   },
                 ]}>
                 <Ionicons
-                  name="search-outline"
+                  name="create-outline"
                   size={18}
-                  color={theme.textMuted}
+                  color={focusedField === 'search' || isDropdownOpen ? theme.primary : theme.textMuted}
                   style={styles.searchIcon}
                 />
                 <TextInput
                   style={[styles.searchInput, { color: theme.text }]}
                   placeholder={
                     language === 'ur'
-                      ? 'پراڈکٹ تلاش کریں یا نیا نام لکھیں...'
-                      : 'Search your items or type name...'
+                      ? 'آئٹم کا نام لکھیں (خالی چھوڑنے پر متفرق آئٹم ہوگا)...'
+                      : 'Type item name (default: Custom Item)...'
                   }
                   placeholderTextColor={theme.textMuted}
                   value={language === 'ur' && nameUrdu && !name ? nameUrdu : name}
@@ -208,7 +207,11 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
                     }
                     setError('');
                   }}
-                  onFocus={() => setIsDropdownOpen(true)}
+                  onFocus={() => {
+                    setIsDropdownOpen(true);
+                    setFocusedField('search');
+                  }}
+                  onBlur={() => setFocusedField(null)}
                 />
                 {name.length > 0 && (
                   <Pressable
@@ -371,7 +374,12 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
                   styles.priceInputBox,
                   {
                     backgroundColor: theme.surfaceSubtle,
-                    borderColor: error ? theme.danger : theme.border,
+                    borderColor: error
+                      ? theme.danger
+                      : focusedField === 'price'
+                      ? theme.primary
+                      : theme.border,
+                    borderWidth: error || focusedField === 'price' ? 1.5 : 1,
                   },
                 ]}>
                 <Text style={[styles.currencyPrefix, { color: theme.primary }]}>
@@ -387,40 +395,45 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
                     setPrice(val);
                     setError('');
                   }}
+                  onFocus={() => setFocusedField('price')}
+                  onBlur={() => setFocusedField(null)}
                 />
               </View>
 
               {/* Price shortcut chips */}
               <View style={styles.priceShortcutsRow}>
-                {PRICE_PRESETS.map((amt) => (
-                  <Pressable
-                    key={amt}
-                    onPress={() => {
-                      setPrice(amt.toString());
-                      setError('');
-                    }}
-                    style={[
-                      styles.priceShortcutBtn,
-                      {
-                        backgroundColor:
-                          price === amt.toString() ? theme.primaryLight : theme.surfaceSubtle,
-                        borderColor:
-                          price === amt.toString() ? theme.primary : theme.border,
-                      },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.priceShortcutText,
+                {PRICE_PRESETS.map((amt) => {
+                  const isSelected = price === amt.toString();
+                  return (
+                    <Pressable
+                      key={amt}
+                      onPress={() => {
+                        setPrice(amt.toString());
+                        setError('');
+                      }}
+                      style={({ pressed }) => [
+                        styles.priceShortcutBtn,
                         {
-                          color:
-                            price === amt.toString() ? theme.primary : theme.textSecondary,
-                          fontWeight: price === amt.toString() ? '700' : '500',
+                          backgroundColor: isSelected
+                            ? theme.primary
+                            : theme.surfaceSubtle,
+                          borderColor: isSelected ? theme.primary : 'transparent',
                         },
+                        pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
                       ]}>
-                      +{amt}
-                    </Text>
-                  </Pressable>
-                ))}
+                      <Text
+                        style={[
+                          styles.priceShortcutText,
+                          {
+                            color: isSelected ? '#FFFFFF' : theme.textSecondary,
+                            fontWeight: isSelected ? '800' : '600',
+                          },
+                        ]}>
+                        +{amt}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
 
@@ -493,14 +506,22 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   sheetContainer: {
-    borderTopLeftRadius: BorderRadius.xxl,
-    borderTopRightRadius: BorderRadius.xxl,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderTopWidth: 1,
-    maxHeight: '90%',
+    maxHeight: '92%',
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
     ...Shadows.xl,
+  },
+  sheetHandle: {
+    width: 38,
+    height: 4.5,
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 4,
   },
   header: {
     flexDirection: 'row',
@@ -584,8 +605,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 48,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1.5,
+    borderRadius: 14,
+    borderWidth: 1,
     paddingHorizontal: Spacing.sm,
   },
   searchIcon: {
@@ -606,8 +627,8 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   dropdownBox: {
-    borderWidth: 1.5,
-    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderRadius: 14,
     overflow: 'hidden',
     marginTop: 4,
     ...Shadows.md,
@@ -697,10 +718,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 52,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1.5,
+    borderRadius: 14,
+    borderWidth: 1,
     paddingHorizontal: Spacing.md,
-    gap: 6,
+    gap: 8,
   },
   currencyPrefix: {
     fontSize: 20,
@@ -718,9 +739,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   priceShortcutBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 12,
     borderWidth: 1,
   },
   priceShortcutText: {
@@ -738,9 +759,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   stepBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: BorderRadius.full,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -755,7 +776,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 14,
   },
   totalPreviewLabel: {
     fontSize: 14,
@@ -766,8 +787,8 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   submitBtn: {
-    height: 50,
-    borderRadius: BorderRadius.xl,
+    height: 52,
+    borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

@@ -27,6 +27,8 @@ const FOLDER_CACHE_KEY = '@shopkeeper_gdrive_folder_cache';
 class GoogleDriveService {
   private currentAuth: GoogleDriveAuth | null = null;
   private folderCache: DriveFolderCache | null = null;
+  /** In-memory dedup: saleKey → real Drive file id, populated only after a confirmed upload */
+  private uploadedBillCache = new Map<string, string>();
 
   /**
    * Loads saved credentials from AsyncStorage
@@ -434,7 +436,7 @@ class GoogleDriveService {
   }
 
   /**
-   * Ensure root and subfolders exist in user's 5 TB Google Drive
+   * Ensure root and subfolders exist in user's Google Drive
    */
   async ensureFolders(token?: string): Promise<DriveFolderCache> {
     if (this.folderCache) return this.folderCache;
@@ -492,13 +494,22 @@ class GoogleDriveService {
   }
 
   /**
-   * Uploads an individual sale / bill receipt directly to the Bills folder in Google Drive
-   * Completely resilient: never throws or crashes the UI
+   * Uploads an individual sale / bill receipt directly to the Bills folder in Google Drive.
+   * Idempotent within a session: returns the cached result if this sale was already uploaded.
+   * Completely resilient: never throws or crashes the UI.
    */
   async uploadBillToDrive(
     sale: any,
     shopSettings?: any
   ): Promise<{ id: string; name: string } | null> {
+    // Dedup: return the real Drive file id cached from the first successful upload this session
+    const saleKey = sale?.id;
+    if (saleKey) {
+      const cachedDriveId = this.uploadedBillCache.get(saleKey);
+      if (cachedDriveId) {
+        return { id: cachedDriveId, name: `bill_${saleKey}.json` };
+      }
+    }
     try {
       const auth = await this.getSavedAuth();
       if (!auth) return null;
@@ -560,7 +571,11 @@ class GoogleDriveService {
 
       if (res.ok) {
         const data = await res.json();
-        return { id: data.id, name: filename };
+        // Only treat as success if Drive returned a real file id
+        if (data?.id) {
+          if (saleKey) this.uploadedBillCache.set(saleKey, data.id);
+          return { id: data.id, name: filename };
+        }
       }
       return null;
     } catch (err) {
@@ -570,7 +585,7 @@ class GoogleDriveService {
   }
 
   /**
-   * Helper to find an existing folder or create one in the user's 5 TB Google Drive
+   * Helper to find an existing folder or create one in the user's Google Drive
    */
   private async findOrCreateFolder(accessToken: string, name: string, parentId?: string): Promise<string> {
     let q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
@@ -621,7 +636,7 @@ class GoogleDriveService {
   }
 
   /**
-   * Uploads a product image directly to the 5 TB Google Drive
+   * Uploads a product image directly to Google Drive
    * Returns a direct CDN thumbnail URL (https://lh3.googleusercontent.com/d/{fileId})
    */
   async uploadProductImage(imageUri: string, filename?: string): Promise<string> {
@@ -849,7 +864,7 @@ const activeResolutions = new Map<string, Promise<string>>();
  * Resolves a Google Drive URL or local URI into a viewable image URI.
  * If the image is stored in Google Drive:
  * 1. Checks local cache (instant)
- * 2. Fetches via Google Drive API with OAuth Bearer Token (safe for private 5 TB files)
+ * 2. Fetches via Google Drive API with OAuth Bearer Token (safe for private Drive files)
  * 3. Creates local object URL / data URL and caches it
  */
 export async function resolveDriveImageUrl(uri?: string | null): Promise<string> {

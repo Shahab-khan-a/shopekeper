@@ -11,6 +11,9 @@ interface FilterChipProps {
   icon?: keyof typeof Ionicons.glyphMap;
   activeColor?: string;
   activeBg?: string;
+  inactiveBg?: string;
+  inactiveColor?: string;
+  inactiveBorder?: string;
 }
 
 export const FilterChip: React.FC<FilterChipProps> = ({
@@ -20,13 +23,32 @@ export const FilterChip: React.FC<FilterChipProps> = ({
   icon,
   activeColor,
   activeBg,
+  inactiveBg,
+  inactiveColor,
+  inactiveBorder,
 }) => {
   const { settings } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
-  const bg = isActive ? (activeBg || theme.primary) : theme.surface;
-  const border = isActive ? (activeBg || theme.primary) : theme.border;
-  const textColor = isActive ? (activeColor || '#FFFFFF') : theme.textSecondary;
+  const isAlertChip = !!icon && (icon === 'warning' || icon === 'alert-circle');
+
+  const bg = isActive
+    ? (activeBg || theme.primary)
+    : isAlertChip
+    ? (settings.darkMode ? 'rgba(239, 68, 68, 0.14)' : '#FEE2E2')
+    : (inactiveBg || (settings.darkMode ? '#1E293B' : '#F1F5F9'));
+
+  const border = isActive
+    ? (activeBg || theme.primary)
+    : isAlertChip
+    ? (settings.darkMode ? 'rgba(239, 68, 68, 0.3)' : '#FECACA')
+    : (inactiveBorder || (settings.darkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)'));
+
+  const textColor = isActive
+    ? (activeColor || '#FFFFFF')
+    : isAlertChip
+    ? theme.danger
+    : (inactiveColor || theme.textSecondary);
 
   return (
     <Pressable
@@ -34,19 +56,19 @@ export const FilterChip: React.FC<FilterChipProps> = ({
       style={({ pressed }) => [
         styles.chip,
         { backgroundColor: bg, borderColor: border },
-        pressed && { opacity: 0.8 },
+        pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
       ]}>
       {icon && (
         <Ionicons
           name={icon}
-          size={12}
-          color={isActive ? (activeColor || '#FFFFFF') : (activeBg || theme.textMuted)}
+          size={13}
+          color={isActive ? (activeColor || '#FFFFFF') : (isAlertChip ? theme.danger : (activeBg || theme.textMuted))}
         />
       )}
       <Text
         style={[
           styles.label,
-          { color: textColor, fontWeight: isActive ? '700' : '500' },
+          { color: textColor, fontWeight: isActive ? '700' : '600' },
         ]}>
         {label}
       </Text>
@@ -58,13 +80,14 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    gap: 5,
+    paddingHorizontal: 13,
+    paddingVertical: 7.5,
     borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
+    borderWidth: 1,
   },
   label: {
-    fontSize: 12,
+    fontSize: 12.5,
+    letterSpacing: 0.1,
   },
 });
