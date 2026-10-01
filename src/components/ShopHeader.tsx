@@ -19,6 +19,7 @@ export const ShopHeader: React.FC = () => {
     syncStatus,
     pendingSyncCount,
     syncNow,
+    showAlert,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
@@ -30,11 +31,11 @@ export const ShopHeader: React.FC = () => {
         language === 'ur'
           ? `آپ آف لائن ہیں۔ ${pendingSyncCount} تبدیلیاں محفوظ ہیں اور انٹرنیٹ آتے ہی خود بخود کلاؤڈ پر منتقل ہو جائیں گی۔`
           : `You are offline. ${pendingSyncCount} local changes are safely queued and will sync automatically when internet returns.`;
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert('Offline Mode', msg);
-      }
+      showAlert({
+        type: 'info',
+        title: 'Offline Mode',
+        message: msg,
+      });
       return;
     }
 

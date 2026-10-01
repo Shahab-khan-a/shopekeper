@@ -4,7 +4,7 @@ import { ProductImage } from '@/components/ProductImage';
 import { findCurrency } from '@/constants/currencies';
 import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
 import { buildImportTemplateJSON } from '@/constants/sampleData';
-import { BorderRadius, Colors, Shadows, Spacing, ThemeColors } from '@/constants/theme';
+import { BorderRadius, Colors, Shadows, Spacing, ThemeColors, Typography } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { GoogleDriveAuth, googleDriveService } from '@/services/googleDriveService';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,8 +15,10 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  BackHandler,
   Image,
   LayoutChangeEvent,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -309,6 +311,7 @@ export const SettingsScreen: React.FC = () => {
     deleteAccount,
     syncNow,
     setIsAuthModalOpen,
+    showAlert,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -391,13 +394,93 @@ export const SettingsScreen: React.FC = () => {
     setLowStockThreshold(settings.lowStockThreshold.toString());
   }, [settings, user]);
 
+  // Detect whether user has modified any form field compared to current saved settings
+  const isFormDirty =
+    shopName.trim() !== (settings.shopName || '').trim() ||
+    shopNameUrdu.trim() !== (settings.shopNameUrdu || '').trim() ||
+    ownerName.trim() !== (settings.ownerName || user?.displayName || '').trim() ||
+    businessType.trim() !== (settings.businessType || 'Kiryana & General Store').trim() ||
+    phone.trim() !== (settings.phone || '').trim() ||
+    alternatePhone.trim() !== (settings.alternatePhone || '').trim() ||
+    email.trim() !== (settings.email || user?.email || '').trim() ||
+    address.trim() !== (settings.address || '').trim() ||
+    city.trim() !== (settings.city || '').trim() ||
+    taxNumber.trim() !== (settings.taxNumber || '').trim() ||
+    paymentDetails.trim() !== (settings.paymentDetails || '').trim() ||
+    businessHours.trim() !== (settings.businessHours || '').trim() ||
+    footerNote.trim() !== (settings.footerNote || '').trim() ||
+    footerNoteUrdu.trim() !== (settings.footerNoteUrdu || '').trim() ||
+    lowStockThreshold.trim() !== (settings.lowStockThreshold || 5).toString().trim() ||
+    profileImage.trim() !== (settings.profileImage && !isGoogleAvatar(settings.profileImage) ? settings.profileImage : '').trim();
+
+  // Prompt unsaved changes warning using reusable AlertModal
+  const promptUnsavedChanges = () => {
+    showAlert({
+      type: 'warning',
+      title: language === 'ur' ? 'غیر محفوظ شدہ تبدیلیاں' : 'Unsaved Changes',
+      message:
+        language === 'ur'
+          ? 'آپ نے ترتیبات میں کچھ تبدیلیاں کی ہیں۔ واپس جانے سے پہلے کیا آپ انہیں محفوظ کرنا چاہتے ہیں؟'
+          : 'You have unsaved changes in your store settings. Do you want to save them before leaving?',
+      buttons: [
+        {
+          text: language === 'ur' ? 'محفوظ کریں اور واپس جائیں' : 'Save & Exit',
+          style: 'primary',
+          icon: 'checkmark-circle',
+          onPress: async () => {
+            await handleSave();
+            setActiveTab('dashboard');
+          },
+        },
+        {
+          text: language === 'ur' ? 'تبدیلیاں ضائع کریں' : 'Discard Changes',
+          style: 'destructive',
+          icon: 'trash-outline',
+          onPress: () => {
+            setActiveTab('dashboard');
+          },
+        },
+        {
+          text: language === 'ur' ? 'ترمیم جاری رکھیں' : 'Keep Editing',
+          style: 'cancel',
+        },
+      ],
+    });
+  };
+
+  // Handle back button press with dirty check
+  const handleBackPress = () => {
+    if (isFormDirty) {
+      promptUnsavedChanges();
+    } else {
+      setActiveTab('dashboard');
+    }
+  };
+
+  // Intercept hardware back button on Android
+  useEffect(() => {
+    const onHardwareBack = () => {
+      if (isFormDirty) {
+        promptUnsavedChanges();
+        return true;
+      }
+      return false;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+    return () => sub.remove();
+  }, [isFormDirty]);
+
   // ── Handlers ────────────────────────────────────────────────────────────────
   const pickImage = async () => {
     try {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert(t('warningAlert'), 'Gallery permission required.');
+          showAlert({
+            type: 'warning',
+            title: t('warningAlert'),
+            message: 'Gallery permission is required to select photos.',
+          });
           return;
         }
       }
@@ -476,11 +559,11 @@ export const SettingsScreen: React.FC = () => {
         footerNoteUrdu: footerNoteUrdu.trim(),
         lowStockThreshold: parseInt(lowStockThreshold, 10) || 5,
       });
-      if (Platform.OS === 'web') {
-        window.alert(t('settingsSaved'));
-      } else {
-        Alert.alert(t('success'), t('settingsSaved'));
-      }
+      showAlert({
+        type: 'success',
+        title: t('success'),
+        message: t('settingsSaved'),
+      });
     } finally {
       setIsSaving(false);
     }
@@ -496,51 +579,57 @@ export const SettingsScreen: React.FC = () => {
       a.download = `dukandar_backup_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-    } else {
-      Alert.alert('Backup', 'Backup prepared successfully.');
     }
+    showAlert({
+      type: 'success',
+      title: 'Backup Ready',
+      message: 'Store backup JSON has been generated successfully.',
+    });
   };
 
   const handleImport = async () => {
     if (!importJsonText.trim()) return;
     const success = await importDataJSON(importJsonText);
     if (success) {
-      if (Platform.OS === 'web') {
-        window.alert('Data restored!');
-      } else {
-        Alert.alert(t('success'), 'Data restored!');
-      }
+      showAlert({
+        type: 'success',
+        title: t('success'),
+        message: 'Store data restored successfully!',
+      });
       setImportJsonText('');
       setShowImportBox(false);
     } else {
-      if (Platform.OS === 'web') {
-        window.alert('Invalid backup JSON.');
-      } else {
-        Alert.alert(t('error'), 'Invalid backup JSON.');
-      }
+      showAlert({
+        type: 'error',
+        title: t('error'),
+        message: 'Invalid backup JSON file or structure.',
+      });
     }
   };
 
   const handleReset = () => {
     const confirmMsg = t('resetConfirm');
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMsg)) {
-        clearStoreData();
-        window.alert(language === 'ur' ? 'ڈیٹا صاف ہو گیا!' : 'Store data cleared!');
-      }
-    } else {
-      Alert.alert(t('warningAlert'), confirmMsg, [
-        { text: t('cancel'), style: 'cancel' },
+    showAlert({
+      type: 'danger',
+      title: t('warningAlert'),
+      message: confirmMsg,
+      buttons: [
         {
           text: t('confirm'),
           style: 'destructive',
+          icon: 'trash-outline',
           onPress: async () => {
             await clearStoreData();
-            Alert.alert(t('success'), language === 'ur' ? 'ڈیٹا صاف ہو گیا!' : 'Store data cleared!');
+            showAlert({
+              type: 'success',
+              title: t('success'),
+              message: language === 'ur' ? 'ڈیٹا صاف ہو گیا!' : 'Store data cleared!',
+            });
           },
         },
-      ]);
-    }
+        { text: t('cancel'), style: 'cancel' },
+      ],
+    });
   };
 
   const handleGoogleSignIn = async () => {
@@ -548,18 +637,17 @@ export const SettingsScreen: React.FC = () => {
       setGoogleLoading(true);
       const res = await signInWithGoogle();
       if (!res.success) {
-        if (Platform.OS === 'web') {
-          window.alert(res.error || 'Failed to sign in with Google');
-        } else {
-          Alert.alert(t('error'), res.error || 'Failed to sign in with Google');
-        }
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: res.error || 'Failed to sign in with Google',
+        });
       } else {
-        const msg = 'Google account connected! Cloud sync is now active.';
-        if (Platform.OS === 'web') {
-          window.alert(msg);
-        } else {
-          Alert.alert(t('success'), msg);
-        }
+        showAlert({
+          type: 'success',
+          title: t('success'),
+          message: 'Google account connected! Cloud sync is now active.',
+        });
       }
     } finally {
       setGoogleLoading(false);
@@ -567,92 +655,83 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleLogout = () => {
-    const confirmAction = async () => {
-      await logout();
-      const msg = 'Signed out. Your local records are safe.';
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(t('success'), msg);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (window.confirm('Sign out from Google? Your local store data will remain safe.')) {
-        confirmAction();
-      }
-    } else {
-      Alert.alert(t('confirm'), 'Sign out from Google? Your local store data will remain safe.', [
+    showAlert({
+      type: 'warning',
+      title: t('confirm'),
+      message: 'Sign out from Google? Your local store data will remain safe.',
+      buttons: [
+        {
+          text: t('signOut'),
+          style: 'destructive',
+          icon: 'log-out-outline',
+          onPress: async () => {
+            await logout();
+            showAlert({
+              type: 'success',
+              title: t('success'),
+              message: 'Signed out. Your local records are safe.',
+            });
+          },
+        },
         { text: t('cancel'), style: 'cancel' },
-        { text: t('signOut'), style: 'destructive', onPress: confirmAction },
-      ]);
-    }
+      ],
+    });
   };
 
   const handleDeleteAccount = () => {
     const confirmMsg = t('deleteAccountConfirm');
-
-    const executeDeletion = async () => {
-      try {
-        setIsDeletingAccount(true);
-        const res = await deleteAccount();
-        if (!res.success) {
-          const errMsg = res.error || 'Failed to delete account';
-          if (Platform.OS === 'web') {
-            window.alert(errMsg);
-          } else {
-            Alert.alert(t('error'), errMsg);
-          }
-        } else {
-          const successMsg = t('deleteAccountSuccess');
-          if (Platform.OS === 'web') {
-            window.alert(successMsg);
-          } else {
-            Alert.alert(t('success'), successMsg);
-          }
-        }
-      } catch (err: any) {
-        const errMsg = err?.message || 'Failed to delete account';
-        if (Platform.OS === 'web') {
-          window.alert(errMsg);
-        } else {
-          Alert.alert(t('error'), errMsg);
-        }
-      } finally {
-        setIsDeletingAccount(false);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMsg)) {
-        executeDeletion();
-      }
-    } else {
-      Alert.alert(
-        t('warningAlert'),
-        confirmMsg,
-        [
-          { text: t('cancel'), style: 'cancel' },
-          {
-            text: t('deleteAccount'),
-            style: 'destructive',
-            onPress: executeDeletion,
+    showAlert({
+      type: 'danger',
+      title: t('warningAlert'),
+      message: confirmMsg,
+      buttons: [
+        {
+          text: t('deleteAccount'),
+          style: 'destructive',
+          icon: 'trash-outline',
+          onPress: async () => {
+            try {
+              setIsDeletingAccount(true);
+              const res = await deleteAccount();
+              if (!res.success) {
+                showAlert({
+                  type: 'error',
+                  title: t('error'),
+                  message: res.error || 'Failed to delete account',
+                });
+              } else {
+                showAlert({
+                  type: 'success',
+                  title: t('success'),
+                  message: t('deleteAccountSuccess'),
+                });
+              }
+            } catch (err: any) {
+              showAlert({
+                type: 'error',
+                title: t('error'),
+                message: err?.message || 'Failed to delete account',
+              });
+            } finally {
+              setIsDeletingAccount(false);
+            }
           },
-        ]
-      );
-    }
+        },
+        { text: t('cancel'), style: 'cancel' },
+      ],
+    });
   };
-
 
   const handleSyncNow = async () => {
     const res = await syncNow();
     const isSuccess = res ? res.success : true;
-    const msg = isSuccess ? 'All store data synced to Firebase!' : `Sync encountered an error: ${res?.error || 'Failed'}`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
-    } else {
-      Alert.alert(isSuccess ? t('success') : t('error'), msg);
-    }
+    showAlert({
+      type: isSuccess ? 'success' : 'error',
+      title: isSuccess ? t('success') : t('error'),
+      message: isSuccess
+        ? 'All store data synced to Firebase!'
+        : `Sync encountered an error: ${res?.error || 'Failed'}`,
+    });
   };
 
   const handleConnectDrive = async () => {
@@ -661,21 +740,19 @@ export const SettingsScreen: React.FC = () => {
       const res = await googleDriveService.connect();
       if (res.success && res.user) {
         setDriveAuth(res.user);
-        const msg = language === 'ur'
-          ? 'گوگل ڈرائیو کامیابی سے منسلک ہو گئی!'
-          : 'Google Drive connected successfully!';
-        if (Platform.OS === 'web') {
-          window.alert(msg);
-        } else {
-          Alert.alert(t('success'), msg);
-        }
+        showAlert({
+          type: 'success',
+          title: t('success'),
+          message: language === 'ur'
+            ? 'گوگل ڈرائیو کامیابی سے منسلک ہو گئی!'
+            : 'Google Drive connected successfully!',
+        });
       } else {
-        const err = res.error || 'Failed to connect Google Drive';
-        if (Platform.OS === 'web') {
-          window.alert(err);
-        } else {
-          Alert.alert(t('error'), err);
-        }
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: res.error || 'Failed to connect Google Drive',
+        });
       }
     } catch (e: any) {
       console.error('[SettingsScreen] Drive connect error:', e);
@@ -688,21 +765,27 @@ export const SettingsScreen: React.FC = () => {
     const confirmMsg = language === 'ur'
       ? 'کیا آپ گوگل ڈرائیو منقطع کرنا چاہتے ہیں؟'
       : 'Disconnect Google Drive? Your existing files will remain safe.';
-    const doDisconnect = async () => {
-      await googleDriveService.disconnect();
-      setDriveAuth(null);
-    };
-
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMsg)) {
-        await doDisconnect();
-      }
-    } else {
-      Alert.alert(t('confirm'), confirmMsg, [
+    showAlert({
+      type: 'warning',
+      title: t('confirm'),
+      message: confirmMsg,
+      buttons: [
+        {
+          text: t('yes'),
+          style: 'destructive',
+          onPress: async () => {
+            await googleDriveService.disconnect();
+            setDriveAuth(null);
+            showAlert({
+              type: 'info',
+              title: 'Disconnected',
+              message: 'Google Drive has been disconnected.',
+            });
+          },
+        },
         { text: t('no'), style: 'cancel' },
-        { text: t('yes'), onPress: doDisconnect, style: 'destructive' },
-      ]);
-    }
+      ],
+    });
   };
 
   const handleBackupToDrive = async () => {
@@ -716,41 +799,44 @@ export const SettingsScreen: React.FC = () => {
       const jsonStr = exportDataJSON();
       const res = await googleDriveService.uploadStoreBackup(jsonStr);
       setDriveBackupSuccess(res.name);
-      const msg = language === 'ur'
-        ? `بیک اپ محفوظ ہو گیا: ${res.name}`
-        : `Store backed up to Google Drive: ${res.name}`;
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(t('success'), msg);
-      }
+      showAlert({
+        type: 'success',
+        title: t('success'),
+        message: language === 'ur'
+          ? `بیک اپ محفوظ ہو گیا: ${res.name}`
+          : `Store backed up to Google Drive: ${res.name}`,
+      });
     } catch (e: any) {
       console.error('[SettingsScreen] Drive backup error:', e);
       const err = e?.message || 'Failed to backup to Google Drive.';
       if (err.includes('Google Drive API has not been used') || err.includes('disabled')) {
-        if (Platform.OS === 'web') {
-          window.open(
-            'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513',
-            '_blank'
-          );
-          window.alert(
-            'We opened the Google Cloud Console in a new tab for you!\n\n' +
-            '1. Click the blue "ENABLE" button on that page.\n' +
-            '2. Wait 1 minute.\n' +
-            '3. Come back and retry your backup.'
-          );
-        } else {
-          Alert.alert(
-            'Google Drive Setup Required',
-            'Please visit:\nhttps://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513\n\nand click "ENABLE".'
-          );
-        }
+        const consoleUrl = 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513';
+        showAlert({
+          type: 'warning',
+          title: 'Google Drive Setup Required',
+          message: 'Google Drive API must be enabled. Click below to open Google Cloud Console, enable it, and retry after 1 minute.',
+          buttons: [
+            {
+              text: 'Open Google Console',
+              style: 'primary',
+              icon: 'open-outline',
+              onPress: () => {
+                if (Platform.OS === 'web') {
+                  window.open(consoleUrl, '_blank');
+                } else {
+                  Linking.openURL(consoleUrl).catch(() => {});
+                }
+              },
+            },
+            { text: t('cancel'), style: 'cancel' },
+          ],
+        });
       } else {
-        if (Platform.OS === 'web') {
-          window.alert(err);
-        } else {
-          Alert.alert(t('error'), err);
-        }
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: err,
+        });
       }
     } finally {
       setDriveBackupLoading(false);
@@ -791,7 +877,7 @@ export const SettingsScreen: React.FC = () => {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Pressable
-          onPress={() => setActiveTab('dashboard')}
+          onPress={handleBackPress}
           style={({ pressed }) => [
             styles.backBtn,
             { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
@@ -888,8 +974,17 @@ export const SettingsScreen: React.FC = () => {
               onPress={() => handleSegmentPress(seg.key)}
               style={styles.segBtn}
             >
-              <Ionicons name={seg.icon} size={16} color={isActive ? '#FFFFFF' : theme.textMuted} />
-              <Text style={[styles.segBtnText, { color: isActive ? '#FFFFFF' : theme.textMuted }]}>
+              <Ionicons name={seg.icon} size={15} color={isActive ? '#FFFFFF' : theme.textMuted} />
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
+                style={[
+                  styles.segBtnText,
+                  { color: isActive ? '#FFFFFF' : theme.textMuted },
+                  language === 'ur' && { fontFamily: Typography.urduFontFamily },
+                ]}
+              >
                 {seg.label}
               </Text>
             </Pressable>
@@ -1087,34 +1182,6 @@ export const SettingsScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Payment & Tax */}
-          <View style={styles.sectionWrap}>
-            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('paymentSection').toUpperCase()}</Text>
-            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <StackedField
-                icon="wallet-outline" iconColor="#059669" iconBg="#D1FAE5"
-                label={t('paymentDetailsLabel')}
-                value={paymentDetails} onChangeText={setPaymentDetails}
-                placeholder="EasyPaisa: 0300-…"
-                theme={theme}
-              />
-              <StackedField
-                icon="document-text-outline" iconColor="#059669" iconBg="#D1FAE5"
-                label={t('taxNumberLabel')}
-                value={taxNumber} onChangeText={setTaxNumber}
-                placeholder="NTN-XXXXXXX-X"
-                theme={theme}
-              />
-              <StackedField
-                icon="time-outline" iconColor="#059669" iconBg="#D1FAE5"
-                label={t('businessHoursLabel')}
-                value={businessHours} onChangeText={setBusinessHours}
-                placeholder="08:00 AM – 11:30 PM"
-                theme={theme}
-                last
-              />
-            </View>
-          </View>
 
           {/* ── Save Profile Button ── */}
           <Pressable
@@ -1629,6 +1696,7 @@ export const SettingsScreen: React.FC = () => {
         onCapture={(uri) => { handleLogoSelected(uri); setIsCameraOpen(false); }}
         title={t('takePhoto')}
       />
+
     </ScrollView>
   );
 };
@@ -1701,14 +1769,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7,
+    gap: 5,
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     borderRadius: BorderRadius.full,
     zIndex: 1,
   },
   segBtnText: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '700',
     letterSpacing: -0.1,
   },
@@ -2227,6 +2295,91 @@ const styles = StyleSheet.create({
   },
   driveDisconnectText: {
     fontSize: 12,
+    fontWeight: '600',
+  },
+
+  /* Unsaved Changes Modal */
+  unsavedOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  unsavedBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  unsavedCard: {
+    width: '100%',
+    maxWidth: 420,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    borderWidth: 1,
+    ...Shadows.lg,
+  },
+  unsavedIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
+  unsavedTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  unsavedDesc: {
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.sm,
+  },
+  unsavedActions: {
+    width: '100%',
+    gap: 10,
+  },
+  unsavedBtnPrimary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    paddingVertical: 12,
+    borderRadius: BorderRadius.lg,
+    ...Shadows.sm,
+  },
+  unsavedBtnPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  unsavedBtnSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    paddingVertical: 11,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  unsavedBtnSecondaryText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+  },
+  unsavedBtnCancel: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    marginTop: 2,
+  },
+  unsavedBtnCancelText: {
+    fontSize: 13,
     fontWeight: '600',
   },
 });

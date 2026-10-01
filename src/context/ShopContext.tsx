@@ -23,6 +23,14 @@ import { getDatabase } from '@/storage/db';
 import { MigrationService } from '@/storage/migration/migrationService';
 import { NetworkService } from '@/services/networkService';
 import { SyncQueueService } from '@/services/syncQueueService';
+import { AlertModalButton, AlertModalType } from '@/components/ui/AlertModal';
+
+export interface AlertConfig {
+  type?: AlertModalType;
+  title: string;
+  message?: string;
+  buttons?: AlertModalButton[];
+}
 import { MergeService } from '@/services/mergeService';
 import { googleDriveService } from '@/services/googleDriveService';
 import { saveProductToCloud, saveSaleToCloud, saveCustomerToCloud } from '@/services/firestoreService';
@@ -149,6 +157,9 @@ interface ShopContextType {
   isEditShopOpen: boolean;
   setIsEditShopOpen: (open: boolean) => void;
   isLoaded: boolean;
+  alertConfig: AlertConfig | null;
+  showAlert: (config: AlertConfig) => void;
+  hideAlert: () => void;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -175,6 +186,15 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isEditShopOpen, setIsEditShopOpen] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<AlertConfig | null>(null);
+
+  const showAlert = useCallback((config: AlertConfig) => {
+    setAlertConfig(config);
+  }, []);
+
+  const hideAlert = useCallback(() => {
+    setAlertConfig(null);
+  }, []);
 
   const continueAsGuest = useCallback(() => {
     setIsGuestMode(true);
@@ -1035,6 +1055,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsGuestMode,
       continueAsGuest,
       isLoaded,
+      alertConfig,
+      showAlert,
+      hideAlert,
     }),
     [
       activeTab,
@@ -1096,6 +1119,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isGuestMode,
       continueAsGuest,
       isLoaded,
+      alertConfig,
+      showAlert,
+      hideAlert,
     ]
   );
 

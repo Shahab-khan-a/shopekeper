@@ -21,7 +21,7 @@ interface KhataModalProps {
 }
 
 export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClose }) => {
-  const { addCustomerPayment, settings, t } = useShop();
+  const { addCustomerPayment, settings, t, showAlert } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [amount, setAmount] = useState('');
@@ -30,22 +30,35 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
 
   if (!customer) return null;
 
+  const isSettled = customer.totalDebt <= 0;
+
   const handleRecordPayment = async () => {
+    if (isSettled) {
+      showAlert({
+        type: 'info',
+        title: t('warningAlert') || 'Notice',
+        message: 'Customer khata is already settled. No pending debt to collect.',
+      });
+      return;
+    }
+
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      if (Platform.OS === 'web') {
-        window.alert('Please enter a valid payment amount.');
-      } else {
-        Alert.alert(t('warningAlert'), 'Please enter a valid payment amount.');
-      }
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert') || 'Notice',
+        message: 'Please enter a valid payment amount.',
+      });
       return;
     }
 
     if (parsedAmount > customer.totalDebt) {
-      const confirmExceed = Platform.OS === 'web'
-        ? window.confirm('Entered amount is higher than current pending debt. Proceed?')
-        : true;
-      if (!confirmExceed) return;
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert') || 'Notice',
+        message: `Payment amount cannot exceed pending debt (${settings.currencySymbol} ${customer.totalDebt.toLocaleString()}).`,
+      });
+      return;
     }
 
     setIsSubmitting(true);
@@ -85,8 +98,8 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
 
               <View style={styles.debtRow}>
                 <Text style={[styles.debtLabel, { color: theme.textSecondary }]}>{t('debtAmount')}:</Text>
-                <Text style={[styles.debtValue, { color: theme.danger }]}>
-                  {settings.currencySymbol} {customer.totalDebt}
+                <Text style={[styles.debtValue, { color: isSettled ? theme.success : theme.danger }]}>
+                  {settings.currencySymbol} {Math.max(0, customer.totalDebt).toLocaleString()} {isSettled ? `(${t('cleared')})` : ''}
                 </Text>
               </View>
             </View>
@@ -97,39 +110,72 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
                 {t('paymentAmount')} *
               </Text>
               <TextInput
-                style={[styles.textInput, { backgroundColor: theme.surfaceSubtle, color: theme.text, borderColor: theme.border }]}
-                placeholder={`e.g. 500`}
+                style={[
+                  styles.textInput,
+                  {
+                    backgroundColor: theme.surfaceSubtle,
+                    color: theme.text,
+                    borderColor: theme.border,
+                    opacity: isSettled ? 0.6 : 1,
+                  },
+                ]}
+                placeholder={isSettled ? '0 (Cleared)' : 'e.g. 500'}
                 placeholderTextColor={theme.textMuted}
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={setAmount}
-                autoFocus
+                editable={!isSettled}
+                autoFocus={!isSettled}
               />
             </View>
 
-            {/* Quick Amount Pills */}
-            <View style={styles.quickPillsRow}>
-              {[500, 1000, 2000, customer.totalDebt].map((amt, idx) => (
+            {/* Quick Amount Buttons */}
+            {!isSettled && (
+              <View style={styles.quickPillsRow}>
                 <Pressable
-                  key={idx}
-                  onPress={() => setAmount(amt.toString())}
-                  style={[styles.quickPill, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
+                  onPress={() => setAmount(Math.round(customer.totalDebt / 2).toString())}
+                  style={({ pressed }) => [
+                    styles.quickPill,
+                    { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                    pressed && { opacity: 0.8 },
+                  ]}>
                   <Text style={[styles.quickPillText, { color: theme.primary }]}>
-                    {amt === customer.totalDebt ? 'Full: ' : ''}{settings.currencySymbol} {amt}
+                    Half: {settings.currencySymbol} {Math.round(customer.totalDebt / 2).toLocaleString()}
                   </Text>
                 </Pressable>
-              ))}
-            </View>
+
+                <Pressable
+                  onPress={() => setAmount(customer.totalDebt.toString())}
+                  style={({ pressed }) => [
+                    styles.quickPill,
+                    { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                    pressed && { opacity: 0.8 },
+                  ]}>
+                  <Text style={[styles.quickPillText, { color: theme.primary }]}>
+                    Full: {settings.currencySymbol} {customer.totalDebt.toLocaleString()}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
 
             {/* Note input */}
             <View style={styles.inputGroup}>
               <Text style={[styles.inputLabel, { color: theme.text }]}>{t('paymentNote')}</Text>
               <TextInput
-                style={[styles.textInput, { backgroundColor: theme.surfaceSubtle, color: theme.text, borderColor: theme.border }]}
+                style={[
+                  styles.textInput,
+                  {
+                    backgroundColor: theme.surfaceSubtle,
+                    color: theme.text,
+                    borderColor: theme.border,
+                    opacity: isSettled ? 0.6 : 1,
+                  },
+                ]}
                 placeholder="e.g. Cash vasooli at shop"
                 placeholderTextColor={theme.textMuted}
                 value={note}
                 onChangeText={setNote}
+                editable={!isSettled}
               />
             </View>
           </View>
@@ -144,10 +190,25 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
 
             <Pressable
               onPress={handleRecordPayment}
-              disabled={isSubmitting}
-              style={[styles.footerBtn, styles.saveBtn, { backgroundColor: theme.primary }]}>
-              <Ionicons name="checkmark-done" size={18} color="#FFFFFF" />
-              <Text style={styles.saveBtnText}>{isSubmitting ? 'Saving...' : t('recordPaymentBtn')}</Text>
+              disabled={isSubmitting || isSettled}
+              style={[
+                styles.footerBtn,
+                styles.saveBtn,
+                { backgroundColor: isSettled ? theme.surfaceSubtle : theme.primary },
+                isSettled && { opacity: 0.6, borderWidth: 1, borderColor: theme.border },
+              ]}>
+              <Ionicons
+                name={isSettled ? 'checkmark-circle' : 'checkmark-done'}
+                size={18}
+                color={isSettled ? theme.success : '#FFFFFF'}
+              />
+              <Text
+                style={[
+                  styles.saveBtnText,
+                  isSettled && { color: theme.textSecondary },
+                ]}>
+                {isSettled ? t('cleared') : isSubmitting ? 'Saving...' : t('recordPaymentBtn')}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -235,17 +296,20 @@ const styles = StyleSheet.create({
   },
   quickPillsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   quickPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: BorderRadius.full,
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   quickPillText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
   },
   modalFooter: {

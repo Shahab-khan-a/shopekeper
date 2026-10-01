@@ -79,7 +79,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const gridGap = 8;
   const gridColWidth = (catalogWidth - Spacing.lg * 2 - gridGap * (gridCols - 1)) / gridCols;
 
-  const { products, khata, sales, completeSale, settings, t, language, setActiveReceipt, setIsAddProductOpen } = useShop();
+  const { products, khata, sales, completeSale, settings, t, language, setActiveReceipt, setIsAddProductOpen, showAlert } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   // Cart state
@@ -135,22 +135,32 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const restoreHold = async (holdId: string) => {
     const hold = heldCarts.find((h) => h.id === holdId);
     if (!hold) return;
+
+    const doRestore = async () => {
+      setCart(hold.items);
+      const remaining = heldCarts.filter((h) => h.id !== holdId);
+      setHeldCarts(remaining);
+      await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(remaining)).catch(() => { });
+    };
+
     if (cart.length > 0) {
       const msg = language === 'ur' ? 'موجودہ بل ہٹ جائے گا۔ جاری رکھیں؟' : 'Current bill will be replaced. Proceed?';
-      const confirmed = Platform.OS === 'web'
-        ? window.confirm(msg)
-        : await new Promise<boolean>((resolve) => {
-          Alert.alert(language === 'ur' ? 'بل بحال کریں' : 'Restore Held Order', msg, [
-            { text: t('cancel'), onPress: () => resolve(false), style: 'cancel' },
-            { text: language === 'ur' ? 'جاری رکھیں' : 'Proceed', onPress: () => resolve(true) },
-          ]);
-        });
-      if (!confirmed) return;
+      showAlert({
+        type: 'warning',
+        title: language === 'ur' ? 'بل بحال کریں' : 'Restore Held Order',
+        message: msg,
+        buttons: [
+          {
+            text: language === 'ur' ? 'جاری رکھیں' : 'Proceed',
+            style: 'primary',
+            onPress: doRestore,
+          },
+          { text: t('cancel'), style: 'cancel' },
+        ],
+      });
+      return;
     }
-    setCart(hold.items);
-    const remaining = heldCarts.filter((h) => h.id !== holdId);
-    setHeldCarts(remaining);
-    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(remaining)).catch(() => { });
+    await doRestore();
   };
 
   // W1-3: Success toast — stores last completed sale for explicit receipt view
@@ -206,11 +216,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   // Cart actions
   const addToCart = (product: Product, delta: number = 1) => {
     if (product.stock <= 0) {
-      if (Platform.OS === 'web') {
-        window.alert(t('outOfStockWarn'));
-      } else {
-        Alert.alert(t('warningAlert'), t('outOfStockWarn'));
-      }
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert'),
+        message: t('outOfStockWarn'),
+      });
       return;
     }
 
@@ -221,12 +231,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       const newQty = existingItem.quantity + delta;
 
       if (newQty > product.stock) {
-        const warnMsg = `${t('stockExceededWarn')} (Available: ${product.stock} ${product.unit})`;
-        if (Platform.OS === 'web') {
-          window.alert(warnMsg);
-        } else {
-          Alert.alert(t('warningAlert'), warnMsg);
-        }
+        showAlert({
+          type: 'warning',
+          title: t('warningAlert'),
+          message: `${t('stockExceededWarn')} (Available: ${product.stock} ${product.unit})`,
+        });
         return;
       }
 
@@ -262,12 +271,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           const newQty = item.quantity + delta;
 
           if (delta > 0 && newQty > item.product.stock) {
-            const warnMsg = `${t('stockExceededWarn')} (Stock: ${item.product.stock})`;
-            if (Platform.OS === 'web') {
-              window.alert(warnMsg);
-            } else {
-              Alert.alert(t('warningAlert'), warnMsg);
-            }
+            showAlert({
+              type: 'warning',
+              title: t('warningAlert'),
+              message: `${t('stockExceededWarn')} (Stock: ${item.product.stock})`,
+            });
             return item;
           }
 
@@ -376,11 +384,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   // Complete Sale and Generate Bill
   const handleGenerateBill = async () => {
     if (cart.length === 0) {
-      if (Platform.OS === 'web') {
-        window.alert(t('cartEmpty'));
-      } else {
-        Alert.alert(t('warningAlert'), t('cartEmpty'));
-      }
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert'),
+        message: t('cartEmpty'),
+      });
       return;
     }
 
@@ -389,11 +397,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         language === 'ur'
           ? 'ادھار سیل کے لیے گاہک کا نام یا فون درج کرنا لازمی ہے۔'
           : 'Please provide Customer Name or Phone Number for Udhaar (Credit) sales.';
-      if (Platform.OS === 'web') {
-        window.alert(errMsg);
-      } else {
-        Alert.alert(t('warningAlert'), errMsg);
-      }
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert'),
+        message: errMsg,
+      });
       return;
     }
 
@@ -411,11 +419,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       });
 
       if (!result.success) {
-        if (Platform.OS === 'web') {
-          window.alert(result.error || 'Failed to complete sale');
-        } else {
-          Alert.alert(t('warningAlert'), result.error || 'Failed to complete sale');
-        }
+        showAlert({
+          type: 'error',
+          title: t('warningAlert'),
+          message: result.error || 'Failed to complete sale',
+        });
         return;
       }
 
@@ -433,11 +441,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       clearCart();
     } catch (e: any) {
       console.error(e);
-      if (Platform.OS === 'web') {
-        window.alert(e.message || 'Failed to complete sale');
-      } else {
-        Alert.alert(t('warningAlert'), e.message || 'Failed to complete sale');
-      }
+      showAlert({
+        type: 'error',
+        title: t('warningAlert'),
+        message: e.message || 'Failed to complete sale',
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -466,18 +474,20 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           {cart.length > 0 ? (
             <Pressable
               onPress={() => {
-                if (Platform.OS === 'web') {
-                  if (window.confirm(t('clearCartConfirm'))) clearCart();
-                } else {
-                  Alert.alert(
-                    t('clearCart'),
-                    t('clearCartConfirm'),
-                    [
-                      { text: t('cancel'), style: 'cancel' },
-                      { text: t('clearAll'), style: 'destructive', onPress: clearCart },
-                    ]
-                  );
-                }
+                showAlert({
+                  type: 'warning',
+                  title: t('clearCart'),
+                  message: t('clearCartConfirm'),
+                  buttons: [
+                    {
+                      text: t('clearAll'),
+                      style: 'destructive',
+                      icon: 'trash-outline',
+                      onPress: clearCart,
+                    },
+                    { text: t('cancel'), style: 'cancel' },
+                  ],
+                });
               }}
               accessibilityLabel={t('clearCart')}
               accessibilityRole="button"
@@ -1086,24 +1096,22 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               {cart.length > 0 && (
                 <Pressable
                   onPress={() => {
-                    if (Platform.OS === 'web') {
-                      if (window.confirm(t('clearCartConfirm'))) clearCart();
-                    } else {
-                      Alert.alert(
-                        language === 'ur' ? 'بل خارج کریں' : 'Discard Cart',
-                        language === 'ur'
-                          ? `${totalItemsCount} آئٹم ہیں، کیا آپ بل خارج کرنا چاہتے ہیں؟`
-                          : `Discard ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} from the current bill?`,
-                        [
-                          { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
-                          {
-                            text: language === 'ur' ? 'خارج کریں' : 'Discard',
-                            style: 'destructive',
-                            onPress: clearCart,
-                          },
-                        ]
-                      );
-                    }
+                    showAlert({
+                      type: 'warning',
+                      title: language === 'ur' ? 'بل خارج کریں' : 'Discard Cart',
+                      message: language === 'ur'
+                        ? `${totalItemsCount} آئٹم ہیں، کیا آپ بل خارج کرنا چاہتے ہیں؟`
+                        : `Discard ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} from the current bill?`,
+                      buttons: [
+                        {
+                          text: language === 'ur' ? 'خارج کریں' : 'Discard',
+                          style: 'destructive',
+                          icon: 'trash-outline',
+                          onPress: clearCart,
+                        },
+                        { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
+                      ],
+                    });
                   }}
                   style={({ pressed }) => [
                     styles.discardCartBtn,
@@ -1463,8 +1471,9 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                               style={[
                                 styles.listAddBtnText,
                                 { color: isOut ? theme.textMuted : theme.primaryDark },
-                              ]}>
-                              {t('addItemToBill')}
+                              ]}
+                              numberOfLines={1}>
+                              {t('addToBillShort')}
                             </Text>
                           </Pressable>
                         )}
@@ -1616,8 +1625,9 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                             style={[
                               styles.cardAddBtnText,
                               { color: isOut ? theme.textMuted : theme.primaryDark },
-                            ]}>
-                            {t('addItemToBill')}
+                            ]}
+                            numberOfLines={1}>
+                            {t('addToBillShort')}
                           </Text>
                         </Pressable>
                       )}
@@ -1634,24 +1644,22 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               {/* Quick Discard — tap to clear cart without opening drawer */}
               <Pressable
                 onPress={() => {
-                  if (Platform.OS === 'web') {
-                    if (window.confirm(t('clearCartConfirm'))) clearCart();
-                  } else {
-                    Alert.alert(
-                      language === 'ur' ? 'بل خارج کریں' : 'Discard Cart',
-                      language === 'ur'
-                        ? `${totalItemsCount} آئٹم ہیں، کیا آپ بل خارج کرنا چاہتے ہیں؟`
-                        : `Discard ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} from the current bill?`,
-                      [
-                        { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
-                        {
-                          text: language === 'ur' ? 'خارج کریں' : 'Discard',
-                          style: 'destructive',
-                          onPress: clearCart,
-                        },
-                      ]
-                    );
-                  }
+                  showAlert({
+                    type: 'warning',
+                    title: language === 'ur' ? 'بل خارج کریں' : 'Discard Cart',
+                    message: language === 'ur'
+                      ? `${totalItemsCount} آئٹم ہیں، کیا آپ بل خارج کرنا چاہتے ہیں؟`
+                      : `Discard ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} from the current bill?`,
+                    buttons: [
+                      {
+                        text: language === 'ur' ? 'خارج کریں' : 'Discard',
+                        style: 'destructive',
+                        icon: 'trash-outline',
+                        onPress: clearCart,
+                      },
+                      { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
+                    ],
+                  });
                 }}
                 style={({ pressed }) => [
                   styles.floatingDiscardBtn,

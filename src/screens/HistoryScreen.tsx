@@ -21,7 +21,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 type HistoryFilter = 'all' | 'today' | 'week' | 'month';
 
 export const HistoryScreen: React.FC = () => {
-  const { sales, refundSale, setActiveReceipt, setActiveTab, settings, t, language } = useShop();
+  const { sales, refundSale, setActiveReceipt, setActiveTab, settings, t, language, showAlert } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,20 +85,22 @@ export const HistoryScreen: React.FC = () => {
       ? `کیا آپ واقعی بل #${sale.billNumber} واپس کرنا چاہتے ہیں؟ اس سے اشیاء واپس اسٹاک میں شامل ہو جائیں گی اور ادھار بھی ختم ہو جائے گا۔`
       : `Are you sure you want to refund Bill #${sale.billNumber}? Sold items will be restored to inventory and customer debt will be reversed.`;
 
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMessage)) {
-        refundSale(sale.id, 'Voided from History');
-      }
-    } else {
-      Alert.alert(confirmTitle, confirmMessage, [
-        { text: t('cancel'), style: 'cancel' },
+    showAlert({
+      type: 'danger',
+      title: confirmTitle,
+      message: confirmMessage,
+      buttons: [
         {
           text: isUrdu ? 'واپس کریں (Refund)' : 'Refund & Restore',
           style: 'destructive',
-          onPress: () => refundSale(sale.id, 'Voided from History'),
+          icon: 'arrow-undo-outline',
+          onPress: async () => {
+            await refundSale(sale.id, 'Voided from History');
+          },
         },
-      ]);
-    }
+        { text: t('cancel'), style: 'cancel' },
+      ],
+    });
   };
 
   const handleCallCustomer = (phone?: string) => {

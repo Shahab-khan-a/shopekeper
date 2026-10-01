@@ -44,6 +44,7 @@ export const DashboardScreen: React.FC = () => {
     t,
     language,
     loadDemoData,
+    showAlert,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -53,39 +54,46 @@ export const DashboardScreen: React.FC = () => {
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
   const [isLoadingDemo, setIsLoadingDemo] = useState(false);
 
-  const handleLoadDemo = async () => {
+  const handleLoadDemo = () => {
     const msg = language === 'ur'
       ? 'کیا آپ فائر بیس فائر اسٹور (Firebase Firestore) پر سیمپل ٹیسٹ ڈیٹا (پروڈکٹس، سیلز ہسٹری، کھاتہ کسٹمرز) اپ لوڈ کرنا چاہتے ہیں؟'
       : 'Push sample test data (products, sales history, and Khata customers) directly to Firebase Firestore?';
-    
-    const confirm = Platform.OS === 'web'
-      ? window.confirm(msg)
-      : await new Promise<boolean>((resolve) => {
-          Alert.alert(
-            language === 'ur' ? 'فائر بیس ڈیٹا اپ لوڈ کریں' : 'Push Firebase Test Data',
-            msg,
-            [
-              { text: t('cancel'), onPress: () => resolve(false), style: 'cancel' },
-              { text: language === 'ur' ? 'ہاں، اپ لوڈ کریں' : 'Yes, Push to Firebase', onPress: () => resolve(true) },
-            ]
-          );
-        });
 
-    if (!confirm) return;
-
-    setIsLoadingDemo(true);
-    try {
-      await loadDemoData();
-      const successMsg = language === 'ur'
-        ? 'سیمپل ٹیسٹ ڈیٹا کامیابی سے فائر بیس پر اپ لوڈ ہو گیا ہے!'
-        : 'Demo test data pushed to Firebase Firestore & synced successfully!';
-      if (Platform.OS === 'web') window.alert(successMsg);
-      else Alert.alert('Success', successMsg);
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setIsLoadingDemo(false);
-    }
+    showAlert({
+      type: 'confirm',
+      title: language === 'ur' ? 'فائر بیس ڈیٹا اپ لوڈ کریں' : 'Push Firebase Test Data',
+      message: msg,
+      buttons: [
+        {
+          text: language === 'ur' ? 'ہاں، اپ لوڈ کریں' : 'Yes, Push to Firebase',
+          style: 'primary',
+          icon: 'cloud-upload-outline',
+          onPress: async () => {
+            setIsLoadingDemo(true);
+            try {
+              await loadDemoData();
+              showAlert({
+                type: 'success',
+                title: 'Success',
+                message: language === 'ur'
+                  ? 'سیمپل ٹیسٹ ڈیٹا کامیابی سے فائر بیس پر اپ لوڈ ہو گیا ہے!'
+                  : 'Demo test data pushed to Firebase Firestore & synced successfully!',
+              });
+            } catch (e: any) {
+              console.error(e);
+              showAlert({
+                type: 'error',
+                title: 'Error',
+                message: e?.message || 'Failed to push demo data',
+              });
+            } finally {
+              setIsLoadingDemo(false);
+            }
+          },
+        },
+        { text: t('cancel'), style: 'cancel' },
+      ],
+    });
   };
 
   // Pulse animation for floating New Sale button

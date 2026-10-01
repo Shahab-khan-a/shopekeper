@@ -12,6 +12,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -87,7 +88,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   onClose,
   productToEdit,
 }) => {
-  const { addProduct, updateProduct, settings, t, language } = useShop();
+  const { addProduct, updateProduct, settings, t, language, showAlert } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [name, setName] = useState('');
@@ -240,29 +241,33 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         console.error('[ProductModal] Google Drive upload error:', err);
         const errMsg = err?.message || 'Upload to Google Drive failed.';
         if (errMsg.includes('Google Drive API has not been used') || errMsg.includes('disabled')) {
-          if (Platform.OS === 'web') {
-            window.open(
-              'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513',
-              '_blank'
-            );
-            window.alert(
-              'We opened the Google Cloud Console in a new tab for you!\n\n' +
-              '1. Click the blue "ENABLE" button on that page.\n' +
-              '2. Wait 1 minute.\n' +
-              '3. Come back and retry uploading your photo.'
-            );
-          } else {
-            Alert.alert(
-              'Google Drive Setup Required',
-              'Please visit:\nhttps://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513\n\nand click "ENABLE".'
-            );
-          }
+          const consoleUrl = 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513';
+          showAlert({
+            type: 'warning',
+            title: 'Google Drive Setup Required',
+            message: 'Google Drive API must be enabled. Open Google Cloud Console, click ENABLE, and wait 1 minute before retrying.',
+            buttons: [
+              {
+                text: 'Open Google Console',
+                style: 'primary',
+                icon: 'open-outline',
+                onPress: () => {
+                  if (Platform.OS === 'web') {
+                    window.open(consoleUrl, '_blank');
+                  } else {
+                    Linking.openURL(consoleUrl).catch(() => {});
+                  }
+                },
+              },
+              { text: t('cancel'), style: 'cancel' },
+            ],
+          });
         } else {
-          if (Platform.OS === 'web') {
-            window.alert(`Google Drive Upload Error: ${errMsg}`);
-          } else {
-            Alert.alert('Google Drive Error', errMsg);
-          }
+          showAlert({
+            type: 'error',
+            title: 'Google Drive Error',
+            message: errMsg,
+          });
         }
       } finally {
         setIsUploadingToDrive(false);
@@ -281,7 +286,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert(t('warningAlert'), 'Gallery permission is required to choose photos.');
+          showAlert({
+            type: 'warning',
+            title: t('warningAlert'),
+            message: 'Gallery permission is required to choose photos.',
+          });
           return;
         }
       }
@@ -308,33 +317,30 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      const msg = language === 'ur' ? 'براہ کرم پروڈکٹ کا نام درج کریں' : 'Please enter product name.';
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(t('warningAlert'), msg);
-      }
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert'),
+        message: language === 'ur' ? 'براہ کرم پروڈکٹ کا نام درج کریں' : 'Please enter product name.',
+      });
       return;
     }
 
     if (isNaN(parsedPrice) || parsedPrice < 0) {
-      const msg = language === 'ur' ? 'براہ کرم درست فروخت قیمت درج کریں' : 'Please enter a valid price.';
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(t('warningAlert'), msg);
-      }
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert'),
+        message: language === 'ur' ? 'براہ کرم درست فروخت قیمت درج کریں' : 'Please enter a valid price.',
+      });
       return;
     }
 
     const parsedStock = parseInt(stock, 10);
     if (isNaN(parsedStock) || parsedStock < 0) {
-      const msg = language === 'ur' ? 'براہ کرم درست اسٹاک تعداد درج کریں' : 'Please enter a valid stock quantity.';
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(t('warningAlert'), msg);
-      }
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert'),
+        message: language === 'ur' ? 'براہ کرم درست اسٹاک تعداد درج کریں' : 'Please enter a valid stock quantity.',
+      });
       return;
     }
 

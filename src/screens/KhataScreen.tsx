@@ -48,6 +48,7 @@ export const KhataScreen: React.FC = () => {
   }, [khata, searchQuery, selectedFilter]);
 
   const handleRecordPayment = (customer: CustomerKhata) => {
+    if (customer.totalDebt <= 0) return;
     setSelectedCustomer(customer);
     setIsPaymentModalOpen(true);
   };

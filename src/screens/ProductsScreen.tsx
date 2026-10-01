@@ -1,25 +1,25 @@
-import React, { useState, useMemo } from 'react';
+import { ProductCard } from '@/components/ProductCard';
+import { ProductDetailsDrawer } from '@/components/ProductDetailsDrawer';
+import { ProductImage } from '@/components/ProductImage';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { FilterChip } from '@/components/ui/FilterChip';
+import { IconButton } from '@/components/ui/IconButton';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { Product, ProductCategory } from '@/types';
+import { formatCompactPrice } from '@/utils/formatters';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useMemo, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
   Alert,
   Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { ProductCategory, Product } from '@/types';
-import { useShop } from '@/context/ShopContext';
-import { ProductCard } from '@/components/ProductCard';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
-import { SearchBar } from '@/components/ui/SearchBar';
-import { FilterChip } from '@/components/ui/FilterChip';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { IconButton } from '@/components/ui/IconButton';
-import { ProductImage } from '@/components/ProductImage';
-import { ProductDetailsDrawer } from '@/components/ProductDetailsDrawer';
-import { formatCompactPrice } from '@/utils/formatters';
 
 const CATEGORIES: (ProductCategory | 'LowStock')[] = [
   'All',
@@ -50,6 +50,7 @@ export const ProductsScreen: React.FC = () => {
     language,
     lowStockProducts,
     outOfStockProducts,
+    showAlert,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -130,8 +131,8 @@ export const ProductsScreen: React.FC = () => {
                   cat === 'All'
                     ? t('allCategories')
                     : cat === 'LowStock'
-                    ? `${t('lowStockAlert')} (${alertCount})`
-                    : cat
+                      ? `${t('lowStockAlert')} (${alertCount})`
+                      : cat
                 }
                 isActive={selectedFilter === cat}
                 onPress={() => setSelectedFilter(cat)}
@@ -154,7 +155,6 @@ export const ProductsScreen: React.FC = () => {
           {/* Stat 1: Total Investment */}
           <View style={styles.financeSummaryItem}>
             <View style={styles.statLabelRow}>
-              <View style={[styles.statDot, { backgroundColor: theme.textMuted }]} />
               <Text style={[styles.financeSummaryLabel, { color: theme.textSecondary }]} numberOfLines={2}>
                 {t('totalInvestment')}
               </Text>
@@ -173,7 +173,6 @@ export const ProductsScreen: React.FC = () => {
           {/* Stat 2: Retail Value */}
           <View style={styles.financeSummaryItem}>
             <View style={styles.statLabelRow}>
-              <View style={[styles.statDot, { backgroundColor: theme.primary }]} />
               <Text style={[styles.financeSummaryLabel, { color: theme.textSecondary }]} numberOfLines={2}>
                 {t('stockRetailValue')}
               </Text>
@@ -192,7 +191,6 @@ export const ProductsScreen: React.FC = () => {
           {/* Stat 3: Expected Profit */}
           <View style={styles.financeSummaryItem}>
             <View style={styles.statLabelRow}>
-              <View style={[styles.statDot, { backgroundColor: '#10B981' }]} />
               <Text style={[styles.financeSummaryLabel, { color: '#059669' }]} numberOfLines={2}>
                 {t('expectedStockProfit')}
               </Text>
@@ -288,8 +286,8 @@ export const ProductsScreen: React.FC = () => {
                         backgroundColor: isOut
                           ? theme.dangerLight
                           : isLow
-                          ? theme.warningLight
-                          : theme.successLight,
+                            ? theme.warningLight
+                            : theme.successLight,
                       },
                     ]}>
                     <Ionicons
@@ -327,26 +325,22 @@ export const ProductsScreen: React.FC = () => {
                     onPress={(e) => {
                       e.stopPropagation?.();
                       const productName = language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name;
-                      if (Platform.OS === 'web') {
-                        if (window.confirm(`Delete "${productName}"? This cannot be undone.`)) {
-                          deleteProduct(product.id);
-                        }
-                      } else {
-                        Alert.alert(
-                          language === 'ur' ? 'پروڈکٹ حذف کریں' : 'Delete Product',
-                          language === 'ur'
-                            ? `کیا آپ "${productName}" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔`
-                            : `Delete "${productName}"? This cannot be undone.`,
-                          [
-                            { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
-                            {
-                              text: language === 'ur' ? 'حذف کریں' : 'Delete',
-                              style: 'destructive',
-                              onPress: () => deleteProduct(product.id),
-                            },
-                          ]
-                        );
-                      }
+                      showAlert({
+                        type: 'danger',
+                        title: language === 'ur' ? 'پروڈکٹ حذف کریں' : 'Delete Product',
+                        message: language === 'ur'
+                          ? `کیا آپ "${productName}" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔`
+                          : `Delete "${productName}"? This cannot be undone.`,
+                        buttons: [
+                          {
+                            text: language === 'ur' ? 'حذف کریں' : 'Delete',
+                            style: 'destructive',
+                            icon: 'trash-outline',
+                            onPress: () => deleteProduct(product.id),
+                          },
+                          { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
+                        ],
+                      });
                     }}
                     style={({ pressed }) => [
                       styles.smallActionBtn,
@@ -565,7 +559,7 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
   },
   financeSummaryLabel: {
-    fontSize: 9.5,
+    fontSize: 10.5,
     fontWeight: '700',
     textAlign: 'center',
     textTransform: 'uppercase',
