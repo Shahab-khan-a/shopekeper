@@ -10,7 +10,8 @@ import { useShop } from '@/context/ShopContext';
 import { Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Platform,
@@ -57,8 +58,27 @@ export const ProductsScreen: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock'>('All');
+  const PRODUCTS_VIEW_MODE_KEY = '@shopkeeper_products_view_mode';
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(PRODUCTS_VIEW_MODE_KEY)
+      .then((saved) => {
+        if (saved === 'grid' || saved === 'list') {
+          setViewMode(saved);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const toggleViewMode = () => {
+    setViewMode((prev) => {
+      const next = prev === 'grid' ? 'list' : 'grid';
+      AsyncStorage.setItem(PRODUCTS_VIEW_MODE_KEY, next).catch(() => {});
+      return next;
+    });
+  };
 
   const activeProduct = useMemo(() => {
     if (!selectedProductDetails) return null;
@@ -98,7 +118,7 @@ export const ProductsScreen: React.FC = () => {
 
           <IconButton
             icon={viewMode === 'grid' ? 'list-outline' : 'grid-outline'}
-            onPress={() => setViewMode((m) => (m === 'grid' ? 'list' : 'grid'))}
+            onPress={toggleViewMode}
           />
 
           <Pressable

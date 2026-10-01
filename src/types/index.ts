@@ -157,6 +157,7 @@ export interface ShopSettings {
   language: 'ur' | 'en';
   darkMode: boolean;
   enableSound: boolean;
+  whatsappReminderLanguage?: 'en' | 'ur';
 }
 
 export type ActiveTab = 'dashboard' | 'sale' | 'products' | 'history' | 'khata' | 'settings';

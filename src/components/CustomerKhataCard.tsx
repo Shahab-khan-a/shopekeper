@@ -32,8 +32,6 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
   const isSettled = customer.totalDebt <= 0;
   const isUrdu = language === 'ur';
 
-  const [showWhatsAppSheet, setShowWhatsAppSheet] = useState(false);
-
   // Primary and secondary display names
   const primaryName = isUrdu && customer.nameUrdu ? customer.nameUrdu : customer.name;
   const secondaryName = isUrdu && customer.nameUrdu ? customer.name : customer.nameUrdu;
@@ -41,9 +39,9 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
   // Avatar letter
   const avatarChar = (primaryName || customer.name || '?').trim().charAt(0).toUpperCase();
 
-  // WhatsApp Reminder
-  const sendWhatsAppReminder = (msgLang: 'en' | 'ur') => {
-    setShowWhatsAppSheet(false);
+  // WhatsApp Reminder - directly uses settings preference (default 'en')
+  const sendWhatsAppReminder = (overrideLang?: 'en' | 'ur') => {
+    const msgLang = overrideLang || settings.whatsappReminderLanguage || 'en';
     const shopHeader = (msgLang === 'ur' && settings.shopNameUrdu) ? settings.shopNameUrdu : settings.shopName;
     const customerDisplayName = msgLang === 'ur' && customer.nameUrdu ? customer.nameUrdu : customer.name;
     const formattedAmount = `${settings.currencySymbol} ${Math.max(0, customer.totalDebt).toLocaleString()}`;
@@ -335,10 +333,10 @@ Thank you!
           </Pressable>
         )}
 
-        {/* WhatsApp Reminder Button - opens language action sheet */}
+        {/* WhatsApp Reminder Button - sends directly in settings language preference */}
         {customer.phone && !isSettled ? (
           <Pressable
-            onPress={() => setShowWhatsAppSheet(true)}
+            onPress={() => sendWhatsAppReminder()}
             style={({ pressed }) => [
               styles.whatsappBtn,
               pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
@@ -493,166 +491,6 @@ Thank you!
           )}
         </View>
       )}
-
-      {/* ── WhatsApp Language Action Sheet Modal ── */}
-      <Modal
-        visible={showWhatsAppSheet}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowWhatsAppSheet(false)}>
-        <View style={styles.sheetOverlay}>
-          <Pressable
-            style={styles.sheetBackdrop}
-            onPress={() => setShowWhatsAppSheet(false)}
-          />
-
-          <View
-            style={[
-              styles.sheetContainer,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-              },
-            ]}>
-            {/* Sheet grab handle */}
-            <View style={[styles.sheetHandle, { backgroundColor: theme.border }]} />
-
-            {/* Sheet Header */}
-            <View style={styles.sheetHeader}>
-              <View style={styles.sheetHeaderLeft}>
-                <View style={styles.sheetIconWrap}>
-                  <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
-                </View>
-                <View style={styles.sheetTitleBlock}>
-                  <Text style={[styles.sheetTitle, { color: theme.text }]}>
-                    {t('sendWhatsAppReminder')}
-                  </Text>
-                  <Text style={[styles.sheetSubtitle, { color: theme.textSecondary }]}>
-                    {primaryName} • {settings.currencySymbol} {Math.max(0, customer.totalDebt).toLocaleString()}
-                  </Text>
-                </View>
-              </View>
-
-              <Pressable
-                onPress={() => setShowWhatsAppSheet(false)}
-                style={({ pressed }) => [
-                  styles.sheetCloseBtn,
-                  { backgroundColor: theme.surfaceSubtle },
-                  pressed && { opacity: 0.7 },
-                ]}>
-                <Ionicons name="close" size={18} color={theme.textSecondary} />
-              </Pressable>
-            </View>
-
-            {/* Instruction */}
-            <Text style={[styles.sheetInstruction, { color: theme.textMuted }]}>
-              {isUrdu
-                ? 'پیغام کی زبان منتخب کریں:'
-                : 'Select reminder message language:'}
-            </Text>
-
-            {/* Language Options */}
-            <View style={styles.sheetOptions}>
-              {/* Urdu Option */}
-              <Pressable
-                onPress={() => sendWhatsAppReminder('ur')}
-                style={({ pressed }) => [
-                  styles.sheetOptionCard,
-                  {
-                    backgroundColor: theme.surfaceSubtle,
-                    borderColor: theme.border,
-                  },
-                  pressed && {
-                    backgroundColor: settings.darkMode ? '#064E3B' : '#ECFDF5',
-                    borderColor: '#25D366',
-                    transform: [{ scale: 0.99 }],
-                  },
-                ]}>
-                <View style={styles.sheetOptionBadge}>
-                  <Text style={styles.flagEmoji}>🇵🇰</Text>
-                </View>
-
-                <View style={styles.sheetOptionTextCol}>
-                  <View style={styles.sheetOptionTitleRow}>
-                    <Text
-                      style={[
-                        styles.sheetOptionTitle,
-                        { color: theme.text, fontFamily: Typography.urduFontFamily },
-                      ]}>
-                      اردو میں پیغام بھیجیں
-                    </Text>
-                    <View style={styles.tagUrdu}>
-                      <Text style={styles.tagUrduText}>اردو</Text>
-                    </View>
-                  </View>
-                  <Text
-                    style={[styles.sheetOptionPreview, { color: theme.textMuted }]}
-                    numberOfLines={1}>
-                    "السلام علیکم... کل واجب الادا بقایا ادھار: {settings.currencySymbol} {Math.max(0, customer.totalDebt).toLocaleString()}"
-                  </Text>
-                </View>
-
-                <View style={[styles.sheetOptionSendIcon, { backgroundColor: '#25D366' }]}>
-                  <Ionicons name="send" size={13} color="#FFFFFF" />
-                </View>
-              </Pressable>
-
-              {/* English Option */}
-              <Pressable
-                onPress={() => sendWhatsAppReminder('en')}
-                style={({ pressed }) => [
-                  styles.sheetOptionCard,
-                  {
-                    backgroundColor: theme.surfaceSubtle,
-                    borderColor: theme.border,
-                  },
-                  pressed && {
-                    backgroundColor: settings.darkMode ? '#064E3B' : '#ECFDF5',
-                    borderColor: '#25D366',
-                    transform: [{ scale: 0.99 }],
-                  },
-                ]}>
-                <View style={styles.sheetOptionBadge}>
-                  <Text style={styles.flagEmoji}>🇬🇧</Text>
-                </View>
-
-                <View style={styles.sheetOptionTextCol}>
-                  <View style={styles.sheetOptionTitleRow}>
-                    <Text style={[styles.sheetOptionTitle, { color: theme.text }]}>
-                      Send in English
-                    </Text>
-                    <View style={styles.tagEnglish}>
-                      <Text style={styles.tagEnglishText}>English</Text>
-                    </View>
-                  </View>
-                  <Text
-                    style={[styles.sheetOptionPreview, { color: theme.textMuted }]}
-                    numberOfLines={1}>
-                    "Dear {customer.name}... pending balance: {settings.currencySymbol} {Math.max(0, customer.totalDebt).toLocaleString()}"
-                  </Text>
-                </View>
-
-                <View style={[styles.sheetOptionSendIcon, { backgroundColor: '#25D366' }]}>
-                  <Ionicons name="send" size={13} color="#FFFFFF" />
-                </View>
-              </Pressable>
-            </View>
-
-            {/* Cancel Button */}
-            <Pressable
-              onPress={() => setShowWhatsAppSheet(false)}
-              style={({ pressed }) => [
-                styles.sheetCancelBtn,
-                { borderColor: theme.border, backgroundColor: theme.surfaceSubtle },
-                pressed && { opacity: 0.7 },
-              ]}>
-              <Text style={[styles.sheetCancelText, { color: theme.textSecondary }]}>
-                {t('cancel')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -938,162 +776,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: -0.2,
-  },
-  /* WhatsApp Language Action Sheet */
-  sheetOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  sheetBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  sheetContainer: {
-    width: '100%',
-    maxWidth: 500,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
-    paddingBottom: Platform.OS === 'ios' ? 34 : Spacing.lg,
-    ...Shadows.lg,
-  },
-  sheetHandle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: Spacing.md,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-  },
-  sheetHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    minWidth: 0,
-  },
-  sheetIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#25D366',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.sm,
-  },
-  sheetTitleBlock: {
-    marginLeft: Spacing.sm,
-    flex: 1,
-    minWidth: 0,
-  },
-  sheetTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  sheetSubtitle: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  sheetCloseBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: Spacing.sm,
-  },
-  sheetInstruction: {
-    fontSize: 11,
-    fontWeight: '700',
-    marginBottom: Spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-  },
-  sheetOptions: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  sheetOptionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    gap: Spacing.md,
-  },
-  sheetOptionBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  flagEmoji: {
-    fontSize: 24,
-  },
-  sheetOptionTextCol: {
-    flex: 1,
-    minWidth: 0,
-    gap: 3,
-  },
-  sheetOptionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  sheetOptionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  tagUrdu: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: BorderRadius.sm,
-  },
-  tagUrduText: {
-    color: '#15803D',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  tagEnglish: {
-    backgroundColor: '#E0E7FF',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: BorderRadius.sm,
-  },
-  tagEnglishText: {
-    color: '#4338CA',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  sheetOptionPreview: {
-    fontSize: 11,
-  },
-  sheetOptionSendIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sheetCancelBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 11,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-  },
-  sheetCancelText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
 });

@@ -21,6 +21,7 @@ export const INITIAL_SETTINGS: ShopSettings = {
   language: 'ur',
   darkMode: false,
   enableSound: true,
+  whatsappReminderLanguage: 'en',
 };
 
 /**

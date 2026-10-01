@@ -9,7 +9,7 @@ import { CartItem, CustomerKhata, PaymentMethod, Product, ProductCategory } from
 import { formatCompactPrice } from '@/utils/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -94,9 +94,28 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [selectedKhataCustomer, setSelectedKhataCustomer] = useState<CustomerKhata | null>(null);
 
   // Search, Filters & View Mode
+  const SALE_VIEW_MODE_KEY = '@shopkeeper_sale_view_mode';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  useEffect(() => {
+    AsyncStorage.getItem(SALE_VIEW_MODE_KEY)
+      .then((saved) => {
+        if (saved === 'grid' || saved === 'list') {
+          setViewMode(saved);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const toggleViewMode = () => {
+    setViewMode((prev) => {
+      const next = prev === 'grid' ? 'list' : 'grid';
+      AsyncStorage.setItem(SALE_VIEW_MODE_KEY, next).catch(() => {});
+      return next;
+    });
+  };
 
   // Modals & Drawers
   const [isBarcodeOpen, setIsBarcodeOpen] = useState(false);
@@ -1013,7 +1032,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
               {/* View Mode Toggle (Grid vs List) */}
               <Pressable
-                onPress={() => setViewMode((m) => (m === 'grid' ? 'list' : 'grid'))}
+                onPress={toggleViewMode}
                 style={({ pressed }) => [
                   styles.iconSquareBtn,
                   { backgroundColor: theme.surface, borderColor: theme.border },

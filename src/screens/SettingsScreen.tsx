@@ -9,7 +9,10 @@ import { useShop } from '@/context/ShopContext';
 import { GoogleDriveAuth, googleDriveService } from '@/services/googleDriveService';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Linking from 'expo-linking';
+import * as Sharing from 'expo-sharing';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -569,22 +572,74 @@ export const SettingsScreen: React.FC = () => {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const jsonStr = exportDataJSON();
+    const fileName = `shopkeeper_backup_${new Date().toISOString().slice(0, 10)}.json`;
     if (Platform.OS === 'web') {
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `dukandar_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
+    } else {
+      try {
+        const path = `${FileSystem.cacheDirectory}${fileName}`;
+        await FileSystem.writeAsStringAsync(path, jsonStr, { encoding: FileSystem.EncodingType.UTF8 });
+        await Sharing.shareAsync(path, { mimeType: 'application/json', dialogTitle: 'Save Backup File' });
+        showAlert({
+          type: 'success',
+          title: 'Backup Ready',
+          message: 'Store backup JSON has been generated successfully.',
+        });
+      } catch {
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: 'Could not export backup file.',
+        });
+      }
     }
-    showAlert({
-      type: 'success',
-      title: 'Backup Ready',
-      message: 'Store backup JSON has been generated successfully.',
-    });
+  };
+
+  const handleImportFromFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: Platform.OS === 'web' ? 'application/json' : '*/*',
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      let jsonStr: string;
+      if (Platform.OS === 'web') {
+        const res = await fetch(asset.uri);
+        jsonStr = await res.text();
+      } else {
+        jsonStr = await FileSystem.readAsStringAsync(asset.uri, { encoding: FileSystem.EncodingType.UTF8 });
+      }
+      const success = await importDataJSON(jsonStr);
+      if (success) {
+        showAlert({
+          type: 'success',
+          title: t('success'),
+          message: language === 'ur' ? 'ڈیٹا بحال ہو گیا!' : 'Store data restored successfully!',
+        });
+        setShowImportBox(false);
+      } else {
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: language === 'ur' ? 'فائل درست نہیں ہے۔' : 'Invalid backup file. Please select a valid shopkeeper backup.',
+        });
+      }
+    } catch {
+      showAlert({
+        type: 'error',
+        title: t('error'),
+        message: 'Could not read the selected file.',
+      });
+    }
   };
 
   const handleImport = async () => {
@@ -594,7 +649,7 @@ export const SettingsScreen: React.FC = () => {
       showAlert({
         type: 'success',
         title: t('success'),
-        message: 'Store data restored successfully!',
+        message: language === 'ur' ? 'ڈیٹا بحال ہو گیا!' : 'Store data restored successfully!',
       });
       setImportJsonText('');
       setShowImportBox(false);
@@ -602,7 +657,7 @@ export const SettingsScreen: React.FC = () => {
       showAlert({
         type: 'error',
         title: t('error'),
-        message: 'Invalid backup JSON file or structure.',
+        message: language === 'ur' ? 'غلط JSON ہے۔' : 'Invalid backup JSON file or structure.',
       });
     }
   };
@@ -1209,7 +1264,7 @@ export const SettingsScreen: React.FC = () => {
       {activeSegment === 'settings' && (
         <>
           {/* Appearance */}
-          <Section title="Appearance" theme={theme}>
+          <Section title={t('appearanceSection')} theme={theme}>
             {/* Language */}
             <RowItem icon="language-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('languageLabel')} theme={theme}>
               <LangToggle value={language} onChange={setLanguage} theme={theme} />
@@ -1219,6 +1274,49 @@ export const SettingsScreen: React.FC = () => {
             <RowItem icon="moon-outline" iconColor="#6366F1" iconBg="#E0E7FF" label={t('darkModeLabel')} theme={theme} last>
               <DarkToggle value={settings.darkMode} onChange={(val) => updateSettings({ darkMode: val })} theme={theme} />
             </RowItem>
+          </Section>
+
+          {/* WhatsApp Udhaar Reminders */}
+          <Section title={t('whatsappReminderSection')} theme={theme}>
+            <RowItem
+              icon="logo-whatsapp"
+              iconColor="#25D366"
+              iconBg="#DCFCE7"
+              label={t('whatsappReminderLangLabel')}
+              sublabel={t('whatsappReminderLangSublabel')}
+              theme={theme}
+              last={false}
+            >
+              <LangToggle
+                value={settings.whatsappReminderLanguage || 'en'}
+                onChange={(l) => updateSettings({ whatsappReminderLanguage: l })}
+                theme={theme}
+              />
+            </RowItem>
+
+            {/* Live Message Preview Card */}
+            <View style={[styles.waPreviewContainer, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={styles.waPreviewHeader}>
+                <Ionicons name="chatbubble-ellipses-outline" size={15} color="#25D366" />
+                <Text style={[styles.waPreviewTitle, { color: theme.textSecondary }]}>
+                  {t('whatsappReminderPreview')}
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.waPreviewBody,
+                  {
+                    color: theme.text,
+                    fontFamily: (settings.whatsappReminderLanguage === 'ur') ? Typography.urduFontFamily : undefined,
+                    textAlign: (settings.whatsappReminderLanguage === 'ur') ? 'right' : 'left',
+                  },
+                ]}
+              >
+                {(settings.whatsappReminderLanguage === 'ur')
+                  ? `السلام علیکم احمد صاحب!\nامید ہے آپ بخیریت ہوں گے۔\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${settings.shopNameUrdu || settings.shopName}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${settings.currencySymbol} 2,500* ہے۔\n\nبرائے مہربانی سہولت کے مطابق تشریف لا کر رقم ادا فرما دیں۔\n\nشکریہ و جزاک اللہ!\n*${settings.shopName}*\n📞 ${settings.phone || '0300-1234567'}`
+                  : `Dear Ahmed,\n\nHope you are doing well.\n\nThis is a gentle reminder from *${settings.shopName}* regarding your pending balance:\n👉 *${settings.currencySymbol} 2,500*\n\nKindly arrange for the payment at your earliest convenience.\n\nThank you!\n*${settings.shopName}*\n📞 ${settings.phone || '0300-1234567'}`}
+              </Text>
+            </View>
           </Section>
 
           {/* Billing */}
@@ -1574,7 +1672,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#059669"
               iconBg="#D1FAE5"
               label={t('backupBtn')}
-              sublabel="Export all data as JSON"
+              sublabel={t('backupSublabel')}
               onPress={handleExport}
               theme={theme}
             />
@@ -1583,7 +1681,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#0284C7"
               iconBg="#E0F2FE"
               label={t('restoreBtn')}
-              sublabel="Import from JSON backup"
+              sublabel={t('restoreSublabel')}
               onPress={() => setShowImportBox(!showImportBox)}
               theme={theme}
             />
@@ -1592,7 +1690,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#DC2626"
               iconBg="#FEE2E2"
               label={t('resetSampleBtn')}
-              sublabel={language === 'ur' ? 'تمام اشیاء، بل اور کھاتہ صاف کریں' : 'Wipe products, bills & khata'}
+              sublabel={t('resetSublabel')}
               onPress={handleReset}
               theme={theme}
               last
@@ -1602,18 +1700,25 @@ export const SettingsScreen: React.FC = () => {
           {/* Import Box */}
           {showImportBox && (
             <View style={[styles.importBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <Text style={[styles.importHint, { color: theme.textSecondary }]}>
-                Paste your backup JSON below to restore:
-              </Text>
+              {/* Primary: file picker */}
               <Pressable
-                onPress={() => setImportJsonText(buildImportTemplateJSON())}
-                style={[styles.importTemplateBtn, { borderColor: theme.primary }]}
+                onPress={handleImportFromFile}
+                style={({ pressed }) => [
+                  styles.importFileBtn,
+                  { backgroundColor: theme.primary },
+                  pressed && { opacity: 0.85 },
+                ]}
               >
-                <Ionicons name="document-text-outline" size={15} color={theme.primary} />
-                <Text style={[styles.importTemplateText, { color: theme.primary }]}>
-                  Fill sample template (products only)
+                <Ionicons name="folder-open-outline" size={18} color="#fff" />
+                <Text style={styles.importFileBtnText}>
+                  {t('chooseBackupFile')}
                 </Text>
               </Pressable>
+
+              <Text style={[styles.importOrDivider, { color: theme.textMuted }]}>
+                {t('orPasteJson')}
+              </Text>
+
               <TextInput
                 value={importJsonText}
                 onChangeText={setImportJsonText}
@@ -1622,19 +1727,19 @@ export const SettingsScreen: React.FC = () => {
                 multiline
                 style={[
                   styles.importInput,
-                  {
-                    color: theme.text,
-                    backgroundColor: theme.surfaceSubtle,
-                    borderColor: theme.border,
-                  },
+                  { color: theme.text, backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
                 ]}
               />
-              <Pressable
-                onPress={handleImport}
-                style={[styles.importApplyBtn, { backgroundColor: theme.primary }]}
-              >
-                <Text style={styles.importApplyText}>Apply Restore</Text>
-              </Pressable>
+              {importJsonText.trim().length > 0 && (
+                <Pressable
+                  onPress={handleImport}
+                  style={[styles.importApplyBtn, { backgroundColor: theme.primary }]}
+                >
+                  <Text style={styles.importApplyText}>
+                    {t('applyRestore')}
+                  </Text>
+                </Pressable>
+              )}
             </View>
           )}
           {/* About & Legal Section */}
@@ -1644,7 +1749,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#2563EB"
               iconBg="#DBEAFE"
               label={t('privacyPolicy')}
-              sublabel="View official privacy disclosures"
+              sublabel={t('privacyPolicySublabel')}
               onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}
               theme={theme}
             />
@@ -1653,7 +1758,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#0D9488"
               iconBg="#CCFBF1"
               label={t('termsOfService')}
-              sublabel="View terms of service"
+              sublabel={t('termsOfServiceSublabel')}
               onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}
               theme={theme}
             />
@@ -1661,8 +1766,8 @@ export const SettingsScreen: React.FC = () => {
               icon="trash-bin-outline"
               iconColor="#DC2626"
               iconBg="#FEE2E2"
-              label="Account & Data Deletion Portal"
-              sublabel="Online data erasure request"
+              label={t('accountDeletionTitle')}
+              sublabel={t('accountDeletionSublabel')}
               onPress={() => openLegalUrl(LEGAL_CONFIG.accountDeletionUrl)}
               theme={theme}
             />
@@ -1670,7 +1775,7 @@ export const SettingsScreen: React.FC = () => {
               icon="information-circle-outline"
               iconColor="#64748B"
               iconBg="#F1F5F9"
-              label="App Version"
+              label={t('appVersionLabel')}
               sublabel={`v${LEGAL_CONFIG.appVersion} (${LEGAL_CONFIG.packageName})`}
               theme={theme}
               last
@@ -1958,17 +2063,25 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     ...Shadows.sm,
   },
-  importHint: { fontSize: 13, fontWeight: '500' },
-  importTemplateBtn: {
+  importFileBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
+    gap: 8,
+    paddingVertical: 14,
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
+    ...Shadows.sm,
   },
-  importTemplateText: { fontSize: 13, fontWeight: '700' },
+  importFileBtnText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  importOrDivider: {
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '500',
+  },
   importInput: {
     borderWidth: 1,
     borderRadius: BorderRadius.lg,
@@ -2381,5 +2494,31 @@ const styles = StyleSheet.create({
   unsavedBtnCancelText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  /* WhatsApp Reminder Preview */
+  waPreviewContainer: {
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  waPreviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  waPreviewTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+  waPreviewBody: {
+    fontSize: 12,
+    lineHeight: 19,
+    opacity: 0.9,
   },
 });
