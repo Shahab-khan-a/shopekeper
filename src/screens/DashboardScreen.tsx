@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,8 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ProductImage } from '@/components/ProductImage';
+import { SalesChart } from '@/components/SalesChart';
+import { LiveBorderSaleButton } from '@/components/LiveBorderSaleButton';
 
 export const DashboardScreen: React.FC = () => {
   const {
@@ -48,7 +50,14 @@ export const DashboardScreen: React.FC = () => {
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
-  const recentSales = sales.slice(0, 5);
+
+  // Show only a few (top 3) most recent sales on home to prevent crowding busy shops
+  const MAX_HOME_RECENT_SALES = 3;
+  const recentSales = useMemo(() => {
+    return [...sales]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, MAX_HOME_RECENT_SALES);
+  }, [sales]);
 
   // In-home Sale Modal
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
@@ -96,37 +105,6 @@ export const DashboardScreen: React.FC = () => {
     });
   };
 
-  // Pulse animation for floating New Sale button
-  const pulseAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1800,
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0,
-          duration: 0,
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-      ])
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, [pulseAnim]);
-
-  const pulseScale = pulseAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.35],
-  });
-
-  const pulseOpacity = pulseAnim.interpolate({
-    inputRange: [0, 0.45, 1],
-    outputRange: [0.5, 0.2, 0],
-  });
 
   // W2-5: Day-end summary modal
   const [showDayEnd, setShowDayEnd] = useState(false);
@@ -210,10 +188,6 @@ export const DashboardScreen: React.FC = () => {
         </Pressable>
       </View>
 
-
-
-
-
       {/* ── Today's Metrics ── */}
       <View style={styles.metricsGrid}>
         {/* Today's Sales */}
@@ -280,6 +254,9 @@ export const DashboardScreen: React.FC = () => {
           </View>
         </Pressable>
       </View>
+
+      {/* ── Sales Analytics & Trends Chart ── */}
+      <SalesChart sales={sales} />
 
       {/* ── Store Investment & Lifetime Earnings Section ── */}
       <View style={{ marginTop: Spacing.md, marginBottom: Spacing.xs }}>
@@ -433,7 +410,7 @@ export const DashboardScreen: React.FC = () => {
       {/* ── Recent Sales ── */}
       <SectionHeader
         title={t('recentSales')}
-        actionLabel={sales.length > 0 ? t('viewAll') : undefined}
+        actionLabel={sales.length > 0 ? (sales.length > MAX_HOME_RECENT_SALES ? `${t('viewAll')} (${sales.length})` : t('viewAll')) : undefined}
         onAction={() => setActiveTab('history')}
       />
 
@@ -488,6 +465,22 @@ export const DashboardScreen: React.FC = () => {
               </Pressable>
             );
           })}
+
+          {sales.length > MAX_HOME_RECENT_SALES && (
+            <Pressable
+              onPress={() => setActiveTab('history')}
+              style={({ pressed }) => [
+                styles.viewMoreSalesBtn,
+                { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                pressed && { opacity: 0.75 },
+              ]}>
+              <Text style={[styles.viewMoreSalesText, { color: theme.primary }]}>
+                {language === 'ur'
+                  ? `تمام ${sales.length} بلز دیکھیں →`
+                  : `View All ${sales.length} Sales →`}
+              </Text>
+            </Pressable>
+          )}
         </View>
       )}
 
@@ -551,33 +544,14 @@ export const DashboardScreen: React.FC = () => {
 
     </ScrollView>
 
-      {/* ── Floating Action Button (New Sale) with Pulse Effect ── */}
+      {/* ── Floating Action Button (New Sale) with Live Animated Border ── */}
       <View style={styles.floatingFabWrapper} pointerEvents="box-none">
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.floatingSalePulse,
-            {
-              backgroundColor: settings.darkMode ? 'rgba(52, 211, 153, 0.28)' : '#A7F3D0',
-              transform: [{ scale: pulseScale }],
-              opacity: pulseOpacity,
-            },
-          ]}
-        />
-        <Pressable
+        <LiveBorderSaleButton
           onPress={() => setIsSaleModalOpen(true)}
-          accessibilityLabel={t('sale')}
-          accessibilityRole="button"
-          accessibilityHint="Open new sale window directly on home"
-          style={({ pressed }) => [
-            styles.floatingSaleFab,
-            { backgroundColor: theme.primary },
-            Shadows.xl,
-            pressed && { transform: [{ scale: 0.94 }], opacity: 0.92 },
-          ]}>
-          <Ionicons name="cart" size={22} color="#FFFFFF" />
-          <Text style={styles.floatingSaleFabText}>{t('sale')}</Text>
-        </Pressable>
+          label={t('sale')}
+          primaryColor={theme.primary}
+          isDark={!!settings.darkMode}
+        />
       </View>
 
       {/* ── Direct New Sale Window on Home ── */}
@@ -614,29 +588,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 50,
-  },
-  floatingSalePulse: {
-    position: 'absolute',
-    top: -4,
-    left: -4,
-    right: -4,
-    bottom: -4,
-    borderRadius: BorderRadius.full,
-  },
-  floatingSaleFab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: BorderRadius.full,
-    elevation: 8,
-  },
-  floatingSaleFabText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.3,
   },
   saleModalContainer: {
     flex: 1,
@@ -820,6 +771,19 @@ const styles = StyleSheet.create({
   saleTime: { fontSize: 11, fontWeight: '500' },
   saleRight: { alignItems: 'flex-end', gap: 4 },
   saleAmount: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3 },
+  viewMoreSalesBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.xs,
+  },
+  viewMoreSalesText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
   // Finance & Investment Grid
   financeGrid: {
     gap: Spacing.md,

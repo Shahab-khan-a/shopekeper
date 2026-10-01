@@ -27,7 +27,7 @@ const WAVE_WIDTH = 140; // Wide sweeping span matching user's drawing
 const CIRCLE_SIZE = 50;
 const HUMP_RISE = 22; // Wave peak crest height above the bar top line
 const BAR_HEIGHT = 64;
-const STEP = 2; // High-definition 2px vertical slices
+const STEP = 0.5; // High-density 0.5px vertical slices (280 blocks) so steps/pixels are virtually invisible
 const COLUMN_COUNT = Math.floor(WAVE_WIDTH / STEP);
 
 // Pre-computed mathematical bell-curve / Witch of Agnesi profile: y(x) = H / (1 + (x/a)^4)
@@ -151,7 +151,7 @@ export const BottomNav: React.FC = () => {
               transform: [{ translateX }],
             },
           ]}>
-          {/* Symmetrical Continuous Mathematical Wave Mound */}
+          {/* Symmetrical High-Density Mathematical Wave Mound */}
           <View style={styles.waveMound}>
             {WAVE_SLICES.map((slice, idx) => (
               <View
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   waveSlice: {
     position: 'absolute',
     bottom: 0,
-    width: STEP + 0.5, // 0.5px sub-pixel overlap guarantees seamless solid fill
+    width: STEP + 0.3, // sub-pixel overlap guarantees seamless solid fill
   },
   activeCircle: {
     position: 'absolute',

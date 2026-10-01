@@ -11,7 +11,6 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -23,6 +22,7 @@ import {
   useWindowDimensions,
   View
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CATEGORIES: ProductCategory[] = [
   'All',
@@ -70,6 +70,7 @@ export interface SaleScreenProps {
 }
 
 export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
+  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isWideScreen = width >= 860;
 
@@ -103,65 +104,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [isCheckoutDrawerOpen, setIsCheckoutDrawerOpen] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // W2-2: Hold/Park cart state
-  const [heldCarts, setHeldCarts] = useState<{ id: string; ts: number; items: CartItem[]; total: number }[]>([]);
-
-  // Load held carts from storage on mount
-  React.useEffect(() => {
-    AsyncStorage.getItem('@sk_held_carts').then((raw) => {
-      if (!raw) return;
-      try {
-        const parsed = JSON.parse(raw);
-        const now = Date.now();
-        const valid = parsed.filter((h: any) => now - h.ts < 4 * 60 * 60 * 1000); // 4hr expiry
-        setHeldCarts(valid);
-        if (valid.length !== parsed.length) {
-          AsyncStorage.setItem('@sk_held_carts', JSON.stringify(valid)).catch(() => { });
-        }
-      } catch { }
-    }).catch(() => { });
-  }, []);
-
-  const holdCart = async () => {
-    if (cart.length === 0) return;
-    const newHold = { id: Date.now().toString(), ts: Date.now(), items: cart, total: grandTotal };
-    const updated = [...heldCarts, newHold].slice(-3); // max 3 holds
-    setHeldCarts(updated);
-    await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(updated)).catch(() => { });
-    clearCart();
-  };
-
-  const restoreHold = async (holdId: string) => {
-    const hold = heldCarts.find((h) => h.id === holdId);
-    if (!hold) return;
-
-    const doRestore = async () => {
-      setCart(hold.items);
-      const remaining = heldCarts.filter((h) => h.id !== holdId);
-      setHeldCarts(remaining);
-      await AsyncStorage.setItem('@sk_held_carts', JSON.stringify(remaining)).catch(() => { });
-    };
-
-    if (cart.length > 0) {
-      const msg = language === 'ur' ? 'موجودہ بل ہٹ جائے گا۔ جاری رکھیں؟' : 'Current bill will be replaced. Proceed?';
-      showAlert({
-        type: 'warning',
-        title: language === 'ur' ? 'بل بحال کریں' : 'Restore Held Order',
-        message: msg,
-        buttons: [
-          {
-            text: language === 'ur' ? 'جاری رکھیں' : 'Proceed',
-            style: 'primary',
-            onPress: doRestore,
-          },
-          { text: t('cancel'), style: 'cancel' },
-        ],
-      });
-      return;
-    }
-    await doRestore();
-  };
 
   // W1-3: Success toast — stores last completed sale for explicit receipt view
   const [lastCompletedSale, setLastCompletedSale] = useState<any>(null);
@@ -454,11 +396,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   // ---------------- Render Checkout Content ----------------
   const renderCheckoutContent = () => (
     <View style={styles.checkoutInner}>
-      {/* Mobile Drawer Handle */}
-      {!isWideScreen && (
-        <View style={[styles.drawerHandle, { backgroundColor: theme.border }]} />
-      )}
-
       {/* Header */}
       <View style={[styles.drawerHeader, { borderBottomColor: theme.border }]}>
         <View style={styles.drawerHeaderTitle}>
@@ -499,20 +436,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             </Pressable>
           ) : null}
 
-          {/* Hold / Park current cart */}
-          {cart.length > 0 && heldCarts.length < 3 && (
-            <Pressable
-              onPress={holdCart}
-              accessibilityLabel="Hold cart for later"
-              accessibilityRole="button"
-              style={[styles.holdBtn, { backgroundColor: theme.warningLight, borderColor: theme.warning }]}>
-              <Ionicons name="pause-circle-outline" size={14} color={theme.warning} />
-              <Text style={[styles.holdBtnText, { color: theme.warning }]}>
-                {language === 'ur' ? 'روکیں' : 'Hold'}
-              </Text>
-            </Pressable>
-          )}
-
           {!isWideScreen && (
             <Pressable
               onPress={() => setIsCheckoutDrawerOpen(false)}
@@ -523,25 +446,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         </View>
       </View>
 
-      {/* Held Orders Restore Strip */}
-      {heldCarts.length > 0 && (
-        <View style={[styles.heldOrdersBar, { backgroundColor: theme.warningLight, borderBottomColor: theme.warning }]}>
-          <Ionicons name="pause-circle" size={14} color={theme.warning} />
-          <Text style={[styles.heldOrdersLabel, { color: theme.warning }]}>
-            {language === 'ur' ? 'رکے ہوئے آرڈر:' : 'Held:'} {heldCarts.length}
-          </Text>
-          {heldCarts.map((hold) => (
-            <Pressable
-              key={hold.id}
-              onPress={() => restoreHold(hold.id)}
-              style={[styles.heldOrderChip, { backgroundColor: theme.warning }]}>
-              <Text style={styles.heldOrderChipText}>
-                {settings.currencySymbol}{hold.total} ({hold.items.length})
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
+
 
       <ScrollView
         style={styles.drawerScroll}
@@ -958,7 +863,15 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       </ScrollView>
 
       {/* Bill Total & Primary Action Button */}
-      <View style={[styles.checkoutFooter, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+      <View
+        style={[
+          styles.checkoutFooter,
+          {
+            backgroundColor: theme.surface,
+            borderTopColor: theme.border,
+            paddingBottom: Math.max(insets.bottom, 16) + 12,
+          },
+        ]}>
 
         {/* W1-3: Sale Success Toast Banner */}
         {showSuccessToast && lastCompletedSale && (
@@ -984,13 +897,17 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         )}
 
         <View style={styles.totalBar}>
-          <View>
-            <Text style={[styles.subtotalLine, { color: theme.textSecondary }]}>
-              {t('subtotal')}: {settings.currencySymbol}{subtotal}
-              {discountAmount > 0 && ` | -${settings.currencySymbol}${discountAmount}`}
+          <View style={{ flexShrink: 1, paddingRight: 8 }}>
+            <Text style={[styles.subtotalLine, { color: theme.textSecondary }]} numberOfLines={1}>
+              {t('subtotal')}: {settings.currencySymbol} {formatCompactPrice(subtotal)}
+              {discountAmount > 0 && ` | -${settings.currencySymbol} ${formatCompactPrice(discountAmount)}`}
             </Text>
-            <Text style={[styles.grandTotalLine, { color: theme.primary }]}>
-              {settings.currencySymbol}{grandTotal}
+            <Text
+              style={[styles.grandTotalLine, { color: theme.primary }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}>
+              {settings.currencySymbol} {formatCompactPrice(grandTotal)}
             </Text>
           </View>
 
@@ -1013,7 +930,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               style={[
                 styles.completeSaleBtnText,
                 cart.length === 0 && { color: theme.textMuted },
-              ]}>
+              ]}
+              numberOfLines={1}>
               {isProcessing ? t('saved') : t('generateBill')}
             </Text>
           </Pressable>
@@ -1092,41 +1010,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
             {/* Action Buttons Row */}
             <View style={styles.topBarActions}>
-              {/* Discard cart — visible when cart has items */}
-              {cart.length > 0 && (
-                <Pressable
-                  onPress={() => {
-                    showAlert({
-                      type: 'warning',
-                      title: language === 'ur' ? 'بل خارج کریں' : 'Discard Cart',
-                      message: language === 'ur'
-                        ? `${totalItemsCount} آئٹم ہیں، کیا آپ بل خارج کرنا چاہتے ہیں؟`
-                        : `Discard ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} from the current bill?`,
-                      buttons: [
-                        {
-                          text: language === 'ur' ? 'خارج کریں' : 'Discard',
-                          style: 'destructive',
-                          icon: 'trash-outline',
-                          onPress: clearCart,
-                        },
-                        { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
-                      ],
-                    });
-                  }}
-                  style={({ pressed }) => [
-                    styles.discardCartBtn,
-                    {
-                      backgroundColor: settings.darkMode ? 'rgba(239,68,68,0.15)' : '#FEF2F2',
-                      borderColor: settings.darkMode ? 'rgba(239,68,68,0.4)' : '#FECACA',
-                    },
-                    pressed && { opacity: 0.75, transform: [{ scale: 0.96 }] },
-                  ]}>
-                  <Ionicons name="trash-outline" size={17} color={theme.danger} />
-                  <Text style={[styles.discardCartBtnText, { color: theme.danger }]}>
-                    {totalItemsCount}
-                  </Text>
-                </Pressable>
-              )}
 
               {/* View Mode Toggle (Grid vs List) */}
               <Pressable
@@ -1144,6 +1027,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               </Pressable>
             </View>
           </View>
+
+
 
           {/* ⚡ Favorites / Quick-Add Row — Top 8 Most-Sold Products */}
           {topProducts.length > 0 && !searchQuery && (
@@ -1684,8 +1569,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                     <Text style={styles.floatingItemsCount}>
                       {totalItemsCount} {t('itemsInCart')}
                     </Text>
-                    <Text style={styles.floatingTotal}>
-                      {settings.currencySymbol}{grandTotal}
+                    <Text style={styles.floatingTotal} numberOfLines={1}>
+                      {settings.currencySymbol} {formatCompactPrice(grandTotal)}
                     </Text>
                   </View>
                 </View>
@@ -1713,7 +1598,14 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           visible={isCheckoutDrawerOpen}
           animationType="slide"
           onRequestClose={() => setIsCheckoutDrawerOpen(false)}>
-          <View style={[styles.mobileModalContainer, { backgroundColor: theme.surface }]}>
+          <View
+            style={[
+              styles.mobileModalContainer,
+              {
+                backgroundColor: theme.surface,
+                paddingTop: insets.top > 0 ? insets.top : Platform.OS === 'ios' ? 16 : 8,
+              },
+            ]}>
             {renderCheckoutContent()}
           </View>
         </Modal>
@@ -2218,20 +2110,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // Discard cart button (top bar, desktop)
-  discardCartBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    height: 46,
-    paddingHorizontal: 12,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1.5,
-  },
-  discardCartBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
-  },
 
   // Side Panel / Modal Drawer Shared
   sideCheckoutPanel: {
@@ -2293,43 +2171,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-  // W2-2: Hold cart styles
-  holdBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-  },
-  holdBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  heldOrdersBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    flexWrap: 'wrap',
-  },
-  heldOrdersLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  heldOrderChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.full,
-  },
-  heldOrderChipText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
-  },
+
   closeDrawerBtn: {
     width: 32,
     height: 32,
