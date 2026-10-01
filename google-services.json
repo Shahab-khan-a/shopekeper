@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "65013515513",
-    "project_id": "shopkeeper-ea7d8",
-    "storage_bucket": "shopkeeper-ea7d8.firebasestorage.app"
+    "project_number": "800823031098",
+    "project_id": "shopkeeper-a977a",
+    "storage_bucket": "shopkeeper-a977a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:65013515513:android:21b72eaccb06309ac4ce28",
+        "mobilesdk_app_id": "1:800823031098:android:0eb0cecd0ca5ace60e4c03",
         "android_client_info": {
-          "package_name": "com.shahabkhan34.ShopkeeperApp"
+          "package_name": "com.techflowstudio.shopkeeper"
         }
       },
       "oauth_client": [
         {
-          "client_id": "65013515513-v4cvkrc60ch7pl5qun9avovtssu7cb86.apps.googleusercontent.com",
+          "client_id": "800823031098-q8d2bpqrj3smrfkp7m2odvhcpudjl1lv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.shahabkhan34.ShopkeeperApp",
-            "certificate_hash": "14730b7eb8a7611afa8270d1a17357c7651ae5b7"
+            "package_name": "com.techflowstudio.shopkeeper",
+            "certificate_hash": "8b9d9c4d86ed619fe5889415c9cc8fbd706a3d67"
           }
         },
         {
-          "client_id": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
+          "client_id": "800823031098-gi6jjhihtu87f752e3d2798ld13aq1bv.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBQK5EamHLj5ezipkXrwG2yUt4ILpc5jBA"
+          "current_key": "AIzaSyAw_8rrm5OrzZ0hZFA6O5XSOtTj0EjkOyg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "65013515513-3j91ulidbae1jc0dd6t4ptej495ulp9q.apps.googleusercontent.com",
+              "client_id": "800823031098-gi6jjhihtu87f752e3d2798ld13aq1bv.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

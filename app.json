@@ -20,7 +20,7 @@
       "predictiveBackGestureEnabled": false,
       "versionCode": 1,
       "permissions": ["android.permission.CAMERA"],
-      "package": "com.shahabkhan34.ShopkeeperApp",
+      "package": "com.techflowstudio.shopkeeper",
       "googleServicesFile": "./google-services.json",
       "intentFilters": [
         {
@@ -28,7 +28,7 @@
           "autoVerify": true,
           "data": [
             {
-              "scheme": "com.googleusercontent.apps.65013515513-v4cvkrc60ch7pl5qun9avovtssu7cb86",
+              "scheme": "com.googleusercontent.apps.800823031098-q8d2bpqrj3smrfkp7m2odvhcpudjl1lv",
               "host": "oauth2redirect",
               "path": "/google"
             }
