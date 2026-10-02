@@ -114,21 +114,25 @@ export const ShopHeader: React.FC = () => {
           styles.leftSection,
           pressed && { opacity: 0.75, transform: [{ scale: 0.99 }] },
         ]}>
-        <View style={[styles.logoBadge, { backgroundColor: theme.primaryLight }]}>
+        <View style={[styles.logoBadge, { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: theme.border }]}>
           {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
             <ProductImage
               uri={settings.profileImage}
               style={styles.logoImage}
               fallbackIcon={
-                <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
-                  <Ionicons name="storefront" size={22} color="#FFFFFF" />
-                </View>
+                <Image
+                  source={require('@/../assets/images/mainLogoImage.png')}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
               }
             />
           ) : (
-            <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
-              <Ionicons name="storefront" size={22} color="#FFFFFF" />
-            </View>
+            <Image
+              source={require('@/../assets/images/mainLogoImage.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           )}
         </View>
         <View style={styles.titleWrap}>

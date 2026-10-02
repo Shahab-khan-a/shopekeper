@@ -6,6 +6,7 @@ import {
   Pressable,
   ActivityIndicator,
   ScrollView,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
@@ -141,10 +142,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
 
           {/* Hero Branding Header */}
           <View style={styles.brandSection}>
-            <View style={[styles.logoOuter, { backgroundColor: theme.primaryLight }]}>
-              <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
-                <Ionicons name="storefront" size={26} color="#FFFFFF" />
-              </View>
+            <View style={styles.brandLogoWrap}>
+              <Image
+                source={require('@/../assets/images/mainLogoImage.png')}
+                style={styles.brandLogoImg}
+                resizeMode="contain"
+              />
             </View>
 
             <Text style={[styles.appTitle, { color: theme.text }]}>
@@ -375,21 +378,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
   },
-  logoOuter: {
-    width: 58,
-    height: 58,
-    borderRadius: BorderRadius.full,
+  brandLogoWrap: {
+    width: 68,
+    height: 68,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
+    ...Shadows.md,
   },
-  logoInner: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.sm,
+  brandLogoImg: {
+    width: 66,
+    height: 66,
+    borderRadius: 16,
   },
   appTitle: {
     fontSize: 21,

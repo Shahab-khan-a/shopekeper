@@ -1040,14 +1040,22 @@ export const SettingsScreen: React.FC = () => {
                     uri={profileImage}
                     style={[styles.avatar, { borderColor: theme.primary }]}
                     fallbackIcon={
-                      <View style={[styles.avatarFallback, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
-                        <Ionicons name="storefront" size={34} color={theme.primary} />
+                      <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+                        <Image
+                          source={require('@/../assets/images/mainLogoImage.png')}
+                          style={styles.avatarLogoImg}
+                          resizeMode="contain"
+                        />
                       </View>
                     }
                   />
                 ) : (
-                  <View style={[styles.avatarFallback, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
-                    <Ionicons name="storefront" size={34} color={theme.primary} />
+                  <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+                    <Image
+                      source={require('@/../assets/images/mainLogoImage.png')}
+                      style={styles.avatarLogoImg}
+                      resizeMode="contain"
+                    />
                   </View>
                 )}
                 <View style={[styles.cameraBadge, { backgroundColor: theme.primary }]}>
@@ -1880,6 +1888,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
+    overflow: 'hidden',
+  },
+  avatarLogoImg: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
   },
   avatarInitials: {
     fontSize: 26,

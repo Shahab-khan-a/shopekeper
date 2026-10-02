@@ -45,7 +45,6 @@ export const DashboardScreen: React.FC = () => {
     user,
     t,
     language,
-    loadDemoData,
     showAlert,
   } = useShop();
 
@@ -61,49 +60,6 @@ export const DashboardScreen: React.FC = () => {
 
   // In-home Sale Modal
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
-  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
-
-  const handleLoadDemo = () => {
-    const msg = language === 'ur'
-      ? 'کیا آپ فائر بیس فائر اسٹور (Firebase Firestore) پر سیمپل ٹیسٹ ڈیٹا (پروڈکٹس، سیلز ہسٹری، کھاتہ کسٹمرز) اپ لوڈ کرنا چاہتے ہیں؟'
-      : 'Push sample test data (products, sales history, and Khata customers) directly to Firebase Firestore?';
-
-    showAlert({
-      type: 'confirm',
-      title: language === 'ur' ? 'فائر بیس ڈیٹا اپ لوڈ کریں' : 'Push Firebase Test Data',
-      message: msg,
-      buttons: [
-        {
-          text: language === 'ur' ? 'ہاں، اپ لوڈ کریں' : 'Yes, Push to Firebase',
-          style: 'primary',
-          icon: 'cloud-upload-outline',
-          onPress: async () => {
-            setIsLoadingDemo(true);
-            try {
-              await loadDemoData();
-              showAlert({
-                type: 'success',
-                title: 'Success',
-                message: language === 'ur'
-                  ? 'سیمپل ٹیسٹ ڈیٹا کامیابی سے فائر بیس پر اپ لوڈ ہو گیا ہے!'
-                  : 'Demo test data pushed to Firebase Firestore & synced successfully!',
-              });
-            } catch (e: any) {
-              console.error(e);
-              showAlert({
-                type: 'error',
-                title: 'Error',
-                message: e?.message || 'Failed to push demo data',
-              });
-            } finally {
-              setIsLoadingDemo(false);
-            }
-          },
-        },
-        { text: t('cancel'), style: 'cancel' },
-      ],
-    });
-  };
 
 
   // W2-5: Day-end summary modal
@@ -157,35 +113,30 @@ export const DashboardScreen: React.FC = () => {
               styles.heroRight,
               pressed && { opacity: 0.85, transform: [{ scale: 0.95 }] },
             ]}>
-            <View style={[styles.heroIconCircle, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
+            <View style={[styles.heroIconCircle, { backgroundColor: '#FFFFFF' }]}>
               {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
                 <ProductImage
                   uri={settings.profileImage}
                   style={styles.heroAvatarImg}
-                  fallbackIcon={<Ionicons name="storefront" size={30} color="rgba(255,255,255,0.9)" />}
+                  fallbackIcon={
+                    <Image
+                      source={require('@/../assets/images/mainLogoImage.png')}
+                      style={styles.heroAvatarImg}
+                      resizeMode="contain"
+                    />
+                  }
                 />
               ) : (
-                <Ionicons name="storefront" size={30} color="rgba(255,255,255,0.9)" />
+                <Image
+                  source={require('@/../assets/images/mainLogoImage.png')}
+                  style={styles.heroAvatarImg}
+                  resizeMode="contain"
+                />
               )}
             </View>
           </Pressable>
         </View>
 
-        {/* 🧪 Demo Test Data Trigger Banner Button */}
-        <Pressable
-          onPress={handleLoadDemo}
-          disabled={isLoadingDemo}
-          style={({ pressed }) => [
-            styles.demoDataBannerBtn,
-            pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-          ]}>
-          <Ionicons name="flask" size={14} color="#FFFFFF" />
-          <Text style={styles.demoDataBannerBtnText}>
-            {isLoadingDemo
-              ? (language === 'ur' ? 'فائر بیس پر اپ لوڈ ہو رہا ہے...' : 'Pushing to Firebase...')
-              : (language === 'ur' ? '⚡ فائر بیس سیمپل ڈیٹا اپ لوڈ کریں' : '⚡ Push Sample Data to Firebase')}
-          </Text>
-        </Pressable>
       </View>
 
       {/* ── Today's Metrics ── */}
@@ -649,25 +600,6 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   heroCTAText: { fontWeight: '800', fontSize: 13, letterSpacing: 0.2 },
-  demoDataBannerBtn: {
-    marginTop: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    alignSelf: 'flex-start',
-  },
-  demoDataBannerBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
 
   // Metrics Grid
   metricsGrid: {

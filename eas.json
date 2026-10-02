@@ -35,6 +35,9 @@
     },
     "production": {
       "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
       "env": {
         "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "800823031098-gi6jjhihtu87f752e3d2798ld13aq1bv.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "800823031098-gi6jjhihtu87f752e3d2798ld13aq1bv.apps.googleusercontent.com",

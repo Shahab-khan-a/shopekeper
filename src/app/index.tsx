@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ActivityIndicator, Text } from 'react-native';
+import { View, StyleSheet, StatusBar, ActivityIndicator, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -107,10 +107,12 @@ export default function App() {
             barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
             backgroundColor={theme.surface}
           />
-          <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
-            <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
-              <Ionicons name="storefront" size={36} color="#FFFFFF" />
-            </View>
+          <View style={styles.loadingLogoOuter}>
+            <Image
+              source={require('@/../assets/images/mainLogoImage.png')}
+              style={styles.loadingLogoImg}
+              resizeMode="contain"
+            />
           </View>
           <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
           <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
@@ -131,10 +133,12 @@ export default function App() {
               barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
               backgroundColor={theme.surface}
             />
-            <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
-              <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
-                <Ionicons name="storefront" size={36} color="#FFFFFF" />
-              </View>
+            <View style={styles.loadingLogoOuter}>
+              <Image
+                source={require('@/../assets/images/mainLogoImage.png')}
+                style={styles.loadingLogoImg}
+                resizeMode="contain"
+              />
             </View>
             <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
             <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
@@ -165,10 +169,12 @@ export default function App() {
             barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
             backgroundColor={theme.surface}
           />
-          <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
-            <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
-              <Ionicons name="storefront" size={36} color="#FFFFFF" />
-            </View>
+          <View style={styles.loadingLogoOuter}>
+            <Image
+              source={require('@/../assets/images/mainLogoImage.png')}
+              style={styles.loadingLogoImg}
+              resizeMode="contain"
+            />
           </View>
           <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
           <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
@@ -272,19 +278,21 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   loadingLogoOuter: {
-    width: 84,
-    height: 84,
-    borderRadius: BorderRadius.full,
+    width: 88,
+    height: 88,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  loadingLogoInner: {
-    width: 68,
-    height: 68,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
     ...Shadows.md,
+  },
+  loadingLogoImg: {
+    width: 86,
+    height: 86,
+    borderRadius: 20,
   },
   loadingTitle: {
     fontSize: 22,
