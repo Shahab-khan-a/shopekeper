@@ -37,30 +37,6 @@ const CATEGORIES: ProductCategory[] = [
   'Others',
 ];
 
-const QUICK_ADD_COLORS = [
-  { bgLight: '#EEF2FF', borderLight: '#C7D2FE', textLight: '#4F46E5', bgDark: 'rgba(99, 102, 241, 0.18)', borderDark: 'rgba(99, 102, 241, 0.35)', textDark: '#818CF8' },
-  { bgLight: '#ECFDF5', borderLight: '#A7F3D0', textLight: '#059669', bgDark: 'rgba(16, 185, 129, 0.18)', borderDark: 'rgba(16, 185, 129, 0.35)', textDark: '#34D399' },
-  { bgLight: '#FFFBEB', borderLight: '#FDE68A', textLight: '#D97706', bgDark: 'rgba(245, 158, 11, 0.18)', borderDark: 'rgba(245, 158, 11, 0.35)', textDark: '#FBBF24' },
-  { bgLight: '#FFF1F2', borderLight: '#FECDD3', textLight: '#E11D48', bgDark: 'rgba(244, 63, 94, 0.18)', borderDark: 'rgba(244, 63, 94, 0.35)', textDark: '#FB7185' },
-  { bgLight: '#F3E8FF', borderLight: '#E9D5FF', textLight: '#9333EA', bgDark: 'rgba(168, 85, 247, 0.18)', borderDark: 'rgba(168, 85, 247, 0.35)', textDark: '#C084FC' },
-  { bgLight: '#F0FDFA', borderLight: '#99F6E4', textLight: '#0D9488', bgDark: 'rgba(20, 184, 166, 0.18)', borderDark: 'rgba(20, 184, 166, 0.35)', textDark: '#2DD4BF' },
-  { bgLight: '#FFF7ED', borderLight: '#FED7AA', textLight: '#EA580C', bgDark: 'rgba(249, 115, 22, 0.18)', borderDark: 'rgba(249, 115, 22, 0.35)', textDark: '#FB923C' },
-  { bgLight: '#ECFEFF', borderLight: '#A5F3FC', textLight: '#0891B2', bgDark: 'rgba(6, 182, 212, 0.18)', borderDark: 'rgba(6, 182, 212, 0.35)', textDark: '#22D3EE' },
-];
-
-const CATEGORY_TAG_COLORS: Record<string, { bgLight: string; borderLight: string; textLight: string; bgDark: string; borderDark: string; textDark: string }> = {
-  All: { bgLight: '#EEF2FF', borderLight: '#C7D2FE', textLight: '#4F46E5', bgDark: 'rgba(99, 102, 241, 0.16)', borderDark: 'rgba(99, 102, 241, 0.3)', textDark: '#A5B4FC' },
-  Kiryana: { bgLight: '#FEF3C7', borderLight: '#FDE68A', textLight: '#B45309', bgDark: 'rgba(245, 158, 11, 0.16)', borderDark: 'rgba(245, 158, 11, 0.3)', textDark: '#FCD34D' },
-  Grocery: { bgLight: '#D1FAE5', borderLight: '#A7F3D0', textLight: '#047857', bgDark: 'rgba(16, 185, 129, 0.16)', borderDark: 'rgba(16, 185, 129, 0.3)', textDark: '#6EE7B7' },
-  Beverages: { bgLight: '#CFFAFE', borderLight: '#A5F3FC', textLight: '#0E7490', bgDark: 'rgba(6, 182, 212, 0.16)', borderDark: 'rgba(6, 182, 212, 0.3)', textDark: '#67E8F9' },
-  Dairy: { bgLight: '#DBEAFE', borderLight: '#BFDBFE', textLight: '#1D4ED8', bgDark: 'rgba(59, 130, 246, 0.16)', borderDark: 'rgba(59, 130, 246, 0.3)', textDark: '#93C5FD' },
-  Snacks: { bgLight: '#FFEDD5', borderLight: '#FED7AA', textLight: '#C2410C', bgDark: 'rgba(249, 115, 22, 0.16)', borderDark: 'rgba(249, 115, 22, 0.3)', textDark: '#FDBA74' },
-  Spices: { bgLight: '#FFE4E6', borderLight: '#FECDD3', textLight: '#BE123C', bgDark: 'rgba(244, 63, 94, 0.16)', borderDark: 'rgba(244, 63, 94, 0.3)', textDark: '#FDA4AF' },
-  'Personal Care': { bgLight: '#F3E8FF', borderLight: '#E9D5FF', textLight: '#6D28D9', bgDark: 'rgba(168, 85, 247, 0.16)', borderDark: 'rgba(168, 85, 247, 0.3)', textDark: '#D8B4FE' },
-  Bakery: { bgLight: '#FEF9C3', borderLight: '#FEF08A', textLight: '#A16207', bgDark: 'rgba(234, 179, 8, 0.16)', borderDark: 'rgba(234, 179, 8, 0.3)', textDark: '#FDE047' },
-  Others: { bgLight: '#F3F4F6', borderLight: '#E5E7EB', textLight: '#4B5563', bgDark: 'rgba(107, 114, 128, 0.16)', borderDark: 'rgba(107, 114, 128, 0.3)', textDark: '#D1D5DB' },
-};
-
 const CASH_DENOMINATIONS = [100, 500, 1000, 5000];
 const DISCOUNT_SHORTCUTS = [10, 20, 50, 100];
 
@@ -77,8 +53,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   // W3-3: Responsive grid — 2 col narrow, 3 col medium, 4 col wide
   const catalogWidth = isWideScreen ? width * 0.55 : width;
   const gridCols = catalogWidth >= 700 ? 4 : catalogWidth >= 480 ? 3 : 2;
-  const gridGap = 8;
-  const gridColWidth = (catalogWidth - Spacing.lg * 2 - gridGap * (gridCols - 1)) / gridCols;
+  const gridGap = 6;
+  const gridColWidth = (catalogWidth - Spacing.md * 2 - gridGap * (gridCols - 1)) / gridCols;
 
   const { products, khata, sales, completeSale, settings, t, language, setActiveReceipt, setIsAddProductOpen, showAlert } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -129,7 +105,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // W2-3: Top 8 products by sales frequency for the Favorites row
+  // Top frequent products for Quick Add — keep lean (6 max)
   const topProducts = useMemo(() => {
     const freq: Record<string, number> = {};
     sales.forEach((sale) => {
@@ -138,14 +114,13 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         if (id) freq[id] = (freq[id] || 0) + item.quantity;
       });
     });
-    const sorted = [...products]
-      .filter((p) => p.stock > 0)
-      .sort((a, b) => (freq[b.id] || 0) - (freq[a.id] || 0));
-    // If no sales history yet, show top-stocked items
+    const inStock = products.filter((p) => p.stock > 0);
     if (Object.keys(freq).length === 0) {
-      return [...products].filter((p) => p.stock > 0).slice(0, 8);
+      return inStock.slice(0, 6);
     }
-    return sorted.slice(0, 8);
+    return [...inStock]
+      .sort((a, b) => (freq[b.id] || 0) - (freq[a.id] || 0))
+      .slice(0, 6);
   }, [products, sales]);
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -997,40 +972,35 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       <View style={styles.mainLayout}>
         {/* ================= Catalog Section (Full Screen on Mobile) ================= */}
         <View style={styles.catalogSection}>
-          {/* Top Control Bar: Search + Barcode + Quick Item + View Toggle */}
+          {/* Top Control Bar: Search + Barcode + View Toggle */}
           <View style={styles.topControlBar}>
-            {/* Search Box & Inline Barcode Scanner */}
             <View style={styles.searchFlex}>
               <View style={styles.searchInlineRow}>
                 <View style={{ flex: 1 }}>
                   <SearchBar
                     value={searchQuery}
                     onChangeText={setSearchQuery}
-                    placeholder={language === 'ur' ? 'نام یا بارکوڈ سے تلاش کریں...' : 'Search name or barcode...'}
-                    height={46}
+                    placeholder={language === 'ur' ? 'نام یا بارکوڈ...' : 'Search name or barcode...'}
+                    height={40}
                   />
                 </View>
 
-                {/* Inline Barcode Scanner Button */}
                 <Pressable
                   onPress={() => setIsBarcodeOpen(true)}
                   style={({ pressed }) => [
                     styles.searchBarcodeBtn,
                     {
-                      backgroundColor: settings.darkMode ? 'rgba(99, 102, 241, 0.16)' : '#EEF2FF',
-                      borderColor: settings.darkMode ? 'rgba(99, 102, 241, 0.35)' : '#C7D2FE',
+                      backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.16)' : '#ECFDF5',
+                      borderColor: settings.darkMode ? 'rgba(16,185,129,0.35)' : '#A7F3D0',
                     },
                     pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
                   ]}>
-                  <Ionicons name="barcode-outline" size={22} color={theme.primary} />
+                  <Ionicons name="barcode-outline" size={20} color={theme.primary} />
                 </Pressable>
               </View>
             </View>
 
-            {/* Action Buttons Row */}
             <View style={styles.topBarActions}>
-
-              {/* View Mode Toggle (Grid vs List) */}
               <Pressable
                 onPress={toggleViewMode}
                 style={({ pressed }) => [
@@ -1040,107 +1010,89 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 ]}>
                 <Ionicons
                   name={viewMode === 'grid' ? 'list-outline' : 'grid-outline'}
-                  size={20}
+                  size={18}
                   color={theme.textSecondary}
                 />
               </Pressable>
             </View>
           </View>
 
-
-
-          {/* ⚡ Favorites / Quick-Add Row — Top 8 Most-Sold Products */}
-          {topProducts.length > 0 && !searchQuery && (
-            <View style={styles.favRowWrap}>
-              <View style={styles.favRowHeader}>
-                <Ionicons name="flash" size={12} color={theme.accent} />
-                <Text style={[styles.favRowTitle, { color: theme.textSecondary }]}>
-                  {language === 'ur' ? 'اکثر بکنے والے' : 'Quick Add'}
-                </Text>
+          {/* Compact Quick Add — frequent items only (hidden while searching) */}
+          {topProducts.length > 0 && !searchQuery ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.favRowScroll}
+              contentContainerStyle={styles.favRowContent}>
+              <View style={styles.favLead}>
+                <Ionicons name="flash" size={11} color={theme.accent} />
               </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.favRowContent}>
-                {topProducts.map((product, idx) => {
-                  const isOut = product.stock <= 0;
-                  const inCart = cart.find((it) => it.product.id === product.id);
-                  const colorScheme = QUICK_ADD_COLORS[idx % QUICK_ADD_COLORS.length];
-                  const chipBg = inCart
-                    ? theme.primaryLight
-                    : settings.darkMode
-                      ? colorScheme.bgDark
-                      : colorScheme.bgLight;
-                  const chipBorder = inCart
-                    ? theme.primary
-                    : settings.darkMode
-                      ? colorScheme.borderDark
-                      : colorScheme.borderLight;
-                  const chipText = inCart
-                    ? theme.primary
-                    : settings.darkMode
-                      ? colorScheme.textDark
-                      : colorScheme.textLight;
+              {topProducts.map((product) => {
+                const isOut = product.stock <= 0;
+                const inCart = cart.find((it) => it.product.id === product.id);
 
-                  return (
-                    <Pressable
-                      key={product.id}
-                      disabled={isOut}
-                      onPress={() => addToCart(product)}
-                      accessibilityLabel={`Quick add ${product.name}`}
-                      accessibilityRole="button"
-                      style={({ pressed }) => [
-                        styles.favChip,
-                        {
-                          backgroundColor: chipBg,
-                          borderColor: chipBorder,
-                          opacity: isOut ? 0.4 : 1,
-                        },
-                        pressed && !isOut && { transform: [{ scale: 0.95 }] },
-                      ]}>
-                      <Text style={[styles.favChipName, { color: chipText }]} numberOfLines={1}>
-                        {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                return (
+                  <Pressable
+                    key={product.id}
+                    disabled={isOut}
+                    onPress={() => addToCart(product)}
+                    accessibilityLabel={`Quick add ${product.name}`}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [
+                      styles.favChip,
+                      {
+                        backgroundColor: inCart
+                          ? theme.primaryLight
+                          : settings.darkMode
+                            ? theme.surfaceSubtle
+                            : '#FFFFFF',
+                        borderColor: inCart
+                          ? theme.primary
+                          : settings.darkMode
+                            ? 'rgba(255,255,255,0.1)'
+                            : 'rgba(148,163,184,0.45)',
+                        opacity: isOut ? 0.4 : 1,
+                      },
+                      pressed && !isOut && { transform: [{ scale: 0.96 }] },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.favChipName,
+                        { color: inCart ? theme.primary : theme.text },
+                      ]}
+                      numberOfLines={1}>
+                      {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                    </Text>
+                    {inCart ? (
+                      <View style={[styles.favChipBadge, { backgroundColor: theme.primary }]}>
+                        <Text style={styles.favChipBadgeText}>{inCart.quantity}</Text>
+                      </View>
+                    ) : (
+                      <Text style={[styles.favChipPrice, { color: theme.textMuted }]}>
+                        {settings.currencySymbol}
+                        {formatCompactPrice(product.price)}
                       </Text>
-                      <Text style={[styles.favChipPrice, { color: chipText, opacity: inCart ? 1 : 0.8 }]}>
-                        {settings.currencySymbol}{formatCompactPrice(product.price)}
-                      </Text>
-                      {inCart && (
-                        <View style={[styles.favChipBadge, { backgroundColor: theme.primary }]}>
-                          <Text style={styles.favChipBadgeText}>{inCart.quantity}</Text>
-                        </View>
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
-          )}
+                    )}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          ) : null}
 
-          {/* Category Filter Pills */}
+          {/* Category Filter Pills — quiet, compact */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.categoryScroll}
             contentContainerStyle={styles.categoryScrollContent}>
-            {CATEGORIES.map((cat) => {
-              const colorInfo = CATEGORY_TAG_COLORS[cat] || CATEGORY_TAG_COLORS.Others;
-              const inactiveBg = settings.darkMode ? colorInfo.bgDark : colorInfo.bgLight;
-              const inactiveBorder = settings.darkMode ? colorInfo.borderDark : colorInfo.borderLight;
-              const inactiveColor = settings.darkMode ? colorInfo.textDark : colorInfo.textLight;
-
-              return (
-                <FilterChip
-                  key={cat}
-                  label={cat === 'All' ? t('allCategories') : cat}
-                  isActive={selectedCategory === cat}
-                  onPress={() => setSelectedCategory(cat)}
-                  activeBg={theme.primary}
-                  inactiveBg={inactiveBg}
-                  inactiveBorder={inactiveBorder}
-                  inactiveColor={inactiveColor}
-                />
-              );
-            })}
+            {CATEGORIES.map((cat) => (
+              <FilterChip
+                key={cat}
+                label={cat === 'All' ? t('allCategories') : cat}
+                isActive={selectedCategory === cat}
+                onPress={() => setSelectedCategory(cat)}
+              />
+            ))}
           </ScrollView>
 
           {/* Products List / Grid or Empty State */}
@@ -1386,7 +1338,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   );
                 }
 
-                // ================= Clean Card Grid =================
+                // ================= Compact Card Grid =================
                 return (
                   <Pressable
                     key={product.id}
@@ -1398,12 +1350,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         width: gridColWidth,
                         backgroundColor: theme.card,
                         borderColor: inCartItem ? theme.primary : theme.border,
-                        borderWidth: inCartItem ? 2 : 1,
+                        borderWidth: inCartItem ? 1.5 : 1,
                         opacity: isOut ? 0.6 : 1,
                       },
                       pressed && !isOut && !inCartItem && { transform: [{ scale: 0.98 }] },
                     ]}>
-                    {/* Stock pill */}
                     <View
                       style={[
                         styles.stockTag,
@@ -1426,7 +1377,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                                 : theme.success,
                           },
                         ]}>
-                        {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
+                        {isOut ? t('soldOut') : `${product.stock}`}
                       </Text>
                     </View>
 
@@ -1437,17 +1388,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                           style={styles.gridThumb}
                           resizeMode="cover"
                           fallbackColor={theme.textMuted}
-                          fallbackSize={24}
+                          fallbackSize={20}
                         />
                       </View>
-                      <View style={styles.gridTextContainer}>
-                        <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>
-                          {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
-                        </Text>
-                        <Text style={[styles.gridCategory, { color: theme.textMuted }]} numberOfLines={1}>
-                          {product.category}
-                        </Text>
-                      </View>
+                      <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>
+                        {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                      </Text>
                     </View>
 
                     <View style={styles.gridCardBottom}>
@@ -1456,10 +1402,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         numberOfLines={1}
                         adjustsFontSizeToFit
                         minimumFontScale={0.75}>
-                        {settings.currencySymbol}{formatCompactPrice(product.price)}
+                        {settings.currencySymbol}
+                        {formatCompactPrice(product.price)}
                       </Text>
 
-                      {/* Stepper on card if in cart (attached flush at bottom right corner like design spec) */}
                       {inCartItem ? (
                         <View
                           style={[
@@ -1480,7 +1426,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                               pressed && { opacity: 0.6 },
                             ]}
                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 2 }}>
-                            <Ionicons name="remove" size={18} color={theme.text} />
+                            <Ionicons name="remove" size={16} color={theme.text} />
                           </Pressable>
                           <View
                             style={[
@@ -1506,7 +1452,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                               pressed && { opacity: 0.6 },
                             ]}
                             hitSlop={{ top: 6, bottom: 6, left: 2, right: 6 }}>
-                            <Ionicons name="add" size={18} color={theme.text} />
+                            <Ionicons name="add" size={16} color={theme.text} />
                           </Pressable>
                         </View>
                       ) : (
@@ -1522,17 +1468,9 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                           ]}>
                           <Ionicons
                             name="add"
-                            size={13}
+                            size={14}
                             color={isOut ? theme.textMuted : theme.primary}
                           />
-                          <Text
-                            style={[
-                              styles.cardAddBtnText,
-                              { color: isOut ? theme.textMuted : theme.primaryDark },
-                            ]}
-                            numberOfLines={1}>
-                            {t('addToBillShort')}
-                          </Text>
                         </Pressable>
                       )}
                     </View>
@@ -1658,26 +1596,24 @@ const styles = StyleSheet.create({
   topControlBar: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginBottom: Spacing.sm,
+    marginBottom: 8,
     alignItems: 'center',
   },
-  // Updated: search now uses SearchBar component (no inline styles needed)
   searchFlex: {
     flex: 1,
   },
   searchInlineRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   searchBarcodeBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1.5,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.sm,
   },
   topBarActions: {
     flexDirection: 'row',
@@ -1688,9 +1624,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    height: 46,
+    height: 40,
     paddingHorizontal: 12,
-    borderRadius: BorderRadius.xl,
+    borderRadius: 12,
     borderWidth: 1,
     ...Shadows.sm,
   },
@@ -1700,69 +1636,64 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   iconSquareBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1.5,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.sm,
   },
   categoryScroll: {
-    maxHeight: 40,
-    marginBottom: Spacing.sm,
+    maxHeight: 36,
+    marginBottom: 8,
   },
   categoryScrollContent: {
     gap: 6,
     alignItems: 'center',
   },
 
-  // W2-3: Favorites / Quick-Add row
-  favRowWrap: {
-    marginBottom: 6,
-  },
-  favRowHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 4,
-  },
-  favRowTitle: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  favRowScroll: {
+    maxHeight: 34,
+    marginBottom: 8,
   },
   favRowContent: {
     gap: 6,
+    alignItems: 'center',
     paddingRight: 4,
+  },
+  favLead: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   favChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
     borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
+    borderWidth: 1,
     position: 'relative',
   },
   favChipName: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
-    maxWidth: 90,
+    maxWidth: 78,
   },
   favChipPrice: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
   },
   favChipBadge: {
-    width: 16,
+    minWidth: 16,
     height: 16,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 2,
+    paddingHorizontal: 3,
   },
   favChipBadgeText: {
     color: '#FFFFFF',
@@ -1784,25 +1715,24 @@ const styles = StyleSheet.create({
   catalogGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
+    gap: 6,
     paddingBottom: Spacing.xl,
   },
   gridCard: {
-    // width is set dynamically inline (W3-3 responsive grid)
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.md,
+    borderRadius: 12,
+    padding: 10,
     justifyContent: 'space-between',
-    minHeight: 125,
+    minHeight: 98,
     position: 'relative',
     overflow: 'hidden',
-    ...Shadows.md,
+    ...Shadows.sm,
   },
   stockTag: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    top: 6,
+    right: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
     borderRadius: BorderRadius.full,
     zIndex: 1,
   },
@@ -1812,52 +1742,52 @@ const styles = StyleSheet.create({
   },
   gridCardTop: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 7,
     alignItems: 'center',
-    marginTop: 4,
+    paddingRight: 28,
   },
   gridThumb: {
-    width: 42,
-    height: 42,
-    borderRadius: BorderRadius.md,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
   },
   gridThumbFallback: {
-    width: 42,
-    height: 42,
-    borderRadius: BorderRadius.md,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   gridTextContainer: {
     flex: 1,
-    paddingRight: 40,
   },
   gridName: {
-    fontSize: 13,
+    flex: 1,
+    fontSize: 12.5,
     fontWeight: '700',
-    lineHeight: 17,
+    lineHeight: 16,
   },
   gridCategory: {
-    fontSize: 11,
-    marginTop: 2,
+    fontSize: 10,
+    marginTop: 1,
   },
   gridCardBottom: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: Spacing.sm,
+    marginTop: 8,
   },
   gridPrice: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   cardAddBtn: {
-    flexDirection: 'row',
+    width: 28,
+    height: 28,
     alignItems: 'center',
-    gap: 2,
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    justifyContent: 'center',
     borderRadius: BorderRadius.full,
     borderWidth: 1,
   },
@@ -1870,23 +1800,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderRadius: 0,
-    borderTopLeftRadius: 14,
+    borderTopLeftRadius: 12,
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 0,
-    borderBottomRightRadius: BorderRadius.lg,
+    borderBottomRightRadius: 12,
     overflow: 'hidden',
-    height: 38,
-    marginRight: -Spacing.md,
-    marginBottom: -Spacing.md,
+    height: 32,
+    marginRight: -10,
+    marginBottom: -10,
   },
   cardStepBtnMinus: {
-    width: 34,
+    width: 28,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardStepQtyBox: {
-    width: 36,
+    width: 28,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1894,11 +1824,11 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
   },
   cardStepQtyText: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '800',
   },
   cardStepBtnPlus: {
-    width: 34,
+    width: 28,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1906,26 +1836,26 @@ const styles = StyleSheet.create({
 
   // List View Styles
   catalogList: {
-    gap: 8,
+    gap: 6,
     paddingBottom: Spacing.xl,
   },
   listRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    minHeight: 72,
-    gap: 10,
-    borderRadius: BorderRadius.xl,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    minHeight: 64,
+    gap: 8,
+    borderRadius: 12,
     borderWidth: 1,
     overflow: 'hidden',
     position: 'relative',
   },
   listThumbWrap: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
+    width: 42,
+    height: 42,
+    borderRadius: 10,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1935,19 +1865,19 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   listThumbFallback: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
+    width: 42,
+    height: 42,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   listRowContent: {
     flex: 1,
-    gap: 5,
+    gap: 4,
     justifyContent: 'center',
   },
   listRowName: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
@@ -1958,9 +1888,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   listCategoryBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 5,
   },
   listCategoryText: {
     fontSize: 10,
@@ -1970,8 +1900,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 7,
-    paddingVertical: 2.5,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: BorderRadius.full,
   },
   listStockText: {
@@ -1989,8 +1919,8 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   listRowPrice: {
-    fontSize: 15,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '800',
     letterSpacing: -0.3,
   },
   listStepperContainer: {
@@ -1998,17 +1928,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderRadius: 0,
-    borderTopLeftRadius: 14,
+    borderTopLeftRadius: 12,
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 0,
-    borderBottomRightRadius: BorderRadius.lg,
+    borderBottomRightRadius: 12,
     overflow: 'hidden',
-    height: 36,
-    marginRight: -12,
-    marginBottom: -12,
+    height: 32,
+    marginRight: -10,
+    marginBottom: -10,
   },
   listStepBtnMinus: {
-    width: 32,
+    width: 28,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',

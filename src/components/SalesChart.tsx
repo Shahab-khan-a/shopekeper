@@ -214,7 +214,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ sales }) => {
           {analytics.bars.map((bar) => {
             const isSelected = selectedBar?.id === bar.id;
             const heightPercent = maxRevenue > 0 ? (bar.revenue / maxRevenue) * 100 : 0;
-            const barHeight = Math.max(8, (heightPercent / 100) * 120);
+            const barHeight = Math.max(6, (heightPercent / 100) * 96);
 
             // Styling colors
             const barColor = isSelected
@@ -295,9 +295,9 @@ export const SalesChart: React.FC<SalesChartProps> = ({ sales }) => {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: BorderRadius.xl,
+    borderRadius: 12,
     borderWidth: 1,
-    padding: Spacing.md,
+    padding: 12,
     marginBottom: Spacing.md,
     ...Shadows.sm,
   },
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexWrap: 'wrap',
     gap: Spacing.sm,
-    marginBottom: Spacing.sm,
+    marginBottom: 6,
   },
   titleWrap: {
     flexDirection: 'row',
@@ -315,48 +315,48 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
   },
   cardSubtitle: {
-    fontSize: 11,
+    fontSize: 10.5,
     marginTop: 1,
   },
   filterGroup: {
     flexDirection: 'row',
     borderRadius: BorderRadius.full,
     borderWidth: 1,
-    padding: 3,
+    padding: 2,
     gap: 2,
   },
   filterBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: BorderRadius.full,
   },
   filterBtnActive: {
     ...Shadows.sm,
   },
   filterBtnText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
   },
   snapshotRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.sm,
+    marginTop: 2,
+    marginBottom: 6,
   },
   snapshotLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.3,
@@ -364,13 +364,13 @@ const styles = StyleSheet.create({
   amountWithTrend: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 2,
+    gap: 6,
+    marginTop: 1,
   },
   snapshotAmount: {
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: -0.5,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.4,
   },
   trendBadge: {
     flexDirection: 'row',
@@ -437,17 +437,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   chartArea: {
-    height: 185,
+    height: 148,
     position: 'relative',
     justifyContent: 'flex-end',
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 4,
   },
   gridLinesContainer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'space-between',
-    paddingTop: 24,
-    paddingBottom: 28,
+    paddingTop: 16,
+    paddingBottom: 22,
   },
   gridLine: {
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    height: 140,
+    height: 112,
     zIndex: 2,
   },
   columnWrap: {
@@ -468,25 +468,25 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   barTopLabelWrap: {
-    height: 16,
+    height: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   barTopText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '800',
   },
   trackContainer: {
     width: '100%',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    height: 120,
+    height: 96,
   },
   barFillCapsule: {
     width: '58%',
-    maxWidth: 24,
-    minWidth: 14,
+    maxWidth: 22,
+    minWidth: 12,
   },
   barSelectedGlow: {
     ...Platform.select({
@@ -503,9 +503,9 @@ const styles = StyleSheet.create({
     }),
   },
   xAxisLabel: {
-    fontSize: 10,
-    marginTop: 8,
-    marginBottom: 4,
+    fontSize: 9.5,
+    marginTop: 4,
+    marginBottom: 2,
     textAlign: 'center',
   },
   currentDot: {

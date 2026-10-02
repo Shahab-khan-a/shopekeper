@@ -2,7 +2,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Linking, Platform } from 'react-native';
 
 export const LEGAL_CONFIG = {
-  appName: 'Shopkeeper POS (دکاندار ایپ)',
+  appName: 'DigiShop',
   packageName: 'com.techflowstudio.shopkeeper',
   developerContact: 'techflow0500@gmail.com',
   privacyPolicyUrl: 'https://shopkeeper-a977a.web.app/privacy-policy.html',

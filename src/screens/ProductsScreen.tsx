@@ -3,7 +3,6 @@ import { ProductDetailsDrawer } from '@/components/ProductDetailsDrawer';
 import { ProductImage } from '@/components/ProductImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FilterChip } from '@/components/ui/FilterChip';
-import { IconButton } from '@/components/ui/IconButton';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
@@ -13,7 +12,6 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -46,7 +44,6 @@ export const ProductsScreen: React.FC = () => {
     totalInventoryInvestment,
     totalInventoryRetailValue,
     totalExpectedStockProfit,
-    totalInventoryUnits,
     t,
     language,
     lowStockProducts,
@@ -72,12 +69,9 @@ export const ProductsScreen: React.FC = () => {
       .catch(() => {});
   }, []);
 
-  const toggleViewMode = () => {
-    setViewMode((prev) => {
-      const next = prev === 'grid' ? 'list' : 'grid';
-      AsyncStorage.setItem(PRODUCTS_VIEW_MODE_KEY, next).catch(() => {});
-      return next;
-    });
+  const setViewModePersist = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    AsyncStorage.setItem(PRODUCTS_VIEW_MODE_KEY, mode).catch(() => {});
   };
 
   const activeProduct = useMemo(() => {
@@ -103,23 +97,35 @@ export const ProductsScreen: React.FC = () => {
 
   const alertCount = lowStockProducts.length + outOfStockProducts.length;
 
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: products.length };
+    products.forEach((p) => {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    });
+    return counts;
+  }, [products]);
+
+  const profitPct =
+    totalInventoryInvestment > 0
+      ? ((totalExpectedStockProfit / totalInventoryInvestment) * 100).toFixed(1)
+      : '0.0';
+
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.4)';
+  const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.contentWrap}>
-        {/* ── Search & Actions Header Row ── */}
+        {/* Search + Add Product */}
         <View style={styles.topHeader}>
           <View style={styles.searchFlex}>
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder={t('searchProductPlaceholder')}
+              height={40}
             />
           </View>
-
-          <IconButton
-            icon={viewMode === 'grid' ? 'list-outline' : 'grid-outline'}
-            onPress={toggleViewMode}
-          />
 
           <Pressable
             onPress={() => {
@@ -131,12 +137,85 @@ export const ProductsScreen: React.FC = () => {
               { backgroundColor: theme.primary },
               pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
             ]}>
-            <Ionicons name="add" size={20} color="#FFFFFF" />
+            <Ionicons name="add" size={18} color="#FFFFFF" />
             <Text style={styles.addProdText}>{t('addProductBtn')}</Text>
           </Pressable>
         </View>
 
-        {/* ── Category Filter Pills ── */}
+        {/* Segmented Metric Overview Card */}
+        <View
+          style={[
+            styles.financeSummaryBar,
+            {
+              backgroundColor: cardBg,
+              borderColor: softBorder,
+            },
+          ]}>
+          <View style={styles.financeSummaryItem}>
+            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]} numberOfLines={1}>
+              {t('metricInvestment')}
+            </Text>
+            <Text
+              style={[styles.financeSummaryVal, { color: theme.text }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}>
+              {settings.currencySymbol}
+              {formatCompactPrice(totalInventoryInvestment)}
+            </Text>
+            <Text style={[styles.financeSubLabel, { color: theme.textMuted }]}>
+              {t('metricCostValue')}
+            </Text>
+          </View>
+
+          <View style={[styles.financeSummaryDivider, { backgroundColor: softBorder }]} />
+
+          <View style={styles.financeSummaryItem}>
+            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]} numberOfLines={1}>
+              {t('metricRetailValue')}
+            </Text>
+            <Text
+              style={[styles.financeSummaryVal, { color: theme.text }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}>
+              {settings.currencySymbol}
+              {formatCompactPrice(totalInventoryRetailValue)}
+            </Text>
+            <Text style={[styles.financeSubLabel, { color: theme.textMuted }]}>
+              {t('metricSellingEst')}
+            </Text>
+          </View>
+
+          <View style={[styles.financeSummaryDivider, { backgroundColor: softBorder }]} />
+
+          <View style={styles.financeSummaryItem}>
+            <Text style={[styles.financeSummaryLabel, { color: theme.primary }]} numberOfLines={1}>
+              {t('metricEstProfit')}
+            </Text>
+            <Text
+              style={[styles.financeSummaryVal, { color: theme.primary }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}>
+              +{settings.currencySymbol}
+              {formatCompactPrice(totalExpectedStockProfit)}
+            </Text>
+            <View
+              style={[
+                styles.profitPctPill,
+                {
+                  backgroundColor: settings.darkMode
+                    ? 'rgba(16,185,129,0.2)'
+                    : 'rgba(167,243,208,0.5)',
+                },
+              ]}>
+              <Text style={[styles.profitPctText, { color: theme.primary }]}>+{profitPct}%</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Category Filter Chips */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -144,96 +223,95 @@ export const ProductsScreen: React.FC = () => {
           contentContainerStyle={styles.filterScrollContent}>
           {CATEGORIES.map((cat) => {
             const isLowStockTab = cat === 'LowStock';
+            const isAll = cat === 'All';
             return (
               <FilterChip
                 key={cat}
                 label={
-                  cat === 'All'
+                  isAll
                     ? t('allCategories')
-                    : cat === 'LowStock'
+                    : isLowStockTab
                       ? `${t('lowStockAlert')} (${alertCount})`
                       : cat
                 }
                 isActive={selectedFilter === cat}
                 onPress={() => setSelectedFilter(cat)}
                 icon={isLowStockTab ? 'warning' : undefined}
+                variant={isLowStockTab ? 'alert' : 'default'}
+                count={isAll ? categoryCounts.All : undefined}
                 activeBg={isLowStockTab ? theme.danger : undefined}
               />
             );
           })}
         </ScrollView>
 
-        {/* ── Financial Investment Summary Bar ── */}
-        <View
-          style={[
-            styles.financeSummaryBar,
-            {
-              backgroundColor: settings.darkMode ? '#161F30' : '#FFFFFF',
-              borderColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-            },
-          ]}>
-          {/* Stat 1: Total Investment */}
-          <View style={styles.financeSummaryItem}>
-            <View style={styles.statLabelRow}>
-              <Text style={[styles.financeSummaryLabel, { color: theme.textSecondary }]} numberOfLines={2}>
-                {t('totalInvestment')}
-              </Text>
-            </View>
-            <Text
-              style={[styles.financeSummaryVal, { color: theme.text }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}>
-              {settings.currencySymbol}{totalInventoryInvestment.toLocaleString()}
+        {/* Showing count + view switcher */}
+        <View style={styles.gridHeader}>
+          <Text style={[styles.showingText, { color: theme.textMuted }]}>
+            {t('showingItems')}{' '}
+            <Text style={{ color: theme.text, fontWeight: '700' }}>
+              {filteredProducts.length} {t('itemsLabel')}
             </Text>
-          </View>
+          </Text>
 
-          <View style={[styles.financeSummaryDivider, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]} />
-
-          {/* Stat 2: Retail Value */}
-          <View style={styles.financeSummaryItem}>
-            <View style={styles.statLabelRow}>
-              <Text style={[styles.financeSummaryLabel, { color: theme.textSecondary }]} numberOfLines={2}>
-                {t('stockRetailValue')}
-              </Text>
-            </View>
-            <Text
-              style={[styles.financeSummaryVal, { color: theme.text }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}>
-              {settings.currencySymbol}{totalInventoryRetailValue.toLocaleString()}
-            </Text>
-          </View>
-
-          <View style={[styles.financeSummaryDivider, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]} />
-
-          {/* Stat 3: Expected Profit */}
-          <View style={styles.financeSummaryItem}>
-            <View style={styles.statLabelRow}>
-              <Text style={[styles.financeSummaryLabel, { color: '#059669' }]} numberOfLines={2}>
-                {t('expectedStockProfit')}
-              </Text>
-            </View>
-            <Text
-              style={[styles.financeSummaryVal, { color: '#059669' }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}>
-              +{settings.currencySymbol}{totalExpectedStockProfit.toLocaleString()}
-            </Text>
+          <View
+            style={[
+              styles.viewToggle,
+              {
+                backgroundColor: cardBg,
+                borderColor: softBorder,
+              },
+            ]}>
+            <Pressable
+              onPress={() => setViewModePersist('grid')}
+              style={[
+                styles.viewToggleBtn,
+                viewMode === 'grid' && {
+                  backgroundColor: settings.darkMode
+                    ? 'rgba(16,185,129,0.22)'
+                    : 'rgba(167,243,208,0.55)',
+                },
+              ]}
+              accessibilityLabel="Grid view">
+              <Ionicons
+                name="grid-outline"
+                size={14}
+                color={viewMode === 'grid' ? theme.primary : theme.textMuted}
+              />
+            </Pressable>
+            <Pressable
+              onPress={() => setViewModePersist('list')}
+              style={[
+                styles.viewToggleBtn,
+                viewMode === 'list' && {
+                  backgroundColor: settings.darkMode
+                    ? 'rgba(16,185,129,0.22)'
+                    : 'rgba(167,243,208,0.55)',
+                },
+              ]}
+              accessibilityLabel="List view">
+              <Ionicons
+                name="list-outline"
+                size={14}
+                color={viewMode === 'list' ? theme.primary : theme.textMuted}
+              />
+            </Pressable>
           </View>
         </View>
 
-        {/* ── Products Display ── */}
+        {/* Products Display */}
         {filteredProducts.length === 0 ? (
           <EmptyState
             icon="search-outline"
             title={language === 'ur' ? 'کوئی پروڈکٹ نہیں ملا' : 'No products found'}
             subtitle={
               searchQuery
-                ? (language === 'ur' ? 'مختلف نام سے تلاش کریں۔' : 'Try a different search term.')
-                : (language === 'ur' ? 'کیٹیگری فلٹر تبدیل کریں یا نیا پروڈکٹ شامل کریں۔' : 'Adjust the category filter or add a new product.')
+                ? language === 'ur'
+                  ? 'مختلف نام سے تلاش کریں۔'
+                  : 'Try a different search term.'
+                : language === 'ur'
+                  ? 'کیٹیگری فلٹر تبدیل کریں یا نیا پروڈکٹ شامل کریں۔'
+                  : 'Adjust the category filter or add a new product.'
             }
             actionLabel={t('addProductBtn')}
             onAction={() => {
@@ -242,7 +320,6 @@ export const ProductsScreen: React.FC = () => {
             }}
           />
         ) : viewMode === 'list' ? (
-          /* ── List View ── */
           <ScrollView
             style={styles.productsScroll}
             contentContainerStyle={styles.productsList}
@@ -251,7 +328,10 @@ export const ProductsScreen: React.FC = () => {
               const isOut = product.stock <= 0;
               const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
               const cost = product.costPrice || Math.round(product.price * 0.8);
-              const margin = product.price > 0 ? Math.round(((product.price - cost) / product.price) * 100) : 0;
+              const margin =
+                product.price > 0
+                  ? Math.round(((product.price - cost) / product.price) * 100)
+                  : 0;
 
               return (
                 <Pressable
@@ -261,12 +341,15 @@ export const ProductsScreen: React.FC = () => {
                     styles.listRowCard,
                     {
                       backgroundColor: theme.card,
-                      borderColor: isLow ? theme.warning : isOut ? theme.danger : theme.border,
+                      borderColor: isLow
+                        ? theme.warning
+                        : isOut
+                          ? theme.danger
+                          : softBorder,
                       borderWidth: isLow || isOut ? 1.5 : 1,
                     },
                     pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
                   ]}>
-                  {/* Thumbnail Image */}
                   <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
                     <ProductImage
                       uri={product.image || product.imageUri}
@@ -277,28 +360,34 @@ export const ProductsScreen: React.FC = () => {
                     />
                   </View>
 
-                  {/* Middle: Name + meta row */}
                   <View style={styles.listRowContent}>
                     <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
                       {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
                     </Text>
-                    {/* Row 1: category + stock */}
                     <View style={styles.listRowBadgeRow}>
-                      <View style={[styles.listCategoryBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
+                      <View
+                        style={[
+                          styles.listCategoryBadge,
+                          {
+                            backgroundColor: settings.darkMode
+                              ? 'rgba(255,255,255,0.08)'
+                              : '#F1F5F9',
+                          },
+                        ]}>
                         <Text style={[styles.listCategoryText, { color: theme.textSecondary }]}>
                           {product.category}
                         </Text>
                       </View>
                     </View>
-                    {/* Row 2: barcode on its own line */}
                     {product.barcode ? (
-                      <Text style={[styles.listBarcodeText, { color: theme.textMuted }]} numberOfLines={1}>
+                      <Text
+                        style={[styles.listBarcodeText, { color: theme.textMuted }]}
+                        numberOfLines={1}>
                         # {product.barcode}
                       </Text>
                     ) : null}
                   </View>
 
-                  {/* Stock Badge */}
                   <View
                     style={[
                       styles.listStockBadge,
@@ -307,50 +396,79 @@ export const ProductsScreen: React.FC = () => {
                           ? theme.dangerLight
                           : isLow
                             ? theme.warningLight
-                            : theme.successLight,
+                            : settings.darkMode
+                              ? 'rgba(16,185,129,0.22)'
+                              : '#A7F3D0',
                       },
                     ]}>
                     <Ionicons
                       name={isOut ? 'alert-circle' : isLow ? 'warning' : 'cube-outline'}
                       size={12}
-                      color={isOut ? theme.danger : isLow ? theme.warning : theme.success}
+                      color={
+                        isOut
+                          ? theme.danger
+                          : isLow
+                            ? theme.warning
+                            : settings.darkMode
+                              ? theme.success
+                              : '#047857'
+                      }
                     />
                     <Text
                       style={[
                         styles.listStockText,
-                        { color: isOut ? theme.danger : isLow ? theme.warning : theme.success },
+                        {
+                          color: isOut
+                            ? theme.danger
+                            : isLow
+                              ? theme.warning
+                              : settings.darkMode
+                                ? theme.success
+                                : '#047857',
+                        },
                       ]}>
                       {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
                     </Text>
                   </View>
 
-                  {/* Pricing & Profit */}
                   <View style={styles.listRowRight}>
                     <Text
                       style={[styles.listRowPrice, { color: theme.primary }]}
                       numberOfLines={1}
                       adjustsFontSizeToFit
                       minimumFontScale={0.75}>
-                      {settings.currencySymbol}{formatCompactPrice(product.price)}
+                      {settings.currencySymbol}
+                      {formatCompactPrice(product.price)}
                     </Text>
                     {margin > 0 ? (
-                      <View style={[styles.listMarginChip, { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.15)' : '#ECFDF5' }]}>
-                        <Text style={[styles.listMarginText, { color: '#059669' }]}>+{margin}%</Text>
+                      <View
+                        style={[
+                          styles.listMarginChip,
+                          {
+                            backgroundColor: settings.darkMode
+                              ? 'rgba(16,185,129,0.15)'
+                              : 'rgba(167,243,208,0.45)',
+                          },
+                        ]}>
+                        <Text style={[styles.listMarginText, { color: theme.primary }]}>
+                          +{margin}%
+                        </Text>
                       </View>
                     ) : null}
                   </View>
 
-                  {/* Delete Action */}
                   <Pressable
                     onPress={(e) => {
                       e.stopPropagation?.();
-                      const productName = language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name;
+                      const productName =
+                        language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name;
                       showAlert({
                         type: 'danger',
                         title: language === 'ur' ? 'پروڈکٹ حذف کریں' : 'Delete Product',
-                        message: language === 'ur'
-                          ? `کیا آپ "${productName}" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔`
-                          : `Delete "${productName}"? This cannot be undone.`,
+                        message:
+                          language === 'ur'
+                            ? `کیا آپ "${productName}" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔`
+                            : `Delete "${productName}"? This cannot be undone.`,
                         buttons: [
                           {
                             text: language === 'ur' ? 'حذف کریں' : 'Delete',
@@ -374,7 +492,6 @@ export const ProductsScreen: React.FC = () => {
             })}
           </ScrollView>
         ) : (
-          /* ── Grid View ── */
           <ScrollView
             style={styles.productsScroll}
             contentContainerStyle={styles.productsGrid}
@@ -396,7 +513,6 @@ export const ProductsScreen: React.FC = () => {
         )}
       </View>
 
-      {/* ── Animated Product Details Sidebar ── */}
       <ProductDetailsDrawer
         visible={!!selectedProductDetails}
         product={activeProduct}
@@ -419,63 +535,139 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   contentWrap: {
     flex: 1,
-    padding: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
     maxWidth: 820,
     marginHorizontal: 'auto',
     width: '100%',
   },
 
-
-  // Header
   topHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   searchFlex: { flex: 1 },
   addProdBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    height: 46,
-    paddingHorizontal: 15,
-    borderRadius: 14,
-    ...Shadows.md,
+    gap: 4,
+    height: 40,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    ...Shadows.sm,
   },
-  addProdText: { color: '#FFFFFF', fontWeight: '800', fontSize: 13 },
+  addProdText: { color: '#FFFFFF', fontWeight: '700', fontSize: 12.5 },
 
-  // Filters
-  filterScroll: { maxHeight: 44, marginBottom: Spacing.sm },
-  filterScrollContent: { gap: 6, alignItems: 'center' },
+  financeSummaryBar: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+    ...Shadows.sm,
+  },
+  financeSummaryItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    gap: 2,
+  },
+  financeSummaryLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  financeSummaryVal: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    textAlign: 'center',
+    alignSelf: 'stretch',
+    letterSpacing: -0.2,
+    marginTop: 2,
+  },
+  financeSubLabel: {
+    fontSize: 9,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginTop: 1,
+  },
+  financeSummaryDivider: {
+    width: 1,
+    marginVertical: 4,
+  },
+  profitPctPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: BorderRadius.full,
+    marginTop: 2,
+  },
+  profitPctText: {
+    fontSize: 9,
+    fontWeight: '800',
+  },
 
-  // Products Grid
+  filterScroll: { maxHeight: 40, marginBottom: Spacing.sm },
+  filterScrollContent: { gap: 8, alignItems: 'center', paddingRight: 4 },
+
+  gridHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+    paddingTop: 2,
+  },
+  showingText: {
+    fontSize: 12.5,
+    fontWeight: '500',
+  },
+  viewToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 2,
+    gap: 2,
+  },
+  viewToggleBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   productsScroll: { flex: 1 },
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
+    gap: Spacing.md,
     paddingBottom: 100,
   },
   cardContainer: {
     width: Platform.select({ web: 'calc(50% - 6px)' as any, default: '48%' }),
   },
 
-  // List View
   productsList: { gap: 8, paddingBottom: 100 },
   listRowCard: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 14,
-    minHeight: 74,
-    borderRadius: 18,
-    gap: 12,
+    paddingHorizontal: 12,
+    minHeight: 72,
+    borderRadius: 12,
+    gap: 10,
   },
   listThumbWrap: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
+    width: 48,
+    height: 48,
+    borderRadius: 10,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -486,11 +678,11 @@ const styles = StyleSheet.create({
   },
   listRowContent: {
     flex: 1,
-    gap: 4,
+    gap: 3,
     justifyContent: 'center',
   },
   listRowName: {
-    fontSize: 14.5,
+    fontSize: 14,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
@@ -516,7 +708,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 9,
+    paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: BorderRadius.full,
   },
@@ -530,70 +722,24 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   listRowPrice: {
-    fontSize: 15.5,
-    fontWeight: '900',
+    fontSize: 15,
+    fontWeight: '800',
     letterSpacing: -0.3,
   },
   listMarginChip: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: BorderRadius.full,
+    borderRadius: 4,
   },
   listMarginText: {
     fontSize: 9.5,
     fontWeight: '800',
   },
   smallActionBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // Finance Summary Bar
-  financeSummaryBar: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: Spacing.md,
-    ...Shadows.sm,
-  },
-  financeSummaryItem: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
-    gap: 4,
-  },
-  statLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-  },
-  financeSummaryLabel: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    flexShrink: 1,
-  },
-  financeSummaryVal: {
-    fontSize: 14.5,
-    fontWeight: '800',
-    textAlign: 'center',
-    alignSelf: 'stretch',
-  },
-  financeSummaryDivider: {
-    width: 1,
-    marginVertical: 4,
   },
 });

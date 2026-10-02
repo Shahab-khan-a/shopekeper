@@ -114,8 +114,8 @@ export default function App() {
               resizeMode="contain"
             />
           </View>
-          <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
-          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
+          <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
+          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>ڈیجی شاپ</Text>
           <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
           <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
             Loading your store...
@@ -140,8 +140,8 @@ export default function App() {
                 resizeMode="contain"
               />
             </View>
-            <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
-            <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
+            <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
+            <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>ڈیجی شاپ</Text>
             <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
             <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
               Checking your account...
@@ -176,8 +176,8 @@ export default function App() {
               resizeMode="contain"
             />
           </View>
-          <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
-          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
+          <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
+          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>ڈیجی شاپ</Text>
           <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
           <Text style={[styles.loadingSub, { color: theme.textMuted, marginTop: 12 }]}>
             Setting up your store...

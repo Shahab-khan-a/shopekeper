@@ -536,7 +536,7 @@ class GoogleDriveService {
         discount: sale.discount || 0,
         grandTotal: sale.grandTotal ?? sale.total,
         paymentMethod: sale.paymentMethod || 'cash',
-        shopName: shopSettings?.shopName || 'Shopkeeper POS',
+        shopName: shopSettings?.shopName || 'DigiShop',
         shopPhone: shopSettings?.phone || '',
         shopAddress: shopSettings?.address || '',
         syncedAt: new Date().toISOString(),

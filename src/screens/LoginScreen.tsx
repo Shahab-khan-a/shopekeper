@@ -151,7 +151,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
             </View>
 
             <Text style={[styles.appTitle, { color: theme.text }]}>
-              {isUrdu ? 'دکاندار ایپ' : 'Shopkeeper POS'}
+              {isUrdu ? 'ڈیجی شاپ' : 'DigiShop'}
             </Text>
 
             <Text style={[styles.appSubtitle, { color: theme.textMuted }]}>

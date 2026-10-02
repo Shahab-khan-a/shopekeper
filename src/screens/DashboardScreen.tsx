@@ -146,7 +146,7 @@ export const DashboardScreen: React.FC = () => {
           <View style={[styles.metricAccentBar, { backgroundColor: theme.primary }]} />
           <View style={styles.metricBody}>
             <View style={[styles.metricIconWrap, { backgroundColor: theme.primaryLight }]}>
-              <Ionicons name="cash-outline" size={20} color={theme.primary} />
+              <Ionicons name="cash-outline" size={16} color={theme.primary} />
             </View>
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('todaySales')}</Text>
             <Text style={[styles.metricValue, { color: theme.text }]}>
@@ -160,7 +160,7 @@ export const DashboardScreen: React.FC = () => {
           <View style={[styles.metricAccentBar, { backgroundColor: theme.secondary }]} />
           <View style={styles.metricBody}>
             <View style={[styles.metricIconWrap, { backgroundColor: theme.surfaceSubtle }]}>
-              <Ionicons name="receipt-outline" size={20} color={theme.secondary} />
+              <Ionicons name="receipt-outline" size={16} color={theme.secondary} />
             </View>
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('todayOrders')}</Text>
             <Text style={[styles.metricValue, { color: theme.text }]}>{todayOrdersCount}</Text>
@@ -178,7 +178,7 @@ export const DashboardScreen: React.FC = () => {
           <View style={[styles.metricAccentBar, { backgroundColor: theme.danger }]} />
           <View style={styles.metricBody}>
             <View style={[styles.metricIconWrap, { backgroundColor: theme.dangerLight }]}>
-              <Ionicons name="book-outline" size={20} color={theme.danger} />
+              <Ionicons name="book-outline" size={16} color={theme.danger} />
             </View>
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('totalReceivable')}</Text>
             <Text style={[styles.metricValue, { color: theme.danger }]}>
@@ -198,7 +198,7 @@ export const DashboardScreen: React.FC = () => {
           <View style={[styles.metricAccentBar, { backgroundColor: theme.warning }]} />
           <View style={styles.metricBody}>
             <View style={[styles.metricIconWrap, { backgroundColor: theme.warningLight }]}>
-              <Ionicons name="cube-outline" size={20} color={theme.warning} />
+              <Ionicons name="cube-outline" size={16} color={theme.warning} />
             </View>
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('totalInventory')}</Text>
             <Text style={[styles.metricValue, { color: theme.text }]}>{products.length}</Text>
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
   },
   container: { flex: 1 },
   content: {
-    padding: Spacing.lg,
+    padding: Spacing.md,
     paddingBottom: 110,
     maxWidth: 720,
     marginHorizontal: 'auto',
@@ -546,36 +546,37 @@ const styles = StyleSheet.create({
 
   // Hero Banner
   heroBanner: {
-    borderRadius: BorderRadius.xxl,
-    padding: Spacing.xl,
-    marginBottom: Spacing.lg,
+    borderRadius: 16,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 12,
+    marginBottom: Spacing.md,
     overflow: 'hidden',
-    ...Shadows.lg,
+    ...Shadows.md,
   },
   heroGlowLayer: {
     position: 'absolute',
     top: -30,
     right: -30,
-    width: 160,
-    height: 160,
+    width: 120,
+    height: 120,
     borderRadius: BorderRadius.full,
     opacity: 0.3,
   },
   heroContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 0,
   },
-  heroLeft: { flex: 1, gap: 3 },
-  heroGreet: { color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: '500' },
-  heroOwner: { color: '#FFFFFF', fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
-  heroShop: { color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '600' },
+  heroLeft: { flex: 1, gap: 1 },
+  heroGreet: { color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '500' },
+  heroOwner: { color: '#FFFFFF', fontSize: 17, fontWeight: '800', letterSpacing: -0.4 },
+  heroShop: { color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: '600' },
   heroBusinessType: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: '500', marginTop: 2 },
-  heroRight: { marginLeft: Spacing.md },
+  heroRight: { marginLeft: Spacing.sm },
   heroIconCircle: {
-    width: 64,
-    height: 64,
+    width: 44,
+    height: 44,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -584,8 +585,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.25)',
   },
   heroAvatarImg: {
-    width: 64,
-    height: 64,
+    width: 44,
+    height: 44,
     borderRadius: BorderRadius.full,
   },
   heroCTA: {
@@ -606,29 +607,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: Spacing.md,
-    columnGap: Spacing.md,
-    marginBottom: Spacing.lg,
+    rowGap: 8,
+    columnGap: 8,
+    marginBottom: Spacing.md,
   },
   metricCard: {
-    width: '48%',
-    borderRadius: BorderRadius.lg,
+    width: '48.5%',
+    borderRadius: 10,
     borderWidth: 1,
     overflow: 'hidden',
     ...Shadows.sm,
   },
-  metricAccentBar: { height: 4, width: '100%' },
-  metricBody: { padding: Spacing.md, gap: 4 },
+  metricAccentBar: { height: 3, width: '100%' },
+  metricBody: { paddingHorizontal: 10, paddingVertical: 8, gap: 2 },
   metricIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: BorderRadius.md,
+    width: 26,
+    height: 26,
+    borderRadius: 7,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  metricLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.4 },
-  metricValue: { fontSize: 20, fontWeight: '800', letterSpacing: -0.5 },
+  metricLabel: { fontSize: 10, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
+  metricValue: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3 },
 
   // Alert Section
   alertSection: {
