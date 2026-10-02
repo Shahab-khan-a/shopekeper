@@ -15,6 +15,8 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image as ExpoImage } from 'expo-image';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Product, ProductCategory, ProductUnit } from '@/types';
 import { useShop } from '@/context/ShopContext';
@@ -88,7 +90,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   onClose,
   productToEdit,
 }) => {
-  const { addProduct, updateProduct, settings, t, language, showAlert } = useShop();
+  const { addProduct, updateProduct, settings, t, language, showAlert, isOnline } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [name, setName] = useState('');
@@ -109,6 +111,33 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
   const [isDriveConnected, setIsDriveConnected] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  // Intelligent preset photo caching:
+  // If first opened without internet, hide presets so no broken/blank images appear.
+  // When online, prefetch & cache them to disk so they remain usable even offline later.
+  const [arePresetsCached, setArePresetsCached] = useState<boolean>(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('@shopkeeper_presets_cached')
+      .then((val) => {
+        if (val === 'true') {
+          setArePresetsCached(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (isOnline) {
+      setArePresetsCached(true);
+      AsyncStorage.setItem('@shopkeeper_presets_cached', 'true').catch(() => {});
+      PRESET_IMAGES.forEach((preset) => {
+        ExpoImage.prefetch(preset.url).catch(() => {});
+      });
+    }
+  }, [isOnline]);
+
+  const shouldShowPresets = isOnline || arePresetsCached;
 
   const softBorder = settings.darkMode ? 'rgba(255, 255, 255, 0.08)' : '#E2E8F0';
   const sectionBg = settings.darkMode ? '#161F30' : '#F8FAFC';
@@ -542,35 +571,43 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </View>
                   )}
 
-                  {/* Quick Preset Photos */}
-                  <View style={{ marginTop: 8 }}>
-                    <Text style={[styles.presetHeader, { color: theme.textMuted }]}>
-                      {language === 'ur' ? 'یا فوری سیمپل تصویر منتخب کریں:' : 'Or tap a preset image:'}
-                    </Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetScroll}>
-                      {PRESET_IMAGES.map((preset, idx) => (
-                        <Pressable
-                          key={idx}
-                          onPress={() => setImage(preset.url)}
-                          style={[
-                            styles.presetChip,
-                            {
-                              backgroundColor: image === preset.url ? theme.primaryLight : inputBg,
-                              borderColor: image === preset.url ? theme.primary : softBorder,
-                            },
-                          ]}>
-                          <Image source={{ uri: preset.url }} style={styles.presetThumbImg} />
-                          <Text
+                  {/* Quick Preset Photos (Only rendered if online or cached from a previous session) */}
+                  {shouldShowPresets && (
+                    <View style={{ marginTop: 8 }}>
+                      <Text style={[styles.presetHeader, { color: theme.textMuted }]}>
+                        {language === 'ur' ? 'یا فوری سیمپل تصویر منتخب کریں:' : 'Or tap a preset image:'}
+                      </Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetScroll}>
+                        {PRESET_IMAGES.map((preset, idx) => (
+                          <Pressable
+                            key={idx}
+                            onPress={() => setImage(preset.url)}
                             style={[
-                              styles.presetChipText,
-                              { color: image === preset.url ? theme.primaryDark : theme.textSecondary },
+                              styles.presetChip,
+                              {
+                                backgroundColor: image === preset.url ? theme.primaryLight : inputBg,
+                                borderColor: image === preset.url ? theme.primary : softBorder,
+                              },
                             ]}>
-                            {preset.label}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </ScrollView>
-                  </View>
+                            <ExpoImage
+                              source={{ uri: preset.url }}
+                              style={styles.presetThumbImg}
+                              contentFit="cover"
+                              cachePolicy="memory-disk"
+                              transition={200}
+                            />
+                            <Text
+                              style={[
+                                styles.presetChipText,
+                                { color: image === preset.url ? theme.primaryDark : theme.textSecondary },
+                              ]}>
+                              {preset.label}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
                 </View>
 
                 {/* ── Section 1: Basic Info ── */}
@@ -1097,7 +1134,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
                   {/* Barcode & Auto SKU */}
                   <View style={styles.inputWrap}>
-                    <Text style={[styles.inputLabel, { color: theme.text }]}>{t('barcodeOrSku')}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <Text style={[styles.inputLabel, { color: theme.text, marginBottom: 0 }]}>{t('barcodeOrSku')}</Text>
+                      <Text style={{ fontSize: 11, color: theme.textMuted, fontWeight: '600' }}>
+                        {language === 'ur' ? 'اندرونی کوڈ' : 'Internal SKU'}
+                      </Text>
+                    </View>
                     <View style={{ flexDirection: 'row', gap: 8 }}>
                       <TextInput
                         style={[
@@ -1109,7 +1151,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                             borderColor: focusedField === 'barcode' ? theme.primary : softBorder,
                           },
                         ]}
-                        placeholder="8964000..."
+                        placeholder={language === 'ur' ? '8964... (اندرونی کوڈ)' : '8964... (Internal SKU)'}
                         placeholderTextColor={theme.textMuted}
                         value={barcode}
                         onChangeText={setBarcode}
@@ -1123,10 +1165,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                           { backgroundColor: theme.primaryLight },
                           pressed && { opacity: 0.8 },
                         ]}>
-                        <Ionicons name="sparkles" size={15} color={theme.primary} />
-                        <Text style={[styles.autoSkuText, { color: theme.primaryDark }]}>Auto SKU</Text>
+                        <Ionicons name="sparkles" size={14} color={theme.primary} />
+                        <Text style={[styles.autoSkuText, { color: theme.primaryDark }]}>
+                          {language === 'ur' ? 'اندرونی SKU' : 'Internal SKU'}
+                        </Text>
                       </Pressable>
                     </View>
+                    <Text style={{ fontSize: 10.5, color: theme.textMuted, marginTop: 4, paddingHorizontal: 2 }}>
+                      {language === 'ur'
+                        ? 'خودکار جنریٹ شدہ اندرونی کوڈ دکان کی اسکیننگ اور بلنگ کے لیے ہے (غیر سرکاری GS1)'
+                        : 'Auto-generated internal store code for counter scanning (internal SKU, not official GS1)'}
+                    </Text>
                   </View>
                 </View>
               </ScrollView>

@@ -341,7 +341,6 @@ export const SettingsScreen: React.FC = () => {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const [showImportBox, setShowImportBox] = useState(false);
-  const [importJsonText, setImportJsonText] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
 
   // Google Drive Backup
@@ -642,25 +641,6 @@ export const SettingsScreen: React.FC = () => {
     }
   };
 
-  const handleImport = async () => {
-    if (!importJsonText.trim()) return;
-    const success = await importDataJSON(importJsonText);
-    if (success) {
-      showAlert({
-        type: 'success',
-        title: t('success'),
-        message: language === 'ur' ? 'ڈیٹا بحال ہو گیا!' : 'Store data restored successfully!',
-      });
-      setImportJsonText('');
-      setShowImportBox(false);
-    } else {
-      showAlert({
-        type: 'error',
-        title: t('error'),
-        message: language === 'ur' ? 'غلط JSON ہے۔' : 'Invalid backup JSON file or structure.',
-      });
-    }
-  };
 
   const handleReset = () => {
     const confirmMsg = t('resetConfirm');
@@ -1700,7 +1680,15 @@ export const SettingsScreen: React.FC = () => {
           {/* Import Box */}
           {showImportBox && (
             <View style={[styles.importBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              {/* Primary: file picker */}
+              <View style={styles.importBoxHeader}>
+                <Ionicons name="document-text-outline" size={20} color={theme.primary} />
+                <Text style={[styles.importBoxDesc, { color: theme.textMuted }]}>
+                  {language === 'ur'
+                    ? 'پہلے سے محفوظ شدہ بیک اپ فائل (.json) منتخب کر کے اپنا ڈیٹا بحال کریں۔'
+                    : 'Select a previously saved backup file (.json) to restore your products, sales, and khata records.'}
+                </Text>
+              </View>
+
               <Pressable
                 onPress={handleImportFromFile}
                 style={({ pressed }) => [
@@ -1714,32 +1702,6 @@ export const SettingsScreen: React.FC = () => {
                   {t('chooseBackupFile')}
                 </Text>
               </Pressable>
-
-              <Text style={[styles.importOrDivider, { color: theme.textMuted }]}>
-                {t('orPasteJson')}
-              </Text>
-
-              <TextInput
-                value={importJsonText}
-                onChangeText={setImportJsonText}
-                placeholder={'{"products": [...], ...}'}
-                placeholderTextColor={theme.textMuted}
-                multiline
-                style={[
-                  styles.importInput,
-                  { color: theme.text, backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                ]}
-              />
-              {importJsonText.trim().length > 0 && (
-                <Pressable
-                  onPress={handleImport}
-                  style={[styles.importApplyBtn, { backgroundColor: theme.primary }]}
-                >
-                  <Text style={styles.importApplyText}>
-                    {t('applyRestore')}
-                  </Text>
-                </Pressable>
-              )}
             </View>
           )}
           {/* About & Legal Section */}
@@ -2063,41 +2025,30 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     ...Shadows.sm,
   },
+  importBoxHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  importBoxDesc: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+  },
   importFileBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 14,
+    paddingVertical: 13,
     borderRadius: BorderRadius.full,
     ...Shadows.sm,
   },
   importFileBtnText: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
-  importOrDivider: {
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  importInput: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    minHeight: 100,
-    fontSize: 13,
-    fontFamily: Platform.OS === 'web' ? 'monospace' : undefined,
-    textAlignVertical: 'top',
-  },
-  importApplyBtn: {
-    paddingVertical: 13,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    ...Shadows.sm,
-  },
-  importApplyText: { color: '#fff', fontWeight: '800', fontSize: 13 },
 
   // Google Auth & Cloud Backup styles
   googleAuthCard: {

@@ -20,7 +20,6 @@
       "predictiveBackGestureEnabled": false,
       "versionCode": 1,
       "permissions": [
-        "android.permission.CAMERA",
         "android.permission.CAMERA"
       ],
       "package": "com.techflowstudio.shopkeeper",
@@ -46,7 +45,7 @@
           "autoVerify": true,
           "data": [
             {
-              "scheme": "com.googleusercontent.apps.800823031098-q8d2bpqrj3smrfkp7m2odvhcpudjl1lv",
+              "scheme": "com.googleusercontent.apps.800823031098-b93ebl7fb7c6o4io9dgk6h5u4nmgh5d4",
               "host": "oauth2redirect",
               "path": "/google"
             }

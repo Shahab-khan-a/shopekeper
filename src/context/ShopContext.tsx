@@ -196,8 +196,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAlertConfig(null);
   }, []);
 
-  const continueAsGuest = useCallback(() => {
+  const continueAsGuest = useCallback(async () => {
     setIsGuestMode(true);
+    await SettingsRepository.setGuestMode(true).catch(() => {});
   }, []);
 
   // Helpers to refresh state from SQLite/IndexedDB
@@ -291,9 +292,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setKhata(kList);
         setSettings(finalSettings);
         setPendingSyncCount(pCount);
-        // Ensure guest mode is not auto-enabled on boot so the Login screen is shown first
-        setIsGuestMode(false);
-        await SettingsRepository.setGuestMode(false).catch(() => {});
+        // Restore guest mode if user previously chose to continue as guest
+        setIsGuestMode(savedGuest);
 
         if (!initialOnline) {
           setSyncStatus('offline');
@@ -344,6 +344,11 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAuthLoading(false);
 
       if (currentUser) {
+        if (!NetworkService.isCurrentlyOnline()) {
+          setSyncStatus('offline');
+          return;
+        }
+
         setSyncStatus('syncing');
         try {
           // Perform safe bidirectional merge without destroying local sales

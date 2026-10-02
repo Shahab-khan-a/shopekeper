@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "800823031098-b93ebl7fb7c6o4io9dgk6h5u4nmgh5d4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.techflowstudio.shopkeeper",
+            "certificate_hash": "9a561649c4a8869abbc992d534b1582e851e1115"
+          }
+        },
+        {
           "client_id": "800823031098-q8d2bpqrj3smrfkp7m2odvhcpudjl1lv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

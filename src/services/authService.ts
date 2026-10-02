@@ -18,6 +18,7 @@ import * as AuthSession from 'expo-auth-session';
 import { auth } from '@/config/firebase';
 import { googleDriveService } from '@/services/googleDriveService';
 import { deleteAllUserCloudData } from '@/services/firestoreService';
+import { NetworkService } from '@/services/networkService';
 
 // Complete auth session if returning from a web-browser auth flow
 WebBrowser.maybeCompleteAuthSession();
@@ -27,6 +28,10 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
 googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+const GOOGLE_WEB_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+  '800823031098-gi6jjhihtu87f752e3d2798ld13aq1bv.apps.googleusercontent.com';
 
 let GoogleSigninModule: any = null;
 let googleSigninConfigured = false;
@@ -40,7 +45,6 @@ function getNativeGoogleSignin(): any | null {
   if (GoogleSigninModule) return GoogleSigninModule;
 
   // Preemptively check if the native TurboModule is actually registered in the binary.
-  // In Expo Go or standard dev environments, this avoids TurboModuleRegistry.getEnforcing throwing an Invariant Violation.
   try {
     if (TurboModuleRegistry?.get && !TurboModuleRegistry.get('RNGoogleSignin')) {
       return null;
@@ -55,7 +59,7 @@ function getNativeGoogleSignin(): any | null {
     const GoogleSignin = mod?.GoogleSignin;
     if (GoogleSignin && !googleSigninConfigured) {
       GoogleSignin.configure({
-        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        webClientId: GOOGLE_WEB_CLIENT_ID,
         scopes: ['profile', 'email'],
       });
       googleSigninConfigured = true;
@@ -63,9 +67,50 @@ function getNativeGoogleSignin(): any | null {
     GoogleSigninModule = GoogleSignin;
     return GoogleSigninModule;
   } catch (err) {
-    // Native TurboModule 'RNGoogleSignin' not registered in current binary
+    // Native module 'RNGoogleSignin' not registered in current binary
     return null;
   }
+}
+
+/**
+ * Helper to safely extract idToken from signIn response or subsequent getTokens() call
+ */
+async function extractIdToken(signInResponse: any, NativeGoogleSignin: any): Promise<string | null> {
+  let idToken = signInResponse?.data?.idToken ?? signInResponse?.idToken ?? null;
+  if (!idToken && NativeGoogleSignin?.getTokens) {
+    try {
+      const tokens = await NativeGoogleSignin.getTokens();
+      idToken = tokens?.idToken ?? null;
+    } catch (e) {
+      console.warn('[AuthService] Failed to retrieve tokens via getTokens():', e);
+    }
+  }
+  return idToken;
+}
+
+/**
+ * Maps native Google Sign-In SDK error codes to clear user-friendly messages
+ */
+function getFriendlyNativeGoogleErrorMessage(err: any): string {
+  const code = String(err?.code || '');
+  const message = String(err?.message || '');
+
+  if (code === 'SIGN_IN_CANCELLED' || code === '12501' || message.includes('SIGN_IN_CANCELLED')) {
+    return 'Sign in was cancelled.';
+  }
+  if (code === 'IN_PROGRESS' || message.includes('IN_PROGRESS')) {
+    return 'Sign in is already in progress.';
+  }
+  if (code === 'PLAY_SERVICES_NOT_AVAILABLE' || message.includes('PLAY_SERVICES_NOT_AVAILABLE')) {
+    return 'Google Play Services is not available or outdated.';
+  }
+  if (code === '10' || message.includes('DEVELOPER_ERROR') || message.includes('code: 10')) {
+    return 'Google configuration error (Developer Error 10). Certificate SHA-1 is syncing with Google. Please retry in 1-2 minutes.';
+  }
+  if (code === 'NETWORK_ERROR' || message.includes('NETWORK_ERROR') || code === '7') {
+    return 'Network error occurred. Please check your connection and try again.';
+  }
+  return message || 'Google Sign-In failed.';
 }
 
 export interface AuthResult {
@@ -121,6 +166,14 @@ export async function checkRedirectAuth(): Promise<User | null> {
  */
 export async function signInWithGoogle(): Promise<AuthResult> {
   try {
+    const isOnline = await NetworkService.isOnline();
+    if (!isOnline) {
+      return {
+        success: false,
+        error: 'No internet connection detected. Google Sign-In requires an active network connection.',
+      };
+    }
+
     if (Platform.OS === 'web') {
       // --- Web: Firebase popup with redirect fallback ---
       try {
@@ -148,13 +201,23 @@ export async function signInWithGoogle(): Promise<AuthResult> {
             await NativeGoogleSignin.signOut();
           } catch {}
           const signInResponse = await NativeGoogleSignin.signIn();
-          const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
+          if (signInResponse?.type === 'cancelled') {
+            return { success: false, error: 'Sign in was cancelled.' };
+          }
+
+          const idToken = await extractIdToken(signInResponse, NativeGoogleSignin);
 
           if (idToken) {
             return await signInWithGoogleIdToken(idToken);
           }
-        } catch (nativeErr) {
-          console.warn('[AuthService] Native Google Sign-In fallback to WebBrowser:', nativeErr);
+
+          return {
+            success: false,
+            error: 'Google Sign-In did not return an identity token. Please try again.',
+          };
+        } catch (nativeErr: any) {
+          console.error('[AuthService] Native Google Sign-In error:', nativeErr);
+          return { success: false, error: getFriendlyNativeGoogleErrorMessage(nativeErr) };
         }
       }
 
@@ -263,6 +326,14 @@ export function getCurrentUser(): User | null {
  */
 export async function reauthenticateCurrentUser(): Promise<{ success: boolean; error?: string }> {
   try {
+    const isOnline = await NetworkService.isOnline();
+    if (!isOnline) {
+      return {
+        success: false,
+        error: 'No internet connection detected. Please connect to the internet to verify your account.',
+      };
+    }
+
     const user = auth.currentUser;
     if (!user) {
       return { success: false, error: 'No authenticated user found.' };
@@ -278,14 +349,19 @@ export async function reauthenticateCurrentUser(): Promise<{ success: boolean; e
         try {
           await NativeGoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
           const signInResponse = await NativeGoogleSignin.signIn();
-          const idToken = signInResponse.data?.idToken ?? (signInResponse as any).idToken;
+          if (signInResponse?.type === 'cancelled') {
+            return { success: false, error: 'Re-authentication was cancelled.' };
+          }
+          const idToken = await extractIdToken(signInResponse, NativeGoogleSignin);
           if (idToken) {
             const credential = GoogleAuthProvider.credential(idToken);
             await reauthenticateWithCredential(user, credential);
             return { success: true };
           }
-        } catch (nativeErr) {
-          console.warn('[AuthService] Native reauth fallback to WebBrowser:', nativeErr);
+          return { success: false, error: 'Failed to retrieve Google credentials.' };
+        } catch (nativeErr: any) {
+          console.error('[AuthService] Native reauth error:', nativeErr);
+          return { success: false, error: getFriendlyNativeGoogleErrorMessage(nativeErr) };
         }
       }
 
