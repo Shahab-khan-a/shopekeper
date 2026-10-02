@@ -57,7 +57,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          {/* Top Bar: Language Toggle */}
+          {/* Top Bar: Status Badge & Language Switcher */}
           <View style={styles.topBar}>
             <View style={[styles.statusBadge, { backgroundColor: '#DCFCE7' }]}>
               <View style={styles.onlineDot} />

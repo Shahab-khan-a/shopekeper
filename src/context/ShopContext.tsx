@@ -278,10 +278,18 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
           SettingsRepository.getGuestMode(),
         ]);
 
+        // If user hasn't explicitly set a language yet, ensure default is 'en'
+        const explicitLang = await AsyncStorage.getItem('@shopkeeper_user_explicit_language');
+        let finalSettings = setts;
+        if (!explicitLang && setts.language !== 'en') {
+          finalSettings = { ...setts, language: 'en' };
+          await SettingsRepository.saveSettings(finalSettings).catch(() => {});
+        }
+
         setProducts(prods);
         setSales(sList);
         setKhata(kList);
-        setSettings(setts);
+        setSettings(finalSettings);
         setPendingSyncCount(pCount);
         // Ensure guest mode is not auto-enabled on boot so the Login screen is shown first
         setIsGuestMode(false);
@@ -883,6 +891,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const language = settings.language;
   const setLanguage = useCallback(
     (lang: Language) => {
+      AsyncStorage.setItem('@shopkeeper_user_explicit_language', lang).catch(() => {});
       updateSettings({ language: lang });
     },
     [updateSettings]

@@ -1,5 +1,5 @@
 // Firebase configuration for Shopkeeper App
-// Generated from Firebase project: shopkeeper-ea7d8 (Shopkeeper)
+// Generated from Firebase project: shopkeeper-a977a (Shopkeeper)
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';

@@ -18,7 +18,7 @@ export const INITIAL_SETTINGS: ShopSettings = {
   footerNote: 'Thank you for shopping with us! Please visit again.',
   footerNoteUrdu: 'خریداری کا شکریہ! دوبارہ تشریف لائیں۔',
   lowStockThreshold: 5,
-  language: 'ur',
+  language: 'en',
   darkMode: false,
   enableSound: true,
   whatsappReminderLanguage: 'en',
