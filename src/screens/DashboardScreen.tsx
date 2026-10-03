@@ -1,27 +1,24 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Image,
-  Modal,
-  Animated,
-  Platform,
-  Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { SaleScreen } from '@/screens/SaleScreen';
-import { useShop } from '@/context/ShopContext';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { LiveBorderSaleButton } from '@/components/LiveBorderSaleButton';
 import { ProductImage } from '@/components/ProductImage';
 import { SalesChart } from '@/components/SalesChart';
-import { LiveBorderSaleButton } from '@/components/LiveBorderSaleButton';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { SaleScreen } from '@/screens/SaleScreen';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useMemo, useState } from 'react';
+import {
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const DashboardScreen: React.FC = () => {
   const {
@@ -87,413 +84,398 @@ export const DashboardScreen: React.FC = () => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
 
-      {/* ── Hero Welcome Banner ── */}
-      <View style={[styles.heroBanner, { backgroundColor: theme.heroBg }]}>
-        <View style={[styles.heroGlowLayer, { backgroundColor: theme.heroLayer }]} />
+        {/* ── Hero + floating metrics (clean home header) ── */}
+        <View style={[styles.heroSection, { backgroundColor: theme.heroBg }]}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroLeft}>
+              <Text style={styles.heroGreet}>
+                {language === 'ur' ? 'خوش آمدید،' : 'Welcome back,'}
+              </Text>
+              <Text style={styles.heroOwner} numberOfLines={1}>
+                {settings.ownerName || user?.displayName || (language === 'ur' ? 'معزز دکاندار' : 'Valued Shopkeeper')}
+              </Text>
+            </View>
 
-        <View style={styles.heroContent}>
-          <View style={styles.heroLeft}>
-            <Text style={styles.heroGreet}>
-              {language === 'ur' ? '👋 خوش آمدید' : '👋 Welcome back,'}
-            </Text>
-            <Text style={styles.heroOwner} numberOfLines={1}>
-              {settings.ownerName || user?.displayName || (language === 'ur' ? 'معزز دکاندار' : 'Valued Shopkeeper')}
-            </Text>
-            <Text style={styles.heroShop} numberOfLines={1}>
-              {language === 'ur' && settings.shopNameUrdu
-                ? settings.shopNameUrdu
-                : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (language === 'ur' ? 'میری دکان' : 'My Store')))}
-            </Text>
-
+            <Pressable
+              onPress={() => setActiveTab('settings')}
+              style={({ pressed }) => [
+                styles.heroAvatarBtn,
+                pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+              ]}>
+              <View style={styles.heroIconCircle}>
+                {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
+                  <ProductImage
+                    uri={settings.profileImage}
+                    style={styles.heroAvatarImg}
+                    fallbackIcon={
+                      <Image
+                        source={require('@/../assets/images/mainLogoImage.png')}
+                        style={styles.heroAvatarImg}
+                        resizeMode="contain"
+                      />
+                    }
+                  />
+                ) : (
+                  <Image
+                    source={require('@/../assets/images/mainLogoImage.png')}
+                    style={styles.heroAvatarImg}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
+            </Pressable>
           </View>
 
-          <Pressable
-            onPress={() => setActiveTab('settings')}
-            style={({ pressed }) => [
-              styles.heroRight,
-              pressed && { opacity: 0.85, transform: [{ scale: 0.95 }] },
-            ]}>
-            <View style={[styles.heroIconCircle, { backgroundColor: '#FFFFFF' }]}>
-              {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
-                <ProductImage
-                  uri={settings.profileImage}
-                  style={styles.heroAvatarImg}
-                  fallbackIcon={
-                    <Image
-                      source={require('@/../assets/images/mainLogoImage.png')}
-                      style={styles.heroAvatarImg}
-                      resizeMode="contain"
-                    />
-                  }
-                />
-              ) : (
-                <Image
-                  source={require('@/../assets/images/mainLogoImage.png')}
-                  style={styles.heroAvatarImg}
-                  resizeMode="contain"
-                />
-              )}
-            </View>
-          </Pressable>
+          <View style={styles.overviewRow}>
+            <Text style={styles.overviewTitle}>{t('todayOverview')}</Text>
+            <Pressable
+              onPress={() => setShowDayEnd(true)}
+              hitSlop={8}
+              style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
+              <Text style={styles.overviewAction}>{t('showToday')}</Text>
+            </Pressable>
+          </View>
         </View>
 
-      </View>
-
-      {/* ── Today's Metrics ── */}
-      <View style={styles.metricsGrid}>
-        {/* Today's Sales */}
-        <View style={[styles.metricCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <View style={[styles.metricAccentBar, { backgroundColor: theme.primary }]} />
-          <View style={styles.metricBody}>
-            <View style={[styles.metricIconWrap, { backgroundColor: theme.primaryLight }]}>
-              <Ionicons name="cash-outline" size={16} color={theme.primary} />
-            </View>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('todaySales')}</Text>
-            <Text style={[styles.metricValue, { color: theme.text }]}>
+        {/* ── Today's Metrics (overlap green header) ── */}
+        <View style={styles.metricsGrid}>
+          <View style={[styles.metricCard, { backgroundColor: theme.card }]}>
+            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+              {t('todaySales')}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
               {settings.currencySymbol} {todaySalesTotal.toLocaleString()}
             </Text>
           </View>
-        </View>
 
-        {/* Today's Orders */}
-        <View style={[styles.metricCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <View style={[styles.metricAccentBar, { backgroundColor: theme.secondary }]} />
-          <View style={styles.metricBody}>
-            <View style={[styles.metricIconWrap, { backgroundColor: theme.surfaceSubtle }]}>
-              <Ionicons name="receipt-outline" size={16} color={theme.secondary} />
-            </View>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('todayOrders')}</Text>
-            <Text style={[styles.metricValue, { color: theme.text }]}>{todayOrdersCount}</Text>
+          <View style={[styles.metricCard, { backgroundColor: theme.card }]}>
+            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+              {t('todayOrders')}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
+              {todayOrdersCount}
+            </Text>
           </View>
-        </View>
 
-        {/* Total Udhaar */}
-        <Pressable
-          onPress={() => setActiveTab('khata')}
-          style={({ pressed }) => [
-            styles.metricCard,
-            { backgroundColor: theme.card, borderColor: theme.border },
-            pressed && { opacity: 0.85 },
-          ]}>
-          <View style={[styles.metricAccentBar, { backgroundColor: theme.danger }]} />
-          <View style={styles.metricBody}>
-            <View style={[styles.metricIconWrap, { backgroundColor: theme.dangerLight }]}>
-              <Ionicons name="book-outline" size={16} color={theme.danger} />
-            </View>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('totalReceivable')}</Text>
-            <Text style={[styles.metricValue, { color: theme.danger }]}>
+          <Pressable
+            onPress={() => setActiveTab('khata')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              { backgroundColor: theme.card },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+              {t('totalReceivable')}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
               {settings.currencySymbol} {totalUdhaarReceivable.toLocaleString()}
             </Text>
-          </View>
-        </Pressable>
+          </Pressable>
 
-        {/* Total Inventory */}
-        <Pressable
-          onPress={() => setActiveTab('products')}
-          style={({ pressed }) => [
-            styles.metricCard,
-            { backgroundColor: theme.card, borderColor: theme.border },
-            pressed && { opacity: 0.85 },
-          ]}>
-          <View style={[styles.metricAccentBar, { backgroundColor: theme.warning }]} />
-          <View style={styles.metricBody}>
-            <View style={[styles.metricIconWrap, { backgroundColor: theme.warningLight }]}>
-              <Ionicons name="cube-outline" size={16} color={theme.warning} />
-            </View>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>{t('totalInventory')}</Text>
-            <Text style={[styles.metricValue, { color: theme.text }]}>{products.length}</Text>
-          </View>
-        </Pressable>
-      </View>
-
-      {/* ── Sales Analytics & Trends Chart ── */}
-      <SalesChart sales={sales} />
-
-      {/* ── Store Investment & Lifetime Earnings Section ── */}
-      <View style={{ marginTop: Spacing.md, marginBottom: Spacing.xs }}>
-        <SectionHeader title={t('investmentSection')} />
-      </View>
-
-      <View style={styles.financeGrid}>
-        {/* Card 1: Stock Investment & Value */}
-        <Pressable
-          onPress={() => setActiveTab('products')}
-          style={({ pressed }) => [
-            styles.financeCard,
-            { backgroundColor: theme.card, borderColor: theme.border },
-            pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-          ]}>
-          <View style={styles.financeCardHeader}>
-            <View style={[styles.financeIconWrap, { backgroundColor: '#ECFDF5' }]}>
-              <Ionicons name="wallet-outline" size={20} color="#059669" />
-            </View>
-            <View style={[styles.financeHeaderBadge, { backgroundColor: '#D1FAE5' }]}>
-              <Ionicons name="cube-outline" size={11} color="#059669" />
-              <Text style={[styles.financeHeaderBadgeText, { color: '#059669' }]}>
-                {totalInventoryUnits} {language === 'ur' ? 'اشیاء' : 'units'}
-              </Text>
-            </View>
-          </View>
-
-          <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-            {t('totalInvestment')}
-          </Text>
-          <Text style={[styles.financeMainAmount, { color: theme.text }]}>
-            {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
-          </Text>
-
-          <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
-
-          <View style={styles.financeSubStatsRow}>
-            <View style={styles.financeSubStat}>
-              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                {t('stockRetailValue')}
-              </Text>
-              <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
-              </Text>
-            </View>
-            <View style={styles.financeSubStat}>
-              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                {t('expectedStockProfit')}
-              </Text>
-              <Text style={[styles.financeSubStatValue, { color: '#059669', fontWeight: '800' }]}>
-                +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
-              </Text>
-            </View>
-          </View>
-        </Pressable>
-
-        {/* Card 2: Total Store Earnings & Realized Profit */}
-        <Pressable
-          onPress={() => setActiveTab('history')}
-          style={({ pressed }) => [
-            styles.financeCard,
-            { backgroundColor: theme.card, borderColor: theme.border },
-            pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-          ]}>
-          <View style={styles.financeCardHeader}>
-            <View style={[styles.financeIconWrap, { backgroundColor: '#F5F3FF' }]}>
-              <Ionicons name="trending-up-outline" size={20} color="#7C3AED" />
-            </View>
-            <View style={[styles.financeHeaderBadge, { backgroundColor: '#EDE9FE' }]}>
-              <Ionicons name="checkmark-done" size={11} color="#7C3AED" />
-              <Text style={[styles.financeHeaderBadgeText, { color: '#7C3AED' }]}>
-                {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {language === 'ur' ? 'بلز' : 'sales'}
-              </Text>
-            </View>
-          </View>
-
-          <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-            {t('totalStoreEarnings')}
-          </Text>
-          <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
-            {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
-          </Text>
-
-          <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
-
-          <View style={styles.financeSubStatsRow}>
-            <View style={styles.financeSubStat}>
-              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                {t('totalProfitEarned')}
-              </Text>
-              <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
-                +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
-              </Text>
-            </View>
-            <View style={styles.financeSubStat}>
-              <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                {t('profitMargin')}
-              </Text>
-              <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                {totalLifetimeEarnings > 0
-                  ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
-                  : '0%'}
-              </Text>
-            </View>
-          </View>
-        </Pressable>
-      </View>
-
-      {/* ── Stock Alerts ── */}
-      {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
-        <View style={[styles.alertSection, { backgroundColor: theme.warningLight, borderColor: theme.warning }]}>
-          <View style={styles.alertHeader}>
-            <Ionicons name="warning" size={18} color={theme.warning} />
-            <Text style={[styles.alertTitle, { color: theme.accent }]}>
-              {t('lowStockAlert')} ({lowStockProducts.length + outOfStockProducts.length})
+          <Pressable
+            onPress={() => setActiveTab('products')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              { backgroundColor: theme.card },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+              {t('totalInventory')}
             </Text>
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.alertItemsScroll}>
-            {outOfStockProducts.map((p) => (
-              <Pressable
-                key={p.id}
-                onPress={() => setActiveTab('products')}
-                style={({ pressed }) => [pressed && { opacity: 0.8 }]}>
-                <StatusBadge
-                  label={`${p.name}: ${t('outOfStock')}`}
-                  bg={theme.dangerLight}
-                  color={theme.danger}
-                  icon="close-circle"
-                />
-              </Pressable>
-            ))}
-            {lowStockProducts.map((p) => (
-              <Pressable
-                key={p.id}
-                onPress={() => setActiveTab('products')}
-                style={({ pressed }) => [{ marginLeft: 6 }, pressed && { opacity: 0.8 }]}>
-                <StatusBadge
-                  label={`${p.name}: ${p.stock} ${p.unit}`}
-                  bg={theme.warningLight}
-                  color={theme.accent}
-                  icon="alert-circle"
-                />
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-
-
-      {/* ── Recent Sales ── */}
-      <SectionHeader
-        title={t('recentSales')}
-        actionLabel={sales.length > 0 ? (sales.length > MAX_HOME_RECENT_SALES ? `${t('viewAll')} (${sales.length})` : t('viewAll')) : undefined}
-        onAction={() => setActiveTab('history')}
-      />
-
-      {recentSales.length === 0 ? (
-        <EmptyState
-          icon="receipt-outline"
-          title={t('noRecentSales')}
-          subtitle={language === 'ur' ? 'پہلا بل بنانے کے لیے نیچے بٹن دبائیں' : 'Create your first bill to get started.'}
-          compact
-        />
-      ) : (
-        <View style={styles.recentSalesList}>
-          {recentSales.map((s) => {
-            const payColor = getPayColor(s.paymentMethod);
-            return (
-              <Pressable
-                key={s.id}
-                onPress={() => setActiveReceipt(s)}
-                style={({ pressed }) => [
-                  styles.recentSaleItem,
-                  { backgroundColor: theme.card, borderColor: theme.border, borderLeftColor: payColor },
-                  pressed && { opacity: 0.82 },
-                ]}>
-                <View style={[styles.saleAvatar, { backgroundColor: theme.surfaceSubtle }]}>
-                  <Ionicons
-                    name={s.paymentMethod === 'cash' ? 'cash' : s.paymentMethod === 'online' ? 'phone-portrait' : 'book'}
-                    size={18}
-                    color={payColor}
-                  />
-                </View>
-
-                <View style={styles.saleMiddle}>
-                  <Text style={[styles.saleCustomer, { color: theme.text }]} numberOfLines={1}>
-                    {s.customerName || (language === 'ur' ? 'نقد سیل' : 'Cash Sale')}
-                  </Text>
-                  <Text style={[styles.saleTime, { color: theme.textMuted }]}>
-                    {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {s.billNumber} • {s.items.length} {t('itemsCount')}
-                  </Text>
-                </View>
-
-                <View style={styles.saleRight}>
-                  <Text style={[styles.saleAmount, { color: theme.text }]}>
-                    {settings.currencySymbol} {s.grandTotal}
-                  </Text>
-                  <StatusBadge
-                    label={s.paymentMethod.toUpperCase()}
-                    bg={payColor + '22'}
-                    color={payColor}
-                    size="sm"
-                  />
-                </View>
-              </Pressable>
-            );
-          })}
-
-          {sales.length > MAX_HOME_RECENT_SALES && (
-            <Pressable
-              onPress={() => setActiveTab('history')}
-              style={({ pressed }) => [
-                styles.viewMoreSalesBtn,
-                { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                pressed && { opacity: 0.75 },
-              ]}>
-              <Text style={[styles.viewMoreSalesText, { color: theme.primary }]}>
-                {language === 'ur'
-                  ? `تمام ${sales.length} بلز دیکھیں →`
-                  : `View All ${sales.length} Sales →`}
-              </Text>
-            </Pressable>
-          )}
-        </View>
-      )}
-
-      {/* ── W2-5: Day-End Summary Card ── */}
-      <Pressable
-        onPress={() => setShowDayEnd(true)}
-        style={({ pressed }) => [
-          styles.dayEndCard,
-          { backgroundColor: theme.primary, borderColor: theme.primaryDark },
-          pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-        ]}>
-        <View style={styles.dayEndLeft}>
-          <Ionicons name="moon-outline" size={20} color="rgba(255,255,255,0.9)" />
-          <View>
-            <Text style={styles.dayEndTitle}>
-              {language === 'ur' ? 'دن کا خلاصہ دیکھیں' : 'Day-End Summary'}
+            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
+              {products.length}
             </Text>
-            <Text style={styles.dayEndSub}>
-              {todaySales.length} {language === 'ur' ? 'بل آج' : 'bills today'} · {settings.currencySymbol}{todaySalesTotal.toLocaleString()}
-            </Text>
-          </View>
+          </Pressable>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
-      </Pressable>
 
-      {/* Day-End Modal */}
-      <Modal visible={showDayEnd} transparent animationType="slide" onRequestClose={() => setShowDayEnd(false)}>
-        <Pressable style={styles.dayEndOverlay} onPress={() => setShowDayEnd(false)}>
-          <Pressable style={[styles.dayEndModal, { backgroundColor: theme.surface }]} onPress={(e) => e.stopPropagation()}>
-            <View style={[styles.dayEndModalHeader, { borderBottomColor: theme.border }]}>
-              <View style={styles.dayEndModalTitleRow}>
-                <Ionicons name="moon" size={20} color={theme.primary} />
-                <Text style={[styles.dayEndModalTitle, { color: theme.text }]}>
-                  {language === 'ur' ? 'آج کا خلاصہ' : "Today's Summary"}
+        {/* ── Sales Analytics & Trends Chart ── */}
+        <SalesChart sales={sales} />
+
+        {/* ── Store Investment & Lifetime Earnings Section ── */}
+        <View style={{ marginTop: Spacing.md, marginBottom: Spacing.xs }}>
+          <SectionHeader title={t('investmentSection')} />
+        </View>
+
+        <View style={styles.financeGrid}>
+          {/* Card 1: Stock Investment & Value */}
+          <Pressable
+            onPress={() => setActiveTab('products')}
+            style={({ pressed }) => [
+              styles.financeCard,
+              { backgroundColor: theme.card, borderColor: theme.border },
+              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+            ]}>
+            <View style={styles.financeCardHeader}>
+              <View style={[styles.financeIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                <Ionicons name="wallet-outline" size={20} color="#059669" />
+              </View>
+              <View style={[styles.financeHeaderBadge, { backgroundColor: '#D1FAE5' }]}>
+                <Ionicons name="cube-outline" size={11} color="#059669" />
+                <Text style={[styles.financeHeaderBadgeText, { color: '#059669' }]}>
+                  {totalInventoryUnits} {language === 'ur' ? 'اشیاء' : 'units'}
                 </Text>
               </View>
-              <Pressable onPress={() => setShowDayEnd(false)} style={styles.dayEndClose}>
-                <Ionicons name="close" size={22} color={theme.textSecondary} />
-              </Pressable>
             </View>
-            <View style={styles.dayEndBody}>
-              {[
-                { label: language === 'ur' ? 'کل بل' : 'Total Bills', value: `${todaySales.length}`, icon: 'receipt-outline', color: theme.primary },
-                { label: language === 'ur' ? 'نقد وصول' : 'Cash Collected', value: `${settings.currencySymbol}${todayCash.toLocaleString()}`, icon: 'cash-outline', color: theme.success },
-                { label: language === 'ur' ? 'آن لائن' : 'Online', value: `${settings.currencySymbol}${todayOnline.toLocaleString()}`, icon: 'phone-portrait-outline', color: theme.secondary },
-                { label: language === 'ur' ? 'ادھار دیا' : 'Udhaar Given', value: `${settings.currencySymbol}${todayUdhaar.toLocaleString()}`, icon: 'book-outline', color: theme.danger },
-                { label: language === 'ur' ? 'تخمینی منافع' : 'Est. Profit', value: `${settings.currencySymbol}${Math.max(0, todayGrossProfit).toLocaleString()}`, icon: 'trending-up-outline', color: theme.success },
-              ].map((row) => (
-                <View key={row.label} style={[styles.dayEndRow, { borderBottomColor: theme.border }]}>
-                  <View style={[styles.dayEndRowIcon, { backgroundColor: row.color + '20' }]}>
-                    <Ionicons name={row.icon as any} size={16} color={row.color} />
-                  </View>
-                  <Text style={[styles.dayEndRowLabel, { color: theme.textSecondary }]}>{row.label}</Text>
-                  <Text style={[styles.dayEndRowValue, { color: theme.text }]}>{row.value}</Text>
-                </View>
-              ))}
+
+            <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+              {t('totalInvestment')}
+            </Text>
+            <Text style={[styles.financeMainAmount, { color: theme.text }]}>
+              {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
+            </Text>
+
+            <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
+
+            <View style={styles.financeSubStatsRow}>
+              <View style={styles.financeSubStat}>
+                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                  {t('stockRetailValue')}
+                </Text>
+                <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                  {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
+                </Text>
+              </View>
+              <View style={styles.financeSubStat}>
+                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                  {t('expectedStockProfit')}
+                </Text>
+                <Text style={[styles.financeSubStatValue, { color: '#059669', fontWeight: '800' }]}>
+                  +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
+                </Text>
+              </View>
             </View>
           </Pressable>
-        </Pressable>
-      </Modal>
 
-    </ScrollView>
+          {/* Card 2: Total Store Earnings & Realized Profit */}
+          <Pressable
+            onPress={() => setActiveTab('history')}
+            style={({ pressed }) => [
+              styles.financeCard,
+              { backgroundColor: theme.card, borderColor: theme.border },
+              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+            ]}>
+            <View style={styles.financeCardHeader}>
+              <View style={[styles.financeIconWrap, { backgroundColor: '#F5F3FF' }]}>
+                <Ionicons name="trending-up-outline" size={20} color="#7C3AED" />
+              </View>
+              <View style={[styles.financeHeaderBadge, { backgroundColor: '#EDE9FE' }]}>
+                <Ionicons name="checkmark-done" size={11} color="#7C3AED" />
+                <Text style={[styles.financeHeaderBadgeText, { color: '#7C3AED' }]}>
+                  {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {language === 'ur' ? 'بلز' : 'sales'}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+              {t('totalStoreEarnings')}
+            </Text>
+            <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
+              {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
+            </Text>
+
+            <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
+
+            <View style={styles.financeSubStatsRow}>
+              <View style={styles.financeSubStat}>
+                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                  {t('totalProfitEarned')}
+                </Text>
+                <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
+                  +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
+                </Text>
+              </View>
+              <View style={styles.financeSubStat}>
+                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                  {t('profitMargin')}
+                </Text>
+                <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                  {totalLifetimeEarnings > 0
+                    ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
+                    : '0%'}
+                </Text>
+              </View>
+            </View>
+          </Pressable>
+        </View>
+
+        {/* ── Stock Alerts ── */}
+        {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
+          <View style={[styles.alertSection, { backgroundColor: theme.warningLight, borderColor: theme.warning }]}>
+            <View style={styles.alertHeader}>
+              <Ionicons name="warning" size={18} color={theme.warning} />
+              <Text style={[styles.alertTitle, { color: theme.accent }]}>
+                {t('lowStockAlert')} ({lowStockProducts.length + outOfStockProducts.length})
+              </Text>
+            </View>
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.alertItemsScroll}>
+              {outOfStockProducts.map((p) => (
+                <Pressable
+                  key={p.id}
+                  onPress={() => setActiveTab('products')}
+                  style={({ pressed }) => [pressed && { opacity: 0.8 }]}>
+                  <StatusBadge
+                    label={`${p.name}: ${t('outOfStock')}`}
+                    bg={theme.dangerLight}
+                    color={theme.danger}
+                    icon="close-circle"
+                  />
+                </Pressable>
+              ))}
+              {lowStockProducts.map((p) => (
+                <Pressable
+                  key={p.id}
+                  onPress={() => setActiveTab('products')}
+                  style={({ pressed }) => [{ marginLeft: 6 }, pressed && { opacity: 0.8 }]}>
+                  <StatusBadge
+                    label={`${p.name}: ${p.stock} ${p.unit}`}
+                    bg={theme.warningLight}
+                    color={theme.accent}
+                    icon="alert-circle"
+                  />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+
+        {/* ── Recent Sales ── */}
+        <SectionHeader
+          title={t('recentSales')}
+          actionLabel={sales.length > 0 ? (sales.length > MAX_HOME_RECENT_SALES ? `${t('viewAll')} (${sales.length})` : t('viewAll')) : undefined}
+          onAction={() => setActiveTab('history')}
+        />
+
+        {recentSales.length === 0 ? (
+          <EmptyState
+            icon="receipt-outline"
+            title={t('noRecentSales')}
+            subtitle={language === 'ur' ? 'پہلا بل بنانے کے لیے نیچے بٹن دبائیں' : 'Create your first bill to get started.'}
+            compact
+          />
+        ) : (
+          <View style={styles.recentSalesList}>
+            {recentSales.map((s) => {
+              const payColor = getPayColor(s.paymentMethod);
+              return (
+                <Pressable
+                  key={s.id}
+                  onPress={() => setActiveReceipt(s)}
+                  style={({ pressed }) => [
+                    styles.recentSaleItem,
+                    { backgroundColor: theme.card, borderColor: theme.border, borderLeftColor: payColor },
+                    pressed && { opacity: 0.82 },
+                  ]}>
+                  <View style={[styles.saleAvatar, { backgroundColor: theme.surfaceSubtle }]}>
+                    <Ionicons
+                      name={s.paymentMethod === 'cash' ? 'cash' : s.paymentMethod === 'online' ? 'phone-portrait' : 'book'}
+                      size={18}
+                      color={payColor}
+                    />
+                  </View>
+
+                  <View style={styles.saleMiddle}>
+                    <Text style={[styles.saleCustomer, { color: theme.text }]} numberOfLines={1}>
+                      {s.customerName || (language === 'ur' ? 'نقد سیل' : 'Cash Sale')}
+                    </Text>
+                    <Text style={[styles.saleTime, { color: theme.textMuted }]}>
+                      {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {s.billNumber} • {s.items.length} {t('itemsCount')}
+                    </Text>
+                  </View>
+
+                  <View style={styles.saleRight}>
+                    <Text style={[styles.saleAmount, { color: theme.text }]}>
+                      {settings.currencySymbol} {s.grandTotal}
+                    </Text>
+                    <StatusBadge
+                      label={s.paymentMethod.toUpperCase()}
+                      bg={payColor + '22'}
+                      color={payColor}
+                      size="sm"
+                    />
+                  </View>
+                </Pressable>
+              );
+            })}
+
+            {sales.length > MAX_HOME_RECENT_SALES && (
+              <Pressable
+                onPress={() => setActiveTab('history')}
+                style={({ pressed }) => [
+                  styles.viewMoreSalesBtn,
+                  { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                  pressed && { opacity: 0.75 },
+                ]}>
+                <Text style={[styles.viewMoreSalesText, { color: theme.primary }]}>
+                  {language === 'ur'
+                    ? `تمام ${sales.length} بلز دیکھیں →`
+                    : `View All ${sales.length} Sales →`}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {/* ── W2-5: Day-End Summary Card ── */}
+        <Pressable
+          onPress={() => setShowDayEnd(true)}
+          style={({ pressed }) => [
+            styles.dayEndCard,
+            { backgroundColor: theme.primary, borderColor: theme.primaryDark },
+            pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+          ]}>
+          <View style={styles.dayEndLeft}>
+            <Ionicons name="moon-outline" size={20} color="rgba(255,255,255,0.9)" />
+            <View>
+              <Text style={styles.dayEndTitle}>
+                {language === 'ur' ? 'دن کا خلاصہ دیکھیں' : 'Day-End Summary'}
+              </Text>
+              <Text style={styles.dayEndSub}>
+                {todaySales.length} {language === 'ur' ? 'بل آج' : 'bills today'} · {settings.currencySymbol}{todaySalesTotal.toLocaleString()}
+              </Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
+        </Pressable>
+
+        {/* Day-End Modal */}
+        <Modal visible={showDayEnd} transparent animationType="slide" onRequestClose={() => setShowDayEnd(false)}>
+          <Pressable style={styles.dayEndOverlay} onPress={() => setShowDayEnd(false)}>
+            <Pressable style={[styles.dayEndModal, { backgroundColor: theme.surface }]} onPress={(e) => e.stopPropagation()}>
+              <View style={[styles.dayEndModalHeader, { borderBottomColor: theme.border }]}>
+                <View style={styles.dayEndModalTitleRow}>
+                  <Ionicons name="moon" size={20} color={theme.primary} />
+                  <Text style={[styles.dayEndModalTitle, { color: theme.text }]}>
+                    {language === 'ur' ? 'آج کا خلاصہ' : "Today's Summary"}
+                  </Text>
+                </View>
+                <Pressable onPress={() => setShowDayEnd(false)} style={styles.dayEndClose}>
+                  <Ionicons name="close" size={22} color={theme.textSecondary} />
+                </Pressable>
+              </View>
+              <View style={styles.dayEndBody}>
+                {[
+                  { label: language === 'ur' ? 'کل بل' : 'Total Bills', value: `${todaySales.length}`, icon: 'receipt-outline', color: theme.primary },
+                  { label: language === 'ur' ? 'نقد وصول' : 'Cash Collected', value: `${settings.currencySymbol}${todayCash.toLocaleString()}`, icon: 'cash-outline', color: theme.success },
+                  { label: language === 'ur' ? 'آن لائن' : 'Online', value: `${settings.currencySymbol}${todayOnline.toLocaleString()}`, icon: 'phone-portrait-outline', color: theme.secondary },
+                  { label: language === 'ur' ? 'ادھار دیا' : 'Udhaar Given', value: `${settings.currencySymbol}${todayUdhaar.toLocaleString()}`, icon: 'book-outline', color: theme.danger },
+                  { label: language === 'ur' ? 'تخمینی منافع' : 'Est. Profit', value: `${settings.currencySymbol}${Math.max(0, todayGrossProfit).toLocaleString()}`, icon: 'trending-up-outline', color: theme.success },
+                ].map((row) => (
+                  <View key={row.label} style={[styles.dayEndRow, { borderBottomColor: theme.border }]}>
+                    <View style={[styles.dayEndRowIcon, { backgroundColor: row.color + '20' }]}>
+                      <Ionicons name={row.icon as any} size={16} color={row.color} />
+                    </View>
+                    <Text style={[styles.dayEndRowLabel, { color: theme.textSecondary }]}>{row.label}</Text>
+                    <Text style={[styles.dayEndRowValue, { color: theme.text }]}>{row.value}</Text>
+                  </View>
+                ))}
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+      </ScrollView>
 
       {/* ── Floating Action Button (New Sale) with Live Animated Border ── */}
       <View style={styles.floatingFabWrapper} pointerEvents="box-none">
@@ -526,7 +508,8 @@ const styles = StyleSheet.create({
   },
   container: { flex: 1 },
   content: {
-    padding: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingTop: 0,
     paddingBottom: 110,
     maxWidth: 720,
     marginHorizontal: 'auto',
@@ -544,92 +527,95 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Hero Banner
-  heroBanner: {
-    borderRadius: 16,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 12,
-    marginBottom: Spacing.md,
-    overflow: 'hidden',
-    ...Shadows.md,
+  // Hero — full-bleed green band
+  heroSection: {
+    marginHorizontal: -Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: 100,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
   },
-  heroGlowLayer: {
-    position: 'absolute',
-    top: -30,
-    right: -30,
-    width: 120,
-    height: 120,
-    borderRadius: BorderRadius.full,
-    opacity: 0.3,
-  },
-  heroContent: {
+  heroTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 0,
+    alignItems: 'flex-start',
   },
-  heroLeft: { flex: 1, gap: 1 },
-  heroGreet: { color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '500' },
-  heroOwner: { color: '#FFFFFF', fontSize: 17, fontWeight: '800', letterSpacing: -0.4 },
-  heroShop: { color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: '600' },
-  heroBusinessType: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: '500', marginTop: 2 },
-  heroRight: { marginLeft: Spacing.sm },
+  heroLeft: { flex: 1, paddingRight: Spacing.sm },
+  heroGreet: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  heroOwner: {
+    color: '#FFFFFF',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    lineHeight: 32,
+  },
+  heroAvatarBtn: { marginTop: 2 },
   heroIconCircle: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderColor: 'rgba(255,255,255,0.35)',
   },
   heroAvatarImg: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
     borderRadius: BorderRadius.full,
   },
-  heroCTA: {
+  overviewRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: BorderRadius.full,
-    alignSelf: 'flex-start',
-    ...Shadows.sm,
+    justifyContent: 'space-between',
+    marginTop: Spacing.lg,
   },
-  heroCTAText: { fontWeight: '800', fontSize: 13, letterSpacing: 0.2 },
+  overviewTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  overviewAction: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
 
-  // Metrics Grid
+  // Metrics — float over green edge
   metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: 8,
-    columnGap: 8,
+    rowGap: 12,
+    columnGap: 12,
+    marginTop: -42,
     marginBottom: Spacing.md,
   },
   metricCard: {
-    width: '48.5%',
-    borderRadius: 10,
-    borderWidth: 1,
-    overflow: 'hidden',
-    ...Shadows.sm,
+    width: '48%',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 6,
+    ...Shadows.md,
   },
-  metricAccentBar: { height: 3, width: '100%' },
-  metricBody: { paddingHorizontal: 10, paddingVertical: 8, gap: 2 },
-  metricIconWrap: {
-    width: 26,
-    height: 26,
-    borderRadius: 7,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
+  metricLabel: {
+    fontSize: 12,
+    fontWeight: '500',
   },
-  metricLabel: { fontSize: 10, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
-  metricValue: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3 },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
 
   // Alert Section
   alertSection: {

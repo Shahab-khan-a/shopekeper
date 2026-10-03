@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -95,7 +96,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
   // Modals & Drawers
   const [isBarcodeOpen, setIsBarcodeOpen] = useState(false);
-  const [isQuickItemOpen, setIsQuickItemOpen] = useState(false);
   const [isCheckoutDrawerOpen, setIsCheckoutDrawerOpen] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -341,6 +341,18 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       return;
     }
 
+    if (paymentMethod === 'cash' && parsedTendered > 0 && parsedTendered < grandTotal) {
+      showAlert({
+        type: 'warning',
+        title: language === 'ur' ? 'رقم کم ہے' : 'Insufficient Cash Received',
+        message:
+          language === 'ur'
+            ? `کل بل ${settings.currencySymbol}${grandTotal} ہے جبکہ وصول شدہ رقم ${settings.currencySymbol}${parsedTendered} ہے۔ مزید ${settings.currencySymbol}${grandTotal - parsedTendered} درکار ہے۔`
+            : `Bill total is ${settings.currencySymbol}${grandTotal}, but cash received is ${settings.currencySymbol}${parsedTendered}. Customer still owes ${settings.currencySymbol}${grandTotal - parsedTendered}.`,
+      });
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const result = await completeSale({
@@ -456,56 +468,73 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           />
         ) : (
           <View style={[styles.itemsCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-            {cart.map((item, index) => (
-              <View
-                key={item.product.id}
-                style={[
-                  styles.cartItemRow,
-                  index < cart.length - 1 && { borderBottomColor: theme.border, borderBottomWidth: 1 },
-                ]}>
-                <View style={{ flex: 1, paddingRight: 8 }}>
-                  <Text style={[styles.cartItemName, { color: theme.text }]} numberOfLines={1}>
-                    {language === 'ur' && item.product.nameUrdu
-                      ? item.product.nameUrdu
-                      : item.product.name}
-                  </Text>
-                  <Text style={[styles.cartItemPriceInfo, { color: theme.textSecondary }]}>
-                    {settings.currencySymbol}{item.unitPrice} × {item.quantity} ={' '}
-                    <Text style={{ fontWeight: '700', color: theme.text }}>
-                      {settings.currencySymbol}{item.total}
+            <ScrollView
+              style={[styles.cartItemsScroll, { maxHeight: isWideScreen ? 340 : 210 }]}
+              contentContainerStyle={styles.cartItemsScrollContent}
+              nestedScrollEnabled={true}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled">
+              {cart.map((item, index) => (
+                <View
+                  key={item.product.id}
+                  style={[
+                    styles.cartItemRow,
+                    index < cart.length - 1 && { borderBottomColor: theme.border, borderBottomWidth: 1 },
+                  ]}>
+                  <View style={{ flex: 1, paddingRight: 8 }}>
+                    <Text style={[styles.cartItemName, { color: theme.text }]} numberOfLines={1}>
+                      {language === 'ur' && item.product.nameUrdu
+                        ? item.product.nameUrdu
+                        : item.product.name}
                     </Text>
-                  </Text>
-                </View>
+                    <Text style={[styles.cartItemPriceInfo, { color: theme.textSecondary }]}>
+                      {settings.currencySymbol}{item.unitPrice} × {item.quantity} ={' '}
+                      <Text style={{ fontWeight: '700', color: theme.text }}>
+                        {settings.currencySymbol}{item.total}
+                      </Text>
+                    </Text>
+                  </View>
 
-                {/* Stepper */}
-                <View style={styles.itemStepperWrap}>
-                  <Pressable
-                    onPress={() => updateQuantity(item.product.id, -1)}
-                    accessibilityLabel={`Decrease quantity of ${item.product.name}`}
-                    accessibilityRole="button"
-                    style={[styles.smallStepBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                    <Ionicons name="remove" size={16} color={theme.text} />
-                  </Pressable>
-                  <Text style={[styles.smallStepQty, { color: theme.text }]}>
-                    {item.quantity}
-                  </Text>
-                  <Pressable
-                    onPress={() => updateQuantity(item.product.id, 1)}
-                    accessibilityLabel={`Increase quantity of ${item.product.name}`}
-                    accessibilityRole="button"
-                    style={[styles.smallStepBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                    <Ionicons name="add" size={16} color={theme.text} />
-                  </Pressable>
-                  <Pressable
-                    onPress={() => removeFromCart(item.product.id)}
-                    accessibilityLabel={`Remove ${item.product.name} from bill`}
-                    accessibilityRole="button"
-                    style={styles.trashBtn}>
-                    <Ionicons name="trash-outline" size={16} color={theme.danger} />
-                  </Pressable>
+                  {/* Stepper */}
+                  <View style={styles.itemStepperWrap}>
+                    <Pressable
+                      onPress={() => updateQuantity(item.product.id, -1)}
+                      accessibilityLabel={`Decrease quantity of ${item.product.name}`}
+                      accessibilityRole="button"
+                      style={[styles.smallStepBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                      <Ionicons name="remove" size={16} color={theme.text} />
+                    </Pressable>
+                    <Text style={[styles.smallStepQty, { color: theme.text }]}>
+                      {item.quantity}
+                    </Text>
+                    <Pressable
+                      onPress={() => updateQuantity(item.product.id, 1)}
+                      accessibilityLabel={`Increase quantity of ${item.product.name}`}
+                      accessibilityRole="button"
+                      style={[styles.smallStepBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                      <Ionicons name="add" size={16} color={theme.text} />
+                    </Pressable>
+                    <Pressable
+                      onPress={() => removeFromCart(item.product.id)}
+                      accessibilityLabel={`Remove ${item.product.name} from bill`}
+                      accessibilityRole="button"
+                      style={styles.trashBtn}>
+                      <Ionicons name="trash-outline" size={16} color={theme.danger} />
+                    </Pressable>
+                  </View>
                 </View>
+              ))}
+            </ScrollView>
+            {cart.length > 3 && (
+              <View style={[styles.scrollIndicatorRow, { borderTopColor: theme.border, backgroundColor: theme.card }]}>
+                <Ionicons name="swap-vertical" size={12} color={theme.textMuted} />
+                <Text style={[styles.scrollIndicatorText, { color: theme.textMuted }]}>
+                  {language === 'ur'
+                    ? `تمام ${cart.length} اشیاء دیکھنے کے لیے سکرول کریں`
+                    : `Scroll to view all ${cart.length} items`}
+                </Text>
               </View>
-            ))}
+            )}
           </View>
         )}
 
@@ -571,8 +600,13 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               )}
             </View>
 
-            {/* Quick Denominations */}
-            <View style={styles.denomRow}>
+            {/* Quick Denominations (Horizontal Scroll) */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              nestedScrollEnabled={true}
+              style={styles.denomScroll}
+              contentContainerStyle={styles.denomScrollContent}>
               <Pressable
                 onPress={() => setTenderedCash(grandTotal.toString())}
                 style={[
@@ -615,7 +649,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   </Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
 
             {/* Tendered Input */}
             <TextInput
@@ -637,31 +671,38 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   styles.changeBanner,
                   {
                     backgroundColor:
-                      changeToReturn >= 0 ? theme.successLight : theme.dangerLight,
+                      parsedTendered >= grandTotal ? theme.successLight : theme.dangerLight,
                     borderColor:
-                      changeToReturn >= 0 ? theme.success : theme.danger,
+                      parsedTendered >= grandTotal ? theme.success : theme.danger,
                   },
                 ]}>
                 <View>
                   <Text
                     style={[
                       styles.changeBannerLabel,
-                      { color: changeToReturn >= 0 ? theme.success : theme.danger },
+                      { color: parsedTendered >= grandTotal ? theme.success : theme.danger },
                     ]}>
-                    {t('changeReturn')}
+                    {parsedTendered >= grandTotal
+                      ? t('changeReturn')
+                      : language === 'ur'
+                      ? 'کم رقم (بقایا مطلوب)'
+                      : 'Short Amount (Insufficient)'}
                   </Text>
                   <Text
                     style={[
                       styles.changeBannerAmount,
-                      { color: changeToReturn >= 0 ? theme.success : theme.danger },
+                      { color: parsedTendered >= grandTotal ? theme.success : theme.danger },
                     ]}>
-                    {settings.currencySymbol} {changeToReturn}
+                    {settings.currencySymbol}{' '}
+                    {parsedTendered >= grandTotal
+                      ? changeToReturn
+                      : grandTotal - parsedTendered}
                   </Text>
                 </View>
                 <Ionicons
-                  name={changeToReturn >= 0 ? 'checkmark-circle' : 'alert-circle'}
+                  name={parsedTendered >= grandTotal ? 'checkmark-circle' : 'alert-circle'}
                   size={28}
-                  color={changeToReturn >= 0 ? theme.success : theme.danger}
+                  color={parsedTendered >= grandTotal ? theme.success : theme.danger}
                 />
               </View>
             )}
@@ -675,43 +716,72 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               {t('selectCustomer')} *
             </Text>
 
-            {/* Existing Khata Customers Horizontal Chips */}
-            {khata.length > 0 && (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.khataChipsScroll}
-                contentContainerStyle={styles.khataChipsContent}>
-                {khata.map((cust) => {
-                  const isCustSelected = selectedKhataCustomer?.id === cust.id;
-                  return (
-                    <Pressable
-                      key={cust.id}
-                      onPress={() => handleSelectKhataCustomer(cust)}
+            {/* Horizontal Chips: New Customer + Existing Khata Customers */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              nestedScrollEnabled={true}
+              style={styles.khataChipsScroll}
+              contentContainerStyle={styles.khataChipsContent}>
+              <Pressable
+                onPress={() => {
+                  setSelectedKhataCustomer(null);
+                  setCustomerName('');
+                  setCustomerPhone('');
+                }}
+                style={[
+                  styles.khataChip,
+                  {
+                    backgroundColor: !selectedKhataCustomer ? theme.primary : theme.card,
+                    borderColor: !selectedKhataCustomer ? theme.primary : theme.border,
+                  },
+                ]}>
+                <Ionicons
+                  name="person-add"
+                  size={13}
+                  color={!selectedKhataCustomer ? '#FFFFFF' : theme.primary}
+                />
+                <Text
+                  style={[
+                    styles.khataChipName,
+                    {
+                      color: !selectedKhataCustomer ? '#FFFFFF' : theme.text,
+                      fontWeight: '700',
+                    },
+                  ]}>
+                  {language === 'ur' ? '+ نیا گاہک' : '+ New Customer'}
+                </Text>
+              </Pressable>
+
+              {khata.map((cust) => {
+                const isCustSelected = selectedKhataCustomer?.id === cust.id;
+                return (
+                  <Pressable
+                    key={cust.id}
+                    onPress={() => handleSelectKhataCustomer(cust)}
+                    style={[
+                      styles.khataChip,
+                      {
+                        backgroundColor: isCustSelected ? theme.primary : theme.card,
+                        borderColor: isCustSelected ? theme.primary : theme.border,
+                      },
+                    ]}>
+                    <Ionicons
+                      name="person"
+                      size={12}
+                      color={isCustSelected ? '#FFFFFF' : theme.primary}
+                    />
+                    <Text
                       style={[
-                        styles.khataChip,
-                        {
-                          backgroundColor: isCustSelected ? theme.primary : theme.card,
-                          borderColor: isCustSelected ? theme.primary : theme.border,
-                        },
+                        styles.khataChipName,
+                        { color: isCustSelected ? '#FFFFFF' : theme.text },
                       ]}>
-                      <Ionicons
-                        name="person"
-                        size={12}
-                        color={isCustSelected ? '#FFFFFF' : theme.primary}
-                      />
-                      <Text
-                        style={[
-                          styles.khataChipName,
-                          { color: isCustSelected ? '#FFFFFF' : theme.text },
-                        ]}>
-                        {cust.name}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            )}
+                      {cust.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
 
             {/* Customer Name & Phone Input */}
             <View style={{ gap: 8, marginTop: 4 }}>
@@ -720,7 +790,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   styles.formInput,
                   { backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
                 ]}
-                placeholder={t('customerName')}
+                placeholder={language === 'ur' ? 'گاہک کا نام درج کریں *' : 'Enter Customer Name *'}
                 placeholderTextColor={theme.textMuted}
                 value={customerName}
                 onChangeText={(val) => {
@@ -739,6 +809,15 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 value={customerPhone}
                 onChangeText={setCustomerPhone}
               />
+              <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 1 }}>
+                {selectedKhataCustomer
+                  ? language === 'ur'
+                    ? `موجودہ کھاتہ بیلنس: ${settings.currencySymbol}${selectedKhataCustomer.totalDebt || 0}`
+                    : `Existing Khata Balance: ${settings.currencySymbol}${selectedKhataCustomer.totalDebt || 0}`
+                  : language === 'ur'
+                  ? 'نیا گاہک خودکار طور پر کھاتہ رجسٹر میں شامل ہو جائے گا۔'
+                  : 'New customer will be automatically created in Khata on checkout.'}
+              </Text>
             </View>
           </View>
         )}
@@ -915,18 +994,26 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               },
               pressed && cart.length > 0 && { transform: [{ scale: 0.97 }] },
             ]}>
-            <Ionicons
-              name="checkmark-circle"
-              size={22}
-              color={cart.length === 0 ? theme.textMuted : '#FFFFFF'}
-            />
+            {isProcessing ? (
+              <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 6 }} />
+            ) : (
+              <Ionicons
+                name="checkmark-circle"
+                size={22}
+                color={cart.length === 0 ? theme.textMuted : '#FFFFFF'}
+              />
+            )}
             <Text
               style={[
                 styles.completeSaleBtnText,
                 cart.length === 0 && { color: theme.textMuted },
               ]}
               numberOfLines={1}>
-              {isProcessing ? t('saved') : t('generateBill')}
+              {isProcessing
+                ? language === 'ur'
+                  ? 'پروسیس ہو رہا ہے...'
+                  : 'Processing...'
+                : t('generateBill')}
             </Text>
           </Pressable>
         </View>
@@ -1106,8 +1193,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               </Text>
               <Text style={[styles.catalogEmptySub, { color: theme.textSecondary }]}>
                 {language === 'ur'
-                  ? 'سیل کرنے کے لیے پہلے پروڈکٹ شامل کریں، یا فوری آئٹم (Quick Item) سے بغیر کیٹلاگ کے بل بنائیں۔'
-                  : 'Add products to build your catalog, or tap Quick Item to sell unlisted loose items immediately.'}
+                  ? 'سیل کرنے کے لیے پہلے پروڈکٹ شامل کریں۔'
+                  : 'Add products to your catalog to start creating sales.'}
               </Text>
 
               <View style={styles.catalogEmptyBtnRow}>
@@ -1121,19 +1208,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   <Ionicons name="add-circle" size={18} color="#FFFFFF" />
                   <Text style={styles.catalogEmptyPrimaryBtnText}>
                     {t('addProductBtn')}
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setIsQuickItemOpen(true)}
-                  style={({ pressed }) => [
-                    styles.catalogEmptySecondaryBtn,
-                    { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-                  ]}>
-                  <Ionicons name="flash" size={16} color={theme.accent} />
-                  <Text style={[styles.catalogEmptySecondaryBtnText, { color: theme.text }]}>
-                    {t('quickItem')}
                   </Text>
                 </Pressable>
               </View>
@@ -2148,14 +2222,32 @@ const styles = StyleSheet.create({
   itemsCard: {
     borderRadius: 16,
     borderWidth: 1,
-    paddingHorizontal: Spacing.md,
     overflow: 'hidden',
+  },
+  cartItemsScroll: {
+    width: '100%',
+  },
+  cartItemsScrollContent: {
+    flexGrow: 0,
   },
   cartItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
+    paddingHorizontal: Spacing.md,
+  },
+  scrollIndicatorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    borderTopWidth: 1,
+  },
+  scrollIndicatorText: {
+    fontSize: 11,
+    fontWeight: '600',
   },
   cartItemName: {
     fontSize: 14,
@@ -2254,16 +2346,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  denomRow: {
+  denomScroll: {
+    marginHorizontal: -Spacing.md,
+  },
+  denomScrollContent: {
+    paddingHorizontal: Spacing.md,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+    alignItems: 'center',
+    gap: 8,
   },
   denomBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
+    flexShrink: 0,
   },
   denomText: {
     fontSize: 12,
