@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     marginHorizontal: -Spacing.md,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
-    paddingBottom: 100,
+    paddingBottom: 70,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
   },

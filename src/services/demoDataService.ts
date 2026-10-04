@@ -308,3 +308,5 @@ export function generateDemoSales(products: Product[]): Sale[] {
     },
   ];
 }
+
+

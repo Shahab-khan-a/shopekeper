@@ -91,7 +91,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ sales }) => {
             const barHeight = Math.max(4, (heightPercent / 100) * 110);
 
             const barColor = bar.revenue > 0
-              ? (isSelected || bar.isPeak ? theme.primary : theme.primaryDark || theme.primary)
+              ? (isSelected || bar.isPeak ? theme.primary : theme.primaryHover)
               : 'transparent';
 
             return (
