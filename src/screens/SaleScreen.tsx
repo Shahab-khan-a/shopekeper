@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -99,6 +100,23 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [isCheckoutDrawerOpen, setIsCheckoutDrawerOpen] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const checkoutScrollRef = useRef<ScrollView>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   // W1-3: Success toast — stores last completed sale for explicit receipt view
   const [lastCompletedSale, setLastCompletedSale] = useState<any>(null);
@@ -455,8 +473,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
 
       <ScrollView
+        ref={checkoutScrollRef}
         style={styles.drawerScroll}
-        contentContainerStyle={styles.drawerScrollContent}
+        contentContainerStyle={[
+          styles.drawerScrollContent,
+          { paddingBottom: keyboardHeight > 0 ? 80 : 20 },
+        ]}
         keyboardShouldPersistTaps="handled">
         {/* Cart Items List */}
         {cart.length === 0 ? (
@@ -797,17 +819,27 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   setCustomerName(val);
                   setSelectedKhataCustomer(null);
                 }}
+                onFocus={() => {
+                  setTimeout(() => {
+                    checkoutScrollRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
               <TextInput
                 style={[
                   styles.formInput,
                   { backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
                 ]}
-                placeholder={t('customerPhone')}
+                placeholder={language === 'ur' ? 'گاہک کا واٹس ایپ / فون نمبر *' : 'Customer WhatsApp / Phone *'}
                 placeholderTextColor={theme.textMuted}
                 keyboardType="phone-pad"
                 value={customerPhone}
                 onChangeText={setCustomerPhone}
+                onFocus={() => {
+                  setTimeout(() => {
+                    checkoutScrollRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
               <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 1 }}>
                 {selectedKhataCustomer
@@ -861,6 +893,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 keyboardType="numeric"
                 value={discount}
                 onChangeText={setDiscount}
+                onFocus={() => {
+                  setTimeout(() => {
+                    checkoutScrollRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
               <View style={styles.discShortcuts}>
                 {DISCOUNT_SHORTCUTS.map((amt) => {
@@ -899,7 +936,15 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         {paymentMethod !== 'udhaar' && (
           <View style={styles.collapsibleWrap}>
             <Pressable
-              onPress={() => setShowOptionalDetails(!showOptionalDetails)}
+              onPress={() => {
+                const next = !showOptionalDetails;
+                setShowOptionalDetails(next);
+                if (next) {
+                  setTimeout(() => {
+                    checkoutScrollRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }
+              }}
               style={styles.collapsibleHeader}>
               <View style={styles.collapsibleTitleRow}>
                 <Ionicons
@@ -923,11 +968,16 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                     styles.formInput,
                     { backgroundColor: theme.card, color: theme.text, borderColor: theme.border },
                   ]}
-                  placeholder="WhatsApp (0300...)"
+                  placeholder={language === 'ur' ? 'واٹس ایپ نمبر (0300...)' : 'WhatsApp (0300...)'}
                   placeholderTextColor={theme.textMuted}
                   keyboardType="phone-pad"
                   value={customerPhone}
                   onChangeText={setCustomerPhone}
+                  onFocus={() => {
+                    setTimeout(() => {
+                      checkoutScrollRef.current?.scrollToEnd({ animated: true });
+                    }, 150);
+                  }}
                 />
               </View>
             )}
@@ -1629,16 +1679,23 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           visible={isCheckoutDrawerOpen}
           animationType="slide"
           onRequestClose={() => setIsCheckoutDrawerOpen(false)}>
-          <View
-            style={[
-              styles.mobileModalContainer,
-              {
-                backgroundColor: theme.surface,
-                paddingTop: insets.top > 0 ? insets.top : Platform.OS === 'ios' ? 16 : 8,
-              },
-            ]}>
-            {renderCheckoutContent()}
-          </View>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <View
+              style={[
+                styles.mobileModalContainer,
+                {
+                  backgroundColor: theme.surface,
+                  paddingTop: insets.top > 0 ? insets.top : Platform.OS === 'ios' ? 16 : 8,
+                },
+                Platform.OS === 'android' && keyboardHeight > 0 && {
+                  paddingBottom: keyboardHeight,
+                },
+              ]}>
+              {renderCheckoutContent()}
+            </View>
+          </KeyboardAvoidingView>
         </Modal>
       )}
 

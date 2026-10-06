@@ -26,6 +26,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
     language,
     setLanguage,
     isOnline,
+    setActiveTab,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -49,7 +50,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
       setIsLoading(true);
       setErrorMessage(null);
       const result = await signInWithGoogle();
-      if (!result.success) {
+      if (result.success) {
+        setActiveTab('dashboard');
+      } else {
         if (result.error && !result.error.toLowerCase().includes('cancel')) {
           setErrorMessage(result.error);
         }
@@ -255,7 +258,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
 
             {/* Secondary Action: Explore as Guest */}
             <Pressable
-              onPress={onContinueAsGuest}
+              onPress={() => {
+                setActiveTab('dashboard');
+                onContinueAsGuest();
+              }}
               style={({ pressed }) => [
                 styles.guestBtn,
                 { borderColor: theme.border, backgroundColor: theme.surfaceSubtle },

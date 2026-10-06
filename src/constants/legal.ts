@@ -8,7 +8,7 @@ export const LEGAL_CONFIG = {
   privacyPolicyUrl: 'https://shopkeeper-a977a.web.app/privacy-policy.html',
   termsOfServiceUrl: 'https://shopkeeper-a977a.web.app/terms.html',
   accountDeletionUrl: 'https://shopkeeper-a977a.web.app/delete-account.html',
-  appVersion: '1.0.0',
+  appVersion: '1.0.1',
 };
 
 /**

@@ -20,6 +20,8 @@ import {
   Animated,
   BackHandler,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   LayoutChangeEvent,
   Modal,
   Platform,
@@ -80,8 +82,9 @@ const InlineField: React.FC<{
   placeholder?: string;
   keyboardType?: 'default' | 'phone-pad' | 'email-address' | 'numeric';
   onSubmitEditing?: () => void;
+  onFocus?: () => void;
   theme: ThemeColors;
-}> = ({ value, onChangeText, placeholder, keyboardType = 'default', onSubmitEditing, theme }) => (
+}> = ({ value, onChangeText, placeholder, keyboardType = 'default', onSubmitEditing, onFocus, theme }) => (
   <TextInput
     value={value}
     onChangeText={onChangeText}
@@ -89,6 +92,7 @@ const InlineField: React.FC<{
     placeholderTextColor={theme.textMuted}
     keyboardType={keyboardType}
     onSubmitEditing={onSubmitEditing}
+    onFocus={onFocus}
     style={[styles.inlineInput, { color: theme.text }]}
     textAlign="right"
   />
@@ -110,7 +114,8 @@ const StackedField: React.FC<{
   multiline?: boolean;
   theme: ThemeColors;
   last?: boolean;
-}> = ({ icon, iconColor, iconBg, label, value, onChangeText, placeholder, keyboardType = 'default', multiline = false, theme, last }) => (
+  onFocus?: () => void;
+}> = ({ icon, iconColor, iconBg, label, value, onChangeText, placeholder, keyboardType = 'default', multiline = false, theme, last, onFocus }) => (
   <View
     style={[
       stackedStyles.fieldWrap,
@@ -132,6 +137,7 @@ const StackedField: React.FC<{
       placeholderTextColor={theme.textMuted}
       keyboardType={keyboardType}
       multiline={multiline}
+      onFocus={onFocus}
       style={[
         stackedStyles.fieldInput,
         {
@@ -339,6 +345,7 @@ export const SettingsScreen: React.FC = () => {
   const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [showImportBox, setShowImportBox] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -351,6 +358,24 @@ export const SettingsScreen: React.FC = () => {
 
   useEffect(() => {
     googleDriveService.getSavedAuth().then(setDriveAuth);
+  }, []);
+
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
 
   // Profile fields (shop logo & store identity)
@@ -462,15 +487,28 @@ export const SettingsScreen: React.FC = () => {
   // Intercept hardware back button on Android
   useEffect(() => {
     const onHardwareBack = () => {
-      if (isFormDirty) {
-        promptUnsavedChanges();
+      if (isCameraOpen) {
+        setIsCameraOpen(false);
         return true;
       }
-      return false;
+      if (isCurrencyPickerOpen) {
+        setIsCurrencyPickerOpen(false);
+        return true;
+      }
+      if (showImportBox) {
+        setShowImportBox(false);
+        return true;
+      }
+      if (isFormDirty) {
+        promptUnsavedChanges();
+      } else {
+        setActiveTab('dashboard');
+      }
+      return true;
     };
     const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
     return () => sub.remove();
-  }, [isFormDirty]);
+  }, [isCameraOpen, isCurrencyPickerOpen, showImportBox, isFormDirty, setActiveTab]);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const pickImage = async () => {
@@ -700,12 +738,18 @@ export const SettingsScreen: React.FC = () => {
           style: 'destructive',
           icon: 'log-out-outline',
           onPress: async () => {
-            await logout();
-            showAlert({
-              type: 'success',
-              title: t('success'),
-              message: 'Signed out. Your local records are safe.',
-            });
+            try {
+              setIsLoggingOut(true);
+              await logout();
+            } catch (err: any) {
+              showAlert({
+                type: 'error',
+                title: t('error'),
+                message: err?.message || 'Failed to sign out',
+              });
+            } finally {
+              setIsLoggingOut(false);
+            }
           },
         },
         { text: t('cancel'), style: 'cancel' },
@@ -733,12 +777,6 @@ export const SettingsScreen: React.FC = () => {
                   type: 'error',
                   title: t('error'),
                   message: res.error || 'Failed to delete account',
-                });
-              } else {
-                showAlert({
-                  type: 'success',
-                  title: t('success'),
-                  message: t('deleteAccountSuccess'),
                 });
               }
             } catch (err: any) {
@@ -903,12 +941,20 @@ export const SettingsScreen: React.FC = () => {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <ScrollView
+        ref={scrollViewRef}
+        style={[styles.container, { backgroundColor: theme.background }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 120 : 80 },
+        ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Pressable
@@ -1205,6 +1251,11 @@ export const SettingsScreen: React.FC = () => {
                 value={email} onChangeText={setEmail}
                 placeholder="store@gmail.com" keyboardType="email-address"
                 theme={theme}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
               <StackedField
                 icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7"
@@ -1212,6 +1263,11 @@ export const SettingsScreen: React.FC = () => {
                 value={city} onChangeText={setCity}
                 placeholder="e.g. Lahore"
                 theme={theme}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
               <StackedField
                 icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7"
@@ -1221,6 +1277,11 @@ export const SettingsScreen: React.FC = () => {
                 multiline
                 theme={theme}
                 last
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
             </View>
           </View>
@@ -1347,6 +1408,11 @@ export const SettingsScreen: React.FC = () => {
                 value={footerNote} onChangeText={setFooterNote}
                 placeholder="Thank you for shopping!"
                 theme={theme}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
               <StackedField
                 icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE"
@@ -1355,6 +1421,11 @@ export const SettingsScreen: React.FC = () => {
                 placeholder="خریداری کا شکریہ!"
                 theme={theme}
                 last
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
               />
             </View>
           </View>
@@ -1505,17 +1576,23 @@ export const SettingsScreen: React.FC = () => {
                     </Text>
                   </Pressable>
 
+                  {/* Sign Out */}
                   <Pressable
                     onPress={handleLogout}
+                    disabled={isLoggingOut || isDeletingAccount}
                     style={({ pressed }) => [
                       styles.signOutActionBtn,
                       { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, borderWidth: 1 },
-                      pressed && { opacity: 0.8 },
+                      (pressed || isLoggingOut) && { opacity: 0.8 },
                     ]}
                   >
-                    <Ionicons name="log-out-outline" size={15} color={theme.text} />
+                    {isLoggingOut ? (
+                      <ActivityIndicator size="small" color={theme.text} />
+                    ) : (
+                      <Ionicons name="log-out-outline" size={15} color={theme.text} />
+                    )}
                     <Text style={[styles.signOutActionBtnText, { color: theme.text }]}>
-                      {t('signOut')}
+                      {isLoggingOut ? t('signingOut') : t('signOut')}
                     </Text>
                   </Pressable>
                 </View>
@@ -1523,7 +1600,7 @@ export const SettingsScreen: React.FC = () => {
                 {/* Account & Data Deletion */}
                 <Pressable
                   onPress={handleDeleteAccount}
-                  disabled={isDeletingAccount}
+                  disabled={isLoggingOut || isDeletingAccount}
                   style={({ pressed }) => [
                     styles.deleteAccountBtn,
                     { backgroundColor: theme.dangerLight, borderColor: '#FCA5A5', borderWidth: 1 },
@@ -1772,7 +1849,8 @@ export const SettingsScreen: React.FC = () => {
         title={t('takePhoto')}
       />
 
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

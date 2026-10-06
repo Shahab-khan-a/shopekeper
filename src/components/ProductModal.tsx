@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,10 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
+  Keyboard,
   ActivityIndicator,
   Linking,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
@@ -111,6 +113,27 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
   const [isDriveConnected, setIsDriveConnected] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+      }
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   // Intelligent preset photo caching:
   // If first opened without internet, hide presets so no broken/blank images appear.
@@ -262,7 +285,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setIsUploadingToDrive(true);
       try {
         const driveUrl = await googleDriveService.uploadProductImage(
-          persistentUri,
+          rawUri || persistentUri,
           `product_${Date.now()}.jpg`
         );
         setImage(driveUrl);
@@ -418,8 +441,22 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.kavContainer}>
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalCard, { backgroundColor: theme.surface, borderColor: sectionBorder }]}>
+          <View
+            style={[
+              styles.modalOverlay,
+              Platform.OS === 'android' && keyboardHeight > 0 && {
+                paddingBottom: keyboardHeight,
+                paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 8 : 28,
+              },
+            ]}>
+            <View
+              style={[
+                styles.modalCard,
+                { backgroundColor: theme.surface, borderColor: sectionBorder },
+                Platform.OS === 'android' && keyboardHeight > 0 && {
+                  height: '100%',
+                },
+              ]}>
               {/* Sheet Drag Handle for Mobile */}
               {Platform.OS !== 'web' && (
                 <View style={styles.sheetHandleWrap}>
@@ -451,8 +488,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               </View>
 
               <ScrollView
+                ref={scrollViewRef}
                 style={styles.scrollArea}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[
+                  styles.scrollContent,
+                  { paddingBottom: keyboardHeight > 0 ? 80 : 120 },
+                ]}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
                 {/* ── Photo Section ── */}
@@ -1101,7 +1142,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         keyboardType="numeric"
                         value={stock}
                         onChangeText={setStock}
-                        onFocus={() => setFocusedField('stock')}
+                        onFocus={() => {
+                          setFocusedField('stock');
+                          setTimeout(() => {
+                            scrollViewRef.current?.scrollToEnd({ animated: true });
+                          }, 150);
+                        }}
                         onBlur={() => setFocusedField(null)}
                       />
                       {/* Stock shortcuts */}
@@ -1155,7 +1201,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         placeholderTextColor={theme.textMuted}
                         value={barcode}
                         onChangeText={setBarcode}
-                        onFocus={() => setFocusedField('barcode')}
+                        onFocus={() => {
+                          setFocusedField('barcode');
+                          setTimeout(() => {
+                            scrollViewRef.current?.scrollToEnd({ animated: true });
+                          }, 150);
+                        }}
                         onBlur={() => setFocusedField(null)}
                       />
                       <Pressable

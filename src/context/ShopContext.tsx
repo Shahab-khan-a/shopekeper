@@ -197,6 +197,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const continueAsGuest = useCallback(async () => {
+    setActiveTab('dashboard');
     setIsGuestMode(true);
     await SettingsRepository.setGuestMode(true).catch(() => {});
   }, []);
@@ -344,6 +345,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAuthLoading(false);
 
       if (currentUser) {
+        setActiveTab('dashboard');
         if (!NetworkService.isCurrentlyOnline()) {
           setSyncStatus('offline');
           return;
@@ -683,6 +685,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const result = await authSignInWithGoogle();
     setAuthLoading(false);
     if (result.success && result.user) {
+      setActiveTab('dashboard');
       const gUser = result.user;
       setUser(gUser);
       setIsGuestMode(false);
@@ -708,6 +711,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await googleDriveService.disconnect();
     setUser(null);
     setIsGuestMode(false);
+    setActiveTab('dashboard');
     setSyncStatus('idle');
   }, [user?.uid]);
 
@@ -772,6 +776,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SettingsRepository.setGuestMode(false).catch(() => {});
     setUser(null);
     setIsGuestMode(false);
+    setActiveTab('dashboard');
     setSyncStatus('idle');
     return { success: true };
   }, [user?.uid, clearStoreData]);

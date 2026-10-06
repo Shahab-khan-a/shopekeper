@@ -263,18 +263,18 @@ ${t('paymentMethod')}: ${sale.paymentMethod}
         onPress: () => handleRefundSale(sale),
       });
     }
-    if (sale.customerPhone) {
+    if (sale.customerPhone?.trim()) {
       buttons.push({
         text: t('callCustomer'),
         icon: 'call-outline',
         onPress: () => handleCallCustomer(sale.customerPhone),
       });
+      buttons.push({
+        text: t('shareWhatsApp'),
+        icon: 'logo-whatsapp',
+        onPress: () => shareWhatsApp(sale),
+      });
     }
-    buttons.push({
-      text: t('shareWhatsApp'),
-      icon: 'logo-whatsapp',
-      onPress: () => shareWhatsApp(sale),
-    });
     buttons.push({ text: t('cancel'), style: 'cancel' });
 
     showAlert({
@@ -797,7 +797,7 @@ ${t('paymentMethod')}: ${sale.paymentMethod}
                             </Text>
                           </Pressable>
 
-                          {!isRefunded && sale.paymentMethod === 'cash' ? (
+                          {!isRefunded && Boolean(sale.customerPhone?.trim()) && (
                             <Pressable
                               onPress={() => shareWhatsApp(sale)}
                               style={({ pressed }) => [
@@ -808,17 +808,7 @@ ${t('paymentMethod')}: ${sale.paymentMethod}
                               <Ionicons name="logo-whatsapp" size={15} color="#FFFFFF" />
                               <Text style={styles.whatsappBtnText}>{t('whatsapp')}</Text>
                             </Pressable>
-                          ) : !isRefunded ? (
-                            <Pressable
-                              onPress={() => setActiveReceipt(sale)}
-                              style={({ pressed }) => [
-                                styles.iconActionBtn,
-                                { borderColor: softBorder, backgroundColor: cardBg },
-                                pressed && { opacity: 0.8 },
-                              ]}>
-                              <Ionicons name="print-outline" size={16} color={theme.textMuted} />
-                            </Pressable>
-                          ) : null}
+                          )}
 
                           {!isRefunded ? (
                             <Pressable

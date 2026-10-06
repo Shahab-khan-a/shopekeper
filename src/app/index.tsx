@@ -11,7 +11,6 @@ import { ReceiptModal } from '@/components/ReceiptModal';
 import { AuthModal } from '@/components/AuthModal';
 import { EditShopModal } from '@/components/EditShopModal';
 import { LoginScreen } from '@/screens/LoginScreen';
-import { ConnectDriveScreen } from '@/screens/ConnectDriveScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { ProductsScreen } from '@/screens/ProductsScreen';
@@ -45,39 +44,6 @@ export default function App() {
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
-
-  // Track if user has completed or dismissed the post-login Google Drive setup
-  const [isDriveStepCompleted, setIsDriveStepCompleted] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (!user) {
-      setIsDriveStepCompleted(null);
-      return;
-    }
-
-    AsyncStorage.getItem(`@shopkeeper_drive_onboarded_${user.uid}`)
-      .then((val) => {
-        if (val === 'true') {
-          setIsDriveStepCompleted(true);
-        } else {
-          setIsDriveStepCompleted(false);
-        }
-      })
-      .catch(() => {
-        setIsDriveStepCompleted(false);
-      });
-  }, [user?.uid]);
-
-  const handleFinishDriveOnboarding = async () => {
-    if (user?.uid) {
-      try {
-        await AsyncStorage.setItem(`@shopkeeper_drive_onboarded_${user.uid}`, 'true');
-      } catch (e) {
-        console.warn('[App] Error storing drive onboarding flag:', e);
-      }
-    }
-    setIsDriveStepCompleted(true);
-  };
 
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -115,7 +81,6 @@ export default function App() {
             />
           </View>
           <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
-          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>ڈیجی شاپ</Text>
           <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
           <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
             Loading your store...
@@ -141,7 +106,6 @@ export default function App() {
               />
             </View>
             <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
-            <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>ڈیجی شاپ</Text>
             <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
             <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
               Checking your account...
@@ -161,48 +125,7 @@ export default function App() {
       );
     }
 
-    // 3. Authenticated User - Check Drive Onboarding Status
-    if (user && !isGuestMode && isDriveStepCompleted === null) {
-      return (
-        <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
-          <StatusBar
-            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={theme.surface}
-          />
-          <View style={styles.loadingLogoOuter}>
-            <Image
-              source={require('@/../assets/images/mainLogoImage.png')}
-              style={styles.loadingLogoImg}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
-          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>ڈیجی شاپ</Text>
-          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
-          <Text style={[styles.loadingSub, { color: theme.textMuted, marginTop: 12 }]}>
-            Setting up your store...
-          </Text>
-        </SafeAreaView>
-      );
-    }
-
-    // 4. Authenticated User - Connect Google Drive Screen (Post-Login Step)
-    if (user && !isGuestMode && !isDriveStepCompleted) {
-      return (
-        <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
-          <StatusBar
-            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={theme.surface}
-          />
-          <ConnectDriveScreen
-            user={user}
-            onGoNext={handleFinishDriveOnboarding}
-          />
-        </SafeAreaView>
-      );
-    }
-
-    // 5. Authenticated or Guest Mode -> Show Main Store POS App
+    // 3. Authenticated or Guest Mode -> Show Main Store POS App
     return (
       <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: theme.surface }]}>
         <StatusBar
