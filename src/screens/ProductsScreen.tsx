@@ -20,19 +20,9 @@ import {
   View,
 } from 'react-native';
 
-const CATEGORIES: (ProductCategory | 'LowStock')[] = [
-  'All',
-  'LowStock',
-  'Kiryana',
-  'Grocery',
-  'Beverages',
-  'Dairy',
-  'Snacks',
-  'Spices',
-  'Personal Care',
-  'Bakery',
-  'Others',
-];
+import { PRODUCTS_FILTER_CATEGORIES } from '@/constants/categories';
+
+const CATEGORIES: (ProductCategory | 'LowStock')[] = PRODUCTS_FILTER_CATEGORIES;
 
 export const ProductsScreen: React.FC = () => {
   const {

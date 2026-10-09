@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ActivityIndicator, Text, Image } from 'react-native';
+import { View, StyleSheet, StatusBar, ActivityIndicator, Text, Image, Platform, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +23,7 @@ import { AlertModal } from '@/components/ui';
 export default function App() {
   const {
     activeTab,
+    setActiveTab,
     settings,
     isAddProductOpen,
     setIsAddProductOpen,
@@ -44,6 +45,66 @@ export default function App() {
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+
+  // Global Android Hardware Back Button Stack Management
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const onHardwareBack = () => {
+      // 1. Dismiss topmost Alert dialog if active
+      if (alertConfig) {
+        hideAlert();
+        return true;
+      }
+      // 2. Dismiss Receipt modal if active
+      if (activeReceipt) {
+        setActiveReceipt(null);
+        return true;
+      }
+      // 3. Dismiss Product Add/Edit modal if active
+      if (isAddProductOpen) {
+        setIsAddProductOpen(false);
+        setEditingProduct(null);
+        return true;
+      }
+      // 4. Dismiss Auth modal if active
+      if (isAuthModalOpen) {
+        setIsAuthModalOpen(false);
+        return true;
+      }
+      // 5. Dismiss Edit Shop profile modal if active
+      if (isEditShopOpen) {
+        setIsEditShopOpen(false);
+        return true;
+      }
+      // 6. Navigation Stack: If in Sale, Products, History, or Khata, back navigates to Dashboard
+      // (SettingsScreen has its own dedicated handler to prompt if store form is dirty)
+      if (activeTab !== 'dashboard' && activeTab !== 'settings') {
+        setActiveTab('dashboard');
+        return true;
+      }
+
+      // If already on Dashboard with no modals open, allow default Android back action (exit)
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+    return () => sub.remove();
+  }, [
+    alertConfig,
+    activeReceipt,
+    isAddProductOpen,
+    isAuthModalOpen,
+    isEditShopOpen,
+    activeTab,
+    hideAlert,
+    setActiveReceipt,
+    setIsAddProductOpen,
+    setEditingProduct,
+    setIsAuthModalOpen,
+    setIsEditShopOpen,
+    setActiveTab,
+  ]);
 
   const renderActiveScreen = () => {
     switch (activeTab) {

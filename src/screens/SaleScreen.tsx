@@ -26,18 +26,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const CATEGORIES: ProductCategory[] = [
-  'All',
-  'Kiryana',
-  'Grocery',
-  'Beverages',
-  'Dairy',
-  'Snacks',
-  'Spices',
-  'Personal Care',
-  'Bakery',
-  'Others',
-];
+import { SALE_CATEGORIES } from '@/constants/categories';
+
+const CATEGORIES: ProductCategory[] = SALE_CATEGORIES;
 
 const CASH_DENOMINATIONS = [100, 500, 1000, 5000];
 const DISCOUNT_SHORTCUTS = [10, 20, 50, 100];

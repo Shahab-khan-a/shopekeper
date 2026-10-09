@@ -23,6 +23,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Product, ProductCategory, ProductUnit } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { CameraModal } from '@/components/CameraModal';
+import { ProductBarcodeModal } from '@/components/ProductBarcodeModal';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { googleDriveService } from '@/services/googleDriveService';
 import { ProductImage } from '@/components/ProductImage';
@@ -33,46 +34,18 @@ interface ProductModalProps {
   productToEdit?: Product | null;
 }
 
-export interface CategoryOption {
-  key: ProductCategory;
-  labelEn: string;
-  labelUrdu: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  subtitle: string;
-}
+import {
+  CATEGORY_OPTIONS,
+  UNIT_OPTIONS,
+  PRODUCT_CATEGORIES,
+  PRODUCT_UNITS,
+  CategoryOption,
+  UnitOption,
+} from '@/constants/categories';
+export { CATEGORY_OPTIONS, UNIT_OPTIONS, CategoryOption, UnitOption };
 
-export const CATEGORY_OPTIONS: CategoryOption[] = [
-  { key: 'Kiryana', labelEn: 'Kiryana', labelUrdu: 'کریانہ', icon: 'storefront-outline', subtitle: 'General Store' },
-  { key: 'Grocery', labelEn: 'Grocery', labelUrdu: 'گروسری', icon: 'cart-outline', subtitle: 'Pulses, Flour, Oil' },
-  { key: 'Beverages', labelEn: 'Beverages', labelUrdu: 'مشروبات', icon: 'wine-outline', subtitle: 'Cold Drinks, Juices, Tea' },
-  { key: 'Dairy', labelEn: 'Dairy', labelUrdu: 'دودھ و دہی', icon: 'nutrition-outline', subtitle: 'Milk, Yogurt, Butter, Eggs' },
-  { key: 'Snacks', labelEn: 'Snacks', labelUrdu: 'اسنیکس و بسکٹ', icon: 'pizza-outline', subtitle: 'Chips, Biscuits, Nimko' },
-  { key: 'Spices', labelEn: 'Spices', labelUrdu: 'مصالحہ جات', icon: 'flame-outline', subtitle: 'Spices, Salt, Masalas' },
-  { key: 'Personal Care', labelEn: 'Personal Care', labelUrdu: 'صابن و سرف', icon: 'sparkles-outline', subtitle: 'Soaps, Shampoos, Detergent' },
-  { key: 'Bakery', labelEn: 'Bakery', labelUrdu: 'بیکری', icon: 'cafe-outline', subtitle: 'Bread, Rusk, Cakes' },
-  { key: 'Others', labelEn: 'Others', labelUrdu: 'دیگر', icon: 'grid-outline', subtitle: 'General & Miscellaneous' },
-];
-
-export interface UnitOption {
-  key: ProductUnit;
-  labelEn: string;
-  labelUrdu: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  shortCode: string;
-}
-
-export const UNIT_OPTIONS: UnitOption[] = [
-  { key: 'piece', labelEn: 'Piece', labelUrdu: 'پیس / عدد', icon: 'cube-outline', shortCode: 'pc' },
-  { key: 'kg', labelEn: 'Kilogram', labelUrdu: 'کلوگرام', icon: 'scale-outline', shortCode: 'kg' },
-  { key: 'packet', labelEn: 'Packet', labelUrdu: 'پیکٹ', icon: 'bag-handle-outline', shortCode: 'pkt' },
-  { key: 'litre', labelEn: 'Litre', labelUrdu: 'لیٹر', icon: 'water-outline', shortCode: 'L' },
-  { key: 'dozen', labelEn: 'Dozen', labelUrdu: 'درجن (12)', icon: 'apps-outline', shortCode: 'dz' },
-  { key: 'box', labelEn: 'Box / Carton', labelUrdu: 'ڈبہ / کاٹن', icon: 'archive-outline', shortCode: 'box' },
-  { key: 'gram', labelEn: 'Gram', labelUrdu: 'گرام', icon: 'speedometer-outline', shortCode: 'g' },
-];
-
-const CATEGORIES: ProductCategory[] = CATEGORY_OPTIONS.map((c) => c.key);
-const UNITS: ProductUnit[] = UNIT_OPTIONS.map((u) => u.key);
+const CATEGORIES: ProductCategory[] = PRODUCT_CATEGORIES;
+const UNITS: ProductUnit[] = PRODUCT_UNITS;
 
 const PRESET_IMAGES = [
   { label: 'Oil / گھی', url: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop&q=80' },
@@ -110,6 +83,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [image, setImage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
   const [isDriveConnected, setIsDriveConnected] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -435,9 +409,29 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     }
   };
 
+  const handleRequestClose = () => {
+    if (isBarcodeScannerOpen) {
+      setIsBarcodeScannerOpen(false);
+      return;
+    }
+    if (isCameraOpen) {
+      setIsCameraOpen(false);
+      return;
+    }
+    if (isCategoryOpen) {
+      setIsCategoryOpen(false);
+      return;
+    }
+    if (isUnitOpen) {
+      setIsUnitOpen(false);
+      return;
+    }
+    onClose();
+  };
+
   return (
     <>
-      <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <Modal visible={visible} animationType="slide" transparent onRequestClose={handleRequestClose}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.kavContainer}>
@@ -1210,6 +1204,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         onBlur={() => setFocusedField(null)}
                       />
                       <Pressable
+                        onPress={() => setIsBarcodeScannerOpen(true)}
+                        style={({ pressed }) => [
+                          styles.scanBarcodeActionBtn,
+                          { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, borderWidth: 1 },
+                          pressed && { opacity: 0.8 },
+                        ]}>
+                        <Ionicons name="barcode-outline" size={17} color={theme.primary} />
+                        <Text style={[styles.scanBarcodeActionText, { color: theme.text }]}>
+                          {language === 'ur' ? 'سکین' : 'Scan'}
+                        </Text>
+                      </Pressable>
+                      <Pressable
                         onPress={generateRandomSku}
                         style={({ pressed }) => [
                           styles.autoSkuBtn,
@@ -1280,6 +1286,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         onClose={() => setIsCameraOpen(false)}
         onCapture={(uri) => handleImageSelected(uri)}
         title={name.trim() ? `Photo: ${name.trim()}` : t('takePhoto')}
+      />
+
+      <ProductBarcodeModal
+        visible={isBarcodeScannerOpen}
+        onClose={() => setIsBarcodeScannerOpen(false)}
+        onApplyBarcode={(code) => setBarcode(code)}
+        currentBarcode={barcode}
+        productIdToExclude={productToEdit?.id}
       />
     </>
   );
@@ -1689,6 +1703,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   autoSkuText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+  scanBarcodeActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 13,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+  },
+  scanBarcodeActionText: {
     fontSize: 12.5,
     fontWeight: '700',
   },
