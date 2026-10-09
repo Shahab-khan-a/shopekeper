@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TextInput,
-  Pressable,
   Animated,
   Easing,
-  Platform,
   KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Product } from '@/types';
-import { useShop } from '@/context/ShopContext';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 
 interface ProductBarcodeModalProps {
   visible: boolean;
@@ -75,10 +74,10 @@ export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
   const trimmed = inputCode.trim();
   const duplicateProduct = trimmed
     ? products.find(
-        (p) =>
-          p.barcode?.toLowerCase() === trimmed.toLowerCase() &&
-          p.id !== productIdToExclude
-      )
+      (p) =>
+        p.barcode?.toLowerCase() === trimmed.toLowerCase() &&
+        p.id !== productIdToExclude
+    )
     : null;
 
   const handleApply = () => {

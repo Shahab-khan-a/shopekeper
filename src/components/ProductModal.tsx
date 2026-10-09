@@ -1,32 +1,30 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TextInput,
-  ScrollView,
-  Pressable,
-  Image,
-  Alert,
-  Platform,
-  KeyboardAvoidingView,
-  Keyboard,
-  ActivityIndicator,
-  Linking,
-  StatusBar,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Image as ExpoImage } from 'expo-image';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
-import { Product, ProductCategory, ProductUnit } from '@/types';
-import { useShop } from '@/context/ShopContext';
 import { CameraModal } from '@/components/CameraModal';
 import { ProductBarcodeModal } from '@/components/ProductBarcodeModal';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
-import { googleDriveService } from '@/services/googleDriveService';
 import { ProductImage } from '@/components/ProductImage';
+import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { googleDriveService } from '@/services/googleDriveService';
+import { Product, ProductCategory, ProductUnit } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image as ExpoImage } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from 'react-native';
 
 interface ProductModalProps {
   visible: boolean;
@@ -36,13 +34,13 @@ interface ProductModalProps {
 
 import {
   CATEGORY_OPTIONS,
-  UNIT_OPTIONS,
+  CategoryOption,
   PRODUCT_CATEGORIES,
   PRODUCT_UNITS,
-  CategoryOption,
+  UNIT_OPTIONS,
   UnitOption,
 } from '@/constants/categories';
-export { CATEGORY_OPTIONS, UNIT_OPTIONS, CategoryOption, UnitOption };
+export { CATEGORY_OPTIONS, CategoryOption, UNIT_OPTIONS, UnitOption };
 
 const CATEGORIES: ProductCategory[] = PRODUCT_CATEGORIES;
 const UNITS: ProductUnit[] = PRODUCT_UNITS;
@@ -121,15 +119,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           setArePresetsCached(true);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
     if (isOnline) {
       setArePresetsCached(true);
-      AsyncStorage.setItem('@shopkeeper_presets_cached', 'true').catch(() => {});
+      AsyncStorage.setItem('@shopkeeper_presets_cached', 'true').catch(() => { });
       PRESET_IMAGES.forEach((preset) => {
-        ExpoImage.prefetch(preset.url).catch(() => {});
+        ExpoImage.prefetch(preset.url).catch(() => { });
       });
     }
   }, [isOnline]);
@@ -281,7 +279,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   if (Platform.OS === 'web') {
                     window.open(consoleUrl, '_blank');
                   } else {
-                    Linking.openURL(consoleUrl).catch(() => {});
+                    Linking.openURL(consoleUrl).catch(() => { });
                   }
                 },
               },
@@ -1191,7 +1189,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                             borderColor: focusedField === 'barcode' ? theme.primary : softBorder,
                           },
                         ]}
-                        placeholder={language === 'ur' ? '8964... (اندرونی کوڈ)' : '8964... (Internal SKU)'}
+                        placeholder={language === 'ur' ? '8964...' : '8964...'}
                         placeholderTextColor={theme.textMuted}
                         value={barcode}
                         onChangeText={setBarcode}
@@ -1271,8 +1269,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     {isUploadingToDrive
                       ? (language === 'ur' ? 'ڈرائیو پر اپلوڈ ہو رہا ہے...' : 'Uploading Image...')
                       : isSubmitting
-                      ? (language === 'ur' ? 'محفوظ ہو رہا ہے...' : 'Saving...')
-                      : t('saveProduct')}
+                        ? (language === 'ur' ? 'محفوظ ہو رہا ہے...' : 'Saving...')
+                        : t('saveProduct')}
                   </Text>
                 </Pressable>
               </View>
