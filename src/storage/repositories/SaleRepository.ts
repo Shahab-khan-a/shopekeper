@@ -161,11 +161,14 @@ export const SaleRepository = {
 
     const amountPaid = paymentMethod === 'cash' ? (tenderedCash ?? grandTotal) : 0;
 
-    // Profit calculation
+    // Profit calculation: only compute profit when cost price is explicitly known (> 0)
     const totalProfit =
       items.reduce((sum, item) => {
-        const cost = item.costPrice ?? item.product.costPrice ?? item.unitPrice * 0.8;
-        return sum + (item.unitPrice - cost) * item.quantity;
+        const cost = item.costPrice ?? item.product?.costPrice;
+        if (cost !== undefined && cost !== null && cost > 0) {
+          return sum + (item.unitPrice - cost) * item.quantity;
+        }
+        return sum;
       }, 0) - discountAmount;
 
     try {

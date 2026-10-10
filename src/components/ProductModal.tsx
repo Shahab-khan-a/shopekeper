@@ -40,6 +40,7 @@ import {
   UNIT_OPTIONS,
   UnitOption,
 } from '@/constants/categories';
+import { STAPLE_ITEMS, StapleItem } from '@/constants/staples';
 export { CATEGORY_OPTIONS, CategoryOption, UNIT_OPTIONS, UnitOption };
 
 const CATEGORIES: ProductCategory[] = PRODUCT_CATEGORIES;
@@ -85,7 +86,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
   const [isDriveConnected, setIsDriveConnected] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [selectedStapleId, setSelectedStapleId] = useState<string | null>(null);
+  const [stapleCategoryFilter, setStapleCategoryFilter] = useState<string>('All');
   const scrollViewRef = useRef<ScrollView>(null);
+  const priceInputRef = useRef<TextInput>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
@@ -179,10 +183,39 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setUnitSearch('');
     setBarcode('');
     setImage('');
+    setSelectedStapleId(null);
+    setStapleCategoryFilter('All');
     setIsSubmitting(false);
     setIsCameraOpen(false);
     setIsUploadingToDrive(false);
   };
+
+  const handleSelectStaple = (staple: StapleItem) => {
+    setSelectedStapleId(staple.id);
+    setName(staple.name);
+    setNameUrdu(staple.nameUrdu);
+    setCategory(staple.category);
+    setUnit(staple.unit);
+    if (staple.image) {
+      setImage(staple.image);
+    }
+    // Leave barcode empty so user can scan real GS1 barcode or leave blank
+    // Auto-focus price input and scroll to pricing section
+    setTimeout(() => {
+      priceInputRef.current?.focus();
+      setFocusedField('price');
+    }, 120);
+  };
+
+  const stapleCategories = useMemo(() => {
+    const cats = ['All', ...Array.from(new Set(STAPLE_ITEMS.map((s) => s.category)))];
+    return cats;
+  }, []);
+
+  const filteredStaples = useMemo(() => {
+    if (stapleCategoryFilter === 'All') return STAPLE_ITEMS;
+    return STAPLE_ITEMS.filter((s) => s.category === stapleCategoryFilter);
+  }, [stapleCategoryFilter]);
 
   const activeCategoryMeta =
     CATEGORY_OPTIONS.find((c) => c.key === category) || CATEGORY_OPTIONS[0];
@@ -643,6 +676,126 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   )}
                 </View>
 
+                {/* Quick Staple Templates Carousel (Only shown when adding a new product) */}
+                {!productToEdit && (
+                  <View style={[styles.formSectionCard, { backgroundColor: sectionBg, borderColor: sectionBorder }]}>
+                    <View style={styles.sectionTitleRow}>
+                      <View style={[styles.sectionTitleIndicator, { backgroundColor: theme.accent }]} />
+                      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
+                          {language === 'ur' ? '⚡ فوری بنیادی کریانہ اشیاء' : '⚡ Quick Staple Templates'}
+                        </Text>
+                        <View style={[styles.stapleCountBadge, { backgroundColor: theme.primaryLight }]}>
+                          <Text style={[styles.stapleCountBadgeText, { color: theme.primaryDark }]}>
+                            {STAPLE_ITEMS.length} {language === 'ur' ? 'اشیاء' : 'staples'}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    <Text style={[styles.presetHeader, { color: theme.textMuted, marginTop: -4, marginBottom: 8 }]}>
+                      {language === 'ur'
+                        ? '1-ٹیپ میں نام، کیٹیگری اور اکائی خودکار درج کریں، پھر صرف قیمت لکھیں:'
+                        : '1-Tap to prefill name, category & unit. Then simply enter price:'}
+                    </Text>
+
+                    {/* Staple Category Filter Pills */}
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.stapleFilterScroll}
+                      contentContainerStyle={styles.stapleFilterContent}>
+                      {stapleCategories.map((catKey) => {
+                        const isActive = stapleCategoryFilter === catKey;
+                        return (
+                          <Pressable
+                            key={catKey}
+                            onPress={() => setStapleCategoryFilter(catKey)}
+                            style={[
+                              styles.stapleFilterPill,
+                              {
+                                backgroundColor: isActive ? theme.primary : inputBg,
+                                borderColor: isActive ? theme.primary : softBorder,
+                              },
+                            ]}>
+                            <Text
+                              style={[
+                                styles.stapleFilterPillText,
+                                {
+                                  color: isActive ? '#FFFFFF' : theme.textSecondary,
+                                  fontWeight: isActive ? '700' : '500',
+                                },
+                              ]}>
+                              {catKey === 'All' ? (language === 'ur' ? 'تمام' : 'All') : catKey}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+
+                    {/* Horizontal List of Staples */}
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.staplesScroll}
+                      contentContainerStyle={styles.staplesScrollContent}>
+                      {filteredStaples.map((staple) => {
+                        const isSelected = selectedStapleId === staple.id;
+                        return (
+                          <Pressable
+                            key={staple.id}
+                            onPress={() => handleSelectStaple(staple)}
+                            style={({ pressed }) => [
+                              styles.stapleCard,
+                              {
+                                backgroundColor: isSelected ? theme.primaryLight : inputBg,
+                                borderColor: isSelected ? theme.primary : softBorder,
+                                borderWidth: isSelected ? 1.8 : 1,
+                              },
+                              pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
+                            ]}>
+                            {staple.image ? (
+                              <ExpoImage
+                                source={{ uri: staple.image }}
+                                style={styles.stapleCardImg}
+                                contentFit="cover"
+                                cachePolicy="memory-disk"
+                                transition={150}
+                              />
+                            ) : (
+                              <View style={[styles.stapleIconWrap, { backgroundColor: theme.surfaceSubtle }]}>
+                                <Ionicons name={staple.icon} size={22} color={theme.primary} />
+                              </View>
+                            )}
+
+                            <View style={styles.stapleCardBody}>
+                              <Text
+                                style={[
+                                  styles.stapleCardTitle,
+                                  { color: isSelected ? theme.primaryDark : theme.text },
+                                ]}
+                                numberOfLines={1}>
+                                {language === 'ur' ? staple.nameUrdu : staple.name}
+                              </Text>
+
+                              <View style={styles.stapleUnitPillRow}>
+                                <View style={[styles.stapleUnitPill, { backgroundColor: theme.surfaceSubtle }]}>
+                                  <Text style={[styles.stapleUnitPillText, { color: theme.textSecondary }]}>
+                                    {staple.unit}
+                                  </Text>
+                                </View>
+                                {isSelected && (
+                                  <Ionicons name="checkmark-circle" size={14} color={theme.primary} />
+                                )}
+                              </View>
+                            </View>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+
                 {/* ── Section 1: Basic Info ── */}
                 <View style={[styles.formSectionCard, { backgroundColor: sectionBg, borderColor: sectionBorder }]}>
                   <View style={styles.sectionTitleRow}>
@@ -1040,6 +1193,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         {t('price')} ({settings.currencySymbol}) *
                       </Text>
                       <TextInput
+                        ref={priceInputRef}
                         style={[
                           styles.inputBox,
                           styles.priceInputBold,
@@ -1819,5 +1973,78 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '700',
+  },
+  stapleCountBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  stapleCountBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  stapleFilterScroll: {
+    marginBottom: 10,
+  },
+  stapleFilterContent: {
+    gap: 6,
+    paddingRight: 8,
+  },
+  stapleFilterPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  stapleFilterPillText: {
+    fontSize: 11,
+  },
+  staplesScroll: {
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  staplesScrollContent: {
+    gap: 8,
+    paddingRight: 8,
+  },
+  stapleCard: {
+    width: 125,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    overflow: 'hidden',
+    ...Shadows.sm,
+  },
+  stapleCardImg: {
+    width: '100%',
+    height: 64,
+  },
+  stapleIconWrap: {
+    width: '100%',
+    height: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stapleCardBody: {
+    padding: 7,
+    gap: 4,
+  },
+  stapleCardTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  stapleUnitPillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  stapleUnitPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  stapleUnitPillText: {
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
 });

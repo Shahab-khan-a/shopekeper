@@ -312,12 +312,17 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // 2. Network connectivity subscriber: Triggers background sync on OFFLINE -> ONLINE
+  const prevOnlineRef = useRef<boolean | null>(null);
+
   useEffect(() => {
     const unsubscribe = NetworkService.subscribeToNetworkChanges(async (online) => {
       setIsOnline(online);
+      const wasOffline = prevOnlineRef.current === false;
+      prevOnlineRef.current = online;
+
       if (!online) {
         setSyncStatus('offline');
-      } else {
+      } else if (wasOffline) {
         console.log('[ShopContext] Network restored to ONLINE. Draining offline sync queue...');
         const count = await refreshPendingCount();
         if (count > 0 && user) {
@@ -346,29 +351,53 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (currentUser) {
         setActiveTab('dashboard');
-        if (!NetworkService.isCurrentlyOnline()) {
+
+        // Check if device is currently online before attempting cloud operations
+        const isOnline = await NetworkService.isOnline();
+        if (!isOnline) {
           setSyncStatus('offline');
           return;
         }
 
-        setSyncStatus('syncing');
-        try {
-          // Perform safe bidirectional merge without destroying local sales
-          await MergeService.mergeGuestDataWithAccount(currentUser.uid);
+        // Check if initial merge has already been executed for this user on this device
+        const mergeKey = `@shopkeeper_merged_${currentUser.uid}`;
+        const hasMerged = await AsyncStorage.getItem(mergeKey);
 
-          // Refresh state from updated local database
-          await Promise.all([
-            refreshProducts(),
-            refreshSales(),
-            refreshKhata(),
-            refreshSettings(),
-            refreshPendingCount(),
-          ]);
+        if (!hasMerged) {
+          setSyncStatus('syncing');
+          try {
+            await MergeService.mergeGuestDataWithAccount(currentUser.uid);
+            await AsyncStorage.setItem(mergeKey, 'true');
 
-          setSyncStatus('synced');
-        } catch (err) {
-          console.warn('[ShopContext] Merge/sync error on auth:', err);
-          setSyncStatus('error');
+            // Refresh state from updated local database
+            await Promise.all([
+              refreshProducts(),
+              refreshSales(),
+              refreshKhata(),
+              refreshSettings(),
+              refreshPendingCount(),
+            ]);
+
+            setSyncStatus('synced');
+          } catch (err: any) {
+            console.log('[ShopContext] Initial cloud merge deferred (offline/network):', err?.message || err);
+            setSyncStatus('offline');
+          }
+        } else {
+          // User already merged: local SQLite is primary. Process pending offline queue if online.
+          try {
+            const pendingCount = await refreshPendingCount();
+            if (pendingCount > 0) {
+              setSyncStatus('syncing');
+              const res = await SyncQueueService.processQueue(currentUser.uid);
+              await refreshPendingCount();
+              setSyncStatus(res.errors > 0 ? 'error' : 'synced');
+            } else {
+              setSyncStatus('synced');
+            }
+          } catch {
+            setSyncStatus('offline');
+          }
         }
       } else {
         setSyncStatus('idle');

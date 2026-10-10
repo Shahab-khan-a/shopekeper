@@ -13,6 +13,7 @@ import {
   saveSettingsToCloud,
 } from './firestoreService';
 import { SyncQueueService } from './syncQueueService';
+import { NetworkService } from './networkService';
 import { Product, Sale, CustomerKhata, ShopSettings } from '@/types';
 
 export const MergeService = {
@@ -26,6 +27,12 @@ export const MergeService = {
     mergedCustomers: number;
   }> {
     if (!userId) return { mergedProducts: 0, mergedSales: 0, mergedCustomers: 0 };
+
+    const online = await NetworkService.isOnline();
+    if (!online) {
+      console.log(`[MergeService] Device is offline, skipping cloud merge for user ${userId}.`);
+      return { mergedProducts: 0, mergedSales: 0, mergedCustomers: 0 };
+    }
 
     console.log(`[MergeService] Starting safe merge for user ${userId}...`);
 
@@ -126,8 +133,17 @@ export const MergeService = {
       );
 
       return { mergedProducts, mergedSales, mergedCustomers };
-    } catch (err) {
-      console.error('[MergeService] Merge error:', err);
+    } catch (err: any) {
+      const isOffline =
+        err?.code === 'unavailable' ||
+        err?.code === 'unknown' ||
+        err?.message?.includes('offline') ||
+        err?.message?.includes('network');
+      if (isOffline) {
+        console.log('[MergeService] Network or Firestore offline during merge, keeping local SQLite data.');
+      } else {
+        console.warn('[MergeService] Merge error:', err);
+      }
       return { mergedProducts, mergedSales, mergedCustomers };
     }
   },

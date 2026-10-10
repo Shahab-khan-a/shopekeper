@@ -65,10 +65,40 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
       msgLang === 'ur' && customer.nameUrdu ? customer.nameUrdu : customer.name;
     const formattedAmount = `${settings.currencySymbol} ${Math.max(0, customer.totalDebt).toLocaleString()}`;
 
+    // Itemize recent credit transactions for bill transparency
+    const recentCreditTxs = (customer.transactions || [])
+      .filter((t) => t.type === 'credit' || t.type === 'credit_sale')
+      .slice(0, 3);
+
+    let breakdownUr = '';
+    let breakdownEn = '';
+
+    if (recentCreditTxs.length > 0) {
+      breakdownUr =
+        '\n\n*حالیہ ادھار بلز:*\n' +
+        recentCreditTxs
+          .map((t) => {
+            const d = new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            const bill = t.billNumber ? ` (بل #${t.billNumber})` : '';
+            return `• ${d}${bill}: ${settings.currencySymbol}${t.amount.toLocaleString()}`;
+          })
+          .join('\n');
+
+      breakdownEn =
+        '\n\n*Recent Credit Purchases:*\n' +
+        recentCreditTxs
+          .map((t) => {
+            const d = new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            const bill = t.billNumber ? ` (Bill #${t.billNumber})` : '';
+            return `• ${d}${bill}: ${settings.currencySymbol}${t.amount.toLocaleString()}`;
+          })
+          .join('\n');
+    }
+
     const message =
       msgLang === 'ur'
-        ? `السلام علیکم ${customerDisplayName} صاحب!\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopHeader}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${formattedAmount}* ہے۔\n\nشکریہ!\n*${settings.shopName}*\n📞 ${settings.phone}`
-        : `Dear ${customerDisplayName},\n\nGentle reminder from *${shopHeader}* regarding your pending balance:\n👉 *${formattedAmount}*\n\nThank you!\n*${settings.shopName}*\n📞 ${settings.phone}`;
+        ? `السلام علیکم ${customerDisplayName} صاحب!\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopHeader}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${formattedAmount}* ہے۔${breakdownUr}\n\nبرائے مہربانی سہولت کے مطابق ادائیگی فرما دیں۔ شکریہ!\n*${settings.shopName}*\n📞 ${settings.phone}`
+        : `Dear ${customerDisplayName},\n\nGentle reminder from *${shopHeader}* regarding your pending balance:\n👉 *${formattedAmount}*${breakdownEn}\n\nPlease settle at your convenience. Thank you!\n*${settings.shopName}*\n📞 ${settings.phone}`;
 
     const encoded = encodeURIComponent(message);
     const cleanPhone = customer.phone ? customer.phone.replace(/[^0-9]/g, '') : '';

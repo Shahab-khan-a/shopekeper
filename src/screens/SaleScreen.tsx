@@ -1,4 +1,6 @@
 import { BarcodeModal } from '@/components/BarcodeModal';
+import { HeldCart, HeldCartsModal } from '@/components/HeldCartsModal';
+import { LooseWeightModal } from '@/components/LooseWeightModal';
 import { ProductImage } from '@/components/ProductImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FilterChip } from '@/components/ui/FilterChip';
@@ -94,6 +96,29 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const checkoutScrollRef = useRef<ScrollView>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  // Rush-Hour Counter: Held / Parked Carts
+  const HELD_CARTS_STORAGE_KEY = '@shopkeeper_held_carts';
+  const [heldCarts, setHeldCarts] = useState<HeldCart[]>([]);
+  const [isHeldCartsModalOpen, setIsHeldCartsModalOpen] = useState(false);
+
+  // Rush-Hour Counter: Loose Goods Weight Modal
+  const [looseModalProduct, setLooseModalProduct] = useState<Product | null>(null);
+  const [looseModalInitialQty, setLooseModalInitialQty] = useState<number>(1);
+  const [isLooseModalOpen, setIsLooseModalOpen] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(HELD_CARTS_STORAGE_KEY)
+      .then((saved) => {
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setHeldCarts(parsed);
+          }
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   useEffect(() => {
     const showSub = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -146,7 +171,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
   // Cart totals
   const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.total, 0), [cart]);
-  const totalItemsCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
+  const totalItemsCount = useMemo(
+    () => cart.reduce((sum, item) => sum + (Number.isInteger(item.quantity) ? item.quantity : 1), 0),
+    [cart]
+  );
   const parsedDiscount = parseFloat(discount) || 0;
   const discountAmount =
     discountType === 'percent'
@@ -253,6 +281,157 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     setIsCheckoutDrawerOpen(false);
   };
 
+  // Rush-Hour Counter: Loose Goods Weight Converter
+  const openLooseWeightModal = (product: Product, currentQty: number = 1) => {
+    setLooseModalProduct(product);
+    setLooseModalInitialQty(currentQty);
+    setIsLooseModalOpen(true);
+  };
+
+  const handleApplyLooseWeight = (quantity: number, customTotal?: number) => {
+    if (!looseModalProduct) return;
+    const p = looseModalProduct;
+    const existingIndex = cart.findIndex((item) => item.product.id === p.id);
+    const computedTotal = customTotal ?? Math.round(quantity * p.price);
+
+    if (existingIndex >= 0) {
+      const updated = [...cart];
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        quantity,
+        total: computedTotal,
+      };
+      setCart(updated);
+    } else {
+      setCart([
+        ...cart,
+        {
+          product: p,
+          quantity,
+          unitPrice: p.price,
+          total: computedTotal,
+        },
+      ]);
+    }
+  };
+
+  // Rush-Hour Counter: Hold & Resume Cart Handlers
+  const handleHoldCart = () => {
+    if (cart.length === 0) return;
+
+    const newHeldCart: HeldCart = {
+      id: 'held_' + Date.now(),
+      heldAt: Date.now(),
+      items: [...cart],
+      customerName: customerName.trim() || undefined,
+      customerPhone: customerPhone.trim() || undefined,
+      discount,
+      discountType,
+      total: grandTotal,
+      totalItemsCount,
+    };
+
+    const nextHeld = [newHeldCart, ...heldCarts];
+    setHeldCarts(nextHeld);
+    AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(nextHeld)).catch(console.error);
+
+    clearCart();
+    setIsCheckoutDrawerOpen(false);
+
+    showAlert({
+      type: 'success',
+      title: language === 'ur' ? 'بل پارک کر دیا گیا' : 'Bill Parked / Held',
+      message: language === 'ur'
+        ? `${newHeldCart.totalItemsCount} اشیاء پارک ہو گئیں۔ اگلا گاہک فارغ کریں۔`
+        : `Bill with ${newHeldCart.totalItemsCount} item(s) parked. You can now serve the next customer.`,
+    });
+  };
+
+  const handleResumeCart = (heldCart: HeldCart) => {
+    if (cart.length > 0) {
+      showAlert({
+        type: 'warning',
+        title: language === 'ur' ? 'موجودہ بل تبدیل کریں؟' : 'Active Cart Not Empty',
+        message: language === 'ur'
+          ? 'کیا آپ موجودہ بل کو پارک کر کے یہ بل بحال کرنا چاہتے ہیں؟'
+          : 'Do you want to hold the current bill and resume this one?',
+        buttons: [
+          {
+            text: language === 'ur' ? 'موجودہ پارک کریں اور بحال کریں' : 'Hold Current & Resume',
+            style: 'default',
+            onPress: () => {
+              const currentHeld: HeldCart = {
+                id: 'held_' + Date.now(),
+                heldAt: Date.now(),
+                items: [...cart],
+                customerName: customerName.trim() || undefined,
+                customerPhone: customerPhone.trim() || undefined,
+                discount,
+                discountType,
+                total: grandTotal,
+                totalItemsCount,
+              };
+              const updatedHeld = [currentHeld, ...heldCarts.filter((c) => c.id !== heldCart.id)];
+              setHeldCarts(updatedHeld);
+              AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(updatedHeld)).catch(console.error);
+
+              setCart(heldCart.items);
+              setCustomerName(heldCart.customerName || '');
+              setCustomerPhone(heldCart.customerPhone || '');
+              setDiscount(heldCart.discount || '');
+              setDiscountType(heldCart.discountType || 'fixed');
+              setIsHeldCartsModalOpen(false);
+              if (!isWideScreen) setIsCheckoutDrawerOpen(true);
+            },
+          },
+          {
+            text: language === 'ur' ? 'موجودہ ختم کریں اور بحال کریں' : 'Replace Current',
+            style: 'destructive',
+            onPress: () => {
+              const updatedHeld = heldCarts.filter((c) => c.id !== heldCart.id);
+              setHeldCarts(updatedHeld);
+              AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(updatedHeld)).catch(console.error);
+
+              setCart(heldCart.items);
+              setCustomerName(heldCart.customerName || '');
+              setCustomerPhone(heldCart.customerPhone || '');
+              setDiscount(heldCart.discount || '');
+              setDiscountType(heldCart.discountType || 'fixed');
+              setIsHeldCartsModalOpen(false);
+              if (!isWideScreen) setIsCheckoutDrawerOpen(true);
+            },
+          },
+          { text: t('cancel'), style: 'cancel' },
+        ],
+      });
+      return;
+    }
+
+    const updatedHeld = heldCarts.filter((c) => c.id !== heldCart.id);
+    setHeldCarts(updatedHeld);
+    AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(updatedHeld)).catch(console.error);
+
+    setCart(heldCart.items);
+    setCustomerName(heldCart.customerName || '');
+    setCustomerPhone(heldCart.customerPhone || '');
+    setDiscount(heldCart.discount || '');
+    setDiscountType(heldCart.discountType || 'fixed');
+    setIsHeldCartsModalOpen(false);
+    if (!isWideScreen) setIsCheckoutDrawerOpen(true);
+  };
+
+  const handleDeleteHeldCart = (cartId: string) => {
+    const updated = heldCarts.filter((c) => c.id !== cartId);
+    setHeldCarts(updated);
+    AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(updated)).catch(console.error);
+  };
+
+  const handleClearAllHeldCarts = () => {
+    setHeldCarts([]);
+    AsyncStorage.removeItem(HELD_CARTS_STORAGE_KEY).catch(console.error);
+    setIsHeldCartsModalOpen(false);
+  };
+
   // Add loose or custom uncataloged item
   const handleAddQuickItem = ({
     name,
@@ -300,7 +479,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       name,
       nameUrdu,
       price,
-      costPrice: Math.round(price * 0.8),
+      costPrice: undefined,
       stock: 9999,
       category: 'Others',
       unit: 'piece',
@@ -424,31 +603,48 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
         <View style={styles.drawerHeaderActions}>
           {cart.length > 0 ? (
-            <Pressable
-              onPress={() => {
-                showAlert({
-                  type: 'warning',
-                  title: t('clearCart'),
-                  message: t('clearCartConfirm'),
-                  buttons: [
-                    {
-                      text: t('clearAll'),
-                      style: 'destructive',
-                      icon: 'trash-outline',
-                      onPress: clearCart,
-                    },
-                    { text: t('cancel'), style: 'cancel' },
-                  ],
-                });
-              }}
-              accessibilityLabel={t('clearCart')}
-              accessibilityRole="button"
-              accessibilityHint="Removes all items from the current bill"
-              style={styles.clearBtn}>
-              <Text style={[styles.clearBtnText, { color: theme.danger }]}>
-                {t('clearAll')}
-              </Text>
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Pressable
+                onPress={handleHoldCart}
+                accessibilityLabel="Hold Cart"
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.holdCartHeaderBtn,
+                  { backgroundColor: theme.primaryLight },
+                  pressed && { opacity: 0.8 },
+                ]}>
+                <Ionicons name="pause-circle-outline" size={15} color={theme.primary} />
+                <Text style={[styles.holdCartHeaderBtnText, { color: theme.primaryDark }]}>
+                  {language === 'ur' ? 'پارک کریں' : 'Hold'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  showAlert({
+                    type: 'warning',
+                    title: t('clearCart'),
+                    message: t('clearCartConfirm'),
+                    buttons: [
+                      {
+                        text: t('clearAll'),
+                        style: 'destructive',
+                        icon: 'trash-outline',
+                        onPress: clearCart,
+                      },
+                      { text: t('cancel'), style: 'cancel' },
+                    ],
+                  });
+                }}
+                accessibilityLabel={t('clearCart')}
+                accessibilityRole="button"
+                accessibilityHint="Removes all items from the current bill"
+                style={styles.clearBtn}>
+                <Text style={[styles.clearBtnText, { color: theme.danger }]}>
+                  {t('clearAll')}
+                </Text>
+              </Pressable>
+            </View>
           ) : null}
 
           {!isWideScreen && (
@@ -501,15 +697,23 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         : item.product.name}
                     </Text>
                     <Text style={[styles.cartItemPriceInfo, { color: theme.textSecondary }]}>
-                      {settings.currencySymbol}{item.unitPrice} × {item.quantity} ={' '}
+                      {settings.currencySymbol}{item.unitPrice} × {item.quantity} {item.product.unit || ''} ={' '}
                       <Text style={{ fontWeight: '700', color: theme.text }}>
                         {settings.currencySymbol}{item.total}
                       </Text>
                     </Text>
                   </View>
 
-                  {/* Stepper */}
+                  {/* Stepper & Loose Weight Scale Button */}
                   <View style={styles.itemStepperWrap}>
+                    <Pressable
+                      onPress={() => openLooseWeightModal(item.product, item.quantity)}
+                      accessibilityLabel={`Adjust weight or cash for ${item.product.name}`}
+                      accessibilityRole="button"
+                      style={[styles.smallScaleBtn, { backgroundColor: theme.primaryLight }]}>
+                      <Ionicons name="scale-outline" size={15} color={theme.primary} />
+                    </Pressable>
+
                     <Pressable
                       onPress={() => updateQuantity(item.product.id, -1)}
                       accessibilityLabel={`Decrease quantity of ${item.product.name}`}
@@ -1129,6 +1333,25 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             </View>
 
             <View style={styles.topBarActions}>
+              {/* Parked Carts Button */}
+              {heldCarts.length > 0 && (
+                <Pressable
+                  onPress={() => setIsHeldCartsModalOpen(true)}
+                  style={({ pressed }) => [
+                    styles.heldPillBtn,
+                    {
+                      backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.2)' : '#FEF3C7',
+                      borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.4)' : '#FDE68A',
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}>
+                  <Ionicons name="pause-circle" size={15} color="#D97706" />
+                  <Text style={[styles.heldPillText, { color: '#B45309' }]}>
+                    {heldCarts.length}
+                  </Text>
+                </Pressable>
+              )}
+
               <Pressable
                 onPress={toggleViewMode}
                 style={({ pressed }) => [
@@ -1543,7 +1766,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 2 }}>
                             <Ionicons name="remove" size={16} color={theme.text} />
                           </Pressable>
-                          <View
+                          <Pressable
+                            onPress={() => openLooseWeightModal(product, inCartItem.quantity)}
                             style={[
                               styles.cardStepQtyBox,
                               {
@@ -1554,7 +1778,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                             <Text style={[styles.cardStepQtyText, { color: theme.text }]}>
                               {inCartItem.quantity}
                             </Text>
-                          </View>
+                          </Pressable>
                           <Pressable
                             onPress={() => addToCart(product, 1)}
                             style={({ pressed }) => [
@@ -1571,22 +1795,42 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                           </Pressable>
                         </View>
                       ) : (
-                        <Pressable
-                          disabled={isOut}
-                          onPress={() => addToCart(product)}
-                          style={[
-                            styles.cardAddBtn,
-                            {
-                              backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
-                              borderColor: isOut ? theme.border : theme.primary,
-                            },
-                          ]}>
-                          <Ionicons
-                            name="add"
-                            size={14}
-                            color={isOut ? theme.textMuted : theme.primary}
-                          />
-                        </Pressable>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          {(product.unit === 'kg' || product.unit === 'gram' || product.unit === 'litre') && (
+                            <Pressable
+                              disabled={isOut}
+                              onPress={() => openLooseWeightModal(product, 1)}
+                              style={[
+                                styles.cardScaleQuickBtn,
+                                {
+                                  backgroundColor: theme.surfaceSubtle,
+                                  borderColor: theme.border,
+                                },
+                              ]}>
+                              <Ionicons
+                                name="scale-outline"
+                                size={14}
+                                color={isOut ? theme.textMuted : theme.primary}
+                              />
+                            </Pressable>
+                          )}
+                          <Pressable
+                            disabled={isOut}
+                            onPress={() => addToCart(product)}
+                            style={[
+                              styles.cardAddBtn,
+                              {
+                                backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
+                                borderColor: isOut ? theme.border : theme.primary,
+                              },
+                            ]}>
+                            <Ionicons
+                              name="add"
+                              size={14}
+                              color={isOut ? theme.textMuted : theme.primary}
+                            />
+                          </Pressable>
+                        </View>
                       )}
                     </View>
                   </Pressable>
@@ -1598,6 +1842,17 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           {/* ================= Mobile Sticky Floating Cart Bar ================= */}
           {!isWideScreen && cart.length > 0 && (
             <View style={styles.floatingBarContainer}>
+              {/* Quick Hold / Park Cart Button */}
+              <Pressable
+                onPress={handleHoldCart}
+                style={({ pressed }) => [
+                  styles.floatingHoldBtn,
+                  { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                  pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
+                ]}>
+                <Ionicons name="pause-circle-outline" size={20} color={theme.primary} />
+              </Pressable>
+
               {/* Quick Discard — tap to clear cart without opening drawer */}
               <Pressable
                 onPress={() => {
@@ -1654,6 +1909,44 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               </Pressable>
             </View>
           )}
+
+          {/* ================= Mobile Sticky Resume Parked Carts Banner ================= */}
+          {!isWideScreen && cart.length === 0 && heldCarts.length > 0 && (
+            <View style={styles.floatingBarContainer}>
+              <Pressable
+                onPress={() => setIsHeldCartsModalOpen(true)}
+                style={({ pressed }) => [
+                  styles.floatingHeldBar,
+                  {
+                    backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.22)' : '#FEF3C7',
+                    borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.5)' : '#F59E0B',
+                  },
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                ]}>
+                <View style={styles.floatingBarLeft}>
+                  <View style={[styles.floatingBadge, { backgroundColor: '#F59E0B' }]}>
+                    <Ionicons name="pause-circle" size={17} color="#FFFFFF" />
+                    <Text style={[styles.floatingBadgeText, { color: '#FFFFFF' }]}>{heldCarts.length}</Text>
+                  </View>
+                  <View>
+                    <Text style={[styles.floatingHeldTitle, { color: settings.darkMode ? '#FDE68A' : '#92400E' }]}>
+                      {language === 'ur' ? 'پارک شدہ بلز محفوظ ہیں' : 'Parked Bills Waiting'}
+                    </Text>
+                    <Text style={[styles.floatingHeldSub, { color: settings.darkMode ? '#FCD34D' : '#B45309' }]}>
+                      {language === 'ur' ? 'بحال کرنے کے لیے ٹیپ کریں' : 'Tap to review & resume'}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.floatingBarRight}>
+                  <Text style={[styles.floatingHeldActionText, { color: settings.darkMode ? '#FDE68A' : '#92400E' }]}>
+                    {language === 'ur' ? 'دیکھیں' : 'Resume'}
+                  </Text>
+                  <Ionicons name="arrow-forward" size={16} color={settings.darkMode ? '#FDE68A' : '#92400E'} />
+                </View>
+              </Pressable>
+            </View>
+          )}
         </View>
 
         {/* ================= Wide Screen Dedicated Checkout Panel ================= */}
@@ -1697,6 +1990,28 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         onSelectProduct={(p) => {
           addToCart(p);
         }}
+      />
+
+      {/* Rush-Hour Counter: Held Carts Modal */}
+      <HeldCartsModal
+        visible={isHeldCartsModalOpen}
+        onClose={() => setIsHeldCartsModalOpen(false)}
+        heldCarts={heldCarts}
+        onResumeCart={handleResumeCart}
+        onDeleteHeldCart={handleDeleteHeldCart}
+        onClearAllHeldCarts={handleClearAllHeldCarts}
+      />
+
+      {/* Rush-Hour Counter: Loose Goods Weight Modal */}
+      <LooseWeightModal
+        visible={isLooseModalOpen}
+        onClose={() => {
+          setIsLooseModalOpen(false);
+          setLooseModalProduct(null);
+        }}
+        product={looseModalProduct}
+        initialQuantity={looseModalInitialQty}
+        onApply={handleApplyLooseWeight}
       />
     </KeyboardAvoidingView>
   );
@@ -2742,5 +3057,78 @@ const styles = StyleSheet.create({
   catalogEmptySecondaryBtnText: {
     fontSize: 13,
     fontWeight: '700',
+  },
+  holdCartHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.sm,
+  },
+  holdCartHeaderBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  smallScaleBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: BorderRadius.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 2,
+  },
+  heldPillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  heldPillText: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  floatingHoldBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.full,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    ...Shadows.md,
+  },
+  floatingHeldBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 12,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1.5,
+    ...Shadows.md,
+  },
+  floatingHeldTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  floatingHeldSub: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  floatingHeldActionText: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  cardScaleQuickBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

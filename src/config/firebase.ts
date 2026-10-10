@@ -60,6 +60,7 @@ try {
   try {
     db = initializeFirestore(app, {
       ignoreUndefinedProperties: true,
+      experimentalForceLongPolling: Platform.OS !== 'web',
     });
   } catch {
     db = getFs(app);
