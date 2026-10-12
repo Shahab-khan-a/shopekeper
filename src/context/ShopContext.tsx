@@ -36,6 +36,7 @@ import { googleDriveService } from '@/services/googleDriveService';
 import { saveProductToCloud, saveSaleToCloud, saveCustomerToCloud } from '@/services/firestoreService';
 import { INITIAL_SETTINGS } from '@/constants/sampleData';
 import { SAMPLE_PRODUCTS, SAMPLE_KHATA, generateDemoSales } from '@/services/demoDataService';
+import { STAPLE_ITEMS } from '@/constants/staples';
 import { Translations, Language, TranslationKey } from '@/constants/translations';
 import { User } from 'firebase/auth';
 import { 
@@ -96,17 +97,19 @@ interface ShopContextType {
   khata: CustomerKhata[];
   addCustomer: (customer: Omit<CustomerKhata, 'id' | 'createdAt' | 'lastUpdated' | 'transactions'>) => Promise<CustomerKhata>;
   addCustomerPayment: (customerId: string, amount: number, note?: string) => Promise<void>;
+  addCustomerCredit: (customerId: string, amount: number, note?: string) => Promise<void>;
   totalUdhaarReceivable: number;
   getCustomers: () => CustomerKhata[];
 
   // Dashboard Stats
   getDashboardStats: () => DashboardStats;
 
-  // Settings
+  // Settings & Catalog Setup
   settings: ShopSettings;
   updateSettings: (newSettings: Partial<ShopSettings>) => Promise<void>;
   resetToSampleData: () => Promise<void>;
   loadDemoData: () => Promise<void>;
+  loadStapleProducts: (count?: number) => Promise<void>;
   clearStoreData: () => Promise<void>;
   exportDataJSON: () => string;
   importDataJSON: (jsonString: string) => Promise<boolean>;
@@ -170,6 +173,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [sales, setSales] = useState<Sale[]>([]);
   const [khata, setKhata] = useState<CustomerKhata[]>([]);
   const [settings, setSettings] = useState<ShopSettings>(INITIAL_SETTINGS);
+  const language = settings.language;
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Network & Cloud Sync State
@@ -206,8 +210,17 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProducts = useCallback(async () => {
     try {
       const prods = await ProductRepository.getAll();
-      setProducts(prods);
-      return prods;
+      const cleanedProds = prods.map((p) => {
+        const cleaned = p.name.replace(/\s*\([\u0600-\u06FF\s/]+\)$/, '').trim();
+        if (cleaned !== p.name) {
+          const updated = { ...p, name: cleaned };
+          ProductRepository.update(p.id, { name: cleaned }).catch(() => {});
+          return updated;
+        }
+        return p;
+      });
+      setProducts(cleanedProds);
+      return cleanedProds;
     } catch (e) {
       console.warn('[ShopContext] refreshProducts error:', e);
       return [];
@@ -288,7 +301,17 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await SettingsRepository.saveSettings(finalSettings).catch(() => {});
         }
 
-        setProducts(prods);
+        const cleanedProds = prods.map((p) => {
+          const cleaned = p.name.replace(/\s*\([\u0600-\u06FF\s/]+\)$/, '').trim();
+          if (cleaned !== p.name) {
+            const updated = { ...p, name: cleaned };
+            ProductRepository.update(p.id, { name: cleaned }).catch(() => {});
+            return updated;
+          }
+          return p;
+        });
+
+        setProducts(cleanedProds);
         setSales(sList);
         setKhata(kList);
         setSettings(finalSettings);
@@ -564,7 +587,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         customerId,
         type: 'payment',
         amount,
-        note: note?.trim() || 'Payment received (vasooli)',
+        note: note?.trim() || 'Payment received',
         createdAt: now,
         date: new Date(now).toISOString(),
         syncStatus: 'pending',
@@ -602,16 +625,34 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const receiveKhataPayment = recordCustomerPayment;
   const addCustomerPayment = recordCustomerPayment;
 
-  // Add Customer directly
+  // Add Customer directly (with optional opening debt balance)
   const addCustomer = useCallback(
     async (custData: Omit<CustomerKhata, 'id' | 'createdAt' | 'lastUpdated' | 'transactions'>): Promise<CustomerKhata> => {
       const now = Date.now();
+      const openingDebt = custData.balance ?? custData.totalDebt ?? 0;
+      const newCustId = 'cust-' + now + '-' + Math.floor(Math.random() * 1000);
+      const openingTxId = `ktx-${now}`;
+
+      const transactions: KhataTransaction[] = [];
+      if (openingDebt > 0) {
+        transactions.push({
+          id: openingTxId,
+          customerId: newCustId,
+          type: 'credit',
+          amount: openingDebt,
+          note: language === 'ur' ? 'سابقہ بقایا رقم (اوپننگ بیلنس)' : 'Opening balance',
+          createdAt: now,
+          date: new Date(now).toISOString(),
+          syncStatus: 'pending',
+        });
+      }
+
       const newCust: CustomerKhata = {
         ...custData,
-        id: 'cust-' + now + '-' + Math.floor(Math.random() * 1000),
-        totalDebt: custData.balance || custData.totalDebt || 0,
-        balance: custData.balance || custData.totalDebt || 0,
-        transactions: [],
+        id: newCustId,
+        totalDebt: openingDebt,
+        balance: openingDebt,
+        transactions,
         createdAt: now,
         lastUpdated: now,
         updatedAt: now,
@@ -620,6 +661,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       await CustomerRepository.insert(newCust, 'pending');
       await SyncQueueRepository.enqueue('customer', newCust.id, 'create', newCust);
+      if (transactions.length > 0) {
+        await SyncQueueRepository.enqueue('khata_transaction', openingTxId, 'create', transactions[0]);
+      }
 
       await refreshKhata();
       await refreshPendingCount();
@@ -630,7 +674,46 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return newCust;
     },
-    [user, isOnline, refreshKhata, refreshPendingCount]
+    [user, isOnline, refreshKhata, refreshPendingCount, language]
+  );
+
+  // Add Direct Credit (نیا ادھار) to Customer
+  const addCustomerCredit = useCallback(
+    async (customerId: string, amount: number, note?: string) => {
+      if (amount <= 0) return;
+      const now = Date.now();
+      const txId = `ktx-${now}`;
+
+      await CustomerRepository.updateBalance(customerId, amount);
+
+      const newTx: KhataTransaction = {
+        id: txId,
+        customerId,
+        type: 'credit',
+        amount,
+        note: note?.trim() || (language === 'ur' ? 'نیا ادھار' : 'Credit purchase'),
+        createdAt: now,
+        date: new Date(now).toISOString(),
+        syncStatus: 'pending',
+      };
+      await CustomerRepository.addTransaction(newTx, 'pending');
+
+      const updatedCust = await CustomerRepository.getById(customerId);
+      if (updatedCust) {
+        await SyncQueueRepository.enqueueBatch([
+          { entityType: 'customer', entityId: customerId, operation: 'update', payload: updatedCust },
+          { entityType: 'khata_transaction', entityId: txId, operation: 'create', payload: newTx },
+        ]);
+      }
+
+      await refreshKhata();
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
+    },
+    [user, isOnline, refreshKhata, refreshPendingCount, language]
   );
 
   // Backward compatibility wrappers
@@ -860,6 +943,83 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user?.uid, refreshProducts, refreshSales, refreshKhata, refreshPendingCount]);
 
+  /**
+   * Day-0 Rapid Store Setup: Load top authentic Kiryana & grocery staples
+   */
+  const loadStapleProducts = useCallback(
+    async (count = 20) => {
+      try {
+        const staplesToLoad = STAPLE_ITEMS.slice(0, count);
+        const now = Date.now();
+
+        // Realistic Kiryana retail and wholesale cost pricing (strictly non-fabricated)
+        const getStaplePricing = (id: string) => {
+          switch (id) {
+            case 'staple_sugar': return { price: 150, costPrice: 142 };
+            case 'staple_atta': return { price: 1400, costPrice: 1320 };
+            case 'staple_rice_basmati': return { price: 360, costPrice: 330 };
+            case 'staple_ghee_1kg': return { price: 540, costPrice: 510 };
+            case 'staple_cooking_oil': return { price: 560, costPrice: 525 };
+            case 'staple_daal_chana': return { price: 260, costPrice: 240 };
+            case 'staple_daal_moong': return { price: 310, costPrice: 285 };
+            case 'staple_daal_masoor': return { price: 320, costPrice: 295 };
+            case 'staple_daal_mash': return { price: 520, costPrice: 480 };
+            case 'staple_white_chana': return { price: 380, costPrice: 350 };
+            case 'staple_besan': return { price: 280, costPrice: 255 };
+            case 'staple_tea_tapal': return { price: 1550, costPrice: 1390 };
+            case 'staple_tea_lipton': return { price: 1600, costPrice: 1440 };
+            case 'staple_rooh_afza': return { price: 420, costPrice: 360 };
+            case 'staple_water_15l': return { price: 90, costPrice: 70 };
+            case 'staple_milk_loose': return { price: 220, costPrice: 195 };
+            case 'staple_milk_tetra': return { price: 290, costPrice: 260 };
+            case 'staple_eggs': return { price: 320, costPrice: 290 };
+            case 'staple_salt_national': return { price: 60, costPrice: 48 };
+            case 'staple_red_chili': return { price: 1200, costPrice: 1050 };
+            case 'staple_haldi': return { price: 950, costPrice: 820 };
+            case 'staple_surf_detergent': return { price: 580, costPrice: 510 };
+            case 'staple_soap_lux': return { price: 160, costPrice: 138 };
+            case 'staple_dishwash_bar': return { price: 80, costPrice: 65 };
+            case 'staple_bread_large': return { price: 210, costPrice: 180 };
+            case 'staple_rusk': return { price: 150, costPrice: 125 };
+            case 'staple_biscuit_sooper': return { price: 50, costPrice: 42 };
+            default: return { price: 100, costPrice: 85 };
+          }
+        };
+
+        for (let i = 0; i < staplesToLoad.length; i++) {
+          const item = staplesToLoad[i];
+          const pricing = getStaplePricing(item.id);
+          const newProd: Product = {
+            id: `prod_staple_${now}_${i}`,
+            name: item.name,
+            nameUrdu: item.nameUrdu,
+            price: pricing.price,
+            costPrice: pricing.costPrice,
+            stock: 50,
+            category: item.category,
+            unit: item.unit,
+            image: item.image,
+            createdAt: now - i * 1000,
+            updatedAt: now,
+            syncStatus: 'pending',
+          };
+          await ProductRepository.insert(newProd, 'pending');
+          await SyncQueueRepository.enqueue('product', newProd.id, 'create', newProd);
+
+          if (user?.uid) {
+            saveProductToCloud(user.uid, newProd).catch(() => {});
+          }
+        }
+
+        await refreshProducts();
+        await refreshPendingCount();
+      } catch (err) {
+        console.error('[ShopContext] Error loading staple products:', err);
+      }
+    },
+    [user?.uid, refreshProducts, refreshPendingCount]
+  );
+
   const exportDataJSON = useCallback(() => {
     return JSON.stringify(
       {
@@ -927,7 +1087,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [products, sales, khata, settings, isLoaded, exportDataJSON]);
 
   // Localization
-  const language = settings.language;
   const setLanguage = useCallback(
     (lang: Language) => {
       AsyncStorage.setItem('@shopkeeper_user_explicit_language', lang).catch(() => {});
@@ -988,24 +1147,28 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     totalExpectedStockProfit,
     totalInventoryUnits,
   } = useMemo(() => {
-    let investment = 0;
+    let totalCostInvestment = 0;
     let retail = 0;
     let units = 0;
+    let expectedProfit = 0;
 
     for (const p of products) {
       const stock = Math.max(0, p.stock || 0);
-      const cost = p.costPrice != null ? p.costPrice : Math.round((p.sellingPrice ?? p.price ?? 0) * 0.8);
       const price = p.sellingPrice ?? p.price ?? 0;
 
-      investment += cost * stock;
       retail += price * stock;
       units += stock;
+
+      if (p.costPrice != null && p.costPrice > 0) {
+        totalCostInvestment += p.costPrice * stock;
+        expectedProfit += Math.max(0, (price - p.costPrice) * stock);
+      }
     }
 
     return {
-      totalInventoryInvestment: Math.round(investment),
+      totalInventoryInvestment: Math.round(totalCostInvestment),
       totalInventoryRetailValue: Math.round(retail),
-      totalExpectedStockProfit: Math.max(0, Math.round(retail - investment)),
+      totalExpectedStockProfit: Math.round(expectedProfit),
       totalInventoryUnits: units,
     };
   }, [products]);
@@ -1056,6 +1219,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       khata,
       addCustomer,
       addCustomerPayment,
+      addCustomerCredit,
       totalUdhaarReceivable,
       getCustomers,
       getDashboardStats,
@@ -1063,6 +1227,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateSettings,
       resetToSampleData: loadDemoData,
       loadDemoData,
+      loadStapleProducts,
       clearStoreData,
       exportDataJSON,
       importDataJSON,

@@ -47,14 +47,14 @@ const CATEGORIES: ProductCategory[] = PRODUCT_CATEGORIES;
 const UNITS: ProductUnit[] = PRODUCT_UNITS;
 
 const PRESET_IMAGES = [
-  { label: 'Oil / گھی', url: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Rice / چاول', url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Tea / چائے', url: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Milk / دودھ', url: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Spices / مصالحہ', url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Biscuits / بسکٹ', url: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Soap / صابن', url: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Sugar / چینی', url: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Oil', labelUrdu: 'گھی', url: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Rice', labelUrdu: 'چاول', url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Tea', labelUrdu: 'چائے', url: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Milk', labelUrdu: 'دودھ', url: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Spices', labelUrdu: 'مصالحہ', url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Biscuits', labelUrdu: 'بسکٹ', url: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Soap', labelUrdu: 'صابن', url: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Sugar', labelUrdu: 'چینی', url: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?w=400&auto=format&fit=crop&q=80' },
 ];
 
 const STOCK_SHORTCUTS = [10, 25, 50, 100];
@@ -244,11 +244,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     });
   }, [unitSearch]);
 
-  // Live profit calculation
+  // Live profit calculation (strictly authentic, zero fabricated margins)
   const parsedPrice = parseFloat(price) || 0;
-  const parsedCost = parseFloat(costPrice) || (parsedPrice > 0 ? Math.round(parsedPrice * 0.8) : 0);
-  const unitProfit = Math.max(0, parsedPrice - parsedCost);
-  const profitMarginPercent = parsedPrice > 0 ? Math.round((unitProfit / parsedPrice) * 100) : 0;
+  const hasValidCost = Boolean(costPrice && !isNaN(parseFloat(costPrice)) && parseFloat(costPrice) > 0);
+  const parsedCost = hasValidCost ? parseFloat(costPrice) : 0;
+  const unitProfit = hasValidCost ? Math.max(0, parsedPrice - parsedCost) : 0;
+  const profitMarginPercent = hasValidCost && parsedPrice > 0 ? Math.round((unitProfit / parsedPrice) * 100) : 0;
 
   const handleConnectDriveFromModal = async () => {
     try {
@@ -298,26 +299,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         console.error('[ProductModal] Google Drive upload error:', err);
         const errMsg = err?.message || 'Upload to Google Drive failed.';
         if (errMsg.includes('Google Drive API has not been used') || errMsg.includes('disabled')) {
-          const consoleUrl = 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513';
           showAlert({
-            type: 'warning',
-            title: 'Google Drive Setup Required',
-            message: 'Google Drive API must be enabled. Open Google Cloud Console, click ENABLE, and wait 1 minute before retrying.',
-            buttons: [
-              {
-                text: 'Open Google Console',
-                style: 'primary',
-                icon: 'open-outline',
-                onPress: () => {
-                  if (Platform.OS === 'web') {
-                    window.open(consoleUrl, '_blank');
-                  } else {
-                    Linking.openURL(consoleUrl).catch(() => { });
-                  }
-                },
-              },
-              { text: t('cancel'), style: 'cancel' },
-            ],
+            type: 'info',
+            title: language === 'ur' ? 'گوگل ڈرائیو بیک اپ' : 'Google Drive Backup',
+            message:
+              language === 'ur'
+                ? 'گوگل ڈرائیو فوٹو بیک اپ فی الحال دستیاب نہیں ہے۔ تصویر آپ کے موبائل میں محفوظ ہے۔'
+                : 'Google Drive photo backup is currently unavailable. Photos are safely saved locally on this device.',
+            buttons: [{ text: t('close') || 'OK', style: 'cancel' }],
           });
         } else {
           showAlert({
@@ -403,7 +392,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const finalCost = costPrice ? parseFloat(costPrice) : Math.round(parsedPrice * 0.85);
+      const finalCost =
+        costPrice && !isNaN(parseFloat(costPrice)) && parseFloat(costPrice) > 0
+          ? parseFloat(costPrice)
+          : undefined;
 
       if (productToEdit) {
         await updateProduct(productToEdit.id, {
@@ -667,7 +659,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                                 styles.presetChipText,
                                 { color: image === preset.url ? theme.primaryDark : theme.textSecondary },
                               ]}>
-                              {preset.label}
+                              {language === 'ur' ? preset.labelUrdu : preset.label}
                             </Text>
                           </Pressable>
                         ))}
@@ -854,7 +846,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         {t('category')} *
                       </Text>
                       <Text style={[styles.fieldHintUrdu, { color: theme.textMuted }]}>
-                        {language === 'ur' ? 'کیٹیگری منتخب کریں' : activeCategoryMeta.labelUrdu}
+                        {language === 'ur' ? activeCategoryMeta.labelUrdu : activeCategoryMeta.labelEn}
                       </Text>
                     </View>
 
@@ -1020,7 +1012,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         {t('unit')} *
                       </Text>
                       <Text style={[styles.fieldHintUrdu, { color: theme.textMuted }]}>
-                        {language === 'ur' ? 'اکائی / پیمائش' : activeUnitMeta.labelUrdu}
+                        {language === 'ur' ? activeUnitMeta.labelUrdu : activeUnitMeta.labelEn}
                       </Text>
                     </View>
 
@@ -1237,8 +1229,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </View>
                   </View>
 
-                  {/* Live Profit Banner */}
-                  {parsedPrice > 0 ? (
+                  {/* Live Profit Banner - Only shown when cost price is provided */}
+                  {parsedPrice > 0 && hasValidCost ? (
                     <View
                       style={[
                         styles.profitBanner,
@@ -1250,10 +1242,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       <Ionicons name="trending-up" size={20} color={theme.success} />
                       <View style={{ flex: 1 }}>
                         <Text style={[styles.profitBannerTitle, { color: theme.success }]}>
-                          Estimated Profit: {settings.currencySymbol}{unitProfit} / {unit} ({profitMarginPercent}% Margin)
+                          {language === 'ur'
+                            ? `متوقع منافع: ${settings.currencySymbol}${unitProfit} فی ${unit} (${profitMarginPercent}% مارجن)`
+                            : `Estimated Profit: ${settings.currencySymbol}${unitProfit} / ${unit} (${profitMarginPercent}% Margin)`}
                         </Text>
                         <Text style={[styles.profitBannerSub, { color: theme.textSecondary }]}>
-                          Based on selling for {settings.currencySymbol}{parsedPrice} and cost of {settings.currencySymbol}{parsedCost}
+                          {language === 'ur'
+                            ? `فروخت قیمت ${settings.currencySymbol}${parsedPrice} اور خرید قیمت ${settings.currencySymbol}${parsedCost}`
+                            : `Based on selling for ${settings.currencySymbol}${parsedPrice} and cost of ${settings.currencySymbol}${parsedCost}`}
                         </Text>
                       </View>
                     </View>

@@ -135,8 +135,9 @@ export const CustomerRepository = {
 
   async updateBalance(id: string, delta: number, db: IDatabaseAdapter = getDatabase()): Promise<void> {
     const now = Date.now();
+    // Allow negative balance to support advance customer deposits (پیشگی رقم)
     await db.run(
-      `UPDATE customers SET balance = MAX(0, balance + ?), updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
+      `UPDATE customers SET balance = balance + ?, updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
       [delta, now, id]
     );
   },

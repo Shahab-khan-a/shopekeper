@@ -194,7 +194,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
               </View>
               <View style={styles.featureTextWrap}>
                 <Text style={[styles.featureTitle, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}>
-                  {isUrdu ? 'گاہک ادھار کھاتہ' : 'Customer Udhaar Khata'}
+                  {isUrdu ? 'گاہک ادھار کھاتہ' : 'Customer Credit Ledger'}
                 </Text>
                 <Text style={[styles.featureDesc, { color: theme.textMuted, textAlign: isUrdu ? 'right' : 'left' }]}>
                   {isUrdu ? 'بقایا جات اور ادائیگیوں کا مکمل ریکارڈ' : 'Track dues, payments & WhatsApp follow-up'}
@@ -256,7 +256,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
               <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
             </View>
 
-            {/* Secondary Action: Explore as Guest */}
+            {/* Secondary Action: Open Offline Store */}
             <Pressable
               onPress={() => {
                 setActiveTab('dashboard');
@@ -268,10 +268,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
                 pressed && { opacity: 0.75, backgroundColor: theme.border },
               ]}
             >
-              <Ionicons name="enter-outline" size={16} color={theme.text} />
-              <Text style={[styles.guestBtnText, { color: theme.text }]} numberOfLines={1} ellipsizeMode="tail">
-                {isUrdu ? 'آف لائن دکان شروع کریں (گیسٹ موڈ)' : 'Continue as Guest (Offline Mode)'}
-              </Text>
+              <Ionicons name="phone-portrait-outline" size={17} color={theme.text} />
+              <View style={{ flex: 1, marginHorizontal: 8 }}>
+                <Text style={[styles.guestBtnText, { color: theme.text }]} numberOfLines={1}>
+                  {isUrdu ? 'آف لائن دکان شروع کریں (محفوظ لوکل ڈیٹا)' : 'Open Offline Store (Saved Locally)'}
+                </Text>
+                <Text style={{ fontSize: 10.5, color: theme.textMuted, marginTop: 1 }}>
+                  {isUrdu ? 'بغیر انٹرنیٹ کے تمام فیچرز مکمل کام کریں گے' : '100% offline - all data stays safe on device'}
+                </Text>
+              </View>
               <Ionicons name="chevron-forward" size={14} color={theme.textMuted} />
             </Pressable>
           </View>

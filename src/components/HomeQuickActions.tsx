@@ -29,8 +29,8 @@ export const HomeQuickActions: React.FC<HomeQuickActionsProps> = ({
     },
     {
       id: 'add_product',
-      labelEn: 'Add Stock',
-      labelUr: 'اسٹاک شامل',
+      labelEn: 'Add Item',
+      labelUr: 'نیا سامان',
       icon: 'add-circle-outline',
       color: '#4F46E5',
       bgColor: '#EEF2FF',
@@ -39,8 +39,8 @@ export const HomeQuickActions: React.FC<HomeQuickActionsProps> = ({
     },
     {
       id: 'khata_wasooli',
-      labelEn: 'Khata Wasooli',
-      labelUr: 'وصولی کھاتہ',
+      labelEn: 'Customer Credit',
+      labelUr: 'کھاتہ وصولی',
       icon: 'book-outline',
       color: '#D97706',
       bgColor: '#FFFBEB',
@@ -49,8 +49,8 @@ export const HomeQuickActions: React.FC<HomeQuickActionsProps> = ({
     },
     {
       id: 'day_end',
-      labelEn: 'Day-End Close',
-      labelUr: 'حساب بند',
+      labelEn: 'Day Summary',
+      labelUr: 'دن کا خلاصہ',
       icon: 'moon-outline',
       color: '#7C3AED',
       bgColor: '#F5F3FF',

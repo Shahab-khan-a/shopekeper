@@ -15,6 +15,7 @@ import { Colors, BorderRadius, Shadows, Typography } from '@/constants/theme';
 interface CustomerKhataCardProps {
   customer: CustomerKhata;
   onRecordPayment: (customer: CustomerKhata) => void;
+  onAddCredit?: (customer: CustomerKhata) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
   overdueDays?: number;
@@ -23,6 +24,7 @@ interface CustomerKhataCardProps {
 export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
   customer,
   onRecordPayment,
+  onAddCredit,
   isExpanded,
   onToggleExpand,
   overdueDays = 0,
@@ -30,8 +32,11 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
   const { settings, t, language } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
-  const isSettled = customer.totalDebt <= 0;
-  const isOverdue = !isSettled && overdueDays >= 7;
+  const rawBalance = customer.balance ?? customer.totalDebt ?? 0;
+  const hasAdvance = rawBalance < 0;
+  const advanceAmount = hasAdvance ? Math.abs(rawBalance) : 0;
+  const isSettled = customer.totalDebt <= 0 && !hasAdvance;
+  const isOverdue = !isSettled && !hasAdvance && overdueDays >= 7;
   const isUrdu = language === 'ur';
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.35)';
 
@@ -234,18 +239,30 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
         ]}>
         <View style={styles.debtLeft}>
           <Text style={[styles.debtLabel, { color: theme.textMuted }]}>
-            {isSettled ? t('cleared') : t('outstandingUdhaar')}
+            {hasAdvance
+              ? (isUrdu ? 'پیشگی بیلنس (دکان پر جمع)' : 'Advance Deposit')
+              : isSettled
+                ? t('cleared')
+                : t('outstandingUdhaar')}
           </Text>
           <View style={styles.debtAmountRow}>
             <Text
               style={[
                 styles.debtAmount,
-                { color: isSettled ? theme.success : theme.danger },
+                { color: hasAdvance ? '#059669' : isSettled ? theme.success : theme.danger },
               ]}>
               {settings.currencySymbol}
-              {Math.max(0, customer.totalDebt).toLocaleString()}
+              {hasAdvance
+                ? advanceAmount.toLocaleString()
+                : Math.max(0, customer.totalDebt).toLocaleString()}
             </Text>
-            {isOverdue ? (
+            {hasAdvance ? (
+              <View style={[styles.overduePill, { backgroundColor: '#D1FAE5' }]}>
+                <Text style={[styles.overduePillText, { color: '#059669', fontWeight: '800' }]}>
+                  {isUrdu ? 'پیشگی رقم' : 'Advance'}
+                </Text>
+              </View>
+            ) : isOverdue ? (
               <View style={[styles.overduePill, { backgroundColor: theme.dangerLight }]}>
                 <Text style={[styles.overduePillText, { color: theme.danger }]}>
                   {overdueDays}d {t('daysOverdue')}
@@ -294,6 +311,23 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
 
       {/* Actions */}
       <View style={styles.actionsRow}>
+        {/* Direct Credit Button */}
+        <Pressable
+          onPress={() => (onAddCredit ? onAddCredit(customer) : onToggleExpand())}
+          style={({ pressed }) => [
+            styles.creditBtn,
+            {
+              backgroundColor: settings.darkMode ? 'rgba(239, 68, 68, 0.15)' : '#FEE2E2',
+              borderColor: settings.darkMode ? 'rgba(239, 68, 68, 0.3)' : '#FCA5A5',
+            },
+            pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+          ]}>
+          <Ionicons name="add-circle" size={15} color={theme.danger} />
+          <Text style={[styles.creditBtnText, { color: theme.danger }]}>
+            {isUrdu ? '+ ادھار' : '+ Credit'}
+          </Text>
+        </Pressable>
+
         {isSettled ? (
           <View style={styles.settledWrap}>
             <Ionicons name="checkmark-circle" size={16} color={theme.success} />
@@ -524,6 +558,20 @@ const styles = StyleSheet.create({
   settledText: {
     fontSize: 13,
     fontWeight: '700',
+  },
+  creditBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  creditBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
   },
   vasooliBtn: {
     flex: 1,

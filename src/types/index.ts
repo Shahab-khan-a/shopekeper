@@ -216,3 +216,30 @@ export interface SyncOperation {
   retryCount: number;
 }
 
+// ==================== SUPPLIER LEDGER TYPES ====================
+
+export type SupplierTxType = 'purchase_credit' | 'payment_made';
+
+export interface SupplierTransaction {
+  id: string;
+  supplierId: string;
+  date: string; // ISO string
+  type: SupplierTxType;
+  amount: number;
+  billNumber?: string;
+  note?: string;
+  createdAt: number;
+}
+
+export interface SupplierKhata {
+  id: string;
+  name: string;
+  companyName?: string;
+  phone?: string;
+  address?: string;
+  totalPayable: number; // Positive = Shopkeeper owes supplier; Negative = Advance deposit
+  transactions: SupplierTransaction[];
+  createdAt: number;
+  lastUpdated: number;
+}
+

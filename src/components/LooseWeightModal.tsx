@@ -26,14 +26,14 @@ export interface LooseWeightModalProps {
 }
 
 const FRACTION_PRESETS = [
-  { label: '1/4 kg (پاؤ)', value: 0.25 },
-  { label: '1/2 kg (آدھا کلو)', value: 0.5 },
-  { label: '3/4 kg (تین پاؤ)', value: 0.75 },
-  { label: '1 kg (ایک کلو)', value: 1.0 },
-  { label: '1.5 kg (ڈیڑھ کلو)', value: 1.5 },
-  { label: '2 kg (دو کلو)', value: 2.0 },
-  { label: '2.5 kg', value: 2.5 },
-  { label: '5 kg', value: 5.0 },
+  { labelEn: '1/4 kg (250g)', labelUrdu: '1/4 kg (پاؤ)', value: 0.25 },
+  { labelEn: '1/2 kg (500g)', labelUrdu: '1/2 kg (آدھا کلو)', value: 0.5 },
+  { labelEn: '3/4 kg (750g)', labelUrdu: '3/4 kg (تین پاؤ)', value: 0.75 },
+  { labelEn: '1 kg', labelUrdu: '1 kg (ایک کلو)', value: 1.0 },
+  { labelEn: '1.5 kg', labelUrdu: '1.5 kg (ڈیڑھ کلو)', value: 1.5 },
+  { labelEn: '2 kg', labelUrdu: '2 kg (دو کلو)', value: 2.0 },
+  { labelEn: '2.5 kg', labelUrdu: '2.5 kg (ڈھائی کلو)', value: 2.5 },
+  { labelEn: '5 kg', labelUrdu: '5 kg (پانچ کلو)', value: 5.0 },
 ];
 
 const CASH_PRESETS = [20, 30, 50, 100, 150, 200, 300, 500];
@@ -92,6 +92,11 @@ export const LooseWeightModal: React.FC<LooseWeightModalProps> = ({
     setCashStr(Math.round(next * unitPrice).toString());
   };
 
+  const cleanProductName =
+    language === 'ur' && product.nameUrdu
+      ? product.nameUrdu
+      : product.name.replace(/\s*\([\u0600-\u06FF\s/]+\)$/, '').trim();
+
   return (
     <Modal
       visible={visible}
@@ -121,7 +126,7 @@ export const LooseWeightModal: React.FC<LooseWeightModalProps> = ({
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.productName, { color: theme.text }]} numberOfLines={1}>
-                  {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+                  {cleanProductName}
                 </Text>
                 <Text style={[styles.unitPriceText, { color: theme.textSecondary }]}>
                   {settings.currencySymbol}{unitPrice} / {unit}
@@ -176,7 +181,7 @@ export const LooseWeightModal: React.FC<LooseWeightModalProps> = ({
                   { color: mode === 'cash' ? theme.primary : theme.textMuted },
                   mode === 'cash' && styles.tabBtnTextActive,
                 ]}>
-                {language === 'ur' ? 'روپوں کے حساب سے' : 'By Cash Amount (روپے)'}
+                {language === 'ur' ? 'روپوں کے حساب سے' : 'By Cash Amount'}
               </Text>
             </Pressable>
           </View>
@@ -247,7 +252,7 @@ export const LooseWeightModal: React.FC<LooseWeightModalProps> = ({
                               fontWeight: isSelected ? '700' : '500',
                             },
                           ]}>
-                          {preset.label}
+                          {language === 'ur' ? preset.labelUrdu : preset.labelEn}
                         </Text>
                       </Pressable>
                     );

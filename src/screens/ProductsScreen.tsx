@@ -317,11 +317,11 @@ export const ProductsScreen: React.FC = () => {
             {filteredProducts.map((product) => {
               const isOut = product.stock <= 0;
               const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
-              const cost = product.costPrice || Math.round(product.price * 0.8);
+              const hasCost = product.costPrice !== undefined && product.costPrice !== null && product.costPrice > 0;
               const margin =
-                product.price > 0
-                  ? Math.round(((product.price - cost) / product.price) * 100)
-                  : 0;
+                hasCost && product.price > 0
+                  ? Math.round(((product.price - (product.costPrice as number)) / product.price) * 100)
+                  : null;
 
               return (
                 <Pressable
@@ -430,7 +430,7 @@ export const ProductsScreen: React.FC = () => {
                       {settings.currencySymbol}
                       {formatCompactPrice(product.price)}
                     </Text>
-                    {margin > 0 ? (
+                    {margin !== null && margin > 0 ? (
                       <View
                         style={[
                           styles.listMarginChip,

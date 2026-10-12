@@ -65,10 +65,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
 
   const paymentLabel =
     sale.paymentMethod === 'udhaar'
-      ? '(Udhaar / Credit)'
+      ? (language === 'ur' ? '(ادھار)' : '(Store Credit)')
       : sale.paymentMethod === 'cash'
-        ? '(Cash / نقد)'
-        : '(Online / آن لائن)';
+        ? (language === 'ur' ? '(نقد)' : '(Cash)')
+        : (language === 'ur' ? '(آن لائن)' : '(Online)');
 
   // Helper to generate a realistic SVG Barcode for HTML printing
   const generateBarcodeSVG = (code: string) => {
@@ -592,10 +592,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
 
     const paymentText =
       sale.paymentMethod === 'cash'
-        ? 'نقد (Cash)'
+        ? (language === 'ur' ? 'نقد (Cash)' : 'Cash')
         : sale.paymentMethod === 'online'
-          ? 'آن لائن (Online)'
-          : 'ادھار (Udhaar / Credit)';
+          ? (language === 'ur' ? 'آن لائن (Online)' : 'Online')
+          : (language === 'ur' ? 'ادھار (Credit)' : 'Store Credit');
 
     return `
 🧾 ${shopHeader}

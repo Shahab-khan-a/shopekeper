@@ -123,7 +123,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <View style={styles.contentWrap}>
         <View style={styles.nameContainer}>
           <Text style={[styles.productName, { color: theme.text }]} numberOfLines={2}>
-            {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
+            {language === 'ur' && product.nameUrdu
+              ? product.nameUrdu
+              : product.name.replace(/\s*\([\u0600-\u06FF\s/]+\)$/, '').trim()}
           </Text>
         </View>
 

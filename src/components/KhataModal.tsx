@@ -30,33 +30,22 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
 
   if (!customer) return null;
 
-  const isSettled = customer.totalDebt <= 0;
+  const rawBalance = customer.balance ?? customer.totalDebt ?? 0;
+  const hasAdvance = rawBalance < 0;
+  const advanceAmount = hasAdvance ? Math.abs(rawBalance) : 0;
+  const pendingDebt = Math.max(0, customer.totalDebt || 0);
+  const isSettled = pendingDebt <= 0 && !hasAdvance;
+
+  const parsedAmount = parseFloat(amount) || 0;
+  const isOverpaying = pendingDebt > 0 && parsedAmount > pendingDebt;
+  const extraAdvance = isOverpaying ? parsedAmount - pendingDebt : (pendingDebt === 0 ? parsedAmount : 0);
 
   const handleRecordPayment = async () => {
-    if (isSettled) {
-      showAlert({
-        type: 'info',
-        title: t('warningAlert') || 'Notice',
-        message: 'Customer khata is already settled. No pending debt to collect.',
-      });
-      return;
-    }
-
-    const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       showAlert({
         type: 'warning',
         title: t('warningAlert') || 'Notice',
         message: 'Please enter a valid payment amount.',
-      });
-      return;
-    }
-
-    if (parsedAmount > customer.totalDebt) {
-      showAlert({
-        type: 'warning',
-        title: t('warningAlert') || 'Notice',
-        message: `Payment amount cannot exceed pending debt (${settings.currencySymbol} ${customer.totalDebt.toLocaleString()}).`,
       });
       return;
     }
@@ -171,7 +160,7 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
                     opacity: isSettled ? 0.6 : 1,
                   },
                 ]}
-                placeholder="e.g. Cash vasooli at shop"
+                placeholder="e.g. Cash payment received at shop"
                 placeholderTextColor={theme.textMuted}
                 value={note}
                 onChangeText={setNote}

@@ -101,7 +101,7 @@ export const PaymentMixCard: React.FC<PaymentMixCardProps> = ({ sales }) => {
           <View style={[styles.legendDot, { backgroundColor: theme.danger }]} />
           <View>
             <Text style={[styles.legendLabel, { color: theme.textSecondary }]}>
-              {language === 'ur' ? 'ادھار' : 'Udhaar'} ({mix.udhaarPercent}%)
+              {language === 'ur' ? 'ادھار' : 'Credit'} ({mix.udhaarPercent}%)
             </Text>
             <Text style={[styles.legendVal, { color: theme.danger }]}>
               {settings.currencySymbol} {formatCompactPrice(mix.udhaar)}

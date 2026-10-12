@@ -149,7 +149,7 @@ export const SaleRepository = {
       if (!customerName?.trim() && !customerPhone?.trim() && !customerId) {
         return {
           success: false,
-          error: 'Customer name or phone number is required for an Udhaar (Credit) sale.',
+          error: 'Customer name or phone number is required for a Credit sale.',
         };
       }
     }
@@ -159,7 +159,12 @@ export const SaleRepository = {
         ? tenderedCash - grandTotal
         : 0;
 
-    const amountPaid = paymentMethod === 'cash' ? (tenderedCash ?? grandTotal) : 0;
+    const amountPaid =
+      paymentMethod === 'cash'
+        ? (tenderedCash ?? grandTotal)
+        : paymentMethod === 'online'
+        ? grandTotal
+        : 0;
 
     // Profit calculation: only compute profit when cost price is explicitly known (> 0)
     const totalProfit =
@@ -180,10 +185,17 @@ export const SaleRepository = {
 
         for (const item of items) {
           const pId = item.productId || item.product.id;
+          // Uncataloged / custom counter items (e.g. eggs, loose goods, custom amount) skip inventory deduction
+          const isCustom = pId.startsWith('custom-') || (item.product as any)?.isCustom;
+          if (isCustom) {
+            continue;
+          }
+
           const pRow = await tx.get<any>(`SELECT id, name, stock, unit FROM products WHERE id = ?`, [pId]);
 
           if (!pRow) {
-            throw new Error(`Product "${item.product.name}" was not found in database.`);
+            // If item is not in catalog table, treat as non-inventory item rather than failing checkout
+            continue;
           }
 
           if (item.quantity > pRow.stock) {
@@ -265,13 +277,13 @@ export const SaleRepository = {
           );
         }
 
-        // 6. Record Cash payment
+        // 6. Record Cash or Online payment
         const paymentId = `pmt-${now}`;
-        if (paymentMethod === 'cash') {
+        if (paymentMethod === 'cash' || paymentMethod === 'online') {
           await tx.run(
             `INSERT INTO payments (id, customerId, saleId, amount, paymentMethod, createdAt, syncStatus)
-             VALUES (?, ?, ?, ?, 'cash', ?, 'pending')`,
-            [paymentId, finalCustomerId || 'walk-in', saleId, grandTotal, now]
+             VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+            [paymentId, finalCustomerId || 'walk-in', saleId, grandTotal, paymentMethod, now]
           );
         }
 
@@ -464,15 +476,17 @@ export const SaleRepository = {
         // 2. Retrieve sale items
         const itemRows = await tx.all<any>(`SELECT * FROM sale_items WHERE saleId = ?`, [saleId]);
 
-        // 3. Restore inventory
+        // 3. Restore inventory (skip uncataloged custom items)
         const restoredProducts: any[] = [];
         for (const it of itemRows) {
-          await tx.run(
-            `UPDATE products SET stock = stock + ?, updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
-            [it.quantity, now, it.productId]
-          );
-          const fullProd = await tx.get<any>(`SELECT * FROM products WHERE id = ?`, [it.productId]);
-          if (fullProd) restoredProducts.push(fullProd);
+          if (it.productId && !it.productId.startsWith('custom-')) {
+            await tx.run(
+              `UPDATE products SET stock = stock + ?, updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
+              [it.quantity, now, it.productId]
+            );
+            const fullProd = await tx.get<any>(`SELECT * FROM products WHERE id = ?`, [it.productId]);
+            if (fullProd) restoredProducts.push(fullProd);
+          }
         }
 
         // 4. Reverse Khata if Udhaar

@@ -1,3 +1,5 @@
+import { CASH_OUT_STORAGE_KEY, CashOutEntry, CashOutModal } from '@/components/CashOutModal';
+import { HomeQuickActions } from '@/components/HomeQuickActions';
 import { LiveBorderSaleButton } from '@/components/LiveBorderSaleButton';
 import { ProductImage } from '@/components/ProductImage';
 import { SalesChart } from '@/components/SalesChart';
@@ -8,7 +10,8 @@ import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Modal,
@@ -28,6 +31,7 @@ export const DashboardScreen: React.FC = () => {
     outOfStockProducts,
     products,
     sales,
+    khata,
     totalUdhaarReceivable,
     totalInventoryInvestment,
     totalInventoryRetailValue,
@@ -43,9 +47,55 @@ export const DashboardScreen: React.FC = () => {
     t,
     language,
     showAlert,
+    loadStapleProducts,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+
+  // Day-0 Kiryana Setup State
+  const [isLoadingStaples, setIsLoadingStaples] = useState(false);
+  const [isSetupCardDismissed, setIsSetupCardDismissed] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('@shopkeeper_setup_card_dismissed')
+      .then((val) => {
+        if (val === 'true') {
+          setIsSetupCardDismissed(true);
+        }
+      })
+      .catch(() => { });
+  }, []);
+
+  const handleDismissSetupCard = async () => {
+    setIsSetupCardDismissed(true);
+    await AsyncStorage.setItem('@shopkeeper_setup_card_dismissed', 'true').catch(() => { });
+  };
+
+  const hasProducts = products.length > 0;
+  const hasCustomers = khata.length > 0;
+  const hasSales = sales.length > 0;
+  const isStoreSetupComplete = hasProducts && hasCustomers && hasSales;
+  const completedStepsCount = (hasProducts ? 1 : 0) + (hasCustomers ? 1 : 0) + (hasSales ? 1 : 0);
+  const showSetupCard = !isSetupCardDismissed && !isStoreSetupComplete;
+
+  const handleLoadStaples = async () => {
+    setIsLoadingStaples(true);
+    try {
+      await loadStapleProducts(20);
+      showAlert({
+        type: 'success',
+        title: language === 'ur' ? '20 اشیاء لوڈ ہو گئیں!' : 'Top 20 Staples Loaded!',
+        message:
+          language === 'ur'
+            ? 'مرحلہ 1 مکمل! چینی، آٹا، گھی، دالیں وغیرہ شامل ہو گئیں۔ اب مرحلہ 2 میں گاہک کھاتہ درج کریں یا مرحلہ 3 میں پہلی سیل بنائیں۔'
+            : 'Step 1 complete! 20 essential staples added. Proceed to Step 2 (Customer Ledger) or Step 3 (First Sale).',
+      });
+    } catch (e: any) {
+      console.error('[Dashboard] Error loading staples:', e);
+    } finally {
+      setIsLoadingStaples(false);
+    }
+  };
 
   // Show only a few (top 3) most recent sales on home to prevent crowding busy shops
   const MAX_HOME_RECENT_SALES = 3;
@@ -58,14 +108,64 @@ export const DashboardScreen: React.FC = () => {
   // In-home Sale Modal
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
-
-  // W2-5: Day-end summary modal
+  // Day-end summary modal & Cash Drawer Tally
   const [showDayEnd, setShowDayEnd] = useState(false);
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const [isCashOutModalOpen, setIsCashOutModalOpen] = useState(false);
+  const [todayCashOutTotal, setTodayCashOutTotal] = useState(0);
+
+  const todayStart = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  const refreshCashOut = useCallback(async () => {
+    try {
+      const data = await AsyncStorage.getItem(CASH_OUT_STORAGE_KEY);
+      if (data) {
+        const parsed: CashOutEntry[] = JSON.parse(data);
+        const startMs = todayStart.getTime();
+        const total = parsed
+          .filter((e) => e.createdAt >= startMs)
+          .reduce((sum, e) => sum + e.amount, 0);
+        setTodayCashOutTotal(total);
+      } else {
+        setTodayCashOutTotal(0);
+      }
+    } catch {
+      setTodayCashOutTotal(0);
+    }
+  }, [todayStart]);
+
+  useEffect(() => {
+    refreshCashOut();
+  }, [refreshCashOut]);
+
   const todaySales = sales.filter((s) => new Date(s.date) >= todayStart && !s.refundedAt);
   const todayCash = todaySales.filter((s) => s.paymentMethod === 'cash').reduce((a, b) => a + b.grandTotal, 0);
   const todayOnline = todaySales.filter((s) => s.paymentMethod === 'online').reduce((a, b) => a + b.grandTotal, 0);
   const todayUdhaar = todaySales.filter((s) => s.paymentMethod === 'udhaar').reduce((a, b) => a + b.grandTotal, 0);
+
+  // Vasooli / Debt Recovery collected today from customers
+  const todayVasooli = useMemo(() => {
+    let sum = 0;
+    const startMs = todayStart.getTime();
+    (khata || []).forEach((c: any) => {
+      c.transactions?.forEach((tx: any) => {
+        if (tx.type === 'payment' || tx.type === 'payment_received') {
+          const txTime = typeof tx.createdAt === 'number' ? tx.createdAt : new Date(tx.date || 0).getTime();
+          if (txTime >= startMs) {
+            sum += tx.amount || 0;
+          }
+        }
+      });
+    });
+    return sum;
+  }, [khata, todayStart]);
+
+  // Net Cash in Drawer = Cash Sales + Khata Vasooli - Cash Out
+  const todayNetCashInDrawer = Math.max(0, todayCash + todayVasooli - todayCashOutTotal);
+
   const todayGrossProfit = todaySales.reduce((a, s) => {
     const cost = s.items.reduce((c: number, it: any) => c + ((it.costPrice || 0) * it.quantity), 0);
     return a + (s.grandTotal - cost);
@@ -139,24 +239,55 @@ export const DashboardScreen: React.FC = () => {
 
         {/* ── Today's Metrics (overlap green header) ── */}
         <View style={styles.metricsGrid}>
-          <View style={[styles.metricCard, { backgroundColor: theme.card }]}>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-              {t('todaySales')}
-            </Text>
+          {/* 1. Today's Total Sales */}
+          <Pressable
+            onPress={() => setShowDayEnd(true)}
+            style={({ pressed }) => [
+              styles.metricCard,
+              { backgroundColor: theme.card },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <View style={styles.metricHeaderRow}>
+              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+                {t('todaySales')}
+              </Text>
+              <Ionicons name="receipt-outline" size={15} color={theme.textMuted} />
+            </View>
             <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
               {settings.currencySymbol} {todaySalesTotal.toLocaleString()}
             </Text>
-          </View>
-
-          <View style={[styles.metricCard, { backgroundColor: theme.card }]}>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-              {t('todayOrders')}
+            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
+              {todaySales.length > 0
+                ? `${todaySales.length} ${language === 'ur' ? 'بلز آج' : 'bills today'}`
+                : language === 'ur' ? 'آج کوئی بل نہیں' : 'No bills yet'}
             </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
-              {todayOrdersCount}
-            </Text>
-          </View>
+          </Pressable>
 
+          {/* 2. Today's Profit */}
+          <Pressable
+            onPress={() => setShowDayEnd(true)}
+            style={({ pressed }) => [
+              styles.metricCard,
+              { backgroundColor: theme.card },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <View style={styles.metricHeaderRow}>
+              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+                {language === 'ur' ? 'آج کا منافع' : "Today's Profit"}
+              </Text>
+              <Ionicons name="trending-up-outline" size={15} color="#059669" />
+            </View>
+            <Text style={[styles.metricValue, { color: '#059669' }]} numberOfLines={1}>
+              +{settings.currencySymbol} {Math.max(0, todayGrossProfit).toLocaleString()}
+            </Text>
+            <Text style={[styles.metricSubHint, { color: '#059669' }]} numberOfLines={1}>
+              {todaySalesTotal > 0
+                ? `${Math.round((todayGrossProfit / todaySalesTotal) * 100)}% ${language === 'ur' ? 'منافع مارجن' : 'margin'}`
+                : language === 'ur' ? 'سیل کا منافع' : 'Net profit'}
+            </Text>
+          </Pressable>
+
+          {/* 3. Customer Credit */}
           <Pressable
             onPress={() => setActiveTab('khata')}
             style={({ pressed }) => [
@@ -164,29 +295,365 @@ export const DashboardScreen: React.FC = () => {
               { backgroundColor: theme.card },
               pressed && { opacity: 0.88 },
             ]}>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-              {t('totalReceivable')}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
+            <View style={styles.metricHeaderRow}>
+              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+                {language === 'ur' ? 'گاہکوں کا ادھار' : 'Customer Credit'}
+              </Text>
+              <Ionicons name="book-outline" size={15} color={theme.danger} />
+            </View>
+            <Text style={[styles.metricValue, { color: theme.danger }]} numberOfLines={1}>
               {settings.currencySymbol} {totalUdhaarReceivable.toLocaleString()}
+            </Text>
+            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
+              {khata.filter((c: any) => (c.currentBalance || c.balance || 0) > 0).length > 0
+                ? `${khata.filter((c: any) => (c.currentBalance || c.balance || 0) > 0).length} ${language === 'ur' ? 'کھاتے بقایا' : 'pending accounts'}`
+                : language === 'ur' ? 'کوئی ادھار نہیں' : 'All cleared'}
             </Text>
           </Pressable>
 
+          {/* 4. Debt Recovered */}
           <Pressable
-            onPress={() => setActiveTab('products')}
+            onPress={() => setActiveTab('khata')}
             style={({ pressed }) => [
               styles.metricCard,
               { backgroundColor: theme.card },
               pressed && { opacity: 0.88 },
             ]}>
-            <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-              {t('totalInventory')}
+            <View style={styles.metricHeaderRow}>
+              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
+                {language === 'ur' ? 'ادھار وصولی' : 'Debt Recovered'}
+              </Text>
+              <Ionicons name="arrow-down-circle-outline" size={15} color="#059669" />
+            </View>
+            <Text style={[styles.metricValue, { color: '#059669' }]} numberOfLines={1}>
+              +{settings.currencySymbol} {todayVasooli.toLocaleString()}
             </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
-              {products.length}
+            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
+              {language === 'ur' ? 'آج کی جمع شدہ رقم' : "Today's collections"}
             </Text>
           </Pressable>
         </View>
+
+        {/* ── Cash Register / Cash-in-Drawer Hero Card ── */}
+        <View style={[styles.drawerActionStrip, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          {/* Header Row: Title + Info on left, Record Expense Button on right */}
+          <View style={styles.drawerTopRow}>
+            <Pressable
+              onPress={() => setShowDayEnd(true)}
+              style={styles.drawerTitleWrap}>
+              <View style={[styles.drawerSmallIcon, { backgroundColor: '#ECFDF5' }]}>
+                <Ionicons name="wallet" size={17} color="#059669" />
+              </View>
+              <Text style={[styles.drawerStripLabel, { color: theme.text }]} numberOfLines={1}>
+                {language === 'ur' ? 'گلہ کا نقد کیش' : 'Cash in Register'}
+              </Text>
+              <Ionicons name="information-circle-outline" size={14} color={theme.textMuted} />
+            </Pressable>
+
+            <Pressable
+              onPress={() => setIsCashOutModalOpen(true)}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.drawerStripCashOutBtn,
+                { backgroundColor: theme.dangerLight, borderColor: theme.danger },
+                pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
+              ]}>
+              <Ionicons name="arrow-up-circle-outline" size={14} color={theme.danger} />
+              <Text style={[styles.drawerStripCashOutText, { color: theme.danger }]}>
+                {language === 'ur' ? 'خرچہ لکھیں' : 'Record Expense'}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Hero Body: Bold Amount + Deducted Pill + Live Formula */}
+          <Pressable
+            onPress={() => setShowDayEnd(true)}
+            style={styles.drawerBottomArea}>
+            <View style={styles.drawerAmountRow}>
+              <Text style={[styles.drawerStripAmount, { color: '#059669' }]}>
+                {settings.currencySymbol} {todayNetCashInDrawer.toLocaleString()}
+              </Text>
+              {todayCashOutTotal > 0 && (
+                <View style={[styles.expDeductedPill, { backgroundColor: theme.dangerLight }]}>
+                  <Text style={[styles.expDeductedText, { color: theme.danger }]}>
+                    -{settings.currencySymbol}{todayCashOutTotal.toLocaleString()} {language === 'ur' ? 'خرچہ' : 'exp'}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={[styles.drawerFormulaSub, { color: theme.textMuted }]} numberOfLines={1}>
+              {todaySales.length === 0 && todayVasooli === 0 && todayCashOutTotal === 0
+                ? (language === 'ur' ? 'نقد سیل یا خرچہ پر گلہ خودکار اپڈیٹ ہوگا' : 'Live balance = Cash Sales + Recovered - Expenses')
+                : (language === 'ur' ? 'نقد سیل + وصولی - خرچہ' : 'Cash Sales + Recoveries - Expenses')}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* ── Quick Counter Actions ── */}
+        <HomeQuickActions
+          onNewSale={() => setIsSaleModalOpen(true)}
+          onDayEnd={() => setShowDayEnd(true)}
+        />
+
+        {/* ── Day-0 Rapid Store Setup Card (Checklist stays visible until all milestones completed or dismissed) ── */}
+        {showSetupCard && (
+          <View style={[styles.setupCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.setupCardHeader}>
+              <View style={[styles.setupIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                <Ionicons name="sparkles" size={20} color="#059669" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.setupTitle, { color: theme.text }]}>
+                  {language === 'ur' ? 'دکان شروع کرنے کے آسان 3 مراحل' : 'Quick 3-Step Store Setup'}
+                </Text>
+                <Text style={[styles.setupSubtitle, { color: theme.textSecondary }]}>
+                  {language === 'ur'
+                    ? `${completedStepsCount} از 3 مرحلے مکمل`
+                    : `${completedStepsCount} of 3 steps completed`}
+                </Text>
+              </View>
+
+              <View style={[styles.setupBadge, { backgroundColor: completedStepsCount > 0 ? '#D1FAE5' : theme.surfaceSubtle }]}>
+                <Text style={[styles.setupBadgeText, { color: completedStepsCount > 0 ? '#059669' : theme.textSecondary }]}>
+                  {completedStepsCount}/3
+                </Text>
+              </View>
+
+              <Pressable
+                onPress={handleDismissSetupCard}
+                hitSlop={8}
+                style={({ pressed }) => [styles.dismissBtn, pressed && { opacity: 0.6 }]}>
+                <Ionicons name="close" size={18} color={theme.textMuted} />
+              </Pressable>
+            </View>
+
+            {/* Progress track */}
+            <View style={[styles.progressBarTrack, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#E2E8F0' }]}>
+              <View
+                style={[
+                  styles.progressBarFill,
+                  {
+                    backgroundColor: '#059669',
+                    width: `${Math.max(8, Math.round((completedStepsCount / 3) * 100))}%`,
+                  },
+                ]}
+              />
+            </View>
+
+            {/* Step 1: Add Staples or Custom Product */}
+            <View
+              style={[
+                styles.setupStepBox,
+                {
+                  backgroundColor: hasProducts
+                    ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
+                    : theme.surfaceSubtle,
+                  borderColor: hasProducts ? theme.success : theme.border,
+                },
+              ]}>
+              <View style={styles.setupStepTop}>
+                <View
+                  style={[
+                    styles.stepNumBubble,
+                    { backgroundColor: hasProducts ? theme.success : theme.primary },
+                  ]}>
+                  {hasProducts ? (
+                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.stepNumText}>1</Text>
+                  )}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.stepTitle, { color: theme.text }]}>
+                    {hasProducts
+                      ? (language === 'ur' ? 'اشیاء شامل ہیں' : 'Inventory Ready')
+                      : (language === 'ur' ? 'دکان میں اشیاء شامل کریں' : 'Add Inventory Products')}
+                  </Text>
+                  <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
+                    {hasProducts
+                      ? (language === 'ur' ? `دکان میں ${products.length} اشیاء محفوظ ہیں` : `${products.length} products ready in catalog`)
+                      : (language === 'ur'
+                        ? 'چینی، آٹا، گھی، دالیں اور چائے کی پتی 1 کلک میں لوڈ کریں'
+                        : 'Load top 20 Pakistani staples with verified prices or add custom item')}
+                  </Text>
+                </View>
+                {hasProducts ? (
+                  <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
+                    <Text style={[styles.stepDoneText, { color: '#059669' }]}>
+                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+
+              {!hasProducts && (
+                <View style={styles.stepButtonsRow}>
+                  <Pressable
+                    onPress={handleLoadStaples}
+                    disabled={isLoadingStaples}
+                    style={({ pressed }) => [
+                      styles.loadStaplesBtn,
+                      { backgroundColor: '#059669' },
+                      pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                    ]}>
+                    {isLoadingStaples ? (
+                      <Text style={styles.loadStaplesText}>
+                        {language === 'ur' ? 'لوڈ ہو رہا ہے...' : 'Loading...'}
+                      </Text>
+                    ) : (
+                      <>
+                        <Ionicons name="flash" size={15} color="#FFFFFF" />
+                        <Text style={styles.loadStaplesText}>
+                          {language === 'ur' ? '⚡ 20 اہم اشیاء لوڈ کریں' : '⚡ Load Top 20 Staples'}
+                        </Text>
+                      </>
+                    )}
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setIsAddProductOpen(true)}
+                    style={({ pressed }) => [
+                      styles.customProductBtn,
+                      { borderColor: theme.border, backgroundColor: theme.card },
+                      pressed && { opacity: 0.8 },
+                    ]}>
+                    <Ionicons name="add" size={15} color={theme.text} />
+                    <Text style={[styles.customProductText, { color: theme.text }]}>
+                      {language === 'ur' ? '+ نیا آئٹم' : '+ Custom Item'}
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+
+            {/* Step 2: Add Customer Udhaar */}
+            <View
+              style={[
+                styles.setupStepBox,
+                {
+                  backgroundColor: hasCustomers
+                    ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
+                    : theme.surfaceSubtle,
+                  borderColor: hasCustomers
+                    ? theme.success
+                    : (!hasCustomers && hasProducts ? theme.primary : theme.border),
+                  borderWidth: !hasCustomers && hasProducts ? 1.5 : 1,
+                },
+              ]}>
+              <View style={styles.setupStepTop}>
+                <View
+                  style={[
+                    styles.stepNumBubble,
+                    { backgroundColor: hasCustomers ? theme.success : theme.secondary },
+                  ]}>
+                  {hasCustomers ? (
+                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.stepNumText}>2</Text>
+                  )}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.stepTitle, { color: theme.text }]}>
+                    {hasCustomers
+                      ? (language === 'ur' ? 'گاہک کھاتہ فعال ہے' : 'Customer Ledger Active')
+                      : (language === 'ur' ? 'پرانا ادھار کھاتہ درج کریں' : 'Register Customer Ledger')}
+                  </Text>
+                  <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
+                    {hasCustomers
+                      ? (language === 'ur' ? `کھاتے میں ${khata.length} گاہک محفوظ ہیں` : `${khata.length} customers in ledger`)
+                      : (language === 'ur'
+                        ? 'بہی کھاتہ سے اپنے پرانے ادھار گاہک اور سابقہ بقایا لکھیں'
+                        : 'Transfer customer names and opening debt balances from your notebook')}
+                  </Text>
+                </View>
+                {hasCustomers ? (
+                  <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
+                    <Text style={[styles.stepDoneText, { color: '#059669' }]}>
+                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
+                    </Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={() => setActiveTab('khata')}
+                    style={({ pressed }) => [
+                      styles.stepActionBtn,
+                      { backgroundColor: theme.primary, borderColor: theme.primary },
+                      pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+                    ]}>
+                    <Ionicons name="person-add" size={14} color="#FFFFFF" />
+                    <Text style={[styles.stepActionText, { color: '#FFFFFF' }]}>
+                      {language === 'ur' ? 'نیا گاہک' : 'Add Customer'}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+
+            {/* Step 3: First Sale */}
+            <View
+              style={[
+                styles.setupStepBox,
+                {
+                  backgroundColor: hasSales
+                    ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
+                    : theme.surfaceSubtle,
+                  borderColor: hasSales
+                    ? theme.success
+                    : (!hasSales && hasProducts ? '#7C3AED' : theme.border),
+                  borderWidth: !hasSales && hasProducts ? 1.5 : 1,
+                },
+              ]}>
+              <View style={styles.setupStepTop}>
+                <View
+                  style={[
+                    styles.stepNumBubble,
+                    { backgroundColor: hasSales ? theme.success : '#7C3AED' },
+                  ]}>
+                  {hasSales ? (
+                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.stepNumText}>3</Text>
+                  )}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.stepTitle, { color: theme.text }]}>
+                    {hasSales
+                      ? (language === 'ur' ? 'سیل کا ریکارڈ موجود ہے' : 'First Sale Completed')
+                      : (language === 'ur' ? 'پہلی سیل اور بل بنائیں' : 'Create First Sale Bill')}
+                  </Text>
+                  <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
+                    {hasSales
+                      ? (language === 'ur' ? `${sales.length} بل بنائے جا چکے ہیں` : `${sales.length} sales recorded`)
+                      : (language === 'ur'
+                        ? 'نقد فروخت یا ادھار بل کا پرنٹ و واٹس ایپ رسید'
+                        : 'Fast counter billing with instant WhatsApp receipt sharing')}
+                  </Text>
+                </View>
+                {hasSales ? (
+                  <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
+                    <Text style={[styles.stepDoneText, { color: '#059669' }]}>
+                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
+                    </Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={() => setActiveTab('sale')}
+                    style={({ pressed }) => [
+                      styles.stepActionBtn,
+                      { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+                      pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+                    ]}>
+                    <Ionicons name="receipt-outline" size={14} color="#FFFFFF" />
+                    <Text style={[styles.stepActionText, { color: '#FFFFFF' }]}>
+                      {language === 'ur' ? 'سیل بنائیں' : 'Start Sale'}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* ── Sales Analytics & Trends Chart ── */}
         <SalesChart sales={sales} />
@@ -352,6 +819,8 @@ export const DashboardScreen: React.FC = () => {
             icon="receipt-outline"
             title={t('noRecentSales')}
             subtitle={language === 'ur' ? 'پہلا بل بنانے کے لیے نیچے بٹن دبائیں' : 'Create your first bill to get started.'}
+            actionLabel={language === 'ur' ? 'نیا بل بنائیں' : 'Create First Bill'}
+            onAction={() => setIsSaleModalOpen(true)}
             compact
           />
         ) : (
@@ -457,23 +926,33 @@ export const DashboardScreen: React.FC = () => {
               <View style={styles.dayEndBody}>
                 {[
                   { label: language === 'ur' ? 'کل بل' : 'Total Bills', value: `${todaySales.length}`, icon: 'receipt-outline', color: theme.primary },
-                  { label: language === 'ur' ? 'نقد وصول' : 'Cash Collected', value: `${settings.currencySymbol}${todayCash.toLocaleString()}`, icon: 'cash-outline', color: theme.success },
-                  { label: language === 'ur' ? 'آن لائن' : 'Online', value: `${settings.currencySymbol}${todayOnline.toLocaleString()}`, icon: 'phone-portrait-outline', color: theme.secondary },
-                  { label: language === 'ur' ? 'ادھار دیا' : 'Udhaar Given', value: `${settings.currencySymbol}${todayUdhaar.toLocaleString()}`, icon: 'book-outline', color: theme.danger },
-                  { label: language === 'ur' ? 'تخمینی منافع' : 'Est. Profit', value: `${settings.currencySymbol}${Math.max(0, todayGrossProfit).toLocaleString()}`, icon: 'trending-up-outline', color: theme.success },
+                  { label: language === 'ur' ? 'نقد سیل' : 'Cash Sales', value: `${settings.currencySymbol}${todayCash.toLocaleString()}`, icon: 'cash-outline', color: theme.success },
+                  { label: language === 'ur' ? 'ادھار وصولی' : 'Credit Collected', value: `+${settings.currencySymbol}${todayVasooli.toLocaleString()}`, icon: 'arrow-down-circle-outline', color: '#059669' },
+                  { label: language === 'ur' ? 'دکان کے اخراجات' : 'Shop Expenses (Cash Out)', value: `-${settings.currencySymbol}${todayCashOutTotal.toLocaleString()}`, icon: 'arrow-up-circle-outline', color: theme.danger },
+                  { label: language === 'ur' ? 'گلہ میں متوقع کیش' : 'Net Cash in Drawer', value: `${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()}`, icon: 'wallet-outline', color: '#059669' },
+                  { label: language === 'ur' ? 'آن لائن رقم' : 'Online / EasyPaisa', value: `${settings.currencySymbol}${todayOnline.toLocaleString()}`, icon: 'phone-portrait-outline', color: theme.secondary },
+                  { label: language === 'ur' ? 'آج دیا گیا ادھار' : 'Credit Given Today', value: `${settings.currencySymbol}${todayUdhaar.toLocaleString()}`, icon: 'book-outline', color: theme.danger },
+                  { label: language === 'ur' ? 'مجموعی منافع' : 'Gross Margin', value: `${settings.currencySymbol}${Math.max(0, todayGrossProfit).toLocaleString()}`, icon: 'trending-up-outline', color: theme.success },
                 ].map((row) => (
                   <View key={row.label} style={[styles.dayEndRow, { borderBottomColor: theme.border }]}>
                     <View style={[styles.dayEndRowIcon, { backgroundColor: row.color + '20' }]}>
                       <Ionicons name={row.icon as any} size={16} color={row.color} />
                     </View>
                     <Text style={[styles.dayEndRowLabel, { color: theme.textSecondary }]}>{row.label}</Text>
-                    <Text style={[styles.dayEndRowValue, { color: theme.text }]}>{row.value}</Text>
+                    <Text style={[styles.dayEndRowValue, { color: theme.text, fontWeight: '700' }]}>{row.value}</Text>
                   </View>
                 ))}
               </View>
             </Pressable>
           </Pressable>
         </Modal>
+
+        {/* ── Cash Out (Expense) Modal ── */}
+        <CashOutModal
+          visible={isCashOutModalOpen}
+          onClose={() => setIsCashOutModalOpen(false)}
+          onCashOutSaved={refreshCashOut}
+        />
 
       </ScrollView>
 
@@ -603,18 +1082,29 @@ const styles = StyleSheet.create({
     width: '48%',
     borderRadius: 14,
     paddingHorizontal: 14,
-    paddingVertical: 14,
-    gap: 6,
+    paddingVertical: 12,
+    gap: 4,
     ...Shadows.md,
+  },
+  metricHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   metricLabel: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
+    flex: 1,
   },
   metricValue: {
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.3,
+  },
+  metricSubHint: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 1,
   },
 
   // Alert Section
@@ -853,14 +1343,236 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
+
   },
   dayEndRowLabel: {
     flex: 1,
     fontSize: 13,
     fontWeight: '600',
+
   },
   dayEndRowValue: {
     fontSize: 15,
+    fontWeight: '800',
+
+  },
+  drawerActionStrip: {
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 14,
+    marginTop: 6,
+    marginBottom: 6,
+    minHeight: 105,
+    justifyContent: 'space-between',
+    ...Shadows.sm,
+  },
+  drawerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  drawerTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    flex: 1,
+    minWidth: 0,
+  },
+  drawerSmallIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  drawerStripLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  drawerStripCashOutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  drawerStripCashOutText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  drawerBottomArea: {
+    marginTop: 10,
+    gap: 4,
+  },
+  drawerAmountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  drawerStripAmount: {
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  expDeductedPill: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  expDeductedText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  drawerFormulaSub: {
+    fontSize: 11.5,
+    fontWeight: '500',
+  },
+
+  // Day-0 Setup Card
+  setupCard: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    padding: Spacing.md,
+    marginTop: 6,
+    marginBottom: Spacing.sm,
+    gap: Spacing.md,
+    ...Shadows.sm,
+  },
+  setupCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  setupIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  setupTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  setupSubtitle: {
+    fontSize: 11.5,
+    marginTop: 2,
+  },
+  setupBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.sm,
+  },
+  setupBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  setupStepBox: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  setupStepTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  stepNumBubble: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  stepTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  stepDesc: {
+    fontSize: 11,
+    marginTop: 1,
+    lineHeight: 15,
+  },
+  stepButtonsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  loadStaplesBtn: {
+    flex: 1.6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderRadius: BorderRadius.md,
+  },
+  loadStaplesText: {
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontWeight: '800',
+  },
+  customProductBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  customProductText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  stepActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  stepActionText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  dismissBtn: {
+    padding: 4,
+    marginLeft: Spacing.xs,
+  },
+  progressBarTrack: {
+    height: 5,
+    borderRadius: 3,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  stepDoneBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.sm,
+  },
+  stepDoneText: {
+    fontSize: 11,
     fontWeight: '800',
   },
 });

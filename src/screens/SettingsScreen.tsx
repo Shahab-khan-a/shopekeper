@@ -1770,7 +1770,7 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={[styles.importBoxDesc, { color: theme.textMuted }]}>
                   {language === 'ur'
                     ? 'پہلے سے محفوظ شدہ بیک اپ فائل (.json) منتخب کر کے اپنا ڈیٹا بحال کریں۔'
-                    : 'Select a previously saved backup file (.json) to restore your products, sales, and khata records.'}
+                    : 'Select a previously saved backup file (.json) to restore your products, sales, and ledger records.'}
                 </Text>
               </View>
 
