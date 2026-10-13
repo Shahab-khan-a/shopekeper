@@ -38,7 +38,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       return {
         bg: theme.dangerLight,
         text: theme.danger,
-        label: t('soldOut'),
+        label: language === 'ur' ? 'ختم' : t('soldOut'),
         icon: 'alert-circle' as const,
       };
     }
@@ -46,12 +46,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       return {
         bg: theme.warningLight,
         text: theme.warning,
-        label: `${product.stock} ${product.unit}`,
+        label: language === 'ur' ? `${product.stock} باقی` : `${product.stock} left`,
         icon: 'warning' as const,
       };
     }
     return {
-      bg: settings.darkMode ? 'rgba(16,185,129,0.22)' : '#A7F3D0',
+      bg: settings.darkMode ? 'rgba(16,185,129,0.22)' : '#D1FAE5',
       text: settings.darkMode ? theme.success : '#047857',
       label: `${product.stock} ${product.unit}`,
       icon: 'checkmark-circle' as const,
@@ -184,8 +184,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </View>
 
         <View style={styles.detailsChevron}>
-          <Text style={[styles.detailsText, { color: theme.primary }]}>{t('detailsLink')}</Text>
-          <Ionicons name="chevron-forward" size={13} color={theme.primary} />
+          <Text style={[styles.detailsText, { color: theme.primary }]}>
+            {language === 'ur' ? 'تفصیل' : 'Details'}
+          </Text>
+          <Ionicons name="chevron-forward" size={12} color={theme.primary} />
         </View>
       </View>
     </Pressable>
@@ -215,10 +217,10 @@ const styles = StyleSheet.create({
   },
   categoryBadge: {
     position: 'absolute',
-    top: 8,
-    left: 8,
+    top: 7,
+    left: 7,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 2.5,
     borderRadius: BorderRadius.full,
     zIndex: 2,
     maxWidth: '55%',
@@ -226,17 +228,17 @@ const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   stockBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 7,
+    right: 7,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
     borderRadius: BorderRadius.full,
     zIndex: 2,
     maxWidth: '48%',
@@ -247,17 +249,17 @@ const styles = StyleSheet.create({
   },
   contentWrap: {
     paddingHorizontal: 10,
-    paddingTop: 10,
-    paddingBottom: 8,
-    gap: 6,
+    paddingTop: 8,
+    paddingBottom: 6,
+    gap: 5,
     flex: 1,
   },
   nameContainer: {
-    minHeight: 36,
+    minHeight: 34,
     justifyContent: 'flex-start',
   },
   productName: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '700',
     lineHeight: 18,
     letterSpacing: -0.1,
@@ -276,7 +278,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   priceValue: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
@@ -285,12 +287,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   profitChip: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
     borderRadius: 4,
   },
   profitChipText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
   },
   cardFooter: {
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 5,
     borderTopWidth: 1,
   },
   stockInfoPill: {

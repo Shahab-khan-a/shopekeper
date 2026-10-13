@@ -1,6 +1,5 @@
 import { CASH_OUT_STORAGE_KEY, CashOutEntry, CashOutModal } from '@/components/CashOutModal';
-import { HomeQuickActions } from '@/components/HomeQuickActions';
-import { LiveBorderSaleButton } from '@/components/LiveBorderSaleButton';
+import { RainbowQuickActionFab } from '@/components/RainbowQuickActionFab';
 import { ProductImage } from '@/components/ProductImage';
 import { SalesChart } from '@/components/SalesChart';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -390,12 +389,7 @@ export const DashboardScreen: React.FC = () => {
           </Pressable>
         </View>
 
-        {/* ── Quick Counter Actions ── */}
-        <HomeQuickActions
-          onNewSale={() => setIsSaleModalOpen(true)}
-          onDayEnd={() => setShowDayEnd(true)}
-        />
-
+        
         {/* ── Day-0 Rapid Store Setup Card (Checklist stays visible until all milestones completed or dismissed) ── */}
         {showSetupCard && (
           <View style={[styles.setupCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -956,15 +950,16 @@ export const DashboardScreen: React.FC = () => {
 
       </ScrollView>
 
-      {/* ── Floating Action Button (New Sale) with Live Animated Border ── */}
-      <View style={styles.floatingFabWrapper} pointerEvents="box-none">
-        <LiveBorderSaleButton
-          onPress={() => setIsSaleModalOpen(true)}
-          label={t('sale')}
-          primaryColor={theme.primary}
-          isDark={!!settings.darkMode}
-        />
-      </View>
+      {/* ── Floating Action Button: Rainbow Quick Action Arc ── */}
+      <RainbowQuickActionFab
+        onNewSale={() => setIsSaleModalOpen(true)}
+        onAddProduct={() => setIsAddProductOpen(true)}
+        onDayEnd={() => setShowDayEnd(true)}
+        onSettings={() => setActiveTab('settings')}
+        primaryColor={theme.primary}
+        isDark={!!settings.darkMode}
+        language={language}
+      />
 
       {/* ── Direct New Sale Window on Home ── */}
       <Modal

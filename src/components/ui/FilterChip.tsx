@@ -37,31 +37,31 @@ export const FilterChip: React.FC<FilterChipProps> = ({
 
   const bg = isActive
     ? activeBg || theme.primary
-    : isAlertChip
+    : inactiveBg || (isAlertChip
       ? settings.darkMode
         ? 'rgba(239, 68, 68, 0.14)'
         : '#FEE2E2'
-      : inactiveBg || (settings.darkMode ? theme.surfaceSubtle : '#FFFFFF');
+      : (settings.darkMode ? theme.surfaceSubtle : '#FFFFFF'));
 
   const border = isActive
     ? activeBg || theme.primary
-    : isAlertChip
+    : inactiveBorder || (isAlertChip
       ? settings.darkMode
         ? 'rgba(239, 68, 68, 0.3)'
         : '#FECACA'
-      : inactiveBorder || (settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.45)');
+      : (settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.45)'));
 
   const textColor = isActive
     ? activeColor || '#FFFFFF'
-    : isAlertChip
+    : inactiveColor || (isAlertChip
       ? theme.danger
-      : inactiveColor || theme.textSecondary;
+      : theme.textSecondary);
 
   const iconColor = isActive
     ? activeColor || '#FFFFFF'
-    : isAlertChip
+    : inactiveColor || (isAlertChip
       ? theme.danger
-      : theme.textMuted;
+      : theme.textMuted);
 
   const countBg = isActive
     ? 'rgba(255,255,255,0.22)'

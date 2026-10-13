@@ -188,10 +188,10 @@ export default function App() {
 
     // 3. Authenticated or Guest Mode -> Show Main Store POS App
     return (
-      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: theme.surface }]}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: theme.heroBg }]}>
         <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.surface}
+          barStyle="light-content"
+          backgroundColor={theme.heroBg}
         />
         <View style={[styles.appContainer, { backgroundColor: theme.background }]}>
           {/* Top Shop Brand & Settings Header */}

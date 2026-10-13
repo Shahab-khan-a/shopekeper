@@ -9,8 +9,7 @@ import { useShop } from '@/context/ShopContext';
 import { Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -39,29 +38,19 @@ export const ProductsScreen: React.FC = () => {
     lowStockProducts,
     outOfStockProducts,
     showAlert,
+    productsViewMode,
+    setProductsViewMode,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock'>('All');
-  const PRODUCTS_VIEW_MODE_KEY = '@shopkeeper_products_view_mode';
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const viewMode = productsViewMode;
   const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
 
-  useEffect(() => {
-    AsyncStorage.getItem(PRODUCTS_VIEW_MODE_KEY)
-      .then((saved) => {
-        if (saved === 'grid' || saved === 'list') {
-          setViewMode(saved);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   const setViewModePersist = (mode: 'grid' | 'list') => {
-    setViewMode(mode);
-    AsyncStorage.setItem(PRODUCTS_VIEW_MODE_KEY, mode).catch(() => {});
+    setProductsViewMode(mode);
   };
 
   const activeProduct = useMemo(() => {
@@ -105,136 +94,127 @@ export const ProductsScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.contentWrap}>
-        {/* Search + Add Product */}
-        <View style={styles.topHeader}>
-          <View style={styles.searchFlex}>
-            <SearchBar
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={t('searchProductPlaceholder')}
-              height={40}
-            />
-          </View>
+      {/* ── Emerald Hero Canopy Header ── */}
+      <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
+        <View style={styles.heroInner}>
+          {/* Top Row: Search + Add Product */}
+          <View style={styles.topHeader}>
+            <View style={styles.searchFlex}>
+              <SearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={language === 'ur' ? 'اشیاء یا بارکوڈ تلاش کریں...' : t('searchProductPlaceholder')}
+                height={40}
+              />
+            </View>
 
-          <Pressable
-            onPress={() => {
-              setEditingProduct(null);
-              setIsAddProductOpen(true);
-            }}
-            style={({ pressed }) => [
-              styles.addProdBtn,
-              { backgroundColor: theme.primary },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
-            ]}>
-            <Ionicons name="add" size={18} color="#FFFFFF" />
-            <Text style={styles.addProdText}>{t('addProductBtn')}</Text>
-          </Pressable>
-        </View>
-
-        {/* Segmented Metric Overview Card */}
-        <View
-          style={[
-            styles.financeSummaryBar,
-            {
-              backgroundColor: cardBg,
-              borderColor: softBorder,
-            },
-          ]}>
-          <View style={styles.financeSummaryItem}>
-            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]} numberOfLines={1}>
-              {t('metricInvestment')}
-            </Text>
-            <Text
-              style={[styles.financeSummaryVal, { color: theme.text }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}>
-              {settings.currencySymbol}
-              {formatCompactPrice(totalInventoryInvestment)}
-            </Text>
-            <Text style={[styles.financeSubLabel, { color: theme.textMuted }]}>
-              {t('metricCostValue')}
-            </Text>
-          </View>
-
-          <View style={[styles.financeSummaryDivider, { backgroundColor: softBorder }]} />
-
-          <View style={styles.financeSummaryItem}>
-            <Text style={[styles.financeSummaryLabel, { color: theme.textMuted }]} numberOfLines={1}>
-              {t('metricRetailValue')}
-            </Text>
-            <Text
-              style={[styles.financeSummaryVal, { color: theme.text }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}>
-              {settings.currencySymbol}
-              {formatCompactPrice(totalInventoryRetailValue)}
-            </Text>
-            <Text style={[styles.financeSubLabel, { color: theme.textMuted }]}>
-              {t('metricSellingEst')}
-            </Text>
-          </View>
-
-          <View style={[styles.financeSummaryDivider, { backgroundColor: softBorder }]} />
-
-          <View style={styles.financeSummaryItem}>
-            <Text style={[styles.financeSummaryLabel, { color: theme.primary }]} numberOfLines={1}>
-              {t('metricEstProfit')}
-            </Text>
-            <Text
-              style={[styles.financeSummaryVal, { color: theme.primary }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}>
-              +{settings.currencySymbol}
-              {formatCompactPrice(totalExpectedStockProfit)}
-            </Text>
-            <View
-              style={[
-                styles.profitPctPill,
-                {
-                  backgroundColor: settings.darkMode
-                    ? 'rgba(16,185,129,0.2)'
-                    : 'rgba(167,243,208,0.5)',
-                },
+            <Pressable
+              onPress={() => {
+                setEditingProduct(null);
+                setIsAddProductOpen(true);
+              }}
+              style={({ pressed }) => [
+                styles.addProdBtn,
+                { backgroundColor: settings.darkMode ? theme.primary : '#FFFFFF' },
+                pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
               ]}>
-              <Text style={[styles.profitPctText, { color: theme.primary }]}>+{profitPct}%</Text>
+              <Ionicons
+                name="add-circle"
+                size={18}
+                color={settings.darkMode ? '#FFFFFF' : '#064E3B'}
+              />
+              <Text
+                style={[
+                  styles.addProdText,
+                  { color: settings.darkMode ? '#FFFFFF' : '#064E3B' },
+                ]}>
+                {language === 'ur' ? 'نیا آئٹم' : t('addProductBtn')}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Compact Glass Metric Summary Strip */}
+          <View style={styles.compactMetricBar}>
+            <View style={styles.compactMetricItem}>
+              <Ionicons name="cube-outline" size={13} color="#A7F3D0" />
+              <Text style={styles.compactMetricText} numberOfLines={1}>
+                <Text style={styles.compactMetricBold}>{products.length}</Text>{' '}
+                {language === 'ur' ? 'اشیاء' : 'Items'}
+              </Text>
+            </View>
+
+            <View style={styles.compactMetricDivider} />
+
+            <View style={styles.compactMetricItem}>
+              <Ionicons name="pricetag-outline" size={12} color="#A7F3D0" />
+              <Text style={styles.compactMetricText} numberOfLines={1}>
+                {language === 'ur' ? 'مال: ' : 'Value: '}
+                <Text style={styles.compactMetricBold}>
+                  {settings.currencySymbol}{formatCompactPrice(totalInventoryRetailValue)}
+                </Text>
+              </Text>
+            </View>
+
+            <View style={styles.compactMetricDivider} />
+
+            <View style={styles.compactMetricItem}>
+              <Ionicons name="trending-up" size={13} color="#6EE7B7" />
+              <Text style={[styles.compactMetricText, { color: '#6EE7B7' }]} numberOfLines={1}>
+                <Text style={[styles.compactMetricBold, { color: '#6EE7B7' }]}>+{profitPct}%</Text>{' '}
+                {language === 'ur' ? 'منافع' : 'Margin'}
+              </Text>
             </View>
           </View>
+
+          {/* Horizontal Category Filters with Frosted Glass Chips */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filterScroll}
+            contentContainerStyle={styles.filterScrollContent}>
+            {CATEGORIES.map((cat) => {
+              const isLowStockTab = cat === 'LowStock';
+              const isAll = cat === 'All';
+              const isSelected = selectedFilter === cat;
+
+              return (
+                <FilterChip
+                  key={cat}
+                  label={
+                    isAll
+                      ? (language === 'ur' ? `تمام (${products.length})` : `All (${products.length})`)
+                      : isLowStockTab
+                        ? (language === 'ur' ? `کم اسٹاک (${alertCount})` : `Low Stock (${alertCount})`)
+                        : cat
+                  }
+                  isActive={isSelected}
+                  onPress={() => setSelectedFilter(cat)}
+                  icon={isLowStockTab ? 'warning' : undefined}
+                  variant={isLowStockTab ? 'alert' : 'default'}
+                  activeBg={isLowStockTab ? '#EF4444' : '#FFFFFF'}
+                  activeColor={isLowStockTab ? '#FFFFFF' : '#064E3B'}
+                  inactiveBg={
+                    isLowStockTab
+                      ? (alertCount > 0 ? 'rgba(239, 68, 68, 0.35)' : 'rgba(255,255,255,0.14)')
+                      : 'rgba(255, 255, 255, 0.16)'
+                  }
+                  inactiveBorder={
+                    isLowStockTab
+                      ? (alertCount > 0 ? 'rgba(248, 113, 113, 0.65)' : 'rgba(255,255,255,0.25)')
+                      : 'rgba(255, 255, 255, 0.25)'
+                  }
+                  inactiveColor={
+                    isLowStockTab && alertCount > 0 ? '#FECACA' : '#FFFFFF'
+                  }
+                />
+              );
+            })}
+          </ScrollView>
         </View>
+      </View>
 
-        {/* Category Filter Chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-          contentContainerStyle={styles.filterScrollContent}>
-          {CATEGORIES.map((cat) => {
-            const isLowStockTab = cat === 'LowStock';
-            const isAll = cat === 'All';
-            return (
-              <FilterChip
-                key={cat}
-                label={
-                  isAll
-                    ? t('allCategories')
-                    : isLowStockTab
-                      ? `${t('lowStockAlert')} (${alertCount})`
-                      : cat
-                }
-                isActive={selectedFilter === cat}
-                onPress={() => setSelectedFilter(cat)}
-                icon={isLowStockTab ? 'warning' : undefined}
-                variant={isLowStockTab ? 'alert' : 'default'}
-                count={isAll ? categoryCounts.All : undefined}
-                activeBg={isLowStockTab ? theme.danger : undefined}
-              />
-            );
-          })}
-        </ScrollView>
-
+      {/* ── Main Content Area ── */}
+      <View style={styles.contentWrap}>
         {/* Showing count + view switcher */}
         <View style={styles.gridHeader}>
           <Text style={[styles.showingText, { color: theme.textMuted }]}>
@@ -417,7 +397,9 @@ export const ProductsScreen: React.FC = () => {
                                 : '#047857',
                         },
                       ]}>
-                      {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
+                      {isOut
+                        ? (language === 'ur' ? 'ختم' : t('soldOut'))
+                        : `${product.stock} ${product.unit}`}
                     </Text>
                   </View>
 
@@ -450,32 +432,20 @@ export const ProductsScreen: React.FC = () => {
                   <Pressable
                     onPress={(e) => {
                       e.stopPropagation?.();
-                      const productName =
-                        language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name;
-                      showAlert({
-                        type: 'danger',
-                        title: language === 'ur' ? 'پروڈکٹ حذف کریں' : 'Delete Product',
-                        message:
-                          language === 'ur'
-                            ? `کیا آپ "${productName}" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔`
-                            : `Delete "${productName}"? This cannot be undone.`,
-                        buttons: [
-                          {
-                            text: language === 'ur' ? 'حذف کریں' : 'Delete',
-                            style: 'destructive',
-                            icon: 'trash-outline',
-                            onPress: () => deleteProduct(product.id),
-                          },
-                          { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
-                        ],
-                      });
+                      setEditingProduct(product);
+                      setIsAddProductOpen(true);
                     }}
                     style={({ pressed }) => [
                       styles.smallActionBtn,
-                      { backgroundColor: theme.dangerLight },
-                      pressed && { opacity: 0.7 },
-                    ]}>
-                    <Ionicons name="trash-outline" size={14} color={theme.danger} />
+                      {
+                        backgroundColor: settings.darkMode
+                          ? 'rgba(16,185,129,0.14)'
+                          : 'rgba(167,243,208,0.45)',
+                      },
+                      pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+                    ]}
+                    accessibilityLabel="Edit product">
+                    <Ionicons name="create-outline" size={15} color={theme.primary} />
                   </Pressable>
                 </Pressable>
               );
@@ -525,85 +495,77 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   contentWrap: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.xs,
     maxWidth: 820,
     marginHorizontal: 'auto',
     width: '100%',
   },
 
+  heroCanopy: {
+    width: '100%',
+    paddingTop: 12,
+    paddingBottom: 10,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    ...Shadows.md,
+  },
+  heroInner: {
+    maxWidth: 820,
+    marginHorizontal: 'auto',
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+    gap: 8,
+  },
   topHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    marginBottom: Spacing.md,
   },
   searchFlex: { flex: 1 },
   addProdBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
     height: 40,
-    paddingHorizontal: 14,
+    paddingHorizontal: 13,
     borderRadius: 12,
     ...Shadows.sm,
   },
-  addProdText: { color: '#FFFFFF', fontWeight: '700', fontSize: 12.5 },
+  addProdText: { fontWeight: '800', fontSize: 12.5 },
 
-  financeSummaryBar: {
+  compactMetricBar: {
     flexDirection: 'row',
-    alignItems: 'stretch',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: Spacing.md,
-    ...Shadows.sm,
-  },
-  financeSummaryItem: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    gap: 2,
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
   },
-  financeSummaryLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+  compactMetricItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
-  financeSummaryVal: {
-    fontSize: 14.5,
-    fontWeight: '800',
-    textAlign: 'center',
-    alignSelf: 'stretch',
-    letterSpacing: -0.2,
-    marginTop: 2,
-  },
-  financeSubLabel: {
-    fontSize: 9,
+  compactMetricText: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '500',
-    textAlign: 'center',
-    marginTop: 1,
   },
-  financeSummaryDivider: {
-    width: 1,
-    marginVertical: 4,
-  },
-  profitPctPill: {
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: BorderRadius.full,
-    marginTop: 2,
-  },
-  profitPctText: {
-    fontSize: 9,
+  compactMetricBold: {
+    color: '#FFFFFF',
     fontWeight: '800',
+  },
+  compactMetricDivider: {
+    width: 1,
+    height: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
   },
 
-  filterScroll: { maxHeight: 40, marginBottom: Spacing.sm },
+  filterScroll: { maxHeight: 38 },
   filterScrollContent: { gap: 8, alignItems: 'center', paddingRight: 4 },
 
   gridHeader: {
@@ -611,7 +573,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.sm,
-    paddingTop: 2,
+    paddingTop: 4,
   },
   showingText: {
     fontSize: 12.5,
@@ -648,15 +610,15 @@ const styles = StyleSheet.create({
   listRowCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    minHeight: 72,
+    minHeight: 68,
     borderRadius: 12,
     gap: 10,
   },
   listThumbWrap: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: 10,
     overflow: 'hidden',
     alignItems: 'center',
@@ -668,7 +630,7 @@ const styles = StyleSheet.create({
   },
   listRowContent: {
     flex: 1,
-    gap: 3,
+    gap: 2,
     justifyContent: 'center',
   },
   listRowName: {
@@ -682,24 +644,24 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   listCategoryBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 5,
   },
   listCategoryText: {
     fontSize: 10,
     fontWeight: '600',
   },
   listBarcodeText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '500',
   },
   listStockBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: BorderRadius.full,
   },
   listStockText: {
@@ -709,7 +671,7 @@ const styles = StyleSheet.create({
   listRowRight: {
     alignItems: 'flex-end',
     justifyContent: 'center',
-    gap: 2,
+    gap: 1,
   },
   listRowPrice: {
     fontSize: 15,
@@ -717,8 +679,8 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   listMarginChip: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
     borderRadius: 4,
   },
   listMarginText: {

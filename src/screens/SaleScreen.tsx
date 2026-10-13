@@ -52,7 +52,20 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const gridGap = 6;
   const gridColWidth = (catalogWidth - Spacing.md * 2 - gridGap * (gridCols - 1)) / gridCols;
 
-  const { products, khata, sales, completeSale, settings, t, language, setActiveReceipt, setIsAddProductOpen, showAlert } = useShop();
+  const {
+    products,
+    khata,
+    sales,
+    completeSale,
+    settings,
+    t,
+    language,
+    setActiveReceipt,
+    setIsAddProductOpen,
+    showAlert,
+    saleViewMode,
+    setSaleViewMode,
+  } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   // Cart state
@@ -71,27 +84,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [isAddingNewCustomer, setIsAddingNewCustomer] = useState<boolean>(false);
 
   // Search, Filters & View Mode
-  const SALE_VIEW_MODE_KEY = '@shopkeeper_sale_view_mode';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>('All');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  useEffect(() => {
-    AsyncStorage.getItem(SALE_VIEW_MODE_KEY)
-      .then((saved) => {
-        if (saved === 'grid' || saved === 'list') {
-          setViewMode(saved);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const viewMode = saleViewMode;
 
   const toggleViewMode = () => {
-    setViewMode((prev) => {
-      const next = prev === 'grid' ? 'list' : 'grid';
-      AsyncStorage.setItem(SALE_VIEW_MODE_KEY, next).catch(() => {});
-      return next;
-    });
+    setSaleViewMode(saleViewMode === 'grid' ? 'list' : 'grid');
   };
 
   // Modals & Drawers

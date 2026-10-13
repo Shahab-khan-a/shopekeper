@@ -163,12 +163,38 @@ interface ShopContextType {
   alertConfig: AlertConfig | null;
   showAlert: (config: AlertConfig) => void;
   hideAlert: () => void;
+
+  // View Modes (Catalog Grid vs List)
+  saleViewMode: 'grid' | 'list';
+  setSaleViewMode: (mode: 'grid' | 'list') => void;
+  productsViewMode: 'grid' | 'list';
+  setProductsViewMode: (mode: 'grid' | 'list') => void;
 }
+
+export const SALE_VIEW_MODE_KEY = '@shopkeeper_sale_view_mode';
+export const PRODUCTS_VIEW_MODE_KEY = '@shopkeeper_products_view_mode';
+
+let cachedSaleViewMode: 'grid' | 'list' = 'grid';
+let cachedProductsViewMode: 'grid' | 'list' = 'grid';
+
+AsyncStorage.getItem(SALE_VIEW_MODE_KEY)
+  .then((v) => {
+    if (v === 'grid' || v === 'list') cachedSaleViewMode = v;
+  })
+  .catch(() => {});
+
+AsyncStorage.getItem(PRODUCTS_VIEW_MODE_KEY)
+  .then((v) => {
+    if (v === 'grid' || v === 'list') cachedProductsViewMode = v;
+  })
+  .catch(() => {});
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
 export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
+  const [saleViewMode, setSaleViewModeState] = useState<'grid' | 'list'>(cachedSaleViewMode);
+  const [productsViewMode, setProductsViewModeState] = useState<'grid' | 'list'>(cachedProductsViewMode);
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [khata, setKhata] = useState<CustomerKhata[]>([]);
@@ -284,14 +310,25 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await MigrationService.purgeDummyDataIfNeeded();
 
         // Load all entities from primary SQLite database
-        const [prods, sList, kList, setts, pCount, savedGuest] = await Promise.all([
+        const [prods, sList, kList, setts, pCount, savedGuest, savedSaleView, savedProdView] = await Promise.all([
           ProductRepository.getAll(),
           SaleRepository.getAll(),
           CustomerRepository.getAll(),
           SettingsRepository.getSettings(),
           SyncQueueRepository.getPendingCount(),
           SettingsRepository.getGuestMode(),
+          AsyncStorage.getItem(SALE_VIEW_MODE_KEY),
+          AsyncStorage.getItem(PRODUCTS_VIEW_MODE_KEY),
         ]);
+
+        if (savedSaleView === 'grid' || savedSaleView === 'list') {
+          cachedSaleViewMode = savedSaleView;
+          setSaleViewModeState(savedSaleView);
+        }
+        if (savedProdView === 'grid' || savedProdView === 'list') {
+          cachedProductsViewMode = savedProdView;
+          setProductsViewModeState(savedProdView);
+        }
 
         // If user hasn't explicitly set a language yet, ensure default is 'en'
         const explicitLang = await AsyncStorage.getItem('@shopkeeper_user_explicit_language');
@@ -332,6 +369,18 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     bootApp();
+  }, []);
+
+  const setSaleViewMode = useCallback((mode: 'grid' | 'list') => {
+    cachedSaleViewMode = mode;
+    setSaleViewModeState(mode);
+    AsyncStorage.setItem(SALE_VIEW_MODE_KEY, mode).catch(() => {});
+  }, []);
+
+  const setProductsViewMode = useCallback((mode: 'grid' | 'list') => {
+    cachedProductsViewMode = mode;
+    setProductsViewModeState(mode);
+    AsyncStorage.setItem(PRODUCTS_VIEW_MODE_KEY, mode).catch(() => {});
   }, []);
 
   // 2. Network connectivity subscriber: Triggers background sync on OFFLINE -> ONLINE
@@ -1271,6 +1320,10 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       alertConfig,
       showAlert,
       hideAlert,
+      saleViewMode,
+      setSaleViewMode,
+      productsViewMode,
+      setProductsViewMode,
     }),
     [
       activeTab,
@@ -1335,6 +1388,10 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       alertConfig,
       showAlert,
       hideAlert,
+      saleViewMode,
+      setSaleViewMode,
+      productsViewMode,
+      setProductsViewMode,
     ]
   );
 
