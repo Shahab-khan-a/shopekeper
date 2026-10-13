@@ -15,6 +15,7 @@ import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { formatCompactPrice } from '@/utils/formatters';
 
 type HistoryFilter = 'all' | 'today' | 'week' | 'month' | 'custom';
 type PaymentFilter = 'all' | PaymentMethod;
@@ -360,120 +361,144 @@ ${t('paymentMethod')}: ${sale.paymentMethod}
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView
-        style={styles.contentScroll}
-        contentContainerStyle={styles.contentWrap}
-        showsVerticalScrollIndicator={false}>
-        {/* Screen title */}
-        <View style={styles.titleBlock}>
-          <Text style={[styles.screenTitle, { color: theme.text }]}>
-            {t('salesReceiptsTitle')}
-          </Text>
-          <Text style={[styles.screenSubtitle, { color: theme.textMuted }]}>
-            {t('salesReceiptsSubtitle')}
-          </Text>
-        </View>
-
-        {/* Performance metrics */}
-        <View
-          style={[
-            styles.statsCard,
-            { backgroundColor: cardBg, borderColor: softBorder },
-          ]}>
-          <View style={styles.statsGradientStrip} />
-          <View style={[styles.statsHeader, { borderBottomColor: softBorder }]}>
-            <View style={styles.statsHeaderLeft}>
-              <Ionicons name="stats-chart-outline" size={16} color={theme.primary} />
-              <Text style={[styles.statsHeaderLabel, { color: theme.textMuted }]}>
-                {performanceLabel}
-              </Text>
+      {/* ── Top Emerald Canopy (Seamless continuation from ShopHeader) ── */}
+      <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
+        <View style={styles.heroInner}>
+          {/* Top Title & Margin Pill */}
+          <View style={styles.heroTitleRow}>
+            <View style={styles.titleBlock}>
+              <Text style={styles.screenTitle}>{t('salesReceiptsTitle')}</Text>
+              <Text style={styles.screenSubtitle}>{performanceLabel}</Text>
             </View>
-            <View
-              style={[
-                styles.marginPill,
-                {
-                  backgroundColor: settings.darkMode
-                    ? 'rgba(16,185,129,0.18)'
-                    : '#ECFDF5',
-                  borderColor: settings.darkMode
-                    ? 'rgba(16,185,129,0.3)'
-                    : 'rgba(5,150,105,0.2)',
-                },
-              ]}>
-              <Ionicons name="trending-up" size={12} color={theme.primary} />
-              <Text style={[styles.marginPillText, { color: theme.primary }]}>
+
+            <View style={styles.canopyMarginPill}>
+              <Ionicons name="trending-up" size={12} color="#A7F3D0" />
+              <Text style={styles.canopyMarginText}>
                 +{marginPct}% {t('marginLabel')}
               </Text>
             </View>
           </View>
 
-          <View style={styles.statsGrid}>
-            <View style={styles.statCol}>
-              <Text style={[styles.statLabel, { color: theme.textMuted }]}>
-                {t('totalBillsLabel')}
-              </Text>
-              <Text style={[styles.statValue, { color: theme.text }]}>
-                {completedCount} {t('billsUnit')}
-              </Text>
-              <Text style={[styles.statSub, { color: theme.textMuted }]}>
+          {/* ── Period Selector Filter Chips (Frosted Glass) ── */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.canopyFilterScrollContent}
+            style={styles.canopyFilterScroll}>
+            {dateFilterOptions.map((item) => (
+              <FilterChip
+                key={item.key}
+                label={item.label}
+                isActive={filter === item.key}
+                onPress={() => setFilter(item.key)}
+                icon={item.icon}
+                activeBg="#FFFFFF"
+                activeColor="#064E3B"
+                inactiveBg="rgba(255, 255, 255, 0.16)"
+                inactiveColor="#FFFFFF"
+                inactiveBorder="rgba(255, 255, 255, 0.22)"
+              />
+            ))}
+          </ScrollView>
+
+          {/* ── 3-Pillar Executive Metric Strip (Frosted Glass) ── */}
+          <View style={styles.canopyMetricBar}>
+            {/* Pillar 1: Total Bills */}
+            <View style={styles.canopyMetricItem}>
+              <Text style={styles.canopyMetricTitle}>{t('totalBillsLabel')}</Text>
+              <View style={styles.metricValRow}>
+                <Text style={styles.canopyMetricBold} numberOfLines={1}>
+                  🧾 {completedCount}
+                </Text>
+              </View>
+              <Text style={styles.canopyMetricSub}>
                 {totalInFilter > 0
                   ? `${Math.round((completedCount / totalInFilter) * 100)}% ${t('completedPct')}`
                   : `0% ${t('completedPct')}`}
               </Text>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: softBorder }]} />
-            <View style={styles.statCol}>
-              <Text style={[styles.statLabel, { color: theme.textMuted }]}>
-                {t('grossSales')}
-              </Text>
-              <Text style={[styles.statValue, { color: theme.text }]} numberOfLines={1}>
-                {settings.currencySymbol}
-                {filterRevenue.toLocaleString()}
-              </Text>
-              <Text style={[styles.statSub, { color: theme.textMuted }]}>
-                {t('cashPlusDigital')}
-              </Text>
+
+            <View style={styles.canopyMetricDivider} />
+
+            {/* Pillar 2: Gross Sales */}
+            <View style={styles.canopyMetricItem}>
+              <Text style={styles.canopyMetricTitle}>{t('grossSales')}</Text>
+              <View style={styles.metricValRow}>
+                <Text style={styles.canopyMetricBold} numberOfLines={1}>
+                  💰 {settings.currencySymbol}
+                  {formatCompactPrice(filterRevenue)}
+                </Text>
+              </View>
+              <Text style={styles.canopyMetricSub}>{t('cashPlusDigital')}</Text>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: softBorder }]} />
-            <View style={styles.statCol}>
-              <Text style={[styles.statLabel, { color: theme.primary }]}>
-                {t('netProfitLabel')}
-              </Text>
-              <Text style={[styles.statValue, { color: theme.primary }]} numberOfLines={1}>
-                {settings.currencySymbol}
-                {filterProfit.toLocaleString()}
-              </Text>
-              <Text style={[styles.statSub, { color: theme.primary }]}>
+
+            <View style={styles.canopyMetricDivider} />
+
+            {/* Pillar 3: Net Profit */}
+            <View style={styles.canopyMetricItem}>
+              <Text style={styles.canopyMetricTitle}>{t('netProfitLabel')}</Text>
+              <View style={styles.metricValRow}>
+                <Text style={[styles.canopyMetricBold, { color: '#6EE7B7' }]} numberOfLines={1}>
+                  📈 +{settings.currencySymbol}
+                  {formatCompactPrice(filterProfit)}
+                </Text>
+              </View>
+              <Text style={[styles.canopyMetricSub, { color: 'rgba(167, 243, 208, 0.85)' }]}>
                 {t('estEarnings')}
               </Text>
             </View>
           </View>
         </View>
+      </View>
+
+      <ScrollView
+        style={styles.contentScroll}
+        contentContainerStyle={styles.contentWrap}
+        showsVerticalScrollIndicator={false}>
+        {/* Custom day picker */}
+        {filter === 'custom' ? (
+          <View style={styles.customDateBlock}>
+            <Text style={[styles.customDateHint, { color: theme.textMuted }]}>
+              {t('pickCustomDate')}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.customDaysRow}>
+              {recentDays.map((day) => {
+                const active = isSameDay(day, customDate);
+                return (
+                  <Pressable
+                    key={day.toISOString()}
+                    onPress={() => setCustomDate(day)}
+                    style={[
+                      styles.dayChip,
+                      {
+                        backgroundColor: active ? theme.primary : cardBg,
+                        borderColor: active ? theme.primary : softBorder,
+                      },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.dayChipText,
+                        { color: active ? '#FFFFFF' : theme.textSecondary },
+                      ]}>
+                      {formatDayChip(day)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ) : null}
 
         {/* Search */}
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder={t('searchHistoryPlaceholder')}
-          height={44}
+          height={42}
         />
-
-        {/* Date filters */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterScrollContent}
-          style={styles.filterScroll}>
-          {dateFilterOptions.map((item) => (
-            <FilterChip
-              key={item.key}
-              label={item.label}
-              isActive={filter === item.key}
-              onPress={() => setFilter(item.key)}
-              icon={item.icon}
-            />
-          ))}
-        </ScrollView>
 
         {/* Custom day picker */}
         {filter === 'custom' ? (
@@ -842,106 +867,124 @@ ${t('paymentMethod')}: ${sale.paymentMethod}
 const styles = StyleSheet.create({
   container: { flex: 1 },
   contentScroll: { flex: 1 },
+  heroCanopy: {
+    width: '100%',
+    paddingTop: 8,
+    paddingBottom: 10,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    borderWidth: 0,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
+  },
+  heroInner: {
+    maxWidth: 720,
+    marginHorizontal: 'auto',
+    width: '100%',
+    paddingHorizontal: Spacing.lg,
+    gap: 8,
+  },
+  heroTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  titleBlock: { flex: 1, gap: 1 },
+  screenTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  screenSubtitle: {
+    color: 'rgba(255, 255, 255, 0.78)',
+    fontSize: 11.5,
+    fontWeight: '500',
+  },
+  canopyMarginPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+  },
+  canopyMarginText: {
+    color: '#A7F3D0',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  canopyFilterScroll: { maxHeight: 34 },
+  canopyFilterScrollContent: { gap: 6, alignItems: 'center' },
+
+  canopyMetricBar: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 4,
+  },
+  canopyMetricItem: {
+    flex: 1,
+    minWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 1,
+    gap: 1,
+  },
+  canopyMetricTitle: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    textAlign: 'center',
+  },
+  metricValRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2.5,
+    marginTop: 1,
+    maxWidth: '100%',
+    flexShrink: 1,
+  },
+  canopyMetricBold: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  canopyMetricSub: {
+    color: 'rgba(255, 255, 255, 0.65)',
+    fontSize: 9,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  canopyMetricDivider: {
+    width: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    marginVertical: 2,
+  },
   contentWrap: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingTop: 10,
     paddingBottom: 120,
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
     gap: Spacing.md,
-  },
-
-  titleBlock: { gap: 2 },
-  screenTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-  },
-  screenSubtitle: {
-    fontSize: 12.5,
-    fontWeight: '500',
-  },
-
-  statsCard: {
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: Spacing.md,
-    overflow: 'hidden',
-    ...Shadows.sm,
-  },
-  statsGradientStrip: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: '#059669',
-  },
-  statsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 10,
-    marginBottom: 10,
-    borderBottomWidth: 1,
-  },
-  statsHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  statsHeaderLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  marginPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  marginPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-  },
-  statCol: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 2,
-    paddingHorizontal: 4,
-  },
-  statLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    textAlign: 'center',
-  },
-  statValue: {
-    fontSize: 15,
-    fontWeight: '800',
-    letterSpacing: -0.2,
-    textAlign: 'center',
-    marginTop: 2,
-  },
-  statSub: {
-    fontSize: 10,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  statDivider: {
-    width: 1,
-    marginVertical: 2,
   },
 
   filterScroll: { maxHeight: 40 },

@@ -113,8 +113,11 @@ export const ShopHeader: React.FC = () => {
         styles.headerContainer,
         {
           backgroundColor: theme.heroBg,
-          borderBottomWidth: isContinuousHero ? 0 : 1,
-          borderBottomColor: 'rgba(255, 255, 255, 0.12)',
+          borderWidth: 0,
+          borderBottomWidth: 0,
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
         },
       ]}>
       {/* Left: Clickable Logo + Shop Info (Opens Quick Edit Shop Modal) */}
@@ -222,8 +225,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    ...Shadows.sm,
     zIndex: 10,
+    borderWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
   },
   leftSection: {
     flexDirection: 'row',

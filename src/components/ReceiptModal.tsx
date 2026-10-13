@@ -27,7 +27,7 @@ interface ReceiptModalProps {
 }
 
 export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClose }) => {
-  const { settings, language, t, user } = useShop();
+  const { settings, language, t, user, refundSale, showAlert } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const receiptViewRef = useRef<View>(null);
@@ -48,6 +48,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
   }, [visible, sale?.id]); // re-run only when a different sale opens
 
   if (!sale) return null;
+
+  const isRefunded = sale.status === 'refunded' || !!sale.refundedAt;
 
   const dynamicShopName = settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : 'My Store');
   const dynamicShopUrdu = settings.shopNameUrdu || (user?.displayName ? `${user.displayName} اسٹور` : 'میری دکان');
@@ -573,6 +575,171 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
               <rect width="100%" height="16" fill="url(#sawteeth)"/>
             </svg>
           </div>
+        </body>
+      </html>
+    `;
+  };
+
+  // Generate high-density thermal printer HTML (58mm/80mm ESC/POS compatible)
+  const generateThermalReceiptHTML = (width: '58mm' | '80mm' = '80mm') => {
+    const is58 = width === '58mm';
+    const barcodeHTML = generateBarcodeSVG(sale.billNumber);
+    const itemsRows = sale.items
+      .map(
+        (it) => `
+        <div style="margin: 3px 0;">
+          <div style="font-weight: 700; font-size: ${is58 ? '11px' : '13px'}; color: #000;">
+            ${it.product.name} ${it.product.nameUrdu ? `(${it.product.nameUrdu})` : ''}
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: ${is58 ? '10px' : '12px'}; color: #222; margin-top: 1px;">
+            <span>${it.quantity} ${it.product.unit} × Rs.${it.unitPrice}</span>
+            <span style="font-weight: 700;">Rs.${it.total}</span>
+          </div>
+        </div>
+      `
+      )
+      .join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Thermal Receipt - ${sale.billNumber}</title>
+          <style>
+            @page {
+              margin: 2mm;
+              size: ${width} auto;
+            }
+            * { box-sizing: border-box; }
+            body {
+              font-family: 'Courier New', Courier, monospace, -apple-system, sans-serif;
+              margin: 0;
+              padding: 4px;
+              background-color: #fff;
+              color: #000;
+              width: 100%;
+              max-width: ${is58 ? '210px' : '310px'};
+              margin: 0 auto;
+              font-size: ${is58 ? '11px' : '12px'};
+              line-height: 1.35;
+            }
+            .center { text-align: center; }
+            .bold { font-weight: bold; }
+            .store-title {
+              font-size: ${is58 ? '16px' : '18px'};
+              font-weight: 900;
+              margin-bottom: 2px;
+            }
+            .store-urdu {
+              font-size: ${is58 ? '14px' : '16px'};
+              font-weight: 800;
+              margin-bottom: 2px;
+            }
+            .subtext {
+              font-size: ${is58 ? '9px' : '11px'};
+              color: #333;
+            }
+            .divider {
+              border-top: 1px dashed #000;
+              margin: 6px 0;
+            }
+            .double-divider {
+              border-top: 2px solid #000;
+              margin: 6px 0;
+            }
+            .row {
+              display: flex;
+              justify-content: space-between;
+              margin: 2px 0;
+            }
+            .grand-total-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: ${is58 ? '15px' : '18px'};
+              font-weight: 900;
+              margin: 4px 0;
+            }
+            .cutter-space {
+              height: 35px;
+            }
+            @media print {
+              body { margin: 0; padding: 2px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="center store-title">${dynamicShopName}</div>
+          <div class="center store-urdu">${dynamicShopUrdu}</div>
+          ${dynamicAddress ? `<div class="center subtext">${dynamicAddress}</div>` : ''}
+          ${dynamicPhone ? `<div class="center subtext">Tel: ${dynamicPhone}</div>` : ''}
+
+          <div class="double-divider"></div>
+
+          <div class="row">
+            <span>Bill #:</span>
+            <span class="bold">${sale.billNumber}</span>
+          </div>
+          <div class="row">
+            <span>Date:</span>
+            <span>${formattedDate}</span>
+          </div>
+          <div class="row">
+            <span>Customer:</span>
+            <span class="bold">${customerDisplayName}</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div style="font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between;">
+            <span>ITEMS / سامان</span>
+            <span>TOTAL</span>
+          </div>
+
+          ${itemsRows}
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <span>Subtotal / سب ٹوٹل:</span>
+            <span class="bold">Rs.${sale.subtotal}</span>
+          </div>
+          ${
+            sale.discount > 0
+              ? `
+            <div class="row">
+              <span>Discount / ڈسکاؤنٹ:</span>
+              <span class="bold">-Rs.${sale.discount}</span>
+            </div>
+          `
+              : ''
+          }
+
+          <div class="double-divider"></div>
+
+          <div class="grand-total-row">
+            <span>TOTAL:</span>
+            <span>Rs.${sale.grandTotal}</span>
+          </div>
+
+          <div class="row" style="margin-top: 4px;">
+            <span>Payment / ادائیگی:</span>
+            <span class="bold">${paymentLabel}</span>
+          </div>
+          ${sale.amountPaid ? `<div class="row"><span>Cash Paid / وصول:</span><span>Rs.${sale.amountPaid}</span></div>` : ''}
+          ${sale.change ? `<div class="row"><span>Change / بقایا واپس:</span><span class="bold">Rs.${sale.change}</span></div>` : ''}
+
+          <div class="divider"></div>
+
+          <div class="center" style="margin: 6px 0;">
+            ${barcodeHTML}
+          </div>
+
+          <div class="center subtext bold">${settings.footerNoteUrdu || 'خریداری کا شکریہ!'}</div>
+          <div class="center subtext">${settings.footerNote || 'Thank you for shopping!'}</div>
+
+          <div class="cutter-space"></div>
         </body>
       </html>
     `;
@@ -1174,6 +1341,63 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
     }
   };
 
+  // Direct Thermal Roll Print (58mm / 80mm ESC/POS layout)
+  const handlePrintThermal = async () => {
+    try {
+      const html = generateThermalReceiptHTML('80mm');
+      if (Platform.OS === 'web') {
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(html);
+          printWindow.document.close();
+          printWindow.focus();
+          setTimeout(() => {
+            printWindow.print();
+          }, 300);
+        }
+      } else {
+        await Print.printAsync({ html });
+      }
+    } catch (e) {
+      console.warn('Thermal print error:', e);
+    }
+  };
+
+  // Safe 1-Tap Refund & Return Flow
+  const handleRefund = () => {
+    const isUrdu = language === 'ur';
+    showAlert({
+      type: 'danger',
+      title: isUrdu ? 'بل واپس / ریفنڈ کریں؟' : 'Refund & Return Bill?',
+      message: isUrdu
+        ? `کیا آپ واقعی بل #${sale.billNumber} واپس کرنا چاہتے ہیں؟ اس سے تمام خریدی گئی اشیاء (${sale.items.length} آئٹمز) واپس دکان کے اسٹاک میں جمع ہو جائیں گی اور گلہ/کھاتہ خودکار درست ہو جائے گا۔`
+        : `Are you sure you want to refund Bill #${sale.billNumber}? Sold items (${sale.items.length} items) will be restored to your inventory and customer balance updated.`,
+      buttons: [
+        {
+          text: isUrdu ? 'ہاں، مال واپس لیں (Refund)' : 'Yes, Refund & Restore Stock',
+          style: 'destructive',
+          icon: 'arrow-undo-outline',
+          onPress: async () => {
+            const res = await refundSale(sale.id, 'Customer Return via Receipt');
+            if (res.success) {
+              showAlert({
+                type: 'success',
+                title: isUrdu ? 'بل کامیابی سے واپس ہو گیا!' : 'Bill Refunded Successfully!',
+                message: isUrdu
+                  ? 'اشیاء واپس دکان کے اسٹاک میں جمع ہو گئیں اور آج کا حساب اپڈیٹ ہو گیا۔'
+                  : 'Items restored to inventory and sales balance updated.',
+              });
+              onClose();
+            } else {
+              Alert.alert(t('error'), res.error || 'Failed to refund bill');
+            }
+          },
+        },
+        { text: t('cancel'), style: 'cancel' },
+      ],
+    });
+  };
+
   // Share PDF
   const handleSharePDF = async () => {
     try {
@@ -1221,9 +1445,17 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
         <View style={[styles.receiptCard, { backgroundColor: theme.surface }]}>
           {/* Header Close Bar */}
           <View style={[styles.modalTopBar, { borderBottomColor: theme.border }]}>
-            <View style={styles.topBadge}>
-              <Ionicons name="checkmark-circle" size={20} color="#006837" />
-              <Text style={styles.topBadgeText}>{t('saleCompleted')}</Text>
+            <View style={[styles.topBadge, isRefunded && { backgroundColor: '#FEE2E2', borderColor: '#EF4444' }]}>
+              <Ionicons
+                name={isRefunded ? 'arrow-undo-circle' : 'checkmark-circle'}
+                size={20}
+                color={isRefunded ? '#DC2626' : '#006837'}
+              />
+              <Text style={[styles.topBadgeText, isRefunded && { color: '#DC2626' }]}>
+                {isRefunded
+                  ? (language === 'ur' ? 'واپس شدہ بل (Refunded)' : 'Refunded & Voided')
+                  : t('saleCompleted')}
+              </Text>
             </View>
             <Pressable onPress={onClose} style={styles.closeBtn}>
               <Ionicons name="close" size={22} color={theme.textSecondary} />
@@ -1254,6 +1486,18 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
 
               {/* Green Divider */}
               <View style={styles.previewGreenDivider} />
+
+              {/* Refunded Banner in Preview */}
+              {isRefunded && (
+                <View style={styles.refundedWatermarkBanner}>
+                  <Ionicons name="alert-circle" size={16} color="#DC2626" />
+                  <Text style={styles.refundedWatermarkText}>
+                    {language === 'ur'
+                      ? '⚠️ یہ بل واپس / منسوخ ہو چکا ہے (اسٹاک بحال ہے)'
+                      : '⚠️ VOIDED / REFUNDED (Stock Restored)'}
+                  </Text>
+                </View>
+              )}
 
               {/* Google Drive Auto-Saved Indicator – only shown after a real successful upload */}
               {driveSaved && (
@@ -1484,23 +1728,35 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               </Pressable>
             </View>
 
-            {/* Row 3: PDF + Print */}
+            {/* Row 3: Thermal 80mm + Standard Print + PDF */}
             <View style={styles.actionRow}>
+              <Pressable
+                onPress={handlePrintThermal}
+                style={({ pressed }) => [
+                  styles.actionBtnThird,
+                  styles.thermalBtn,
+                  pressed && { transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons name="receipt-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.actionBtnTextWhite} numberOfLines={1}>Thermal 80mm</Text>
+              </Pressable>
+
               <Pressable
                 onPress={handlePrint}
                 style={({ pressed }) => [
-                  styles.actionBtnHalf,
+                  styles.actionBtnThird,
                   styles.printBtn,
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}>
-                <Ionicons name="print-outline" size={17} color="#FFFFFF" />
-                <Text style={styles.actionBtnTextWhite}>{t('printBill')}</Text>
+                <Ionicons name="print-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.actionBtnTextWhite} numberOfLines={1}>{t('printBill')}</Text>
               </Pressable>
+
               <Pressable
                 onPress={handleSharePDF}
                 disabled={isGeneratingPDF}
                 style={({ pressed }) => [
-                  styles.actionBtnHalf,
+                  styles.actionBtnThird,
                   styles.pdfShareBtn,
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}>
@@ -1508,13 +1764,35 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                   <>
-                    <Ionicons name="document-text" size={17} color="#FFFFFF" />
-                    <Text style={styles.actionBtnTextWhite}>Share as PDF</Text>
+                    <Ionicons name="document-text" size={16} color="#FFFFFF" />
+                    <Text style={styles.actionBtnTextWhite} numberOfLines={1}>PDF</Text>
                   </>
                 )}
               </Pressable>
+            </View>
 
-
+            {/* Row 4: Safe Return / Refund Flow */}
+            <View style={styles.actionRow}>
+              {!isRefunded ? (
+                <Pressable
+                  onPress={handleRefund}
+                  style={({ pressed }) => [
+                    styles.refundBtn,
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                  ]}>
+                  <Ionicons name="arrow-undo-outline" size={16} color="#DC2626" />
+                  <Text style={styles.refundBtnText}>
+                    {language === 'ur' ? 'مال واپس لیں / بل منسوخ کریں (Refund)' : 'Return Goods / Refund Bill'}
+                  </Text>
+                </Pressable>
+              ) : (
+                <View style={styles.alreadyRefundedPill}>
+                  <Ionicons name="checkmark-done-circle" size={16} color="#DC2626" />
+                  <Text style={styles.alreadyRefundedText}>
+                    {language === 'ur' ? 'یہ بل واپس کیا جا چکا ہے (اسٹاک بحال ہے)' : 'This bill has been refunded & inventory restored'}
+                  </Text>
+                </View>
+              )}
             </View>
 
           </View>
@@ -1923,6 +2201,71 @@ const styles = StyleSheet.create({
   },
   printBtn: {
     backgroundColor: '#1E293B',
+  },
+  actionBtnThird: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    borderRadius: BorderRadius.lg,
+    flex: 1,
+  },
+  thermalBtn: {
+    backgroundColor: '#0F766E',
+  },
+  refundBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1.5,
+    borderColor: '#DC2626',
+    flex: 1,
+  },
+  refundBtnText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  alreadyRefundedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: '#FEE2E2',
+    flex: 1,
+  },
+  alreadyRefundedText: {
+    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  refundedWatermarkBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#FEE2E2',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.md,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  refundedWatermarkText: {
+    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '800',
   },
   doneBtn: {
     flex: 0.6,

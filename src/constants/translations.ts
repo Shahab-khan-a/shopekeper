@@ -6,7 +6,7 @@ export const Translations = {
     sale: 'New Sale',
     products: 'Products',
     history: 'History',
-    khata: 'Ledger',
+    khata: 'Khata',
     settings: 'Settings',
 
     // Dashboard
@@ -21,7 +21,7 @@ export const Translations = {
     quickActions: 'Quick Actions',
     newBillBtn: 'New Bill (Sale)',
     addProductBtn: 'Add Product',
-    khataBtn: 'Credit Ledger',
+    khataBtn: 'Customer Khata',
     recentSales: 'Recent Sales',
     viewAll: 'View All',
     noRecentSales: 'No sales recorded yet today.',
@@ -218,7 +218,7 @@ export const Translations = {
     filterSettled: 'Settled',
     filterOverdue: 'Overdue',
     billNumberTag: 'Bill',
-    khataTitleSimple: 'Customer Ledger',
+    khataTitleSimple: 'Customer Khata',
     khataSubtitleSimple: 'Customer credit & collections',
     pendingDebtors: 'With Debt',
     accountsLabel: 'Accounts',
@@ -230,7 +230,7 @@ export const Translations = {
     overdueFollowUp: 'Overdue reminders',
     overdueFollowUpSub: 'customers overdue 7+ days',
     newUdhaarSale: 'New Credit Sale',
-    vasooliCash: 'Receive Payment',
+    vasooliCash: 'Receive',
 
     // Settings & Profile Screen
     settingsTitle: 'Store Settings',
@@ -354,7 +354,7 @@ export const Translations = {
     sale: 'نئی سیل',
     products: 'پروڈکٹس',
     history: 'تاریخچہ',
-    khata: 'ادھار کھاتہ',
+    khata: 'کھاتہ',
     settings: 'ترتیبات',
 
     // Dashboard

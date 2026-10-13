@@ -1,4 +1,5 @@
 import { CASH_OUT_STORAGE_KEY, CashOutEntry, CashOutModal } from '@/components/CashOutModal';
+import { DayEndClosingModal } from '@/components/DayEndClosingModal';
 import { RainbowQuickActionFab } from '@/components/RainbowQuickActionFab';
 import { ProductImage } from '@/components/ProductImage';
 import { SalesChart } from '@/components/SalesChart';
@@ -388,6 +389,39 @@ export const DashboardScreen: React.FC = () => {
             </Text>
           </Pressable>
         </View>
+
+        {/* ── Evening Closing Prompt Banner (Auto-triggers after 5 PM or when sales exist) ── */}
+        {(new Date().getHours() >= 17 || todaySales.length > 0) && (
+          <Pressable
+            onPress={() => setShowDayEnd(true)}
+            style={({ pressed }) => [
+              styles.eveningClosingPromptCard,
+              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+            ]}>
+            <View style={styles.eveningPromptLeft}>
+              <View style={styles.eveningPromptMoon}>
+                <Ionicons name="moon" size={20} color="#FBBF24" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.eveningPromptTitle}>
+                  {language === 'ur'
+                    ? 'دکان بند کرنے کا وقت؟ شام کا حساب کریں'
+                    : "Ready to close shop? Tally cash drawer"}
+                </Text>
+                <Text style={styles.eveningPromptSubtitle} numberOfLines={1}>
+                  {language === 'ur'
+                    ? `گلہ میں متوقع: ${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()} • نقد نوٹ گنیں`
+                    : `Expected: ${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()} • Count notes & get report`}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.eveningPromptCta}>
+              <Text style={styles.eveningPromptCtaText}>
+                {language === 'ur' ? 'حساب کریں ↵' : 'Tally →'}
+              </Text>
+            </View>
+          </Pressable>
+        )}
 
         
         {/* ── Day-0 Rapid Store Setup Card (Checklist stays visible until all milestones completed or dismissed) ── */}
@@ -902,44 +936,20 @@ export const DashboardScreen: React.FC = () => {
           <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
         </Pressable>
 
-        {/* Day-End Modal */}
-        <Modal visible={showDayEnd} transparent animationType="slide" onRequestClose={() => setShowDayEnd(false)}>
-          <Pressable style={styles.dayEndOverlay} onPress={() => setShowDayEnd(false)}>
-            <Pressable style={[styles.dayEndModal, { backgroundColor: theme.surface }]} onPress={(e) => e.stopPropagation()}>
-              <View style={[styles.dayEndModalHeader, { borderBottomColor: theme.border }]}>
-                <View style={styles.dayEndModalTitleRow}>
-                  <Ionicons name="moon" size={20} color={theme.primary} />
-                  <Text style={[styles.dayEndModalTitle, { color: theme.text }]}>
-                    {language === 'ur' ? 'آج کا خلاصہ' : "Today's Summary"}
-                  </Text>
-                </View>
-                <Pressable onPress={() => setShowDayEnd(false)} style={styles.dayEndClose}>
-                  <Ionicons name="close" size={22} color={theme.textSecondary} />
-                </Pressable>
-              </View>
-              <View style={styles.dayEndBody}>
-                {[
-                  { label: language === 'ur' ? 'کل بل' : 'Total Bills', value: `${todaySales.length}`, icon: 'receipt-outline', color: theme.primary },
-                  { label: language === 'ur' ? 'نقد سیل' : 'Cash Sales', value: `${settings.currencySymbol}${todayCash.toLocaleString()}`, icon: 'cash-outline', color: theme.success },
-                  { label: language === 'ur' ? 'ادھار وصولی' : 'Credit Collected', value: `+${settings.currencySymbol}${todayVasooli.toLocaleString()}`, icon: 'arrow-down-circle-outline', color: '#059669' },
-                  { label: language === 'ur' ? 'دکان کے اخراجات' : 'Shop Expenses (Cash Out)', value: `-${settings.currencySymbol}${todayCashOutTotal.toLocaleString()}`, icon: 'arrow-up-circle-outline', color: theme.danger },
-                  { label: language === 'ur' ? 'گلہ میں متوقع کیش' : 'Net Cash in Drawer', value: `${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()}`, icon: 'wallet-outline', color: '#059669' },
-                  { label: language === 'ur' ? 'آن لائن رقم' : 'Online / EasyPaisa', value: `${settings.currencySymbol}${todayOnline.toLocaleString()}`, icon: 'phone-portrait-outline', color: theme.secondary },
-                  { label: language === 'ur' ? 'آج دیا گیا ادھار' : 'Credit Given Today', value: `${settings.currencySymbol}${todayUdhaar.toLocaleString()}`, icon: 'book-outline', color: theme.danger },
-                  { label: language === 'ur' ? 'مجموعی منافع' : 'Gross Margin', value: `${settings.currencySymbol}${Math.max(0, todayGrossProfit).toLocaleString()}`, icon: 'trending-up-outline', color: theme.success },
-                ].map((row) => (
-                  <View key={row.label} style={[styles.dayEndRow, { borderBottomColor: theme.border }]}>
-                    <View style={[styles.dayEndRowIcon, { backgroundColor: row.color + '20' }]}>
-                      <Ionicons name={row.icon as any} size={16} color={row.color} />
-                    </View>
-                    <Text style={[styles.dayEndRowLabel, { color: theme.textSecondary }]}>{row.label}</Text>
-                    <Text style={[styles.dayEndRowValue, { color: theme.text, fontWeight: '700' }]}>{row.value}</Text>
-                  </View>
-                ))}
-              </View>
-            </Pressable>
-          </Pressable>
-        </Modal>
+        {/* Day-End Cash Tally & Closing Modal */}
+        <DayEndClosingModal
+          visible={showDayEnd}
+          onClose={() => setShowDayEnd(false)}
+          todaySales={todaySales}
+          todaySalesTotal={todaySalesTotal}
+          todayCash={todayCash}
+          todayOnline={todayOnline}
+          todayUdhaar={todayUdhaar}
+          todayVasooli={todayVasooli}
+          todayCashOutTotal={todayCashOutTotal}
+          todayNetCashInDrawer={todayNetCashInDrawer}
+          todayGrossProfit={todayGrossProfit}
+        />
 
         {/* ── Cash Out (Expense) Modal ── */}
         <CashOutModal
@@ -1259,6 +1269,58 @@ const styles = StyleSheet.create({
   financeSubStatValue: {
     fontSize: 13,
     fontWeight: '700',
+  },
+
+  // Evening Closing Prompt Card
+  eveningClosingPromptCard: {
+    backgroundColor: '#064E3B',
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.md,
+    marginTop: 8,
+    marginBottom: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#047857',
+    ...Shadows.md,
+  },
+  eveningPromptLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  eveningPromptMoon: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eveningPromptTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  eveningPromptSubtitle: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 11.5,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  eveningPromptCta: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.md,
+  },
+  eveningPromptCtaText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
 
   // W2-5: Day-End Summary card + modal

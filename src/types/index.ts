@@ -243,3 +243,34 @@ export interface SupplierKhata {
   lastUpdated: number;
 }
 
+// ==================== DAILY CLOSING / TALLY TYPES ====================
+
+export interface DenominationCounts {
+  note5000: number;
+  note1000: number;
+  note500: number;
+  note100: number;
+  note50: number;
+  note20: number;
+  note10: number;
+  coins: number;
+}
+
+export interface DailyClosingRecord {
+  id: string;
+  date: string; // ISO string
+  timestamp: number;
+  totalBills: number;
+  totalSales: number;
+  cashSales: number;
+  onlineSales: number;
+  udhaarSales: number;
+  debtRecovered: number; // Vasooli
+  shopExpenses: number; // Cash Out
+  expectedCash: number;
+  countedCash: number;
+  difference: number;
+  denominations: DenominationCounts;
+  notes?: string;
+}
+

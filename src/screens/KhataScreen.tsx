@@ -474,105 +474,103 @@ export const KhataScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.contentWrap}>
-        {/* Title + Action Button */}
-        <View style={styles.titleRow}>
-          <View style={styles.titleBlock}>
-            <Text style={[styles.screenTitle, { color: theme.text }]}>
-              {activeLedgerTab === 'customers' ? t('khataTitleSimple') : (language === 'ur' ? 'سپلائر کھاتہ' : 'Supplier Ledger')}
-            </Text>
-            <Text style={[styles.screenSubtitle, { color: theme.textMuted }]}>
-              {activeLedgerTab === 'customers'
-                ? t('khataSubtitleSimple')
-                : (language === 'ur'
-                  ? 'ڈسٹری بیوٹرز اور ہول سیلرز کے واجبات اور ادائیگیاں'
-                  : 'Distributor deliveries, payables, and payments')}
-            </Text>
+      {/* ── Top Emerald Canopy (Seamless continuation from ShopHeader) ── */}
+      <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
+        <View style={styles.heroInner}>
+          {/* Title + Action Button */}
+          <View style={styles.titleRow}>
+            <View style={styles.titleBlock}>
+              <Text style={styles.screenTitle}>
+                {activeLedgerTab === 'customers' ? t('khataTitleSimple') : (language === 'ur' ? 'سپلائر کھاتہ' : 'Supplier Ledger')}
+              </Text>
+              <Text style={styles.screenSubtitle}>
+                {activeLedgerTab === 'customers'
+                  ? t('khataSubtitleSimple')
+                  : (language === 'ur'
+                    ? 'ڈسٹری بیوٹرز اور ہول سیلرز کے واجبات اور ادائیگیاں'
+                    : 'Distributor deliveries, payables, and payments')}
+              </Text>
+            </View>
+
+            {activeLedgerTab === 'customers' ? (
+              <Pressable
+                onPress={handleOpenAddCustomer}
+                style={({ pressed }) => [
+                  styles.addBtn,
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons name="person-add" size={15} color="#064E3B" />
+                <Text style={styles.addBtnText}>
+                  {language === 'ur' ? '+ نیا گاہک' : '+ Add Customer'}
+                </Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={handleOpenAddSupplier}
+                style={({ pressed }) => [
+                  styles.addBtn,
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons name="person-add" size={15} color="#064E3B" />
+                <Text style={styles.addBtnText}>
+                  {language === 'ur' ? '+ نیا سپلائر' : '+ Add Supplier'}
+                </Text>
+              </Pressable>
+            )}
           </View>
 
-          {activeLedgerTab === 'customers' ? (
+          {/* ── Segment Switcher: Customers vs Suppliers (Frosted glass container) ── */}
+          <View style={styles.segmentContainer}>
             <Pressable
-              onPress={handleOpenAddCustomer}
-              style={({ pressed }) => [
-                styles.addBtn,
-                { backgroundColor: theme.primary },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
+              onPress={() => {
+                setActiveLedgerTab('customers');
+                setSearchQuery('');
+              }}
+              style={[
+                styles.segmentBtn,
+                activeLedgerTab === 'customers' && styles.segmentBtnActive,
               ]}>
-              <Ionicons name="person-add" size={15} color="#FFFFFF" />
-              <Text style={styles.addBtnText}>
-                {language === 'ur' ? '+ نیا گاہک' : '+ Add Customer'}
+              <Ionicons
+                name="people"
+                size={14}
+                color={activeLedgerTab === 'customers' ? '#064E3B' : 'rgba(255, 255, 255, 0.75)'}
+              />
+              <Text
+                style={[
+                  styles.segmentBtnText,
+                  activeLedgerTab === 'customers' ? styles.segmentBtnTextActive : styles.segmentBtnTextInactive,
+                ]}>
+                {language === 'ur' ? 'گاہک کھاتہ (لینے ہیں)' : 'Customers (Receivable)'} ({khata.length})
               </Text>
             </Pressable>
-          ) : (
+
             <Pressable
-              onPress={handleOpenAddSupplier}
-              style={({ pressed }) => [
-                styles.addBtn,
-                { backgroundColor: theme.primary },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
+              onPress={() => {
+                setActiveLedgerTab('suppliers');
+                setSearchQuery('');
+              }}
+              style={[
+                styles.segmentBtn,
+                activeLedgerTab === 'suppliers' && styles.segmentBtnActive,
               ]}>
-              <Ionicons name="person-add" size={15} color="#FFFFFF" />
-              <Text style={styles.addBtnText}>
-                {language === 'ur' ? '+ نیا سپلائر' : '+ Add Supplier'}
+              <Ionicons
+                name="bus"
+                size={14}
+                color={activeLedgerTab === 'suppliers' ? '#064E3B' : 'rgba(255, 255, 255, 0.75)'}
+              />
+              <Text
+                style={[
+                  styles.segmentBtnText,
+                  activeLedgerTab === 'suppliers' ? styles.segmentBtnTextActive : styles.segmentBtnTextInactive,
+                ]}>
+                {language === 'ur' ? 'سپلائر کھاتہ (دینے ہیں)' : 'Suppliers (Payable)'} ({suppliers.length})
               </Text>
             </Pressable>
-          )}
+          </View>
         </View>
+      </View>
 
-        {/* ── Segment Switcher: Customers vs Suppliers ── */}
-        <View style={[styles.segmentContainer, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-          <Pressable
-            onPress={() => {
-              setActiveLedgerTab('customers');
-              setSearchQuery('');
-            }}
-            style={[
-              styles.segmentBtn,
-              activeLedgerTab === 'customers' && { backgroundColor: theme.card, ...Shadows.sm },
-            ]}>
-            <Ionicons
-              name="people"
-              size={14}
-              color={activeLedgerTab === 'customers' ? theme.primary : theme.textMuted}
-            />
-            <Text
-              style={[
-                styles.segmentBtnText,
-                {
-                  color: activeLedgerTab === 'customers' ? theme.primary : theme.textSecondary,
-                  fontWeight: activeLedgerTab === 'customers' ? '800' : '600',
-                },
-              ]}>
-              {language === 'ur' ? 'گاہک کھاتہ (لینے ہیں)' : 'Customers (Receivable)'} ({khata.length})
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => {
-              setActiveLedgerTab('suppliers');
-              setSearchQuery('');
-            }}
-            style={[
-              styles.segmentBtn,
-              activeLedgerTab === 'suppliers' && { backgroundColor: theme.card, ...Shadows.sm },
-            ]}>
-            <Ionicons
-              name="bus"
-              size={14}
-              color={activeLedgerTab === 'suppliers' ? theme.primary : theme.textMuted}
-            />
-            <Text
-              style={[
-                styles.segmentBtnText,
-                {
-                  color: activeLedgerTab === 'suppliers' ? theme.primary : theme.textSecondary,
-                  fontWeight: activeLedgerTab === 'suppliers' ? '800' : '600',
-                },
-              ]}>
-              {language === 'ur' ? 'سپلائر کھاتہ (دینے ہیں)' : 'Suppliers (Payable)'} ({suppliers.length})
-            </Text>
-          </Pressable>
-        </View>
+      <View style={styles.contentWrap}>
 
         {/* ==================== TAB 1: CUSTOMERS ==================== */}
         {activeLedgerTab === 'customers' ? (
@@ -943,10 +941,31 @@ export const KhataScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  heroCanopy: {
+    width: '100%',
+    paddingTop: 8,
+    paddingBottom: 12,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    borderWidth: 0,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
+  },
+  heroInner: {
+    maxWidth: 720,
+    marginHorizontal: 'auto',
+    width: '100%',
+    paddingHorizontal: Spacing.lg,
+    gap: 10,
+  },
   contentWrap: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingTop: 10,
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
@@ -961,11 +980,13 @@ const styles = StyleSheet.create({
   },
   titleBlock: { flex: 1, gap: 1 },
   screenTitle: {
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   screenSubtitle: {
+    color: 'rgba(255, 255, 255, 0.78)',
     fontSize: 11.5,
     fontWeight: '500',
   },
@@ -973,15 +994,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 10,
     ...Shadows.sm,
   },
   addBtnText: {
-    color: '#FFFFFF',
+    color: '#064E3B',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   // Segment Tab
@@ -989,6 +1011,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 12,
     padding: 3,
+    backgroundColor: 'rgba(0, 0, 0, 0.18)',
+    borderColor: 'rgba(255, 255, 255, 0.16)',
     borderWidth: 1,
   },
   segmentBtn: {
@@ -1000,8 +1024,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 10,
   },
+  segmentBtnActive: {
+    backgroundColor: '#FFFFFF',
+    ...Shadows.sm,
+  },
   segmentBtnText: {
     fontSize: 12,
+  },
+  segmentBtnTextActive: {
+    color: '#064E3B',
+    fontWeight: '800',
+  },
+  segmentBtnTextInactive: {
+    color: 'rgba(255, 255, 255, 0.78)',
+    fontWeight: '600',
   },
 
   summaryCard: {

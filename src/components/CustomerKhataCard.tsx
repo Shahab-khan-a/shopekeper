@@ -1,16 +1,16 @@
+import { Colors, Shadows, Typography } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { CustomerKhata } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
   Linking,
   Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { CustomerKhata } from '@/types';
-import { useShop } from '@/context/ShopContext';
-import { Colors, BorderRadius, Shadows, Typography } from '@/constants/theme';
 
 interface CustomerKhataCardProps {
   customer: CustomerKhata;
@@ -46,8 +46,8 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
 
   const lastTx = customer.transactions?.length
     ? [...customer.transactions].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      )[0]
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0]
     : null;
 
   const lastTxLabel = () => {
@@ -119,7 +119,7 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
   const handlePhoneCall = () => {
     if (!customer.phone) return;
     const cleanPhone = customer.phone.replace(/[^0-9+]/g, '');
-    Linking.openURL(`tel:${cleanPhone}`).catch(() => {});
+    Linking.openURL(`tel:${cleanPhone}`).catch(() => { });
   };
 
   const formatTxDate = (dateStr: string) => {
@@ -240,10 +240,10 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
         <View style={styles.debtLeft}>
           <Text style={[styles.debtLabel, { color: theme.textMuted }]}>
             {hasAdvance
-              ? (isUrdu ? 'پیشگی بیلنس (دکان پر جمع)' : 'Advance Deposit')
+              ? (isUrdu ? 'پیشگی جمع رقم (Advance)' : 'Advance Deposit')
               : isSettled
-                ? t('cleared')
-                : t('outstandingUdhaar')}
+                ? (isUrdu ? 'حساب بے باق (برابر)' : 'Account Cleared')
+                : (isUrdu ? 'پیسے لینے ہیں (ادھار)' : 'To Collect (Udhaar)')}
           </Text>
           <View style={styles.debtAmountRow}>
             <Text
@@ -298,7 +298,7 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
               {
                 color:
                   lastTx &&
-                  (lastTx.type === 'payment_received' || lastTx.type === 'payment')
+                    (lastTx.type === 'payment_received' || lastTx.type === 'payment')
                     ? theme.primary
                     : theme.text,
               },
@@ -323,15 +323,15 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
             pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
           ]}>
           <Ionicons name="add-circle" size={15} color={theme.danger} />
-          <Text style={[styles.creditBtnText, { color: theme.danger }]}>
-            {isUrdu ? '+ ادھار' : '+ Credit'}
+          <Text style={[styles.creditBtnText, { color: theme.danger }]} numberOfLines={1} ellipsizeMode="tail">
+            {isUrdu ? '+ مال دیا' : '+ Gave Goods'}
           </Text>
         </Pressable>
 
         {isSettled ? (
           <View style={styles.settledWrap}>
             <Ionicons name="checkmark-circle" size={16} color={theme.success} />
-            <Text style={[styles.settledText, { color: theme.success }]}>
+            <Text style={[styles.settledText, { color: theme.success }]} numberOfLines={1}>
               {t('settled')}
             </Text>
           </View>
@@ -344,38 +344,48 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
               pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}>
             <Ionicons name="cash" size={15} color="#FFFFFF" />
-            <Text style={styles.vasooliBtnText}>{t('vasooliCash')}</Text>
+            <Text style={styles.vasooliBtnText} numberOfLines={1} ellipsizeMode="tail">
+              {isUrdu ? 'وصولی کی' : t('vasooliCash')}
+            </Text>
           </Pressable>
         )}
 
         {!isSettled && customer.phone ? (
           <Pressable
             onPress={sendWhatsAppReminder}
+            hitSlop={6}
             style={({ pressed }) => [
-              styles.whatsappBtn,
-              { backgroundColor: settings.darkMode ? '#047857' : '#059669' },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+              styles.iconBtn,
+              {
+                backgroundColor: settings.darkMode ? '#065F46' : '#DCFCE7',
+                borderWidth: 1,
+                borderColor: settings.darkMode ? '#059669' : '#22C55E',
+              },
+              pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
             ]}>
-            <Ionicons name="logo-whatsapp" size={15} color="#FFFFFF" />
-            <Text style={styles.whatsappBtnText}>{t('whatsapp')}</Text>
+            <Ionicons name="logo-whatsapp" size={17} color={settings.darkMode ? '#34D399' : '#16A34A'} />
           </Pressable>
         ) : null}
 
         {customer.phone ? (
           <Pressable
             onPress={handlePhoneCall}
+            hitSlop={6}
             style={({ pressed }) => [
               styles.iconBtn,
               {
-                backgroundColor: settings.darkMode ? theme.surfaceSubtle : '#E5EEFF',
+                backgroundColor: settings.darkMode ? theme.surfaceSubtle : '#EFF6FF',
+                borderWidth: 1,
+                borderColor: settings.darkMode ? theme.border : '#BFDBFE',
               },
-              pressed && { opacity: 0.8 },
+              pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
             ]}>
-            <Ionicons name="call" size={16} color={theme.textSecondary} />
+            <Ionicons name="call" size={16} color="#2563EB" />
           </Pressable>
         ) : (
           <Pressable
             onPress={onToggleExpand}
+            hitSlop={6}
             style={({ pressed }) => [
               styles.iconBtn,
               {
@@ -560,50 +570,43 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   creditBtn: {
-    flex: 1,
+    flex: 1.1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    paddingVertical: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 8,
     borderRadius: 10,
     borderWidth: 1,
+    minWidth: 0,
   },
   creditBtnText: {
     fontSize: 12,
     fontWeight: '800',
+    flexShrink: 1,
   },
   vasooliBtn: {
-    flex: 1,
+    flex: 1.1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    paddingVertical: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 8,
     borderRadius: 10,
+    minWidth: 0,
+    overflow: 'hidden',
   },
   vasooliBtnText: {
     color: '#FFFFFF',
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '800',
-  },
-  whatsappBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  whatsappBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12.5,
-    fontWeight: '800',
+    flexShrink: 1,
   },
   iconBtn: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',

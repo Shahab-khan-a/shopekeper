@@ -197,6 +197,80 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const parsedTendered = parseFloat(tenderedCash) || 0;
   const changeToReturn = parsedTendered > grandTotal ? parsedTendered - grandTotal : 0;
 
+  // Smart 1-Tap Cash Denominations and Exact Tender Options
+  const smartTenderOptions = useMemo(() => {
+    if (grandTotal <= 0) return [];
+    const opts: { label: string; subLabel?: string; amount: number; isExact?: boolean }[] = [
+      {
+        label: language === 'ur' ? 'پوری رقم' : 'Exact Bill',
+        subLabel: `${settings.currencySymbol} ${grandTotal.toLocaleString()}`,
+        amount: grandTotal,
+        isExact: true,
+      },
+    ];
+
+    const standardNotes = [500, 1000, 5000];
+    standardNotes.forEach((note) => {
+      if (note > grandTotal) {
+        opts.push({
+          label: language === 'ur' ? `${settings.currencySymbol}${note.toLocaleString()} نوٹ` : `${settings.currencySymbol}${note.toLocaleString()} Note`,
+          subLabel:
+            language === 'ur'
+              ? `باقی: ${settings.currencySymbol}${(note - grandTotal).toLocaleString()}`
+              : `Change: ${settings.currencySymbol}${(note - grandTotal).toLocaleString()}`,
+          amount: note,
+        });
+      }
+    });
+
+    if (grandTotal > 500 && grandTotal < 1000) {
+      const nextRound = Math.ceil(grandTotal / 100) * 100;
+      if (nextRound > grandTotal && !opts.some((o) => o.amount === nextRound)) {
+        opts.push({
+          label: `${settings.currencySymbol}${nextRound.toLocaleString()}`,
+          subLabel:
+            language === 'ur'
+              ? `باقی: ${settings.currencySymbol}${(nextRound - grandTotal).toLocaleString()}`
+              : `Change: ${settings.currencySymbol}${(nextRound - grandTotal).toLocaleString()}`,
+          amount: nextRound,
+        });
+      }
+    }
+
+    if (grandTotal > 1000 && grandTotal < 5000) {
+      const nextRound = Math.ceil(grandTotal / 500) * 500;
+      if (nextRound > grandTotal && !opts.some((o) => o.amount === nextRound)) {
+        opts.push({
+          label: `${settings.currencySymbol}${nextRound.toLocaleString()}`,
+          subLabel:
+            language === 'ur'
+              ? `باقی: ${settings.currencySymbol}${(nextRound - grandTotal).toLocaleString()}`
+              : `Change: ${settings.currencySymbol}${(nextRound - grandTotal).toLocaleString()}`,
+          amount: nextRound,
+        });
+      }
+    }
+
+    const fallbackNotes = [100, 500, 1000, 5000];
+    for (const fb of fallbackNotes) {
+      if (opts.length >= 4) break;
+      if (!opts.some((o) => o.amount === fb)) {
+        opts.push({
+          label: `${settings.currencySymbol}${fb.toLocaleString()}`,
+          subLabel:
+            fb > grandTotal
+              ? language === 'ur'
+                ? `باقی: ${settings.currencySymbol}${(fb - grandTotal).toLocaleString()}`
+                : `Change: ${settings.currencySymbol}${(fb - grandTotal).toLocaleString()}`
+              : undefined,
+          amount: fb,
+        });
+      }
+    }
+
+    return opts.slice(0, 4);
+  }, [grandTotal, settings.currencySymbol, language]);
+
   // Cart actions
   const addToCart = (product: Product, delta: number = 1) => {
     if (product.stock <= 0) {
@@ -1097,102 +1171,155 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         {paymentMethod === 'cash' && cart.length > 0 && (
           <View style={[styles.contextPanel, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
             <View style={styles.cashHeaderRow}>
-              <Text style={[styles.contextLabel, { color: theme.textSecondary }]}>
-                {t('tenderedAmount')} ({settings.currencySymbol}) *
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="cash-outline" size={17} color={theme.primary} />
+                <Text style={[styles.contextLabel, { color: theme.textSecondary, marginBottom: 0 }]}>
+                  {language === 'ur' ? 'وصول شدہ نقد رقم (Cash Received) *' : 'Cash Received *'}
+                </Text>
+              </View>
               {parsedTendered > 0 && (
-                <Pressable onPress={() => setTenderedCash('')}>
-                  <Text style={{ fontSize: 11, color: theme.textMuted }}>{t('clearAll')}</Text>
+                <Pressable
+                  onPress={() => setTenderedCash('')}
+                  style={[styles.clearTenderBtn, { backgroundColor: theme.card }]}>
+                  <Ionicons name="refresh-outline" size={12} color={theme.textMuted} />
+                  <Text style={{ fontSize: 11, color: theme.textMuted, fontWeight: '700' }}>
+                    {language === 'ur' ? 'دوبارہ لکھیں' : 'Reset'}
+                  </Text>
                 </Pressable>
               )}
             </View>
 
-            {/* Quick Denominations (Horizontal Scroll) */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              nestedScrollEnabled={true}
-              style={styles.denomScroll}
-              contentContainerStyle={styles.denomScrollContent}>
-              <Pressable
-                onPress={() => setTenderedCash(grandTotal.toString())}
-                style={[
-                  styles.denomBtn,
-                  {
-                    backgroundColor:
-                      tenderedCash === grandTotal.toString() ? theme.primary : theme.card,
-                    borderColor:
-                      tenderedCash === grandTotal.toString() ? theme.primary : theme.border,
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.denomText,
-                    { color: tenderedCash === grandTotal.toString() ? '#FFFFFF' : theme.text },
-                  ]}>
-                  {t('exactAmount')} ({settings.currencySymbol}{grandTotal})
-                </Text>
-              </Pressable>
-
-              {CASH_DENOMINATIONS.map((amt) => (
-                <Pressable
-                  key={amt}
-                  onPress={() => setTenderedCash(amt.toString())}
-                  style={[
-                    styles.denomBtn,
-                    {
-                      backgroundColor:
-                        tenderedCash === amt.toString() ? theme.primary : theme.card,
-                      borderColor:
-                        tenderedCash === amt.toString() ? theme.primary : theme.border,
-                    },
-                  ]}>
-                  <Text
-                    style={[
-                      styles.denomText,
-                      { color: tenderedCash === amt.toString() ? '#FFFFFF' : theme.text },
+            {/* Smart 1-Tap Cash Tender Buttons (Tactile Grid) */}
+            <View style={styles.smartTenderGrid}>
+              {smartTenderOptions.map((opt) => {
+                const isSelected = tenderedCash === opt.amount.toString();
+                return (
+                  <Pressable
+                    key={opt.amount}
+                    onPress={() => setTenderedCash(opt.amount.toString())}
+                    style={({ pressed }) => [
+                      styles.smartTenderCard,
+                      {
+                        backgroundColor: isSelected ? theme.primary : theme.card,
+                        borderColor: isSelected ? theme.primary : theme.border,
+                      },
+                      pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
                     ]}>
-                    {settings.currencySymbol}{amt}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
+                    <Text
+                      style={[
+                        styles.smartTenderLabel,
+                        { color: isSelected ? '#FFFFFF' : theme.text },
+                      ]}>
+                      {opt.label}
+                    </Text>
+                    {opt.subLabel ? (
+                      <Text
+                        style={[
+                          styles.smartTenderSub,
+                          { color: isSelected ? '#E0E7FF' : (opt.isExact ? theme.primary : theme.textMuted) },
+                        ]}>
+                        {opt.subLabel}
+                      </Text>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
 
-            {/* Tendered Input with Dynamic Validation Border */}
-            <TextInput
+            {/* Custom Cash Input Box with Prefix */}
+            <View
               style={[
-                styles.cashInput,
+                styles.cashInputWrap,
                 {
                   backgroundColor: theme.card,
-                  color: theme.text,
                   borderColor:
                     !tenderedCash.trim() || parsedTendered === 0
                       ? (settings.darkMode ? '#F59E0B' : '#D97706')
                       : parsedTendered < grandTotal
                       ? theme.danger
                       : theme.success,
-                  borderWidth: 1.5,
                 },
-              ]}
-              placeholder={t('enterCustomAmount')}
-              placeholderTextColor={theme.textMuted}
-              keyboardType="numeric"
-              value={tenderedCash}
-              onChangeText={setTenderedCash}
-            />
+              ]}>
+              <View style={[styles.cashPrefixBox, { backgroundColor: theme.surfaceSubtle }]}>
+                <Text style={[styles.cashPrefixText, { color: theme.textSecondary }]}>
+                  {settings.currencySymbol}
+                </Text>
+              </View>
+              <TextInput
+                style={[styles.cashInputText, { color: theme.text }]}
+                placeholder={language === 'ur' ? 'یا مختلف رقم لکھیں...' : 'Or enter custom amount...'}
+                placeholderTextColor={theme.textMuted}
+                keyboardType="numeric"
+                value={tenderedCash}
+                onChangeText={setTenderedCash}
+              />
+              {tenderedCash.trim() ? (
+                <Pressable onPress={() => setTenderedCash('')} hitSlop={8} style={{ paddingRight: 12 }}>
+                  <Ionicons name="close-circle" size={18} color={theme.textMuted} />
+                </Pressable>
+              ) : null}
+            </View>
 
-            {/* Empty Cash Validation Prompt */}
+            {/* Scenario A: Change Return to Customer (Luminous Prominent Pill) */}
+            {parsedTendered > grandTotal && (
+              <View style={styles.changeReturnHeroCard}>
+                <View style={styles.changeReturnHeroIcon}>
+                  <Ionicons name="arrow-undo" size={22} color="#047857" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.changeReturnHeroLabel}>
+                    {language === 'ur' ? 'گاہک کو باقی واپس کریں' : 'GIVE BACK CHANGE'}
+                  </Text>
+                  <Text style={styles.changeReturnHeroAmount}>
+                    {settings.currencySymbol} {changeToReturn.toLocaleString()}
+                  </Text>
+                </View>
+                <Ionicons name="checkmark-circle" size={26} color="#10B981" />
+              </View>
+            )}
+
+            {/* Scenario B: Exact Payment Received (No change needed) */}
+            {parsedTendered === grandTotal && parsedTendered > 0 && (
+              <View style={styles.exactPaymentHeroCard}>
+                <Ionicons name="checkmark-done-circle" size={22} color="#15803D" />
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.exactPaymentHeroTitle}>
+                    {language === 'ur' ? 'پوری رقم وصول ہو گئی (باقی صفر)' : 'Exact Payment Received'}
+                  </Text>
+                  <Text style={styles.exactPaymentHeroSub}>
+                    {language === 'ur' ? 'کوئی بقایا واپس نہیں کرنا ہے' : 'Zero change return needed'}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Scenario C: Insufficient Cash (Still due) */}
+            {parsedTendered > 0 && parsedTendered < grandTotal && (
+              <View style={styles.shortCashHeroCard}>
+                <Ionicons name="alert-circle" size={22} color="#DC2626" />
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.shortCashHeroLabel}>
+                    {language === 'ur' ? 'رقم کم ہے (بقایا مطلوب)' : 'INSUFFICIENT TENDER'}
+                  </Text>
+                  <Text style={styles.shortCashHeroAmount}>
+                    {settings.currencySymbol} {(grandTotal - parsedTendered).toLocaleString()} {language === 'ur' ? 'مزید درکار ہیں' : 'Still Due'}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Scenario D: Empty Cash Validation Prompt */}
             {(!tenderedCash.trim() || parsedTendered === 0) && (
               <View
                 style={[
                   styles.validationHintRow,
                   {
                     backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.12)' : '#FEF3C7',
-                    marginTop: 4,
+                    marginTop: 2,
                   },
                 ]}>
                 <Ionicons
-                  name="alert-circle-outline"
+                  name="information-circle-outline"
                   size={16}
                   color={settings.darkMode ? '#FBBF24' : '#D97706'}
                 />
@@ -1202,52 +1329,9 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                     { color: settings.darkMode ? '#FDE68A' : '#92400E' },
                   ]}>
                   {language === 'ur'
-                    ? `گاہک سے وصول شدہ رقم درج کریں یا پوری رقم (${settings.currencySymbol}${grandTotal}) منتخب کریں۔`
-                    : `Enter cash received or tap Exact Amount (${settings.currencySymbol}${grandTotal}).`}
+                    ? `اوپر دیے گئے 1-ٹیپ بٹن سے نوٹ منتخب کریں یا رقم درج کریں۔`
+                    : `Tap a 1-tap note button above or enter amount received.`}
                 </Text>
-              </View>
-            )}
-
-            {/* Change banner */}
-            {parsedTendered > 0 && (
-              <View
-                style={[
-                  styles.changeBanner,
-                  {
-                    backgroundColor:
-                      parsedTendered >= grandTotal ? theme.successLight : theme.dangerLight,
-                    borderColor:
-                      parsedTendered >= grandTotal ? theme.success : theme.danger,
-                  },
-                ]}>
-                <View>
-                  <Text
-                    style={[
-                      styles.changeBannerLabel,
-                      { color: parsedTendered >= grandTotal ? theme.success : theme.danger },
-                    ]}>
-                    {parsedTendered >= grandTotal
-                      ? t('changeReturn')
-                      : language === 'ur'
-                      ? 'کم رقم (بقایا مطلوب)'
-                      : 'Short Amount (Insufficient)'}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.changeBannerAmount,
-                      { color: parsedTendered >= grandTotal ? theme.success : theme.danger },
-                    ]}>
-                    {settings.currencySymbol}{' '}
-                    {parsedTendered >= grandTotal
-                      ? changeToReturn
-                      : grandTotal - parsedTendered}
-                  </Text>
-                </View>
-                <Ionicons
-                  name={parsedTendered >= grandTotal ? 'checkmark-circle' : 'alert-circle'}
-                  size={28}
-                  color={parsedTendered >= grandTotal ? theme.success : theme.danger}
-                />
               </View>
             )}
           </View>
@@ -1973,164 +2057,174 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       <View style={styles.mainLayout}>
         {/* ================= Catalog Section (Full Screen on Mobile) ================= */}
         <View style={styles.catalogSection}>
-          {/* Top Control Bar: Search + Barcode + View Toggle */}
-          <View style={styles.topControlBar}>
-            <View style={styles.searchFlex}>
-              <View style={styles.searchInlineRow}>
-                <View style={{ flex: 1 }}>
-                  <SearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder={language === 'ur' ? 'نام یا بارکوڈ...' : 'Search name or barcode...'}
-                    height={40}
-                  />
+          {/* Top Emerald Canopy (Seamless continuation from ShopHeader) */}
+          <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
+            <View style={styles.heroInner}>
+              {/* Top Control Bar: Search + Barcode + Flash + Parked + View Toggle */}
+              <View style={styles.topControlBar}>
+                <View style={styles.searchFlex}>
+                  <View style={styles.searchInlineRow}>
+                    <View style={{ flex: 1 }}>
+                      <SearchBar
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        placeholder={language === 'ur' ? 'نام یا بارکوڈ...' : 'Search name or barcode...'}
+                        height={40}
+                      />
+                    </View>
+
+                    <Pressable
+                      onPress={() => setIsBarcodeOpen(true)}
+                      style={({ pressed }) => [
+                        styles.searchBarcodeBtn,
+                        {
+                          backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                          borderColor: 'rgba(255, 255, 255, 0.28)',
+                        },
+                        pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
+                      ]}>
+                      <Ionicons name="barcode-outline" size={20} color="#FFFFFF" />
+                    </Pressable>
+
+                    <Pressable
+                      onPress={() => setIsQuickItemOpen(true)}
+                      accessibilityLabel="Add custom or loose item"
+                      accessibilityRole="button"
+                      style={({ pressed }) => [
+                        styles.searchBarcodeBtn,
+                        {
+                          backgroundColor: 'rgba(245, 158, 11, 0.22)',
+                          borderColor: 'rgba(245, 158, 11, 0.45)',
+                        },
+                        pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
+                      ]}>
+                      <Ionicons name="flash" size={19} color="#FDE68A" />
+                    </Pressable>
+                  </View>
                 </View>
 
-                <Pressable
-                  onPress={() => setIsBarcodeOpen(true)}
-                  style={({ pressed }) => [
-                    styles.searchBarcodeBtn,
-                    {
-                      backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.16)' : '#ECFDF5',
-                      borderColor: settings.darkMode ? 'rgba(16,185,129,0.35)' : '#A7F3D0',
-                    },
-                    pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-                  ]}>
-                  <Ionicons name="barcode-outline" size={20} color={theme.primary} />
-                </Pressable>
+                <View style={styles.topBarActions}>
+                  {/* Parked Carts Button */}
+                  {heldCarts.length > 0 && (
+                    <Pressable
+                      onPress={() => setIsHeldCartsModalOpen(true)}
+                      style={({ pressed }) => [
+                        styles.heldPillBtn,
+                        {
+                          backgroundColor: '#FEF3C7',
+                          borderColor: '#FDE68A',
+                        },
+                        pressed && { opacity: 0.8 },
+                      ]}>
+                      <Ionicons name="pause-circle" size={15} color="#D97706" />
+                      <Text style={[styles.heldPillText, { color: '#B45309' }]}>
+                        {heldCarts.length}
+                      </Text>
+                    </Pressable>
+                  )}
 
-                <Pressable
-                  onPress={() => setIsQuickItemOpen(true)}
-                  accessibilityLabel="Add custom or loose item"
-                  accessibilityRole="button"
-                  style={({ pressed }) => [
-                    styles.searchBarcodeBtn,
-                    {
-                      backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7',
-                      borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.35)' : '#FDE68A',
-                    },
-                    pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-                  ]}>
-                  <Ionicons name="flash" size={19} color="#D97706" />
-                </Pressable>
+                  <Pressable
+                    onPress={toggleViewMode}
+                    style={({ pressed }) => [
+                      styles.iconSquareBtn,
+                      {
+                        backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                        borderColor: 'rgba(255, 255, 255, 0.28)',
+                      },
+                      pressed && { opacity: 0.8 },
+                    ]}>
+                    <Ionicons
+                      name={viewMode === 'grid' ? 'list-outline' : 'grid-outline'}
+                      size={18}
+                      color="#FFFFFF"
+                    />
+                  </Pressable>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.topBarActions}>
-              {/* Parked Carts Button */}
-              {heldCarts.length > 0 && (
-                <Pressable
-                  onPress={() => setIsHeldCartsModalOpen(true)}
-                  style={({ pressed }) => [
-                    styles.heldPillBtn,
-                    {
-                      backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.2)' : '#FEF3C7',
-                      borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.4)' : '#FDE68A',
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}>
-                  <Ionicons name="pause-circle" size={15} color="#D97706" />
-                  <Text style={[styles.heldPillText, { color: '#B45309' }]}>
-                    {heldCarts.length}
-                  </Text>
-                </Pressable>
-              )}
+              {/* Compact Quick Add — frequent items only (hidden while searching) */}
+              {topProducts.length > 0 && !searchQuery ? (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.favRowScroll}
+                  contentContainerStyle={styles.favRowContent}>
+                  <View style={[styles.favLead, { backgroundColor: 'rgba(255, 255, 255, 0.18)' }]}>
+                    <Ionicons name="flash" size={11} color="#FDE68A" />
+                  </View>
+                  {topProducts.map((product) => {
+                    const isOut = product.stock <= 0;
+                    const inCart = cart.find((it) => it.product.id === product.id);
 
-              <Pressable
-                onPress={toggleViewMode}
-                style={({ pressed }) => [
-                  styles.iconSquareBtn,
-                  { backgroundColor: theme.surface, borderColor: theme.border },
-                  pressed && { opacity: 0.8 },
-                ]}>
-                <Ionicons
-                  name={viewMode === 'grid' ? 'list-outline' : 'grid-outline'}
-                  size={18}
-                  color={theme.textSecondary}
-                />
-              </Pressable>
+                    return (
+                      <Pressable
+                        key={product.id}
+                        disabled={isOut}
+                        onPress={() => addToCart(product)}
+                        accessibilityLabel={`Quick add ${product.name}`}
+                        accessibilityRole="button"
+                        style={({ pressed }) => [
+                          styles.favChip,
+                          {
+                            backgroundColor: inCart
+                              ? '#FFFFFF'
+                              : 'rgba(255, 255, 255, 0.16)',
+                            borderColor: inCart
+                              ? '#FFFFFF'
+                              : 'rgba(255, 255, 255, 0.26)',
+                            opacity: isOut ? 0.4 : 1,
+                          },
+                          pressed && !isOut && { transform: [{ scale: 0.96 }] },
+                        ]}>
+                        <Text
+                          style={[
+                            styles.favChipName,
+                            { color: inCart ? '#064E3B' : '#FFFFFF' },
+                          ]}
+                          numberOfLines={1}>
+                          {getProductName(product)}
+                        </Text>
+                        {inCart ? (
+                          <View style={[styles.favChipBadge, { backgroundColor: '#064E3B' }]}>
+                            <Text style={[styles.favChipBadgeText, { color: '#FFFFFF' }]}>{inCart.quantity}</Text>
+                          </View>
+                        ) : (
+                          <Text style={[styles.favChipPrice, { color: '#A7F3D0' }]}>
+                            {settings.currencySymbol}
+                            {formatCompactPrice(product.price)}
+                          </Text>
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              ) : null}
+
+              {/* Category Filter Pills — frosted glass */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categoryScroll}
+                contentContainerStyle={styles.categoryScrollContent}>
+                {CATEGORIES.map((cat) => (
+                  <FilterChip
+                    key={cat}
+                    label={cat === 'All' ? t('allCategories') : cat}
+                    isActive={selectedCategory === cat}
+                    onPress={() => setSelectedCategory(cat)}
+                    activeBg="#FFFFFF"
+                    activeColor="#064E3B"
+                    inactiveBg="rgba(255, 255, 255, 0.16)"
+                    inactiveColor="#FFFFFF"
+                    inactiveBorder="rgba(255, 255, 255, 0.22)"
+                  />
+                ))}
+              </ScrollView>
             </View>
           </View>
 
-          {/* Compact Quick Add — frequent items only (hidden while searching) */}
-          {topProducts.length > 0 && !searchQuery ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.favRowScroll}
-              contentContainerStyle={styles.favRowContent}>
-              <View style={styles.favLead}>
-                <Ionicons name="flash" size={11} color={theme.accent} />
-              </View>
-              {topProducts.map((product) => {
-                const isOut = product.stock <= 0;
-                const inCart = cart.find((it) => it.product.id === product.id);
-
-                return (
-                  <Pressable
-                    key={product.id}
-                    disabled={isOut}
-                    onPress={() => addToCart(product)}
-                    accessibilityLabel={`Quick add ${product.name}`}
-                    accessibilityRole="button"
-                    style={({ pressed }) => [
-                      styles.favChip,
-                      {
-                        backgroundColor: inCart
-                          ? theme.primaryLight
-                          : settings.darkMode
-                            ? theme.surfaceSubtle
-                            : '#FFFFFF',
-                        borderColor: inCart
-                          ? theme.primary
-                          : settings.darkMode
-                            ? 'rgba(255,255,255,0.1)'
-                            : 'rgba(148,163,184,0.45)',
-                        opacity: isOut ? 0.4 : 1,
-                      },
-                      pressed && !isOut && { transform: [{ scale: 0.96 }] },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.favChipName,
-                        { color: inCart ? theme.primary : theme.text },
-                      ]}
-                      numberOfLines={1}>
-                      {getProductName(product)}
-                    </Text>
-                    {inCart ? (
-                      <View style={[styles.favChipBadge, { backgroundColor: theme.primary }]}>
-                        <Text style={styles.favChipBadgeText}>{inCart.quantity}</Text>
-                      </View>
-                    ) : (
-                      <Text style={[styles.favChipPrice, { color: theme.textMuted }]}>
-                        {settings.currencySymbol}
-                        {formatCompactPrice(product.price)}
-                      </Text>
-                    )}
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          ) : null}
-
-          {/* Category Filter Pills — quiet, compact */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.categoryScroll}
-            contentContainerStyle={styles.categoryScrollContent}>
-            {CATEGORIES.map((cat) => (
-              <FilterChip
-                key={cat}
-                label={cat === 'All' ? t('allCategories') : cat}
-                isActive={selectedCategory === cat}
-                onPress={() => setSelectedCategory(cat)}
-              />
-            ))}
-          </ScrollView>
-
           {/* Products List / Grid or Empty State */}
+          <View style={styles.catalogItemsWrap}>
           {products.length === 0 ? (
             <View style={styles.catalogEmptyContainer}>
               <View style={[styles.catalogEmptyIconBox, { backgroundColor: theme.primaryLight }]}>
@@ -2522,6 +2616,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               })}
             </ScrollView>
           )}
+          </View>
 
           {/* ================= Mobile Sticky Unified POS Cart Dock ================= */}
           {!isWideScreen && cart.length > 0 && (
@@ -2772,13 +2867,37 @@ const styles = StyleSheet.create({
   },
   catalogSection: {
     flex: 1,
-    padding: Spacing.md,
     position: 'relative',
+  },
+  heroCanopy: {
+    width: '100%',
+    paddingTop: 8,
+    paddingBottom: 10,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    borderWidth: 0,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
+  },
+  heroInner: {
+    maxWidth: 820,
+    marginHorizontal: 'auto',
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+    gap: 7,
+  },
+  catalogItemsWrap: {
+    flex: 1,
+    paddingHorizontal: Spacing.md,
+    paddingTop: 8,
   },
   topControlBar: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginBottom: 8,
     alignItems: 'center',
   },
   searchFlex: {
@@ -2827,7 +2946,6 @@ const styles = StyleSheet.create({
   },
   categoryScroll: {
     maxHeight: 36,
-    marginBottom: 8,
   },
   categoryScrollContent: {
     gap: 6,
@@ -2836,7 +2954,6 @@ const styles = StyleSheet.create({
 
   favRowScroll: {
     maxHeight: 34,
-    marginBottom: 8,
   },
   favRowContent: {
     gap: 6,
@@ -4078,5 +4195,140 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  clearTenderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  smartTenderGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginVertical: 4,
+  },
+  smartTenderCard: {
+    width: '48.5%',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    ...Shadows.sm,
+  },
+  smartTenderLabel: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  smartTenderSub: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  cashInputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  cashPrefixBox: {
+    height: '100%',
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cashPrefixText: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  cashInputText: {
+    flex: 1,
+    height: '100%',
+    paddingHorizontal: 12,
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  changeReturnHeroCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
+    borderWidth: 2,
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 6,
+    ...Shadows.sm,
+  },
+  changeReturnHeroIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#D1FAE5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  changeReturnHeroLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#065F46',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  changeReturnHeroAmount: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#047857',
+    marginTop: 1,
+  },
+  exactPaymentHeroCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderColor: '#86EFAC',
+    borderWidth: 1.5,
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 6,
+  },
+  exactPaymentHeroTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  exactPaymentHeroSub: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    color: '#166534',
+    marginTop: 1,
+  },
+  shortCashHeroCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF2F2',
+    borderColor: '#EF4444',
+    borderWidth: 1.5,
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 6,
+  },
+  shortCashHeroLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#991B1B',
+    textTransform: 'uppercase',
+  },
+  shortCashHeroAmount: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#DC2626',
+    marginTop: 1,
   },
 });

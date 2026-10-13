@@ -133,35 +133,69 @@ export const ProductsScreen: React.FC = () => {
             </Pressable>
           </View>
 
-          {/* Compact Glass Metric Summary Strip */}
+          {/* ── 3 Visual Inventory Summary Pillars (Items, Stock Value, Est. Profit) ── */}
           <View style={styles.compactMetricBar}>
+            {/* 1. Total Catalog Items */}
             <View style={styles.compactMetricItem}>
-              <Ionicons name="cube-outline" size={13} color="#A7F3D0" />
-              <Text style={styles.compactMetricText} numberOfLines={1}>
-                <Text style={styles.compactMetricBold}>{products.length}</Text>{' '}
-                {language === 'ur' ? 'اشیاء' : 'Items'}
+              <Text style={styles.compactMetricTitle} numberOfLines={1}>
+                {language === 'ur' ? 'کل اشیاء' : 'Items'}
+              </Text>
+              <View style={styles.metricValRow}>
+                <Ionicons name="cube" size={11} color="#A7F3D0" />
+                <Text
+                  style={styles.compactMetricBold}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}>
+                  {products.length}
+                </Text>
+              </View>
+              <Text style={styles.compactMetricSub} numberOfLines={1}>
+                {language === 'ur' ? 'سامان' : 'in store'}
               </Text>
             </View>
 
             <View style={styles.compactMetricDivider} />
 
+            {/* 2. Total Retail Stock Worth */}
             <View style={styles.compactMetricItem}>
-              <Ionicons name="pricetag-outline" size={12} color="#A7F3D0" />
-              <Text style={styles.compactMetricText} numberOfLines={1}>
-                {language === 'ur' ? 'مال: ' : 'Value: '}
-                <Text style={styles.compactMetricBold}>
+              <Text style={styles.compactMetricTitle} numberOfLines={1}>
+                {language === 'ur' ? 'کل مال' : 'Stock Value'}
+              </Text>
+              <View style={styles.metricValRow}>
+                <Ionicons name="pricetag" size={10} color="#A7F3D0" />
+                <Text
+                  style={styles.compactMetricBold}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}>
                   {settings.currencySymbol}{formatCompactPrice(totalInventoryRetailValue)}
                 </Text>
+              </View>
+              <Text style={styles.compactMetricSub} numberOfLines={1}>
+                {language === 'ur' ? 'فروخت رقم' : 'retail worth'}
               </Text>
             </View>
 
             <View style={styles.compactMetricDivider} />
 
+            {/* 3. Expected Profit in Rupees + Margin % */}
             <View style={styles.compactMetricItem}>
-              <Ionicons name="trending-up" size={13} color="#6EE7B7" />
-              <Text style={[styles.compactMetricText, { color: '#6EE7B7' }]} numberOfLines={1}>
-                <Text style={[styles.compactMetricBold, { color: '#6EE7B7' }]}>+{profitPct}%</Text>{' '}
-                {language === 'ur' ? 'منافع' : 'Margin'}
+              <Text style={[styles.compactMetricTitle, { color: '#6EE7B7' }]} numberOfLines={1}>
+                {language === 'ur' ? 'متوقع منافع' : 'Est. Profit'}
+              </Text>
+              <View style={styles.metricValRow}>
+                <Ionicons name="trending-up" size={11} color="#6EE7B7" />
+                <Text
+                  style={[styles.compactMetricBold, { color: '#6EE7B7' }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}>
+                  +{settings.currencySymbol}{formatCompactPrice(totalExpectedStockProfit)}
+                </Text>
+              </View>
+              <Text style={[styles.compactMetricSub, { color: '#6EE7B7' }]} numberOfLines={1}>
+                {profitPct}% {language === 'ur' ? 'مارجن' : 'margin'}
               </Text>
             </View>
           </View>
@@ -504,11 +538,17 @@ const styles = StyleSheet.create({
 
   heroCanopy: {
     width: '100%',
-    paddingTop: 12,
+    paddingTop: 8,
     paddingBottom: 10,
     borderBottomLeftRadius: 18,
     borderBottomRightRadius: 18,
-    ...Shadows.md,
+    borderWidth: 0,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
   },
   heroInner: {
     maxWidth: 820,
@@ -536,33 +576,55 @@ const styles = StyleSheet.create({
 
   compactMetricBar: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     justifyContent: 'space-between',
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
     borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 4,
   },
   compactMetricItem: {
+    flex: 1,
+    minWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 1,
+    gap: 1,
+  },
+  compactMetricTitle: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    textAlign: 'center',
+  },
+  metricValRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-  },
-  compactMetricText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '500',
+    justifyContent: 'center',
+    gap: 2.5,
+    marginTop: 1,
+    maxWidth: '100%',
+    flexShrink: 1,
   },
   compactMetricBold: {
     color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  compactMetricSub: {
+    color: 'rgba(255, 255, 255, 0.65)',
+    fontSize: 9,
+    fontWeight: '500',
+    textAlign: 'center',
   },
   compactMetricDivider: {
     width: 1,
-    height: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    marginVertical: 2,
   },
 
   filterScroll: { maxHeight: 38 },

@@ -945,6 +945,36 @@ export const SettingsScreen: React.FC = () => {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      {/* ── Top Emerald Canopy (Seamless continuation from ShopHeader) ── */}
+      <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
+        <View style={styles.heroInner}>
+          <View style={styles.header}>
+            <Pressable
+              onPress={handleBackPress}
+              style={({ pressed }) => [
+                styles.backBtn,
+                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+              ]}
+              hitSlop={8}
+              accessibilityLabel="Back to Dashboard"
+            >
+              <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+            </Pressable>
+
+            <Text
+              style={styles.headerTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {t('settingsTitle')}
+            </Text>
+
+            {/* Spacer to keep title centred */}
+            <View style={styles.headerSpacer} />
+          </View>
+        </View>
+      </View>
+
       <ScrollView
         ref={scrollViewRef}
         style={[styles.container, { backgroundColor: theme.background }]}
@@ -955,32 +985,6 @@ export const SettingsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <View style={styles.header}>
-        <Pressable
-          onPress={handleBackPress}
-          style={({ pressed }) => [
-            styles.backBtn,
-            { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
-          ]}
-          hitSlop={8}
-          accessibilityLabel="Back to Dashboard"
-        >
-          <Ionicons name="arrow-back" size={20} color={theme.text} />
-        </Pressable>
-
-        <Text
-          style={[styles.headerTitle, { color: theme.text }]}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {t('settingsTitle')}
-        </Text>
-
-        {/* Spacer to keep title centred */}
-        <View style={styles.headerSpacer} />
-      </View>
 
       {/* ── Google Cloud Quick Status Banner ─────────────────────────────── */}
       <Pressable
@@ -1857,13 +1861,32 @@ export const SettingsScreen: React.FC = () => {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: Spacing.lg, paddingBottom: 80 },
+  heroCanopy: {
+    width: '100%',
+    paddingTop: 6,
+    paddingBottom: 10,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    borderWidth: 0,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
+  },
+  heroInner: {
+    maxWidth: 720,
+    marginHorizontal: 'auto',
+    width: '100%',
+    paddingHorizontal: Spacing.lg,
+  },
+  content: { paddingHorizontal: Spacing.lg, paddingTop: 12, paddingBottom: 80 },
 
   // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
     gap: Spacing.sm,
   },
   backBtn: {
@@ -1872,13 +1895,17 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: 'rgba(255, 255, 255, 0.28)',
     borderWidth: 1,
   },
   headerTitle: {
     flex: 1,
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.3,
+    textAlign: 'center',
   },
   saveBtn: {
     flexDirection: 'row',
