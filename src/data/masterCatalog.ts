@@ -1,0 +1,22304 @@
+import type { ProductUnit } from '@/types';
+
+export interface ImageCredit {
+  name: string;
+  profileUrl: string;
+  photoUrl: string;
+  source: 'Unsplash' | 'Wikimedia Commons';
+}
+
+export interface CatalogItem {
+  name: string;
+  nameUrdu?: string;
+  unit: ProductUnit;
+  price: number; // typical Pakistan retail estimate in Rs. — editable per shop
+  icon: string; // fallback glyph if no photo loads
+  image?: string; // bundled Commons photo (assets/catalog-images) — offline fallback
+  imageLevel?: 'item' | 'category';
+  imageUrl?: string; // hotlinked Unsplash CDN photo (preferred when online)
+  imageSource?: 'unsplash';
+  credit?: ImageCredit; // photographer attribution — render as 'Photo by {name} on Unsplash'
+  downloadLocation?: string; // Unsplash API: ping this URL when the user actually uses the photo
+}
+
+export interface CatalogCategory { name: string; image?: string; imageUrl?: string; credit?: ImageCredit; items: CatalogItem[] }
+
+export interface CatalogShopType { shopType: string; icon: string; categories: CatalogCategory[] }
+
+/**
+ * Master quick-add catalog: ready-made product lists per shop type.
+ * Photos: Unsplash (hotlinked, credited) preferred; Wikimedia Commons
+ * bundled photos as offline fallback. Prices are starting estimates.
+ */
+export const MASTER_CATALOG: CatalogShopType[] = [
+ {
+  "shopType": "Kiryana & General Store",
+  "icon": "🏪",
+  "categories": [
+   {
+    "name": "Atta, Rice & Grains",
+    "items": [
+     {
+      "name": "Wheat Flour (Atta) 10kg Bag",
+      "unit": "packet",
+      "price": 1350,
+      "icon": "🌾",
+      "nameUrdu": "آٹا",
+      "image": "assets/catalog-images/wheat-flour-bag-424504.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Wheat Flour (Atta) 20kg Bag",
+      "unit": "packet",
+      "price": 2650,
+      "icon": "🌾",
+      "nameUrdu": "آٹا",
+      "image": "assets/catalog-images/wheat-flour-bag-424504.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Super Kernel Basmati Rice 1kg",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🍚",
+      "nameUrdu": "چاول",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Super Kernel Basmati Rice 5kg",
+      "unit": "packet",
+      "price": 2050,
+      "icon": "🍚",
+      "nameUrdu": "چاول",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Irri-6 Coarse Rice 1kg",
+      "unit": "kg",
+      "price": 260,
+      "icon": "🍚",
+      "nameUrdu": "چاول",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Sella Basmati Rice 1kg",
+      "unit": "kg",
+      "price": 480,
+      "icon": "🍚",
+      "nameUrdu": "چاول",
+      "image": "assets/catalog-images/sella-basmati-rice-8a7477.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Broken Rice (Tota) 1kg",
+      "unit": "kg",
+      "price": 230,
+      "icon": "🍚",
+      "nameUrdu": "ٹوٹا چاول",
+      "image": "assets/catalog-images/broken-rice-846bf7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Corn Flour (Makai Atta) 1kg",
+      "unit": "packet",
+      "price": 260,
+      "icon": "🌽",
+      "nameUrdu": "مکئی کا آٹا",
+      "image": "assets/catalog-images/corn-flour-3e1488.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Barley Flour (Jau Atta) 1kg",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🌾",
+      "nameUrdu": "جو کا آٹا",
+      "image": "assets/catalog-images/barley-flour-a20e8d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Gram Flour (Besan) 1kg",
+      "unit": "packet",
+      "price": 480,
+      "icon": "🫘",
+      "nameUrdu": "بیسن",
+      "image": "assets/catalog-images/gram-flour-a31242.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Maize (Makai) Grains 1kg",
+      "unit": "kg",
+      "price": 240,
+      "icon": "🌽",
+      "nameUrdu": "مکئی",
+      "image": "assets/catalog-images/maize-grains-d5d4cb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     },
+     {
+      "name": "Rice Flour 1kg",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🍚",
+      "nameUrdu": "چاول کا آٹا",
+      "image": "assets/catalog-images/rice-flour-930b27.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Nathan Cima",
+       "profileUrl": "https://unsplash.com/@nathan_cima",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/n2sy8zlngYo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1704972269889-f0fdd7f0e7c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmljZSUyMGZsb3VyJTIwZ3JhaW4lMjBzYWNrcyUyMG1hcmtldHxlbnwxfHx8fDE3OTIyNTU0OTJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Nathan Cima",
+     "profileUrl": "https://unsplash.com/@nathan_cima",
+     "photoUrl": "https://unsplash.com/photos/a-bunch-of-baskets-filled-with-white-rice-n2sy8zlngYo",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Dal & Pulses",
+    "items": [
+     {
+      "name": "Masoor Dal (Red Lentils) 1kg",
+      "unit": "kg",
+      "price": 330,
+      "icon": "🫘",
+      "nameUrdu": "مسور کی دال",
+      "image": "assets/catalog-images/masoor-dal-01f7c8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Moong Dal (Yellow) 1kg",
+      "unit": "kg",
+      "price": 420,
+      "icon": "🫘",
+      "nameUrdu": "مونگ کی دال",
+      "image": "assets/catalog-images/moong-dal-f56d68.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chana Dal 1kg",
+      "unit": "kg",
+      "price": 380,
+      "icon": "🫘",
+      "nameUrdu": "چنے کی دال",
+      "image": "assets/catalog-images/chana-dal-892913.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Whole Black Gram (Kala Chana) 1kg",
+      "unit": "kg",
+      "price": 340,
+      "icon": "🫘",
+      "nameUrdu": "کالا چنا",
+      "image": "assets/catalog-images/dal-pulses-39dfae.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "White Chickpeas (Safed Chana) 1kg",
+      "unit": "kg",
+      "price": 380,
+      "icon": "🫘",
+      "nameUrdu": "سفید چنا",
+      "image": "assets/catalog-images/white-chickpeas-bda9c1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mash Dal (White Urad) 1kg",
+      "unit": "kg",
+      "price": 460,
+      "icon": "🫘",
+      "nameUrdu": "ماش کی دال",
+      "image": "assets/catalog-images/mash-dal-655d1a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Arhar/Tur Dal 1kg",
+      "unit": "kg",
+      "price": 450,
+      "icon": "🫘",
+      "nameUrdu": "ارہر کی دال",
+      "image": "assets/catalog-images/arhar-tur-dal-e7f3a5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mix Dal (Panchrangi) 1kg",
+      "unit": "kg",
+      "price": 420,
+      "icon": "🫘",
+      "nameUrdu": "مکس دال",
+      "image": "assets/catalog-images/mix-dal-d23b22.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Whole Masoor (Sabut) 1kg",
+      "unit": "kg",
+      "price": 350,
+      "icon": "🫘",
+      "nameUrdu": "ثابت مسور",
+      "image": "assets/catalog-images/dal-pulses-39dfae.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Green Moong (Sabut) 1kg",
+      "unit": "kg",
+      "price": 440,
+      "icon": "🫘",
+      "nameUrdu": "ثابت مونگ",
+      "image": "assets/catalog-images/green-moong-df7775.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/dal-pulses-39dfae.webp"
+   },
+   {
+    "name": "Ghee & Cooking Oils",
+    "items": [
+     {
+      "name": "Dalda Banaspati Ghee 5kg Tin",
+      "unit": "packet",
+      "price": 2650,
+      "icon": "🫗",
+      "nameUrdu": "بناسپتی گھی",
+      "image": "assets/catalog-images/ghee-cooking-oils-938100.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Dalda Banaspati Ghee 2.5kg",
+      "unit": "packet",
+      "price": 1350,
+      "icon": "🫗",
+      "nameUrdu": "بناسپتی گھی",
+      "image": "assets/catalog-images/ghee-cooking-oils-938100.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Canola Cooking Oil 1 Litre",
+      "unit": "litre",
+      "price": 520,
+      "icon": "🫗",
+      "nameUrdu": "کھانے کا تیل",
+      "image": "assets/catalog-images/canola-cooking-oil-f8ae6a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Canola Cooking Oil 5 Litre",
+      "unit": "packet",
+      "price": 2550,
+      "icon": "🫗",
+      "nameUrdu": "کھانے کا تیل",
+      "image": "assets/catalog-images/canola-cooking-oil-f8ae6a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sunflower Oil 1 Litre",
+      "unit": "litre",
+      "price": 560,
+      "icon": "🌻",
+      "nameUrdu": "سورج مکھی کا تیل",
+      "image": "assets/catalog-images/sunflower-oil-43d621.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mustard Oil (Sarson) 1 Litre",
+      "unit": "litre",
+      "price": 480,
+      "icon": "🫗",
+      "nameUrdu": "سرسوں کا تیل",
+      "image": "assets/catalog-images/mustard-oil-cb0741.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Olive Oil 500ml",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🫒",
+      "nameUrdu": "زیتون کا تیل",
+      "image": "assets/catalog-images/olive-oil-b35a8b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Desi Ghee 1kg",
+      "unit": "kg",
+      "price": 2200,
+      "icon": "🧈",
+      "nameUrdu": "دیسی گھی",
+      "image": "assets/catalog-images/desi-ghee-0c2de9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fortified Cooking Oil 1 Litre",
+      "unit": "litre",
+      "price": 540,
+      "icon": "🫗",
+      "nameUrdu": "کھانے کا تیل",
+      "image": "assets/catalog-images/fortified-cooking-oil-93c97b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cooking Oil 250ml Pouch",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🫗",
+      "nameUrdu": "کھانے کا تیل",
+      "image": "assets/catalog-images/cooking-oil-pouch-fdccf8.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/ghee-cooking-oils-938100.webp"
+   },
+   {
+    "name": "Sugar, Salt & Sweeteners",
+    "items": [
+     {
+      "name": "Sugar 1kg",
+      "unit": "packet",
+      "price": 175,
+      "icon": "🧂",
+      "nameUrdu": "چینی",
+      "image": "assets/catalog-images/sugar-f0dc7a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     },
+     {
+      "name": "Sugar 5kg",
+      "unit": "packet",
+      "price": 860,
+      "icon": "🧂",
+      "nameUrdu": "چینی",
+      "image": "assets/catalog-images/sugar-f0dc7a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     },
+     {
+      "name": "Iodized Salt 800g",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🧂",
+      "nameUrdu": "نمک",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     },
+     {
+      "name": "Rock Salt (Kala Namak) 200g",
+      "unit": "packet",
+      "price": 90,
+      "icon": "🧂",
+      "nameUrdu": "کالا نمک",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     },
+     {
+      "name": "Pink Himalayan Salt 500g",
+      "unit": "packet",
+      "price": 260,
+      "icon": "🧂",
+      "nameUrdu": "پہاڑی نمک",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     },
+     {
+      "name": "Brown Sugar (Shakkar) 1kg",
+      "unit": "kg",
+      "price": 260,
+      "icon": "🟤",
+      "nameUrdu": "شکر",
+      "image": "assets/catalog-images/brown-sugar-911cc6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     },
+     {
+      "name": "Gur (Jaggery) 1kg",
+      "unit": "kg",
+      "price": 320,
+      "icon": "🟫",
+      "nameUrdu": "گڑ",
+      "image": "assets/catalog-images/gur-bee4eb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     },
+     {
+      "name": "Honey 250g",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🍯",
+      "nameUrdu": "شہد",
+      "image": "assets/catalog-images/honey-250g-b45dc0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathilde Langevin",
+       "profileUrl": "https://unsplash.com/@mathildelangevin",
+       "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Q5xjxSfs1Lk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1610219171722-87b3f4170557?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3VnYXIlMjBhbmQlMjBzYWx0JTIwYm93bHN8ZW58MXx8fHwxNzkyMjU1NDkzfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Mathilde Langevin",
+     "profileUrl": "https://unsplash.com/@mathildelangevin",
+     "photoUrl": "https://unsplash.com/photos/white-ceramic-mugs-on-white-table-Q5xjxSfs1Lk",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Tea & Beverages",
+    "items": [
+     {
+      "name": "Tapal Danedar Tea 475g",
+      "unit": "packet",
+      "price": 1150,
+      "icon": "🍵",
+      "nameUrdu": "چائے",
+      "image": "assets/catalog-images/tea-beverages-272673.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Tapal Danedar Tea 190g",
+      "unit": "packet",
+      "price": 480,
+      "icon": "🍵",
+      "nameUrdu": "چائے",
+      "image": "assets/catalog-images/tea-beverages-272673.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Lipton Yellow Label 475g",
+      "unit": "packet",
+      "price": 1180,
+      "icon": "🍵",
+      "nameUrdu": "چائے",
+      "image": "assets/catalog-images/tea-beverages-272673.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Supreme Tea 475g",
+      "unit": "packet",
+      "price": 1080,
+      "icon": "🍵",
+      "nameUrdu": "چائے",
+      "image": "assets/catalog-images/tea-beverages-272673.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Vital Tea 450g",
+      "unit": "packet",
+      "price": 1050,
+      "icon": "🍵",
+      "nameUrdu": "چائے",
+      "image": "assets/catalog-images/tea-beverages-272673.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Tetley Tea Bags 100ct",
+      "unit": "box",
+      "price": 950,
+      "icon": "🍵",
+      "nameUrdu": "چائے",
+      "image": "assets/catalog-images/tea-beverages-272673.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Green Tea (Kahwa) 250g",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🍃",
+      "nameUrdu": "کہوہ",
+      "image": "assets/catalog-images/green-tea-250g-da6245.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Milk Powder 1kg (Nido)",
+      "unit": "packet",
+      "price": 2450,
+      "icon": "🥛",
+      "nameUrdu": "دودھ",
+      "image": "assets/catalog-images/milk-powder-d52eae.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Milk Powder 400g",
+      "unit": "packet",
+      "price": 1050,
+      "icon": "🥛",
+      "nameUrdu": "دودھ",
+      "image": "assets/catalog-images/tea-beverages-272673.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Rooh Afza 800ml",
+      "unit": "piece",
+      "price": 520,
+      "icon": "🥤",
+      "nameUrdu": "روح افزا",
+      "image": "assets/catalog-images/rooh-afza-419e12.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rooh Afza 1500ml",
+      "unit": "piece",
+      "price": 890,
+      "icon": "🥤",
+      "nameUrdu": "روح افزا",
+      "image": "assets/catalog-images/rooh-afza-419e12.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tang Orange 1kg",
+      "unit": "packet",
+      "price": 1150,
+      "icon": "🍊",
+      "nameUrdu": "ٹینگ",
+      "image": "assets/catalog-images/tang-orange-3fddeb.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/tea-beverages-272673.webp"
+   },
+   {
+    "name": "Spices & Masalas",
+    "items": [
+     {
+      "name": "Red Chilli Powder 200g",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🌶️",
+      "nameUrdu": "لال مرچ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Whole Red Chillies 250g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🌶️",
+      "nameUrdu": "ثابت لال مرچ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Turmeric Powder (Haldi) 200g",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🟡",
+      "nameUrdu": "ہلدی",
+      "image": "assets/catalog-images/turmeric-powder-200g-d0e766.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA"
+     },
+     {
+      "name": "Coriander Powder (Dhania) 200g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🌿",
+      "nameUrdu": "دھنیا",
+      "image": "assets/catalog-images/coriander-powder-200g-5fb064.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591272216626-b09e38519371?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Z3JvdW5kJTIwc3BpY2UlMjBwb3dkZXIlMjBib3dsfGVufDF8fHx8MTc5MjI1NTUxN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Merve Sehirli Nasir",
+       "profileUrl": "https://unsplash.com/@32steps",
+       "photoUrl": "https://unsplash.com/photos/assorted-spices-in-clear-glass-containers-dSbUXPQ8Sm8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/dSbUXPQ8Sm8/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Z3JvdW5kJTIwc3BpY2UlMjBwb3dkZXIlMjBib3dsfGVufDF8fHx8MTc5MjI1NTUxN3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cumin Seeds (Zeera) 100g",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🌱",
+      "nameUrdu": "زیرہ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Black Pepper (Kali Mirch) 100g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "⚫",
+      "nameUrdu": "کالی مرچ",
+      "image": "assets/catalog-images/black-pepper-100g-47488d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA"
+     },
+     {
+      "name": "Garam Masala 100g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🧂",
+      "nameUrdu": "گرم مصالحہ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chicken Masala 50g",
+      "unit": "packet",
+      "price": 130,
+      "icon": "🍗",
+      "nameUrdu": "چکن مصالحہ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Biryani Masala 50g",
+      "unit": "packet",
+      "price": 130,
+      "icon": "🍚",
+      "nameUrdu": "بریانی مصالحہ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Qorma Masala 50g",
+      "unit": "packet",
+      "price": 130,
+      "icon": "🍲",
+      "nameUrdu": "قورمہ مصالحہ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Karahi Masala 50g",
+      "unit": "packet",
+      "price": 130,
+      "icon": "🥘",
+      "nameUrdu": "کڑاہی مصالحہ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chaat Masala 100g",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🧂",
+      "nameUrdu": "چاٹ مصالحہ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Whole Garam Masala Mix 100g",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🧂",
+      "nameUrdu": "ثابت گرم مصالحہ",
+      "image": "assets/catalog-images/whole-garam-masala-mix-1ba19e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA"
+     },
+     {
+      "name": "Green Cardamom (Elaichi) 50g",
+      "unit": "packet",
+      "price": 650,
+      "icon": "💚",
+      "nameUrdu": "الائچی",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cloves (Laung) 50g",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🧂",
+      "nameUrdu": "لونگ",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cinnamon (Darcheeni) 100g",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🟤",
+      "nameUrdu": "دار چینی",
+      "image": "assets/catalog-images/cinnamon-100g-8dc9b1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA"
+     },
+     {
+      "name": "Fennel Seeds (Saunf) 100g",
+      "unit": "packet",
+      "price": 280,
+      "icon": "🌱",
+      "nameUrdu": "سونف",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mustard Seeds (Rai) 100g",
+      "unit": "packet",
+      "price": 160,
+      "icon": "🟡",
+      "nameUrdu": "رائی",
+      "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Anju Ravindranath",
+       "profileUrl": "https://unsplash.com/@anjurnath",
+       "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Nihdo084Yos/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/spices-masalas-4d805d.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U3BpY2VzJTIwJTIwJTIwTWFzYWxhc3xlbnwxfHx8fDE3OTIyNTU1MzN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Anju Ravindranath",
+     "profileUrl": "https://unsplash.com/@anjurnath",
+     "photoUrl": "https://unsplash.com/photos/a-table-topped-with-different-types-of-spices-Nihdo084Yos",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Biscuits & Snacks",
+    "items": [
+     {
+      "name": "Sooper Biscuits (EBM)",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🍪",
+      "nameUrdu": "بسکٹ",
+      "image": "assets/catalog-images/sooper-biscuits-cebd71.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA"
+     },
+     {
+      "name": "Marie Biscuits 1 Pack",
+      "unit": "packet",
+      "price": 110,
+      "icon": "🍪",
+      "nameUrdu": "بسکٹ",
+      "image": "assets/catalog-images/marie-biscuits-a8acdc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA"
+     },
+     {
+      "name": "Candy Biscuits 1 Pack",
+      "unit": "packet",
+      "price": 100,
+      "icon": "🍪",
+      "nameUrdu": "بسکٹ",
+      "image": "assets/catalog-images/candy-biscuits-45dc8e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA"
+     },
+     {
+      "name": "Gluco Biscuits 1 Pack",
+      "unit": "packet",
+      "price": 110,
+      "icon": "🍪",
+      "nameUrdu": "بسکٹ",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1522237825450-a0c44eecddb4?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhY2slMjBvZiUyMGJpc2N1aXRzfGVufDF8fHx8MTc5MjI1NTUyMnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jodie Morgan",
+       "profileUrl": "https://unsplash.com/@twoluckyspoons",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-breads-PAa_MJztyUY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/PAa_MJztyUY/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhY2slMjBvZiUyMGJpc2N1aXRzfGVufDF8fHx8MTc5MjI1NTUyMnww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Zeera Plus Biscuits",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🍪",
+      "nameUrdu": "بسکٹ",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Rio Chocolate Biscuits",
+      "unit": "packet",
+      "price": 130,
+      "icon": "🍩",
+      "nameUrdu": "بسکٹ",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chocolate Chip Cookies 1 Pack",
+      "unit": "packet",
+      "price": 160,
+      "icon": "🍪",
+      "nameUrdu": "بسکٹ",
+      "image": "assets/catalog-images/chocolate-chip-cookies-1abeda.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA"
+     },
+     {
+      "name": "Lays Chips Salted",
+      "unit": "packet",
+      "price": 80,
+      "icon": "🥔",
+      "nameUrdu": "چپس",
+      "image": "assets/catalog-images/lays-chips-salted-c8e503.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA"
+     },
+     {
+      "name": "Kurkure Masala Munch",
+      "unit": "packet",
+      "price": 80,
+      "icon": "🌶️",
+      "nameUrdu": "کرکرے",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Slanty Chips",
+      "unit": "packet",
+      "price": 60,
+      "icon": "🥔",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Nimko Mix 500g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🥜",
+      "nameUrdu": "نمکو",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Salted Peanuts 500g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🥜",
+      "nameUrdu": "مونگ پھلی",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Roasted Chana 500g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🫘",
+      "nameUrdu": "بھنا چنا",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Puffed Rice (Murmura) 250g",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🍚",
+      "nameUrdu": "مرمروں",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Popcorn Kernels 500g",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🍿",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Dry Fruit Mix 500g",
+      "unit": "packet",
+      "price": 1400,
+      "icon": "🥜",
+      "nameUrdu": "ڈرائی فروٹ",
+      "image": "assets/catalog-images/dry-fruit-mix-500g-d552fe.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA"
+     },
+     {
+      "name": "Dates (Khajoor) 500g",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🌴",
+      "nameUrdu": "کھجور",
+      "image": "assets/catalog-images/dates-500g-17095d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA"
+     },
+     {
+      "name": "Almonds (Badam) 500g",
+      "unit": "packet",
+      "price": 1650,
+      "icon": "🌰",
+      "nameUrdu": "بادام",
+      "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/biscuits-snacks-c9b21d.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8QmlzY3VpdHMlMjAlMjAlMjBTbmFja3N8ZW58MXx8fHwxNzkyMjU1NTM2fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Vu Nghi Thai",
+     "profileUrl": "https://unsplash.com/@pvnt",
+     "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Dairy Staples",
+    "items": [
+     {
+      "name": "Milk 1 Litre (Olper's)",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🥛",
+      "nameUrdu": "دودھ",
+      "image": "assets/catalog-images/milk-e89b2c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Milk 1 Litre (Milkpak)",
+      "unit": "packet",
+      "price": 230,
+      "icon": "🥛",
+      "nameUrdu": "دودھ",
+      "image": "assets/catalog-images/milk-e89b2c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Yogurt Cup 500g",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍶",
+      "nameUrdu": "دہی",
+      "image": "assets/catalog-images/dairy-staples-a7a6cc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Butter 200g (Nurpur)",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧈",
+      "nameUrdu": "مکھن",
+      "image": "assets/catalog-images/butter-200g-0e9dae.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cheese Slices 10ct",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🧀",
+      "image": "assets/catalog-images/dairy-staples-a7a6cc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Cream 200ml",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🥛",
+      "nameUrdu": "ملائی",
+      "image": "assets/catalog-images/cream-df7721.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Eggs 1 Dozen",
+      "unit": "dozen",
+      "price": 420,
+      "icon": "🥚",
+      "nameUrdu": "انڈے",
+      "image": "assets/catalog-images/eggs-1-dozen-28e8af.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Eggs Half Dozen",
+      "unit": "dozen",
+      "price": 215,
+      "icon": "🥚",
+      "nameUrdu": "انڈے",
+      "image": "assets/catalog-images/eggs-half-dozen-99e0e8.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/dairy-staples-a7a6cc.webp"
+   },
+   {
+    "name": "Personal Care",
+    "items": [
+     {
+      "name": "Lifebuoy Soap 115g",
+      "unit": "piece",
+      "price": 130,
+      "icon": "🧼",
+      "nameUrdu": "صابن",
+      "image": "assets/catalog-images/personal-care-f390f3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Lux Soap 115g",
+      "unit": "piece",
+      "price": 140,
+      "icon": "🧼",
+      "nameUrdu": "صابن",
+      "image": "assets/catalog-images/personal-care-f390f3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Safeguard Soap 115g",
+      "unit": "piece",
+      "price": 145,
+      "icon": "🧼",
+      "nameUrdu": "صابن",
+      "image": "assets/catalog-images/personal-care-f390f3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Dettol Soap 115g",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🧼",
+      "nameUrdu": "صابن",
+      "image": "assets/catalog-images/personal-care-f390f3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Capri Soap 115g",
+      "unit": "piece",
+      "price": 135,
+      "icon": "🧼",
+      "nameUrdu": "صابن",
+      "image": "assets/catalog-images/personal-care-f390f3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Surf Excel Washing Powder 1kg",
+      "unit": "packet",
+      "price": 520,
+      "icon": "🧺",
+      "nameUrdu": "سرف",
+      "image": "assets/catalog-images/personal-care-f390f3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Detergent Bar (Bonux)",
+      "unit": "piece",
+      "price": 110,
+      "icon": "🧼",
+      "nameUrdu": "صابن",
+      "image": "assets/catalog-images/detergent-bar-6fba3f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Shampoo Sachet (Sunsilk)",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🧴",
+      "nameUrdu": "شیمپو",
+      "image": "assets/catalog-images/shampoo-sachet-9402ec.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Shampoo 400ml (Clear)",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🧴",
+      "nameUrdu": "شیمپو",
+      "image": "assets/catalog-images/shampoo-2fb722.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Toothpaste (Colgate 140g)",
+      "unit": "piece",
+      "price": 420,
+      "icon": "🪥",
+      "nameUrdu": "ٹوتھ پیسٹ",
+      "image": "assets/catalog-images/toothpaste-ac40b6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Toothbrush (Oral-B)",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🪥",
+      "nameUrdu": "ٹوتھ برش",
+      "image": "assets/catalog-images/toothbrush-b10b61.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Oil 200ml (Amla)",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧴",
+      "nameUrdu": "تیل",
+      "image": "assets/catalog-images/hair-oil-v2-936a9a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1667242003572-96caaf8ac5c4?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8aGFpciUyMG9pbCUyMGJvdHRsZXxlbnwxfHx8fDE3OTIyNTU1MjB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Lupan",
+       "profileUrl": "https://unsplash.com/@luandmario",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-liquor-coE-z7_L2xU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/coE-z7_L2xU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8aGFpciUyMG9pbCUyMGJvdHRsZXxlbnwxfHx8fDE3OTIyNTU1MjB8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Coconut Oil 200ml",
+      "unit": "piece",
+      "price": 480,
+      "icon": "🥥",
+      "nameUrdu": "ناریل کا تیل",
+      "image": "assets/catalog-images/coconut-oil-df5cda.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Talcum Powder 200g",
+      "unit": "piece",
+      "price": 420,
+      "icon": "🧴",
+      "nameUrdu": "پاؤڈر",
+      "image": "assets/catalog-images/personal-care-f390f3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Face Cream (Fair & Lovely)",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧴",
+      "nameUrdu": "کریم",
+      "image": "assets/catalog-images/face-cream-v2-a66303.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1763503839418-2b45c3d7a3c3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFjZSUyMGNyZWFtJTIwamFyfGVufDF8fHx8MTc5MjI1NTUyM3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Eveling Salazar",
+       "profileUrl": "https://unsplash.com/@eve__3d",
+       "photoUrl": "https://unsplash.com/photos/a-jar-of-white-cream-floats-above-a-rock-01YhA5XDDLk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/01YhA5XDDLk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFjZSUyMGNyZWFtJTIwamFyfGVufDF8fHx8MTc5MjI1NTUyM3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Shaving Blades Pack (7 O'Clock)",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🪒",
+      "nameUrdu": "بلیڈ",
+      "image": "assets/catalog-images/shaving-blades-708b12.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Diana Light",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/personal-care-f390f3.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Diana Light",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-rolling-pin-pBBxMUCgwuU",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Household Cleaning",
+    "items": [
+     {
+      "name": "Dish Soap Bar (Vim)",
+      "unit": "piece",
+      "price": 130,
+      "icon": "🍽️",
+      "nameUrdu": "برتن کا صابن",
+      "image": "assets/catalog-images/dish-soap-bar-c01d54.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Dishwashing Liquid 500ml",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧽",
+      "nameUrdu": "برتن دھونے کا صابن",
+      "image": "assets/catalog-images/dishwashing-liquid-c98cfc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Phenyl 1 Litre",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🧴",
+      "nameUrdu": "فینائل",
+      "image": "assets/catalog-images/phenyl-a44c3a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Bleach 1 Litre",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🧴",
+      "nameUrdu": "بلیچ",
+      "image": "assets/catalog-images/bleach-v2-558bb7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Toilet Cleaner 725ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🚽",
+      "image": "assets/catalog-images/toilet-cleaner-34b59a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Vim Bar Refill",
+      "unit": "piece",
+      "price": 95,
+      "icon": "🍽️",
+      "nameUrdu": "برتن کا صابن",
+      "image": "assets/catalog-images/household-cleaning-1a05f5.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Scrub Pad (Pack of 3)",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🧽",
+      "nameUrdu": "سکرب",
+      "image": "assets/catalog-images/scrub-pad-731232.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Broom (Phool Jharu)",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧹",
+      "nameUrdu": "جھاڑو",
+      "image": "assets/catalog-images/broom-86f98f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Mop (Pochha)",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🧹",
+      "nameUrdu": "پوچھا",
+      "image": "assets/catalog-images/mop-v2-746c84.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Duster Cloth (Pack of 3)",
+      "unit": "packet",
+      "price": 200,
+      "icon": "🧵",
+      "nameUrdu": "ڈسٹر",
+      "image": "assets/catalog-images/duster-cloth-3f26e1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1612800317101-ed7de737b36f?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhY2slMjBvZiUyMGNsZWFuaW5nJTIwY2xvdGhzfGVufDF8fHx8MTc5MjI1NTUxNnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sven Brandsma",
+       "profileUrl": "https://unsplash.com/@seffen99",
+       "photoUrl": "https://unsplash.com/photos/blue-denim-textile-on-black-table-rtDTC6b2-RY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/rtDTC6b2-RY/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhY2slMjBvZiUyMGNsZWFuaW5nJTIwY2xvdGhzfGVufDF8fHx8MTc5MjI1NTUxNnww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Garbage Bags (Roll)",
+      "unit": "packet",
+      "price": 250,
+      "icon": "🗑️",
+      "nameUrdu": "کچرے کی تھیلی",
+      "image": "assets/catalog-images/garbage-bags-281bcc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Incense Sticks (Agarbatti)",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🕯️",
+      "nameUrdu": "اگربتی",
+      "image": "assets/catalog-images/incense-sticks-cce35d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Mosquito Coil (Pack)",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🦟",
+      "nameUrdu": "مچھر کی اگربتی",
+      "image": "assets/catalog-images/mosquito-coil-3abc3b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Matchbox (Pack of 10)",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🔥",
+      "nameUrdu": "ماچس",
+      "image": "assets/catalog-images/matchbox-62908d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Candle (Pack of 6)",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🕯️",
+      "nameUrdu": "موم بتی",
+      "image": "assets/catalog-images/candle-e966b2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Naphthalene Balls 200g",
+      "unit": "packet",
+      "price": 150,
+      "icon": "⚪",
+      "nameUrdu": "نفتھالین",
+      "image": "assets/catalog-images/household-cleaning-1a05f5.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Air Freshener Spray",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🌸",
+      "image": "assets/catalog-images/air-freshener-spray-756e40.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     },
+     {
+      "name": "Shoe Polish Black",
+      "unit": "piece",
+      "price": 180,
+      "icon": "👞",
+      "nameUrdu": "جوتوں کی پالش",
+      "image": "assets/catalog-images/shoe-polish-black-fff2d6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "PuroClean of Fort Worth",
+       "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+       "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dc38HdQR1M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA"
+     }
+    ],
+    "image": "assets/catalog-images/household-cleaning-1a05f5.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SG91c2Vob2xkJTIwQ2xlYW5pbmd8ZW58MXx8fHwxNzkyMjU1NTM1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "PuroClean of Fort Worth",
+     "profileUrl": "https://unsplash.com/@purocleanoffortworth",
+     "photoUrl": "https://unsplash.com/photos/a-person-in-yellow-gloves-and-blue-gloves-cleaning-a-floor--dc38HdQR1M",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Supermarket & Grocery",
+  "icon": "🛒",
+  "categories": [
+   {
+    "name": "Breakfast & Cereals",
+    "items": [
+     {
+      "name": "Weetabix Cereal 500g",
+      "unit": "box",
+      "price": 1450,
+      "icon": "🥣",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Corn Flakes 500g",
+      "unit": "box",
+      "price": 1150,
+      "icon": "🌽",
+      "nameUrdu": "کارن فلیکس",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Oats 500g (Quaker)",
+      "unit": "packet",
+      "price": 750,
+      "icon": "🥣",
+      "nameUrdu": "جو کا دلیہ",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Milo 400g",
+      "unit": "packet",
+      "price": 1250,
+      "icon": "🍫",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Nutella 350g",
+      "unit": "piece",
+      "price": 1650,
+      "icon": "🍫",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Strawberry Jam 500g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍓",
+      "nameUrdu": "مربہ",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Honey 500g",
+      "unit": "piece",
+      "price": 1650,
+      "icon": "🍯",
+      "nameUrdu": "شہد",
+      "image": "assets/catalog-images/honey-500g-ef32f1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Peanut Butter 350g",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🥜",
+      "nameUrdu": "مونگ پھلی کا مکھن",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Pancake Mix 500g",
+      "unit": "packet",
+      "price": 950,
+      "icon": "🥞",
+      "image": "assets/catalog-images/breakfast-cereals-7317b4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Whole Wheat Bread Slices",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🍞",
+      "nameUrdu": "ڈبل روٹی",
+      "image": "assets/catalog-images/whole-wheat-bread-slices-da2c4e.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/breakfast-cereals-7317b4.webp"
+   },
+   {
+    "name": "Pasta, Noodles & Canned",
+    "items": [
+     {
+      "name": "Spaghetti 500g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🍝",
+      "image": "assets/catalog-images/spaghetti-500g-54447f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Macaroni 500g",
+      "unit": "packet",
+      "price": 360,
+      "icon": "🍝",
+      "nameUrdu": "میکرونی",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Maggi 2-Min Noodles (12 pack)",
+      "unit": "packet",
+      "price": 720,
+      "icon": "🍜",
+      "nameUrdu": "نوڈلز",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Knorr Chicken Noodles (Pack)",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🍜",
+      "nameUrdu": "نوڈلز",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Chicken Soup Mix (Shan)",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🍲",
+      "nameUrdu": "سوپ",
+      "image": "assets/catalog-images/chicken-soup-mix-d6f3ce.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Canned Tuna 170g",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🐟",
+      "nameUrdu": "ٹونا مچھلی",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Canned Mushrooms 400g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍄",
+      "nameUrdu": "مشروم",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Sweet Corn Can 400g",
+      "unit": "piece",
+      "price": 480,
+      "icon": "🌽",
+      "nameUrdu": "مکئی",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Baked Beans 400g",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🫘",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Tomato Paste 400g",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🍅",
+      "nameUrdu": "ٹماٹر پیسٹ",
+      "image": "assets/catalog-images/tomato-paste-400g-1a11e1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Coconut Milk 400ml",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🥥",
+      "nameUrdu": "ناریل کا دودھ",
+      "image": "assets/catalog-images/coconut-milk-ea2abb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     },
+     {
+      "name": "Canned Chickpeas 400g",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🫘",
+      "nameUrdu": "چنے",
+      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fabian Kleiser",
+       "profileUrl": "https://unsplash.com/@fabiankleiser",
+       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Fabian Kleiser",
+     "profileUrl": "https://unsplash.com/@fabiankleiser",
+     "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Sauces, Spreads & Condiments",
+    "items": [
+     {
+      "name": "Ketchup 1kg (National)",
+      "unit": "piece",
+      "price": 520,
+      "icon": "🍅",
+      "image": "assets/catalog-images/ketchup-24c60f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Mayonnaise 500ml",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🥚",
+      "image": "assets/catalog-images/mayonnaise-d3f1c2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "BBQ Sauce 500ml",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍖",
+      "image": "assets/catalog-images/bbq-sauce-5fd122.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Soy Sauce 500ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍶",
+      "image": "assets/catalog-images/soy-sauce-c46e8e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chilli Garlic Sauce 500g",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🌶️",
+      "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mustard Paste 200g",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🟡",
+      "nameUrdu": "سرسوں پیسٹ",
+      "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Vinegar 500ml",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🫗",
+      "nameUrdu": "سرکہ",
+      "image": "assets/catalog-images/vinegar-7cc9d3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Mixed Pickles 1kg",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🥒",
+      "nameUrdu": "اچار",
+      "image": "assets/catalog-images/mixed-pickles-842edd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Mango Pickle 500g",
+      "unit": "piece",
+      "price": 480,
+      "icon": "🥭",
+      "nameUrdu": "آم کا اچار",
+      "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mint Chutney 250g",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🌿",
+      "nameUrdu": "پودینے کی چٹنی",
+      "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Pizza Sauce 400g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍕",
+      "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Garlic Paste 250g",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧄",
+      "nameUrdu": "لہسن کا پیسٹ",
+      "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Ginger Garlic Paste 500g",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🧄",
+      "nameUrdu": "ادرک لہسن پیسٹ",
+      "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Salt & Pepper Grinder Set",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🧂",
+      "nameUrdu": "نمک مرچ",
+      "image": "assets/catalog-images/salt-pepper-grinder-d2b5a0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/sauces-spreads-condiments-33281b.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1741519301128-8426ea15d03e?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Zoshua Colah",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/hot-sauce-bottles-line-a-store-shelf-MYbwccBN2-Q",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Frozen Foods",
+    "items": [
+     {
+      "name": "Frozen Parathas 20ct",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🫓",
+      "nameUrdu": "پراٹھے",
+      "image": "assets/catalog-images/frozen-foods-0a8523.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Frozen Samosas 12ct",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🥟",
+      "nameUrdu": "سموسے",
+      "image": "assets/catalog-images/frozen-foods-0a8523.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Chicken Nuggets 1kg",
+      "unit": "packet",
+      "price": 1450,
+      "icon": "🍗",
+      "image": "assets/catalog-images/chicken-nuggets-ded40c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Frozen Shami Kabab 12ct",
+      "unit": "packet",
+      "price": 750,
+      "icon": "🥙",
+      "nameUrdu": "شامی کباب",
+      "image": "assets/catalog-images/frozen-foods-0a8523.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Frozen Seekh Kabab 8ct",
+      "unit": "packet",
+      "price": 950,
+      "icon": "🍢",
+      "nameUrdu": "سیخ کباب",
+      "image": "assets/catalog-images/frozen-foods-0a8523.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Frozen French Fries 1kg",
+      "unit": "packet",
+      "price": 750,
+      "icon": "🍟",
+      "image": "assets/catalog-images/frozen-french-fries-18d4e9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Frozen Peas 500g",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🫛",
+      "nameUrdu": "مٹر",
+      "image": "assets/catalog-images/frozen-foods-0a8523.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Frozen Mixed Vegetables 1kg",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🥦",
+      "nameUrdu": "سبزیاں",
+      "image": "assets/catalog-images/frozen-mixed-vegetables-143462.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Frozen Spring Rolls 12ct",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🥠",
+      "image": "assets/catalog-images/frozen-foods-0a8523.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Ice Cream 1 Litre",
+      "unit": "packet",
+      "price": 950,
+      "icon": "🍨",
+      "nameUrdu": "آئس کریم",
+      "image": "assets/catalog-images/ice-cream-4905f6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kulfi 1 Litre",
+      "unit": "packet",
+      "price": 750,
+      "icon": "🍦",
+      "nameUrdu": "قلفی",
+      "image": "assets/catalog-images/kulfi-763d4f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Frozen Pizza 1ct",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🍕",
+      "image": "assets/catalog-images/frozen-foods-0a8523.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/frozen-foods-0a8523.webp"
+   },
+   {
+    "name": "Baby Care & Food",
+    "items": [
+     {
+      "name": "Cerelac Wheat 400g",
+      "unit": "box",
+      "price": 1350,
+      "icon": "👶",
+      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Baby Milk Formula 400g",
+      "unit": "box",
+      "price": 2450,
+      "icon": "🍼",
+      "nameUrdu": "بچوں کا دودھ",
+      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Pampers Active Baby (Pack)",
+      "unit": "packet",
+      "price": 1650,
+      "icon": "👶",
+      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Baby Wipes 80ct",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🧻",
+      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Baby Shampoo 200ml",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🧴",
+      "nameUrdu": "بچوں کا شیمپو",
+      "image": "assets/catalog-images/baby-shampoo-7f1b47.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Baby Lotion 200ml",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-lotion-bc427e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Baby Oil 200ml",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🧴",
+      "nameUrdu": "بچوں کا تیل",
+      "image": "assets/catalog-images/baby-oil-f020c6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Diaper Rash Cream",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Feeding Bottle 250ml",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🍼",
+      "nameUrdu": "فیڈر",
+      "image": "assets/catalog-images/feeding-bottle-2f7892.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Baby Rusks 250g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🍪",
+      "nameUrdu": "بچوں کے رس",
+      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/baby-care-food-ab4d57.webp"
+   },
+   {
+    "name": "Packaged Dairy & Beverages",
+    "items": [
+     {
+      "name": "Flavoured Milk 200ml (Pack of 6)",
+      "unit": "packet",
+      "price": 750,
+      "icon": "🥛",
+      "nameUrdu": "ذائقہ دار دودھ",
+      "image": "assets/catalog-images/flavoured-milk-f0d4b2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chocolate Milk 1 Litre",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🍫",
+      "nameUrdu": "چاکلیٹ دودھ",
+      "image": "assets/catalog-images/chocolate-milk-3de281.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Buttermilk (Chaas) 500ml",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🥛",
+      "nameUrdu": "چھاس",
+      "image": "assets/catalog-images/buttermilk-814935.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Yogurt Drink (Lassi) 500ml",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍶",
+      "nameUrdu": "لسی",
+      "image": "assets/catalog-images/yogurt-drink-a01e62.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Coca Cola 1.5 Litre",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🥤",
+      "image": "assets/catalog-images/coca-cola-a4afb0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pepsi 1.5 Litre",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🥤",
+      "image": "assets/catalog-images/pepsi-4d2ea3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sprite 1.5 Litre",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🥤",
+      "image": "assets/catalog-images/sprite-51f2b7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pakola 1.5 Litre",
+      "unit": "piece",
+      "price": 240,
+      "icon": "🥤",
+      "image": "assets/catalog-images/pakola-aaa2b2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mineral Water 1.5 Litre",
+      "unit": "piece",
+      "price": 180,
+      "icon": "💧",
+      "nameUrdu": "پانی",
+      "image": "assets/catalog-images/mineral-water-f69dcc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mineral Water 5 Litre",
+      "unit": "piece",
+      "price": 450,
+      "icon": "💧",
+      "nameUrdu": "پانی",
+      "image": "assets/catalog-images/mineral-water-f69dcc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mango Juice 1 Litre",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🥭",
+      "nameUrdu": "آم کا رس",
+      "image": "assets/catalog-images/mango-juice-358e5d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Orange Juice 1 Litre",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🍊",
+      "nameUrdu": "سنگترے کا رس",
+      "image": "assets/catalog-images/orange-juice-245c8f.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/packaged-dairy-beverages-b82a2b.webp"
+   },
+   {
+    "name": "Cleaning & Laundry Brands",
+    "items": [
+     {
+      "name": "Ariel Detergent 1kg",
+      "unit": "packet",
+      "price": 580,
+      "icon": "🧺",
+      "image": "assets/catalog-images/ariel-detergent-950eb6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Surf Excel 1kg",
+      "unit": "packet",
+      "price": 520,
+      "icon": "🧺",
+      "image": "assets/catalog-images/surf-excel-v2-f09a9b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Brite Detergent 1kg",
+      "unit": "packet",
+      "price": 480,
+      "icon": "🧺",
+      "image": "assets/catalog-images/cleaning-laundry-brands-d315af.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Rin Bar 250g",
+      "unit": "piece",
+      "price": 110,
+      "icon": "🧼",
+      "image": "assets/catalog-images/cleaning-laundry-brands-d315af.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Fabric Softener 1 Litre",
+      "unit": "piece",
+      "price": 750,
+      "icon": "👕",
+      "image": "assets/catalog-images/fabric-softener-48b466.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dettol Antiseptic 500ml",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🧴",
+      "image": "assets/catalog-images/dettol-antiseptic-v2-55c7cf.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dettol Handwash 200ml",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🧴",
+      "nameUrdu": "ہینڈ واش",
+      "image": "assets/catalog-images/cleaning-laundry-brands-d315af.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Safeguard Handwash 200ml",
+      "unit": "piece",
+      "price": 420,
+      "icon": "🧴",
+      "nameUrdu": "ہینڈ واش",
+      "image": "assets/catalog-images/cleaning-laundry-brands-d315af.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Floor Cleaner 1 Litre",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧹",
+      "nameUrdu": "فرش صاف",
+      "image": "assets/catalog-images/floor-cleaner-738cec.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Glass Cleaner 500ml",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🪟",
+      "nameUrdu": "شیشہ صاف",
+      "image": "assets/catalog-images/glass-cleaner-f8528a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dish Bar (Vim) 200g",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/cleaning-laundry-brands-d315af.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Steel Wool Pads (Pack)",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🧽",
+      "image": "assets/catalog-images/steel-wool-pads-568a31.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Tissues Box 200ct",
+      "unit": "box",
+      "price": 350,
+      "icon": "🧻",
+      "nameUrdu": "ٹشو",
+      "image": "assets/catalog-images/cleaning-laundry-brands-d315af.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Kitchen Towel Roll",
+      "unit": "piece",
+      "price": 420,
+      "icon": "🧻",
+      "nameUrdu": "کچن ٹاول",
+      "image": "assets/catalog-images/kitchen-towel-roll-v2-25b441.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sufyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/cleaning-laundry-brands-d315af.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1649005011845-ef225c89da86?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Sufyan",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-white-plastic-bottle-with-a-blue-cap-9wCOqpBJRHI",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Pet Food & Household Misc",
+    "items": [
+     {
+      "name": "Dog Food 1kg (Pedigree)",
+      "unit": "packet",
+      "price": 1650,
+      "icon": "🐕",
+      "nameUrdu": "کتوں کا کھانا",
+      "image": "assets/catalog-images/dog-food-6d32dd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Cat Food 1kg (Whiskas)",
+      "unit": "packet",
+      "price": 1750,
+      "icon": "🐈",
+      "nameUrdu": "بلیوں کا کھانا",
+      "image": "assets/catalog-images/cat-food-146ea3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Bird Seed Mix 1kg",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🐦",
+      "nameUrdu": "پرندوں کا دانہ",
+      "image": "assets/catalog-images/bird-seed-mix-b243d5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Batteries AA (Pack of 4)",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🔋",
+      "image": "assets/catalog-images/batteries-aa-cdf3b7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "LED Bulb 12W",
+      "unit": "piece",
+      "price": 450,
+      "icon": "💡",
+      "nameUrdu": "بلب",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Extension Board 4-Socket",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🔌",
+      "image": "assets/catalog-images/extension-board-4-socket-933c98.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Folding Umbrella",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "☂️",
+      "nameUrdu": "چھتری",
+      "image": "assets/catalog-images/folding-umbrella-bc46f7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Reusable Shopping Bag",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🛍️",
+      "nameUrdu": "تھیلی",
+      "image": "assets/catalog-images/reusable-shopping-bag-2dd56c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Aluminium Foil 30m",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🥡",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Cling Wrap 30m",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🫗",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Paper Plates (Pack of 25)",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🍽️",
+      "nameUrdu": "کاغذ کی پلیٹیں",
+      "image": "assets/catalog-images/paper-plates-d940f2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Disposable Cups (Pack of 50)",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🥤",
+      "nameUrdu": "ڈسپوزایبل کپ",
+      "image": "assets/catalog-images/disposable-cups-ce6c31.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Instant Coffee 100g",
+      "unit": "packet",
+      "price": 1150,
+      "icon": "☕",
+      "nameUrdu": "کافی",
+      "image": "assets/catalog-images/instant-coffee-100g-91aec3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Green Tea Bags 50ct",
+      "unit": "box",
+      "price": 650,
+      "icon": "🍃",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Energy Drink (Sting) 500ml",
+      "unit": "piece",
+      "price": 180,
+      "icon": "⚡",
+      "image": "assets/catalog-images/energy-drink-be5ce0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     },
+     {
+      "name": "Diet Soda 1.5 Litre",
+      "unit": "piece",
+      "price": 260,
+      "icon": "🥤",
+      "image": "assets/catalog-images/diet-soda-a98084.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "FLOUFFY",
+       "profileUrl": "https://unsplash.com/@theflouffy",
+       "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/-dMO9Dm-gkU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1591946559594-8c6d3b7391eb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGV0JTIwZm9vZCUyMGRvZyUyMGJvd2x8ZW58MXx8fHwxNzkyMjU1NDk0fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "FLOUFFY",
+     "profileUrl": "https://unsplash.com/@theflouffy",
+     "photoUrl": "https://unsplash.com/photos/dog-sitting-by-empty-bowl--dMO9Dm-gkU",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Dairy & Milk Shop",
+  "icon": "🥛",
+  "categories": [
+   {
+    "name": "Fresh Milk",
+    "items": [
+     {
+      "name": "Fresh Cow Milk 1 Litre",
+      "unit": "litre",
+      "price": 180,
+      "icon": "🥛",
+      "nameUrdu": "گائے کا دودھ",
+      "image": "assets/catalog-images/cow-milk-fdca5f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fresh Buffalo Milk 1 Litre",
+      "unit": "litre",
+      "price": 200,
+      "icon": "🥛",
+      "nameUrdu": "بھینس کا دودھ",
+      "image": "assets/catalog-images/buffalo-milk-e12b55.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Toned Milk 1 Litre",
+      "unit": "litre",
+      "price": 190,
+      "icon": "🥛",
+      "nameUrdu": "ٹونڈ دودھ",
+      "image": "assets/catalog-images/toned-milk-1e17c7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Skimmed Milk 1 Litre",
+      "unit": "litre",
+      "price": 170,
+      "icon": "🥛",
+      "nameUrdu": "بغیر ملائی دودھ",
+      "image": "assets/catalog-images/skimmed-milk-c6628e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Full Cream Milk Pouch 1 Litre",
+      "unit": "packet",
+      "price": 210,
+      "icon": "🥛",
+      "nameUrdu": "دودھ",
+      "image": "assets/catalog-images/fresh-milk-46310d.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Fresh Milk Half Litre",
+      "unit": "litre",
+      "price": 95,
+      "icon": "🥛",
+      "nameUrdu": "دودھ",
+      "image": "assets/catalog-images/milk-half-litre-0872ce.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Boiled Milk (Ready) 1 Litre",
+      "unit": "litre",
+      "price": 190,
+      "icon": "🥛",
+      "nameUrdu": "ابلا دودھ",
+      "image": "assets/catalog-images/boiled-milk-c7eae8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Camel Milk 1 Litre",
+      "unit": "litre",
+      "price": 350,
+      "icon": "🐪",
+      "nameUrdu": "اونٹ کا دودھ",
+      "image": "assets/catalog-images/camel-milk-d8ae09.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/fresh-milk-46310d.webp"
+   },
+   {
+    "name": "Yogurt & Curd",
+    "items": [
+     {
+      "name": "Fresh Dahi 1kg",
+      "unit": "kg",
+      "price": 320,
+      "icon": "🍶",
+      "nameUrdu": "دہی",
+      "image": "assets/catalog-images/dahi-v2-7436e6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1571212515416-fef01fc43637?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Ym93bCUyMG9mJTIweW9ndXJ0fGVufDF8fHx8MTc5MjI1NTUyMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "micheile henderson",
+       "profileUrl": "https://unsplash.com/@micheile",
+       "photoUrl": "https://unsplash.com/photos/a-bowl-of-yogurt-with-a-spoon-in-it-NFHeBysjCTI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/NFHeBysjCTI/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Ym93bCUyMG9mJTIweW9ndXJ0fGVufDF8fHx8MTc5MjI1NTUyMXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Fresh Dahi 500g",
+      "unit": "piece",
+      "price": 165,
+      "icon": "🍶",
+      "nameUrdu": "دہی",
+      "image": "assets/catalog-images/yogurt-curd-3dedcb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Sweet Yogurt 1kg",
+      "unit": "kg",
+      "price": 340,
+      "icon": "🍶",
+      "nameUrdu": "میٹھا دہی",
+      "image": "assets/catalog-images/sweet-yogurt-2bf5dd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Greek Yogurt 400g",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍶",
+      "nameUrdu": "یونانی دہی",
+      "image": "assets/catalog-images/yogurt-curd-3dedcb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Flavoured Yogurt 200g",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍶",
+      "nameUrdu": "ذائقہ دار دہی",
+      "image": "assets/catalog-images/yogurt-curd-3dedcb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Raita Mix 500g",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🍶",
+      "nameUrdu": "رائتہ",
+      "image": "assets/catalog-images/yogurt-curd-3dedcb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Buttermilk (Chaas) 1 Litre",
+      "unit": "litre",
+      "price": 150,
+      "icon": "🥛",
+      "nameUrdu": "چھاس",
+      "image": "assets/catalog-images/buttermilk-814935.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dahi Bara Mix 500g",
+      "unit": "packet",
+      "price": 280,
+      "icon": "🍶",
+      "nameUrdu": "دہی بڑا مکس",
+      "image": "assets/catalog-images/yogurt-curd-3dedcb.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/yogurt-curd-3dedcb.webp"
+   },
+   {
+    "name": "Butter, Cream & Cheese",
+    "items": [
+     {
+      "name": "White Butter 500g",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🧈",
+      "nameUrdu": "سفید مکھن",
+      "image": "assets/catalog-images/white-butter-500g-643496.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Salted Butter 250g",
+      "unit": "piece",
+      "price": 480,
+      "icon": "🧈",
+      "nameUrdu": "نمکین مکھن",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Desi Ghee 500g",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🧈",
+      "nameUrdu": "دیسی گھی",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Desi Ghee 1kg",
+      "unit": "kg",
+      "price": 2250,
+      "icon": "🧈",
+      "nameUrdu": "دیسی گھی",
+      "image": "assets/catalog-images/desi-ghee-0c2de9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fresh Cream (Malai) 500g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🥛",
+      "nameUrdu": "ملائی",
+      "image": "assets/catalog-images/cream-500g-35e752.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Whipped Cream 250ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍦",
+      "image": "assets/catalog-images/whipped-cream-f3df33.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mozzarella Cheese 500g",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🧀",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Cheddar Cheese 500g",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "🧀",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Cheese Slices 200g",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🧀",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Processed Cheese 400g",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🧀",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Koya (Khoya) 500g",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍮",
+      "nameUrdu": "کھویا",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Kalakand 500g",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🍬",
+      "nameUrdu": "کلاکند",
+      "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/butter-cream-cheese-4e0dab.webp"
+   },
+   {
+    "name": "Paneer & Desserts",
+    "items": [
+     {
+      "name": "Fresh Paneer 500g",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🧀",
+      "nameUrdu": "پنیر",
+      "image": "assets/catalog-images/paneer-500g-b1ca75.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Masala Paneer 500g",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🧀",
+      "nameUrdu": "مصالحہ پنیر",
+      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Rabri 500g",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🍮",
+      "nameUrdu": "ربڑی",
+      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Rasmalai 500g (4pc)",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🍮",
+      "nameUrdu": "رس ملائی",
+      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Kheer Mix 500g",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍚",
+      "nameUrdu": "کھیر",
+      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Gulab Jamun Tin 1kg",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🍩",
+      "nameUrdu": "گلاب جامن",
+      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Barfi Mix 500g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍬",
+      "nameUrdu": "برفی",
+      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Custard Powder 250g",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🍮",
+      "nameUrdu": "کسٹرڈ",
+      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp"
+   },
+   {
+    "name": "Eggs",
+    "items": [
+     {
+      "name": "Farm Eggs 1 Dozen",
+      "unit": "dozen",
+      "price": 420,
+      "icon": "🥚",
+      "nameUrdu": "انڈے",
+      "image": "assets/catalog-images/farm-eggs-1-dozen-ed9fe3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Desi Eggs 1 Dozen",
+      "unit": "dozen",
+      "price": 650,
+      "icon": "🥚",
+      "nameUrdu": "دیسی انڈے",
+      "image": "assets/catalog-images/eggs-9890f0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Duck Eggs Half Dozen",
+      "unit": "dozen",
+      "price": 550,
+      "icon": "🦆",
+      "nameUrdu": "بطخ کے انڈے",
+      "image": "assets/catalog-images/duck-eggs-half-dozen-663147.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Boiled Eggs (Ready, 4pc)",
+      "unit": "piece",
+      "price": 160,
+      "icon": "🥚",
+      "nameUrdu": "ابلے انڈے",
+      "image": "assets/catalog-images/boiled-eggs-b84f34.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/eggs-9890f0.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Fruits & Vegetables",
+  "icon": "🥬",
+  "categories": [
+   {
+    "name": "Vegetables",
+    "items": [
+     {
+      "name": "Tomatoes 1kg",
+      "unit": "kg",
+      "price": 180,
+      "icon": "🍅",
+      "nameUrdu": "ٹماٹر",
+      "image": "assets/catalog-images/tomatoes-748108.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Onions 1kg",
+      "unit": "kg",
+      "price": 150,
+      "icon": "🧅",
+      "nameUrdu": "پیاز",
+      "image": "assets/catalog-images/onions-7810b2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Potatoes 1kg",
+      "unit": "kg",
+      "price": 120,
+      "icon": "🥔",
+      "nameUrdu": "آلو",
+      "image": "assets/catalog-images/potatoes-b1bebf.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Cauliflower 1kg",
+      "unit": "kg",
+      "price": 140,
+      "icon": "🥦",
+      "nameUrdu": "پھول گوبھی",
+      "image": "assets/catalog-images/cauliflower-7ddf79.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Cabbage 1kg",
+      "unit": "kg",
+      "price": 120,
+      "icon": "🥬",
+      "nameUrdu": "بند گوبھی",
+      "image": "assets/catalog-images/cabbage-d846ed.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Okra (Bhindi) 1kg",
+      "unit": "kg",
+      "price": 220,
+      "icon": "🌿",
+      "nameUrdu": "بھنڈی",
+      "image": "assets/catalog-images/okra-85422d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Bitter Gourd (Karela) 1kg",
+      "unit": "kg",
+      "price": 200,
+      "icon": "🥒",
+      "nameUrdu": "کریلا",
+      "image": "assets/catalog-images/bitter-gourd-eee303.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Bottle Gourd (Lauki) 1kg",
+      "unit": "kg",
+      "price": 130,
+      "icon": "🥒",
+      "nameUrdu": "لوکی",
+      "image": "assets/catalog-images/bottle-gourd-7d79f4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Ridge Gourd (Tori) 1kg",
+      "unit": "kg",
+      "price": 160,
+      "icon": "🥒",
+      "nameUrdu": "توری",
+      "image": "assets/catalog-images/ridge-gourd-57e901.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Eggplant (Baingan) 1kg",
+      "unit": "kg",
+      "price": 140,
+      "icon": "🍆",
+      "nameUrdu": "بینگن",
+      "image": "assets/catalog-images/eggplant-b2585b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Green Peas 1kg",
+      "unit": "kg",
+      "price": 260,
+      "icon": "🫛",
+      "nameUrdu": "مٹر",
+      "image": "assets/catalog-images/green-peas-f1b009.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Carrots 1kg",
+      "unit": "kg",
+      "price": 130,
+      "icon": "🥕",
+      "nameUrdu": "گاجر",
+      "image": "assets/catalog-images/carrots-431ff2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Capsicum (Shimla Mirch) 1kg",
+      "unit": "kg",
+      "price": 280,
+      "icon": "🫑",
+      "nameUrdu": "شملہ مرچ",
+      "image": "assets/catalog-images/capsicum-8e45ce.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Green Chillies 250g",
+      "unit": "packet",
+      "price": 80,
+      "icon": "🌶️",
+      "nameUrdu": "ہری مرچ",
+      "image": "assets/catalog-images/vegetables-5d02db.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Ginger (Adrak) 250g",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🫚",
+      "nameUrdu": "ادرک",
+      "image": "assets/catalog-images/vegetables-5d02db.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Garlic (Lehsan) 250g",
+      "unit": "packet",
+      "price": 160,
+      "icon": "🧄",
+      "nameUrdu": "لہسن",
+      "image": "assets/catalog-images/garlic-250g-fe888a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Lemon 1 Dozen",
+      "unit": "dozen",
+      "price": 200,
+      "icon": "🍋",
+      "nameUrdu": "لیموں",
+      "image": "assets/catalog-images/lemon-1-dozen-7ba44c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Coriander Bunch",
+      "unit": "piece",
+      "price": 50,
+      "icon": "🌿",
+      "nameUrdu": "دھنیا",
+      "image": "assets/catalog-images/coriander-bunch-165b93.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Mint Bunch (Podina)",
+      "unit": "piece",
+      "price": 50,
+      "icon": "🌱",
+      "nameUrdu": "پودینہ",
+      "image": "assets/catalog-images/mint-bunch-b3be3b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Green Onion Bunch",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🧅",
+      "nameUrdu": "ہری پیاز",
+      "image": "assets/catalog-images/green-onion-bunch-0cdf77.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "French Beans 1kg",
+      "unit": "kg",
+      "price": 240,
+      "icon": "🫛",
+      "nameUrdu": "فرانسیسی پھلیاں",
+      "image": "assets/catalog-images/french-beans-9e219d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Turnip (Shaljam) 1kg",
+      "unit": "kg",
+      "price": 130,
+      "icon": "🥕",
+      "nameUrdu": "شلجم",
+      "image": "assets/catalog-images/turnip-043a46.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Radish (Mooli) 1kg",
+      "unit": "kg",
+      "price": 120,
+      "icon": "🥕",
+      "nameUrdu": "مولی",
+      "image": "assets/catalog-images/radish-f61051.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Arvi (Taro) 1kg",
+      "unit": "kg",
+      "price": 200,
+      "icon": "🥔",
+      "nameUrdu": "اروی",
+      "image": "assets/catalog-images/arvi-5b241f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Zucchini 1kg",
+      "unit": "kg",
+      "price": 280,
+      "icon": "🥒",
+      "image": "assets/catalog-images/zucchini-17bced.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Corn on Cob (Bhutta) 1pc",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🌽",
+      "nameUrdu": "بھٹا",
+      "image": "assets/catalog-images/corn-on-cob-403553.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA"
+     },
+     {
+      "name": "Sweet Corn Kernels 500g",
+      "unit": "packet",
+      "price": 200,
+      "icon": "🌽",
+      "nameUrdu": "مکئی کے دانے",
+      "image": "assets/catalog-images/vegetables-5d02db.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Broccoli 500g",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🥦",
+      "image": "assets/catalog-images/vegetables-5d02db.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marisol Benitez",
+       "profileUrl": "https://unsplash.com/@marisolbenitez",
+       "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/QvkAQTNj4zk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/vegetables-5d02db.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1579113800032-c38bd7635818?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VmVnZXRhYmxlc3xlbnwxfHx8fDE3OTIyNTU1MjR8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Marisol Benitez",
+     "profileUrl": "https://unsplash.com/@marisolbenitez",
+     "photoUrl": "https://unsplash.com/photos/pile-of-vegetables-QvkAQTNj4zk",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Root & Starchy",
+    "items": [
+     {
+      "name": "Sweet Potato (Shakarkandi) 1kg",
+      "unit": "kg",
+      "price": 180,
+      "icon": "🍠",
+      "nameUrdu": "شکر قندی",
+      "image": "assets/catalog-images/sweet-potato-65a730.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tinda (Round Gourd) 1kg",
+      "unit": "kg",
+      "price": 150,
+      "icon": "🥒",
+      "nameUrdu": "ٹینڈا",
+      "image": "assets/catalog-images/tinda-f34879.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pumpkin (Kadu) 1kg",
+      "unit": "kg",
+      "price": 140,
+      "icon": "🎃",
+      "nameUrdu": "کدو",
+      "image": "assets/catalog-images/pumpkin-423a2a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Parwal (Pointed Gourd) 1kg",
+      "unit": "kg",
+      "price": 180,
+      "icon": "🥒",
+      "image": "assets/catalog-images/parwal-7344d8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Beetroot 1kg",
+      "unit": "kg",
+      "price": 180,
+      "icon": "🫚",
+      "nameUrdu": "چقندر",
+      "image": "assets/catalog-images/beetroot-4a9334.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Lotus Root (Bhein) 500g",
+      "unit": "packet",
+      "price": 260,
+      "icon": "🪷",
+      "nameUrdu": "بھین",
+      "image": "assets/catalog-images/root-starchy-dce8ed.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Cassava (Kachalu) 1kg",
+      "unit": "kg",
+      "price": 200,
+      "icon": "🥔",
+      "nameUrdu": "کچالو",
+      "image": "assets/catalog-images/cassava-675bc0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Yam (Zameen Kand) 1kg",
+      "unit": "kg",
+      "price": 260,
+      "icon": "🍠",
+      "image": "assets/catalog-images/yam-b24cd3.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/root-starchy-dce8ed.webp"
+   },
+   {
+    "name": "Leafy Greens",
+    "items": [
+     {
+      "name": "Spinach (Palak) 1 Bunch",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🥬",
+      "nameUrdu": "پالک",
+      "image": "assets/catalog-images/spinach-1-bunch-6f8866.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mustard Greens (Sarson) 1 Bunch",
+      "unit": "piece",
+      "price": 70,
+      "icon": "🥬",
+      "nameUrdu": "سرسوں کا ساگ",
+      "image": "assets/catalog-images/mustard-greens-1-bunch-b22677.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bathua (Chenopodium) 1 Bunch",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🌿",
+      "nameUrdu": "بتھوا",
+      "image": "assets/catalog-images/leafy-greens-e86a23.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Methi (Fenugreek Leaves) 1 Bunch",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🌿",
+      "nameUrdu": "میتھی",
+      "image": "assets/catalog-images/methi-1-bunch-824ab7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chaulai (Amaranth) 1 Bunch",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🥬",
+      "nameUrdu": "چولائی",
+      "image": "assets/catalog-images/leafy-greens-e86a23.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Lettuce 1 Head",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🥬",
+      "nameUrdu": "سلاد پتا",
+      "image": "assets/catalog-images/lettuce-1-head-6066bd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kale 500g",
+      "unit": "packet",
+      "price": 280,
+      "icon": "🥬",
+      "image": "assets/catalog-images/leafy-greens-e86a23.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Spring Greens Mix 500g",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🥬",
+      "nameUrdu": "مکس ساگ",
+      "image": "assets/catalog-images/leafy-greens-e86a23.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/leafy-greens-e86a23.webp"
+   },
+   {
+    "name": "Fruits",
+    "items": [
+     {
+      "name": "Bananas 1 Dozen",
+      "unit": "dozen",
+      "price": 180,
+      "icon": "🍌",
+      "nameUrdu": "کیلے",
+      "image": "assets/catalog-images/bananas-1-dozen-8261fc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Apples (Shimla) 1kg",
+      "unit": "kg",
+      "price": 320,
+      "icon": "🍎",
+      "nameUrdu": "سیب",
+      "image": "assets/catalog-images/apples-92446c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Oranges (Kinnow) 1 Dozen",
+      "unit": "dozen",
+      "price": 250,
+      "icon": "🍊",
+      "nameUrdu": "کنو",
+      "image": "assets/catalog-images/oranges-1-dozen-v2-c65cf1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Malta Oranges 1 Dozen",
+      "unit": "dozen",
+      "price": 280,
+      "icon": "🍊",
+      "nameUrdu": "مالٹا",
+      "image": "assets/catalog-images/fruits-a36ef4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mangoes (Chaunsa) 1kg",
+      "unit": "kg",
+      "price": 320,
+      "icon": "🥭",
+      "nameUrdu": "آم",
+      "image": "assets/catalog-images/mangoes-041ab4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Mangoes (Anwar Ratol) 1kg",
+      "unit": "kg",
+      "price": 380,
+      "icon": "🥭",
+      "nameUrdu": "آم",
+      "image": "assets/catalog-images/mangoes-041ab4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Guava (Amrood) 1kg",
+      "unit": "kg",
+      "price": 180,
+      "icon": "🍈",
+      "nameUrdu": "امرود",
+      "image": "assets/catalog-images/guava-a09345.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Grapes (Green) 1kg",
+      "unit": "kg",
+      "price": 380,
+      "icon": "🍇",
+      "nameUrdu": "انگور",
+      "image": "assets/catalog-images/grapes-af9d7c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Grapes (Black) 1kg",
+      "unit": "kg",
+      "price": 420,
+      "icon": "🍇",
+      "nameUrdu": "کالے انگور",
+      "image": "assets/catalog-images/grapes-af9d7c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Papaya 1kg",
+      "unit": "kg",
+      "price": 200,
+      "icon": "🍈",
+      "nameUrdu": "پپیتا",
+      "image": "assets/catalog-images/papaya-6098d1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Watermelon 1kg",
+      "unit": "kg",
+      "price": 120,
+      "icon": "🍉",
+      "nameUrdu": "تربوز",
+      "image": "assets/catalog-images/watermelon-9aa80c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Melon (Kharbooza) 1kg",
+      "unit": "kg",
+      "price": 150,
+      "icon": "🍈",
+      "nameUrdu": "خربوزہ",
+      "image": "assets/catalog-images/melon-bc9134.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Pomegranate (Anar) 1kg",
+      "unit": "kg",
+      "price": 420,
+      "icon": "🔴",
+      "nameUrdu": "انار",
+      "image": "assets/catalog-images/pomegranate-50c5e7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Pears (Nashpati) 1kg",
+      "unit": "kg",
+      "price": 280,
+      "icon": "🍐",
+      "nameUrdu": "ناشپاتی",
+      "image": "assets/catalog-images/pears-1be777.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Peaches (Aaru) 1kg",
+      "unit": "kg",
+      "price": 280,
+      "icon": "🍑",
+      "nameUrdu": "آڑو",
+      "image": "assets/catalog-images/peaches-5c1ec6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Plums (Aloo Bukhara) 1kg",
+      "unit": "kg",
+      "price": 320,
+      "icon": "🟣",
+      "nameUrdu": "آلو بخارا",
+      "image": "assets/catalog-images/plums-c2b758.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Cherries 500g",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🍒",
+      "nameUrdu": "چیری",
+      "image": "assets/catalog-images/cherries-500g-974604.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Strawberries 500g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🍓",
+      "image": "assets/catalog-images/fruits-a36ef4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Dates (Ajwa) 500g",
+      "unit": "packet",
+      "price": 1450,
+      "icon": "🌴",
+      "nameUrdu": "عجوہ کھجور",
+      "image": "assets/catalog-images/dates-500g-17095d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Coconut (Whole) 1pc",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🥥",
+      "nameUrdu": "ناریل",
+      "image": "assets/catalog-images/coconut-540e00.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Pineapple 1pc",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🍍",
+      "nameUrdu": "انناس",
+      "image": "assets/catalog-images/pineapple-7855cc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+     },
+     {
+      "name": "Falsa 500g",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🫐",
+      "nameUrdu": "فالسہ",
+      "image": "assets/catalog-images/fruits-a36ef4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Allec Gomes",
+       "profileUrl": "https://unsplash.com/@allecgomes",
+       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/fruits-a36ef4.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Allec Gomes",
+     "profileUrl": "https://unsplash.com/@allecgomes",
+     "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Herbs & Extras",
+    "items": [
+     {
+      "name": "Curry Leaves Bunch",
+      "unit": "piece",
+      "price": 40,
+      "icon": "🌿",
+      "nameUrdu": "کری پتا",
+      "image": "assets/catalog-images/curry-leaves-bunch-a216cd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dried Mint 100g",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🌱",
+      "nameUrdu": "خشک پودینہ",
+      "image": "assets/catalog-images/herbs-extras-c99b6b.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Dried Fenugreek (Kasoori Methi) 100g",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🌿",
+      "nameUrdu": "قصوری میتھی",
+      "image": "assets/catalog-images/herbs-extras-c99b6b.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Tamarind (Imli) 500g",
+      "unit": "packet",
+      "price": 280,
+      "icon": "🟤",
+      "nameUrdu": "املی",
+      "image": "assets/catalog-images/herbs-extras-c99b6b.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/herbs-extras-c99b6b.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Meat & Poultry",
+  "icon": "🍗",
+  "categories": [
+   {
+    "name": "Chicken",
+    "items": [
+     {
+      "name": "Whole Chicken 1kg",
+      "unit": "kg",
+      "price": 620,
+      "icon": "🍗",
+      "nameUrdu": "مرغی",
+      "image": "assets/catalog-images/whole-chicken-4c8e23.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Breast 1kg",
+      "unit": "kg",
+      "price": 780,
+      "icon": "🍗",
+      "image": "assets/catalog-images/chicken-breast-d4b559.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Legs 1kg",
+      "unit": "kg",
+      "price": 680,
+      "icon": "🍗",
+      "image": "assets/catalog-images/chicken-legs-b3dedd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Wings 1kg",
+      "unit": "kg",
+      "price": 720,
+      "icon": "🍗",
+      "image": "assets/catalog-images/chicken-wings-9046fc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Mince (Qeema) 1kg",
+      "unit": "kg",
+      "price": 750,
+      "icon": "🍖",
+      "nameUrdu": "چکن قیمہ",
+      "image": "assets/catalog-images/chicken-mince-2512da.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Liver 500g",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🍗",
+      "nameUrdu": "چکن کلیجی",
+      "image": "assets/catalog-images/chicken-a9514f.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Chicken Gizzard 500g",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🍗",
+      "nameUrdu": "چکن پوٹا",
+      "image": "assets/catalog-images/chicken-a9514f.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Chicken Neck/Back Mix 1kg",
+      "unit": "kg",
+      "price": 420,
+      "icon": "🍗",
+      "nameUrdu": "چکن گردن",
+      "image": "assets/catalog-images/chicken-neck-back-mix-2dd1fc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Desi Chicken 1kg",
+      "unit": "kg",
+      "price": 950,
+      "icon": "🍗",
+      "nameUrdu": "دیسی مرغی",
+      "image": "assets/catalog-images/desi-chicken-37b4ac.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Boneless Chicken 1kg",
+      "unit": "kg",
+      "price": 820,
+      "icon": "🍗",
+      "image": "assets/catalog-images/boneless-chicken-51a36b.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/chicken-a9514f.webp"
+   },
+   {
+    "name": "Beef",
+    "items": [
+     {
+      "name": "Beef Boneless 1kg",
+      "unit": "kg",
+      "price": 1250,
+      "icon": "🥩",
+      "nameUrdu": "گائے کا گوشت",
+      "image": "assets/catalog-images/beef-boneless-6f571e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Beef with Bone 1kg",
+      "unit": "kg",
+      "price": 1050,
+      "icon": "🥩",
+      "nameUrdu": "ہڈی والا گوشت",
+      "image": "assets/catalog-images/beef-bone-6ec85a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Beef Mince 1kg",
+      "unit": "kg",
+      "price": 1350,
+      "icon": "🍖",
+      "nameUrdu": "قیمہ",
+      "image": "assets/catalog-images/beef-mince-b98cf1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Beef Ribs 1kg",
+      "unit": "kg",
+      "price": 1150,
+      "icon": "🍖",
+      "nameUrdu": "پسلی",
+      "image": "assets/catalog-images/beef-ribs-200975.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Beef Liver (Kaleji) 500g",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🥩",
+      "nameUrdu": "کلیجی",
+      "image": "assets/catalog-images/beef-8f1f76.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Beef Brain (Maghaz) 1pc",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧠",
+      "nameUrdu": "مغز",
+      "image": "assets/catalog-images/beef-brain-ddd89e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Beef Tongue 1pc",
+      "unit": "piece",
+      "price": 750,
+      "icon": "👅",
+      "nameUrdu": "زبان",
+      "image": "assets/catalog-images/beef-tongue-d15c1b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Beef Paya (Trotters) 1kg",
+      "unit": "kg",
+      "price": 850,
+      "icon": "🦶",
+      "nameUrdu": "پائے",
+      "image": "assets/catalog-images/beef-paya-326b76.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/beef-8f1f76.webp"
+   },
+   {
+    "name": "Mutton",
+    "items": [
+     {
+      "name": "Mutton Boneless 1kg",
+      "unit": "kg",
+      "price": 2200,
+      "icon": "🥩",
+      "nameUrdu": "بکرے کا گوشت",
+      "image": "assets/catalog-images/mutton-boneless-b08f78.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mutton with Bone 1kg",
+      "unit": "kg",
+      "price": 1950,
+      "icon": "🥩",
+      "nameUrdu": "ہڈی والا مٹن",
+      "image": "assets/catalog-images/mutton-bone-1d1285.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mutton Mince 1kg",
+      "unit": "kg",
+      "price": 2350,
+      "icon": "🍖",
+      "nameUrdu": "مٹن قیمہ",
+      "image": "assets/catalog-images/mutton-mince-d4d564.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mutton Chops 1kg",
+      "unit": "kg",
+      "price": 2100,
+      "icon": "🍖",
+      "image": "assets/catalog-images/mutton-chops-4452fe.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mutton Liver 500g",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🥩",
+      "nameUrdu": "مٹن کلیجی",
+      "image": "assets/catalog-images/mutton-070354.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Mutton Brain 1pc",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🧠",
+      "nameUrdu": "مٹن مغز",
+      "image": "assets/catalog-images/mutton-brain-abdf2b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mutton Paya 1kg",
+      "unit": "kg",
+      "price": 1200,
+      "icon": "🦶",
+      "nameUrdu": "مٹن پائے",
+      "image": "assets/catalog-images/mutton-paya-20e91f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mutton Raan (Leg) 1pc",
+      "unit": "piece",
+      "price": 2400,
+      "icon": "🍖",
+      "nameUrdu": "ران",
+      "image": "assets/catalog-images/mutton-raan-fd4449.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/mutton-070354.webp"
+   },
+   {
+    "name": "Fish & Seafood",
+    "items": [
+     {
+      "name": "Rahu Fish 1kg",
+      "unit": "kg",
+      "price": 750,
+      "icon": "🐟",
+      "nameUrdu": "رہو مچھلی",
+      "image": "assets/catalog-images/rahu-fish-89f3fd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Salmon Fillet 500g",
+      "unit": "packet",
+      "price": 1450,
+      "icon": "🐟",
+      "image": "assets/catalog-images/fish-seafood-819e11.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Pomfret (Paplet) 1kg",
+      "unit": "kg",
+      "price": 1650,
+      "icon": "🐟",
+      "nameUrdu": "پاپلیٹ",
+      "image": "assets/catalog-images/pomfret-0da21b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Prawns 500g",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "🦐",
+      "nameUrdu": "جھینگے",
+      "image": "assets/catalog-images/prawns-500g-89b2cd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fish Fingers 500g",
+      "unit": "packet",
+      "price": 850,
+      "icon": "🐟",
+      "image": "assets/catalog-images/fish-seafood-819e11.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Dried Fish (Sookhi Machli) 250g",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🐟",
+      "nameUrdu": "سوکھی مچھلی",
+      "image": "assets/catalog-images/fish-seafood-819e11.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Sole Fish 1kg",
+      "unit": "kg",
+      "price": 950,
+      "icon": "🐟",
+      "nameUrdu": "سول مچھلی",
+      "image": "assets/catalog-images/sole-fish-93df74.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Surmai (King Fish) 1kg",
+      "unit": "kg",
+      "price": 1350,
+      "icon": "🐟",
+      "nameUrdu": "سرمئی",
+      "image": "assets/catalog-images/surmai-bac90d.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/fish-seafood-819e11.webp"
+   },
+   {
+    "name": "Mince, Organs & Eggs",
+    "items": [
+     {
+      "name": "Mixed Mince 1kg",
+      "unit": "kg",
+      "price": 1050,
+      "icon": "🍖",
+      "nameUrdu": "مکس قیمہ",
+      "image": "assets/catalog-images/mixed-mince-00a6ff.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1763140446057-9becaa30b868?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Eric Prouzet",
+       "profileUrl": "https://unsplash.com/@eprouzet",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-hanging-in-a-butcher-shop-window-cL7yZy3I1OM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/cL7yZy3I1OM/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA"
+     },
+     {
+      "name": "Heart (Dil) 500g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "❤️",
+      "nameUrdu": "دل",
+      "imageUrl": "https://images.unsplash.com/photo-1763140446057-9becaa30b868?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Eric Prouzet",
+       "profileUrl": "https://unsplash.com/@eprouzet",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-hanging-in-a-butcher-shop-window-cL7yZy3I1OM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/cL7yZy3I1OM/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA"
+     },
+     {
+      "name": "Kidney (Gurda) 500g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🥩",
+      "nameUrdu": "گردہ",
+      "imageUrl": "https://images.unsplash.com/photo-1763140446057-9becaa30b868?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Eric Prouzet",
+       "profileUrl": "https://unsplash.com/@eprouzet",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-hanging-in-a-butcher-shop-window-cL7yZy3I1OM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/cL7yZy3I1OM/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA"
+     },
+     {
+      "name": "Tripe (Ojri) 500g",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🥩",
+      "nameUrdu": "اوجھڑی",
+      "imageUrl": "https://images.unsplash.com/photo-1763140446057-9becaa30b868?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Eric Prouzet",
+       "profileUrl": "https://unsplash.com/@eprouzet",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-hanging-in-a-butcher-shop-window-cL7yZy3I1OM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/cL7yZy3I1OM/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA"
+     },
+     {
+      "name": "Marrow Bones 1kg",
+      "unit": "kg",
+      "price": 650,
+      "icon": "🦴",
+      "nameUrdu": "گودے والی ہڈی",
+      "image": "assets/catalog-images/marrow-bones-daa8dc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1763140446057-9becaa30b868?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Eric Prouzet",
+       "profileUrl": "https://unsplash.com/@eprouzet",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-hanging-in-a-butcher-shop-window-cL7yZy3I1OM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/cL7yZy3I1OM/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA"
+     },
+     {
+      "name": "Farm Eggs 1 Dozen",
+      "unit": "dozen",
+      "price": 420,
+      "icon": "🥚",
+      "nameUrdu": "انڈے",
+      "image": "assets/catalog-images/farm-eggs-1-dozen-ed9fe3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1763140446057-9becaa30b868?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Eric Prouzet",
+       "profileUrl": "https://unsplash.com/@eprouzet",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-hanging-in-a-butcher-shop-window-cL7yZy3I1OM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/cL7yZy3I1OM/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1763140446057-9becaa30b868?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmF3JTIwbWluY2VkJTIwbWVhdCUyMGJ1dGNoZXJ8ZW58MXx8fHwxNzkyMjU1NDk1fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Eric Prouzet",
+     "profileUrl": "https://unsplash.com/@eprouzet",
+     "photoUrl": "https://unsplash.com/photos/raw-meat-hanging-in-a-butcher-shop-window-cL7yZy3I1OM",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Bakery & Sweets",
+  "icon": "🍰",
+  "categories": [
+   {
+    "name": "Breads & Rusk",
+    "items": [
+     {
+      "name": "Milk Bread 600g",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🍞",
+      "nameUrdu": "دودھ والی ڈبل روٹی",
+      "image": "assets/catalog-images/milk-bread-600g-2f0097.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "White Bread 600g",
+      "unit": "packet",
+      "price": 160,
+      "icon": "🍞",
+      "nameUrdu": "سفید ڈبل روٹی",
+      "image": "assets/catalog-images/white-bread-600g-9afdfc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Whole Wheat Bread 600g",
+      "unit": "packet",
+      "price": 190,
+      "icon": "🍞",
+      "nameUrdu": "گندم کی ڈبل روٹی",
+      "image": "assets/catalog-images/breads-rusk-a4af14.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Bun (Pack of 6)",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🥖",
+      "nameUrdu": "بن",
+      "image": "assets/catalog-images/bun-71d449.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Burger Buns (Pack of 4)",
+      "unit": "packet",
+      "price": 160,
+      "icon": "🍔",
+      "image": "assets/catalog-images/burger-buns-ecfaeb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hot Dog Buns (Pack of 4)",
+      "unit": "packet",
+      "price": 160,
+      "icon": "🌭",
+      "image": "assets/catalog-images/hot-dog-buns-d12b74.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Cake Rusk 400g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🍪",
+      "nameUrdu": "کیک رس",
+      "image": "assets/catalog-images/breads-rusk-a4af14.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Zeera Rusk 400g",
+      "unit": "packet",
+      "price": 360,
+      "icon": "🍪",
+      "nameUrdu": "زیرہ رس",
+      "image": "assets/catalog-images/breads-rusk-a4af14.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Milk Rusk 400g",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🍪",
+      "nameUrdu": "دودھ رس",
+      "image": "assets/catalog-images/breads-rusk-a4af14.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Fruit Cake Slices (Pack)",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🍰",
+      "nameUrdu": "فروٹ کیک",
+      "image": "assets/catalog-images/fruit-cake-slices-4e7a74.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plain Cake 500g",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍰",
+      "nameUrdu": "سادہ کیک",
+      "image": "assets/catalog-images/breads-rusk-a4af14.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Muffins (Pack of 4)",
+      "unit": "packet",
+      "price": 280,
+      "icon": "🧁",
+      "image": "assets/catalog-images/muffins-c3a75b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Croissant (Pack of 2)",
+      "unit": "packet",
+      "price": 320,
+      "icon": "🥐",
+      "image": "assets/catalog-images/croissant-590898.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Garlic Bread Loaf",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🥖",
+      "image": "assets/catalog-images/breads-rusk-a4af14.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Maria Orlova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/breads-rusk-a4af14.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Maria Orlova",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/view-of-baked-bread-on-jute-kU7TkW9FIJY",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Cakes & Pastries",
+    "items": [
+     {
+      "name": "Chocolate Cake 1lb",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🍫",
+      "nameUrdu": "چاکلیٹ کیک",
+      "image": "assets/catalog-images/cakes-pastries-5b8613.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Pineapple Cake 1lb",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🍍",
+      "nameUrdu": "انناس کیک",
+      "image": "assets/catalog-images/cakes-pastries-5b8613.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Vanilla Cake 1lb",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🍰",
+      "image": "assets/catalog-images/cakes-pastries-5b8613.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Black Forest Cake 1lb",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🍒",
+      "image": "assets/catalog-images/cakes-pastries-5b8613.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Red Velvet Cake 1lb",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "❤️",
+      "image": "assets/catalog-images/cakes-pastries-5b8613.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Coffee Cake 1lb",
+      "unit": "piece",
+      "price": 1050,
+      "icon": "☕",
+      "image": "assets/catalog-images/cakes-pastries-5b8613.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chocolate Pastry 1pc",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍫",
+      "nameUrdu": "چاکلیٹ پیسٹری",
+      "image": "assets/catalog-images/chocolate-pastry-f7eab2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Pineapple Pastry 1pc",
+      "unit": "piece",
+      "price": 160,
+      "icon": "🍍",
+      "nameUrdu": "پیسٹری",
+      "image": "assets/catalog-images/pineapple-pastry-bee329.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Eclair (Pack of 2)",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🍫",
+      "image": "assets/catalog-images/eclair-1cedd3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Glazed Donut 1pc",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍩",
+      "image": "assets/catalog-images/glazed-donut-bffcb2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chocolate Donut 1pc",
+      "unit": "piece",
+      "price": 170,
+      "icon": "🍩",
+      "image": "assets/catalog-images/chocolate-donut-f47eee.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Swiss Roll 1pc",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🍰",
+      "image": "assets/catalog-images/swiss-roll-665017.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Cupcakes (Pack of 6)",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🧁",
+      "image": "assets/catalog-images/cupcakes-6cc7ec.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Brownies (Pack of 4)",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🍫",
+      "image": "assets/catalog-images/brownies-45ccf8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Ulysse Pointcheval",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/cakes-pastries-5b8613.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Ulysse Pointcheval",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/bakery-display-with-fruit-tarts-1WmlAiYgnoI",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Biscuits & Cookies",
+    "items": [
+     {
+      "name": "Atta Biscuits 500g",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🍪",
+      "nameUrdu": "آٹے کے بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Coconut Cookies 500g",
+      "unit": "packet",
+      "price": 480,
+      "icon": "🥥",
+      "nameUrdu": "ناریل بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Butter Cookies 500g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🍪",
+      "nameUrdu": "مکھن بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Chocolate Chip Cookies 500g",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🍪",
+      "nameUrdu": "چاکلیٹ چپ بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Nan Khatai 500g",
+      "unit": "packet",
+      "price": 520,
+      "icon": "🍪",
+      "nameUrdu": "نان خطائی",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Shrewsbury Biscuits 500g",
+      "unit": "packet",
+      "price": 580,
+      "icon": "🍪",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Khopra Biscuits 400g",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🥥",
+      "nameUrdu": "کھوپرا بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Zeera Biscuits 400g",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🍪",
+      "nameUrdu": "زیرہ بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Salt Biscuits 400g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🍪",
+      "nameUrdu": "نمکین بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Jam Biscuits 400g",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🍓",
+      "nameUrdu": "مربہ بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Marble Cookies 400g",
+      "unit": "packet",
+      "price": 480,
+      "icon": "🍪",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Walnut Cookies 400g",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🌰",
+      "nameUrdu": "اخروٹ بسکٹ",
+      "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/biscuits-cookies-3b20c7.webp"
+   },
+   {
+    "name": "Mithai",
+    "items": [
+     {
+      "name": "Gulab Jamun 1kg",
+      "unit": "kg",
+      "price": 850,
+      "icon": "🍩",
+      "nameUrdu": "گلاب جامن",
+      "image": "assets/catalog-images/gulab-jamun-bf85b4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Rasgulla 1kg",
+      "unit": "kg",
+      "price": 800,
+      "icon": "⚪",
+      "nameUrdu": "رس گلہ",
+      "image": "assets/catalog-images/rasgulla-3af4fb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Barfi (Plain) 1kg",
+      "unit": "kg",
+      "price": 950,
+      "icon": "🍬",
+      "nameUrdu": "برفی",
+      "image": "assets/catalog-images/barfi-fee7d6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Coconut Barfi 1kg",
+      "unit": "kg",
+      "price": 1050,
+      "icon": "🥥",
+      "nameUrdu": "ناریل برفی",
+      "image": "assets/catalog-images/coconut-barfi-469ab0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Motichoor Ladoo 1kg",
+      "unit": "kg",
+      "price": 850,
+      "icon": "🟠",
+      "nameUrdu": "موتی چور لڈو",
+      "image": "assets/catalog-images/motichoor-ladoo-7d82b1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Besan Ladoo 1kg",
+      "unit": "kg",
+      "price": 900,
+      "icon": "🟡",
+      "nameUrdu": "بیسن لڈو",
+      "image": "assets/catalog-images/besan-ladoo-e96076.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Jalebi 1kg",
+      "unit": "kg",
+      "price": 750,
+      "icon": "🥨",
+      "nameUrdu": "جلیبی",
+      "image": "assets/catalog-images/jalebi-874260.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Imarti 1kg",
+      "unit": "kg",
+      "price": 800,
+      "icon": "🥨",
+      "nameUrdu": "امرتی",
+      "image": "assets/catalog-images/imarti-dc5198.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Soan Papdi 500g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🍬",
+      "nameUrdu": "سون پاپڑی",
+      "image": "assets/catalog-images/mithai-39e36d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Patisa 1kg",
+      "unit": "kg",
+      "price": 900,
+      "icon": "🍬",
+      "nameUrdu": "پتیسہ",
+      "image": "assets/catalog-images/patisa-49df3f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Kalakand 1kg",
+      "unit": "kg",
+      "price": 1150,
+      "icon": "🍮",
+      "nameUrdu": "کلاکند",
+      "image": "assets/catalog-images/kalakand-851616.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Rasmalai 1kg",
+      "unit": "kg",
+      "price": 1250,
+      "icon": "🍮",
+      "nameUrdu": "رس ملائی",
+      "image": "assets/catalog-images/rasmalai-cbb28e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Cham Cham 1kg",
+      "unit": "kg",
+      "price": 950,
+      "icon": "🍬",
+      "nameUrdu": "چم چم",
+      "image": "assets/catalog-images/cham-cham-v2-3b60a4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Balushahi 1kg",
+      "unit": "kg",
+      "price": 900,
+      "icon": "🍩",
+      "nameUrdu": "بالوشاہی",
+      "image": "assets/catalog-images/balushahi-1e0f29.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Milk Cake 1kg",
+      "unit": "kg",
+      "price": 1150,
+      "icon": "🍰",
+      "nameUrdu": "ملک کیک",
+      "image": "assets/catalog-images/milk-cake-94348e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Habshi Halwa 500g",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍮",
+      "nameUrdu": "حبشی حلوہ",
+      "image": "assets/catalog-images/mithai-39e36d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/mithai-39e36d.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1760263216784-a4ca9a841ff5?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Zoshua Colah",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/stacks-of-sweet-jalebi-pastries-on-a-scale-fS5U_je3Ot8",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Nimco & Snacks",
+    "items": [
+     {
+      "name": "Nimco Mix 1kg",
+      "unit": "kg",
+      "price": 750,
+      "icon": "🥜",
+      "nameUrdu": "نمکو مکس",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Dalmoth 500g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🫘",
+      "nameUrdu": "دال موٹھ",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Bhujia Sev 500g",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🥨",
+      "nameUrdu": "بھجیا",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Gathiya 500g",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🥨",
+      "nameUrdu": "گٹھیا",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Roasted Peanuts 500g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🥜",
+      "nameUrdu": "بھنی مونگ پھلی",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Chana Jor Garam 500g",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🫘",
+      "nameUrdu": "چنا جور گرم",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Masala Peanuts 500g",
+      "unit": "packet",
+      "price": 580,
+      "icon": "🥜",
+      "nameUrdu": "مصالحہ مونگ پھلی",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Papdi 500g",
+      "unit": "packet",
+      "price": 380,
+      "icon": "🫓",
+      "nameUrdu": "پاپڑی",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Papad 200g",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🫓",
+      "nameUrdu": "پاپڑ",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Samosa (Fresh, 4pc)",
+      "unit": "piece",
+      "price": 160,
+      "icon": "🥟",
+      "nameUrdu": "سموسہ",
+      "image": "assets/catalog-images/samosa-166e8e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Kachori (Fresh, 4pc)",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🥟",
+      "nameUrdu": "کچوری",
+      "image": "assets/catalog-images/kachori-1ff155.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Spring Roll (Fresh, 4pc)",
+      "unit": "piece",
+      "price": 240,
+      "icon": "🥠",
+      "image": "assets/catalog-images/spring-roll-6bc3c6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Chicken Patties (4pc)",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🥟",
+      "image": "assets/catalog-images/chicken-patties-070428.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     },
+     {
+      "name": "Aloo Patties (4pc)",
+      "unit": "piece",
+      "price": 240,
+      "icon": "🥔",
+      "image": "assets/catalog-images/aloo-patties-0e70bf.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vu Nghi Thai",
+       "profileUrl": "https://unsplash.com/@pvnt",
+       "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/x_lxdRtNRfs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1701341404788-b85484ca379e?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c2FsdHklMjBzbmFja3MlMjBib3dsfGVufDF8fHx8MTc5MjI1NTQ4Nnww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Vu Nghi Thai",
+     "profileUrl": "https://unsplash.com/@pvnt",
+     "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-bowls-of-crackers-x_lxdRtNRfs",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Tea Stall & Dhaba",
+  "icon": "🍵",
+  "categories": [
+   {
+    "name": "Chai & Drinks",
+    "items": [
+     {
+      "name": "Doodh Patti (Full Cup)",
+      "unit": "piece",
+      "price": 80,
+      "icon": "🍵",
+      "nameUrdu": "دودھ پتی",
+      "image": "assets/catalog-images/doodh-patti-168b32.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Doodh Patti (Cutting)",
+      "unit": "piece",
+      "price": 50,
+      "icon": "🍵",
+      "nameUrdu": "کٹنگ چائے",
+      "image": "assets/catalog-images/doodh-patti-168b32.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Elaichi Chai",
+      "unit": "piece",
+      "price": 100,
+      "icon": "🍵",
+      "nameUrdu": "الائچی چائے",
+      "image": "assets/catalog-images/elaichi-chai-d0f745.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Adrak Chai",
+      "unit": "piece",
+      "price": 100,
+      "icon": "🫚",
+      "nameUrdu": "ادرک چائے",
+      "image": "assets/catalog-images/adrak-chai-9ec758.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kahwa (Green Tea)",
+      "unit": "piece",
+      "price": 80,
+      "icon": "🍃",
+      "nameUrdu": "کہوہ",
+      "image": "assets/catalog-images/kahwa-911f85.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kashmiri Chai",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🩷",
+      "nameUrdu": "کشمیری چائے",
+      "image": "assets/catalog-images/kashmiri-chai-d55900.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gur Wali Chai",
+      "unit": "piece",
+      "price": 90,
+      "icon": "🟤",
+      "nameUrdu": "گڑ والی چائے",
+      "image": "assets/catalog-images/chai-drinks-e7effb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Lemon Tea",
+      "unit": "piece",
+      "price": 70,
+      "icon": "🍋",
+      "nameUrdu": "لیموں چائے",
+      "image": "assets/catalog-images/lemon-tea-74d28e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cold Drink (Bottle)",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🥤",
+      "nameUrdu": "کولڈ ڈرنک",
+      "image": "assets/catalog-images/cold-drink-df6fa6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fresh Lime Soda",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍋",
+      "nameUrdu": "لائم سوڈا",
+      "image": "assets/catalog-images/lime-soda-d89748.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Lassi (Sweet)",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍶",
+      "nameUrdu": "میٹھی لسی",
+      "image": "assets/catalog-images/lassi-71d017.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Lassi (Salty)",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍶",
+      "nameUrdu": "نمکین لسی",
+      "image": "assets/catalog-images/lassi-71d017.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/chai-drinks-e7effb.webp"
+   },
+   {
+    "name": "Paratha & Breads",
+    "items": [
+     {
+      "name": "Sada Paratha",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🫓",
+      "nameUrdu": "سادہ پراٹھا",
+      "image": "assets/catalog-images/paratha-breads-37a291.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Aloo Paratha",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🥔",
+      "nameUrdu": "آلو پراٹھا",
+      "image": "assets/catalog-images/aloo-paratha-af3485.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Qeema Paratha",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🫓",
+      "nameUrdu": "قیمہ پراٹھا",
+      "image": "assets/catalog-images/qeema-paratha-723a85.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Anda Paratha",
+      "unit": "piece",
+      "price": 140,
+      "icon": "🍳",
+      "nameUrdu": "انڈا پراٹھا",
+      "image": "assets/catalog-images/anda-paratha-5eba0f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cheese Paratha",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🧀",
+      "image": "assets/catalog-images/cheese-paratha-7a71c5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tandoori Roti",
+      "unit": "piece",
+      "price": 25,
+      "icon": "🫓",
+      "nameUrdu": "تندوری روٹی",
+      "image": "assets/catalog-images/tandoori-roti-52bf12.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Naan",
+      "unit": "piece",
+      "price": 40,
+      "icon": "🫓",
+      "nameUrdu": "نان",
+      "image": "assets/catalog-images/naan-e5c4e0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Roghni Naan",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🫓",
+      "nameUrdu": "روغنی نان",
+      "image": "assets/catalog-images/roghni-naan-990097.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/paratha-breads-37a291.webp"
+   },
+   {
+    "name": "Breakfast",
+    "items": [
+     {
+      "name": "Halwa Puri Set",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🍽️",
+      "nameUrdu": "حلوہ پوری",
+      "image": "assets/catalog-images/halwa-puri-883829.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Puri (2pc)",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🫓",
+      "nameUrdu": "پوری",
+      "image": "assets/catalog-images/puri-dfa478.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Suji Halwa Plate",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍮",
+      "nameUrdu": "سوجی حلوہ",
+      "image": "assets/catalog-images/suji-halwa-plate-c56bef.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Anda (Half Fry)",
+      "unit": "piece",
+      "price": 80,
+      "icon": "🍳",
+      "nameUrdu": "انڈا ہاف فرائی",
+      "image": "assets/catalog-images/anda-077a10.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Anda (Omelette)",
+      "unit": "piece",
+      "price": 100,
+      "icon": "🍳",
+      "nameUrdu": "آملیٹ",
+      "image": "assets/catalog-images/anda-077a10.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596701062351-8c2c14d1fdd0?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8b21lbGV0dGUlMjBvbiUyMHBsYXRlfGVufDF8fHx8MTc5MjI1NTUxM3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Alev Takil",
+       "profileUrl": "https://unsplash.com/@alevtakil",
+       "photoUrl": "https://unsplash.com/photos/breakfast-tray-with-pastries-and-juice-lw3Lqe2K7xc",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/lw3Lqe2K7xc/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8b21lbGV0dGUlMjBvbiUyMHBsYXRlfGVufDF8fHx8MTc5MjI1NTUxM3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chanay Plate",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🫘",
+      "nameUrdu": "چنے",
+      "image": "assets/catalog-images/breakfast-f2265d.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Siri Paye Plate",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍲",
+      "nameUrdu": "سری پائے",
+      "image": "assets/catalog-images/breakfast-f2265d.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Nihari Plate",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🍲",
+      "nameUrdu": "نہاری",
+      "image": "assets/catalog-images/breakfast-f2265d.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/breakfast-f2265d.webp"
+   },
+   {
+    "name": "Snacks",
+    "items": [
+     {
+      "name": "Samosa (2pc)",
+      "unit": "piece",
+      "price": 80,
+      "icon": "🥟",
+      "nameUrdu": "سموسے",
+      "image": "assets/catalog-images/samosa-166e8e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bun Kebab",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍔",
+      "nameUrdu": "بن کباب",
+      "image": "assets/catalog-images/bun-kebab-dd0852.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shami Kebab (2pc)",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🥙",
+      "nameUrdu": "شامی کباب",
+      "image": "assets/catalog-images/shami-kebab-cac26b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Samosa (2pc)",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🥟",
+      "nameUrdu": "چکن سموسے",
+      "image": "assets/catalog-images/chicken-samosa-1014e3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pakoray Plate",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🥘",
+      "nameUrdu": "پکوڑے",
+      "image": "assets/catalog-images/snacks-e826d8.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "French Fries Plate",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍟",
+      "image": "assets/catalog-images/french-fries-plate-258413.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dahi Baray Plate",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍶",
+      "nameUrdu": "دہی بڑے",
+      "image": "assets/catalog-images/snacks-e826d8.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Fruit Chaat Cup",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍎",
+      "nameUrdu": "فروٹ چاٹ",
+      "image": "assets/catalog-images/snacks-e826d8.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/snacks-e826d8.webp"
+   },
+   {
+    "name": "Daily Supplies",
+    "items": [
+     {
+      "name": "Tea Leaves 1kg (Bulk)",
+      "unit": "packet",
+      "price": 1350,
+      "icon": "🍵",
+      "nameUrdu": "چائے پتی",
+      "image": "assets/catalog-images/tea-leaves-8f2e55.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Milk 5 Litre (Daily)",
+      "unit": "litre",
+      "price": 900,
+      "icon": "🥛",
+      "nameUrdu": "دودھ",
+      "image": "assets/catalog-images/milk-e89b2c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sugar 5kg",
+      "unit": "packet",
+      "price": 860,
+      "icon": "🧂",
+      "nameUrdu": "چینی",
+      "image": "assets/catalog-images/sugar-f0dc7a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Disposable Cups (Pack of 100)",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🥤",
+      "nameUrdu": "ڈسپوزایبل کپ",
+      "image": "assets/catalog-images/disposable-cups-ce6c31.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/daily-supplies-f5ae1f.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Restaurant, Fast Food & Cafe",
+  "icon": "🍽️",
+  "categories": [
+   {
+    "name": "Desi Mains",
+    "items": [
+     {
+      "name": "Chicken Karahi (Full)",
+      "unit": "piece",
+      "price": 1650,
+      "icon": "🥘",
+      "nameUrdu": "چکن کڑاہی",
+      "image": "assets/catalog-images/chicken-karahi-c2623d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Karahi (Half)",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🥘",
+      "nameUrdu": "چکن کڑاہی",
+      "image": "assets/catalog-images/chicken-karahi-c2623d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken White Karahi (Full)",
+      "unit": "piece",
+      "price": 1750,
+      "icon": "🥘",
+      "nameUrdu": "وائٹ کڑاہی",
+      "image": "assets/catalog-images/chicken-white-karahi-8bd96a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Jalfrezi",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🥘",
+      "nameUrdu": "چکن جلفریزی",
+      "image": "assets/catalog-images/chicken-jalfrezi-ed5992.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Handi",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🍲",
+      "nameUrdu": "چکن ہانڈی",
+      "image": "assets/catalog-images/chicken-handi-c84240.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Butter Chicken",
+      "unit": "piece",
+      "price": 1050,
+      "icon": "🍗",
+      "image": "assets/catalog-images/butter-chicken-4706df.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Daal Fry",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🫘",
+      "nameUrdu": "دال فرائی",
+      "image": "assets/catalog-images/daal-fry-0f2aec.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Daal Makhani",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍲",
+      "nameUrdu": "دال مکھنی",
+      "image": "assets/catalog-images/daal-makhani-fb5d01.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Palak Paneer",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🥬",
+      "nameUrdu": "پالک پنیر",
+      "image": "assets/catalog-images/palak-paneer-b7e8e8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Mixed Vegetable",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🥦",
+      "nameUrdu": "مکس سبزی",
+      "image": "assets/catalog-images/mixed-vegetable-559695.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Biryani",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🍚",
+      "nameUrdu": "چکن بریانی",
+      "image": "assets/catalog-images/chicken-biryani-022ae9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Beef Biryani",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🍚",
+      "nameUrdu": "بیف بریانی",
+      "image": "assets/catalog-images/beef-biryani-d0bc8c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Sindhi Biryani",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍚",
+      "nameUrdu": "سندھی بریانی",
+      "image": "assets/catalog-images/sindhi-biryani-a42fb0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Pulao",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍚",
+      "nameUrdu": "چکن پلاؤ",
+      "image": "assets/catalog-images/chicken-pulao-9cd676.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Beef Pulao",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🍚",
+      "nameUrdu": "بیف پلاؤ",
+      "image": "assets/catalog-images/beef-pulao-465bcc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Mutton Pulao",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍚",
+      "nameUrdu": "مٹن پلاؤ",
+      "image": "assets/catalog-images/mutton-pulao-4bd55b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Perspective Studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1728910156510-77488f19b152?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Perspective Studio",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-table-filled-with-lots-of-different-types-of-food-DUOpUlw4uLY",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "BBQ",
+    "items": [
+     {
+      "name": "Chicken Tikka (Leg)",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🍗",
+      "nameUrdu": "چکن ٹکا",
+      "image": "assets/catalog-images/chicken-tikka-a36a56.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Tikka (Chest)",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🍗",
+      "nameUrdu": "چکن ٹکا",
+      "image": "assets/catalog-images/chicken-tikka-a36a56.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Malai Boti (8pc)",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍢",
+      "nameUrdu": "ملائی بوٹی",
+      "image": "assets/catalog-images/malai-boti-a07d33.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Seekh Kabab Beef (4pc)",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍢",
+      "nameUrdu": "سیخ کباب",
+      "image": "assets/catalog-images/seekh-kabab-beef-02b9ec.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Seekh Kabab Chicken (4pc)",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🍢",
+      "nameUrdu": "چکن سیخ کباب",
+      "image": "assets/catalog-images/seekh-kabab-chicken-b7a055.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chapli Kabab (2pc)",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🥙",
+      "nameUrdu": "چپلی کباب",
+      "image": "assets/catalog-images/chapli-kabab-f821c7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Wings Grilled (8pc)",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍗",
+      "image": "assets/catalog-images/chicken-wings-grilled-00dc94.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mutton Chops BBQ (4pc)",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🍖",
+      "image": "assets/catalog-images/bbq-709cf7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "BBQ Platter (Family)",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/bbq-platter-0bf136.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fish Grilled",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🐟",
+      "nameUrdu": "گرلڈ مچھلی",
+      "image": "assets/catalog-images/fish-grilled-15b88d.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/bbq-709cf7.webp"
+   },
+   {
+    "name": "Fast Food",
+    "items": [
+     {
+      "name": "Zinger Burger",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍔",
+      "image": "assets/catalog-images/zinger-burger-e0df92.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Beef Smash Burger",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🍔",
+      "image": "assets/catalog-images/beef-smash-burger-c149e9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Patty Burger",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍔",
+      "image": "assets/catalog-images/chicken-patty-burger-1e03d7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Shawarma (Chicken)",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🌯",
+      "nameUrdu": "شاورما",
+      "image": "assets/catalog-images/shawarma-dd8c19.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Shawarma Platter",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🌯",
+      "nameUrdu": "شاورما پلیٹر",
+      "image": "assets/catalog-images/shawarma-platter-8df58c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Broast (2pc)",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍗",
+      "image": "assets/catalog-images/chicken-broast-703dd5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Crispy Chicken Strips (6pc)",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍗",
+      "image": "assets/catalog-images/crispy-chicken-strips-062b6c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Loaded Fries",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍟",
+      "image": "assets/catalog-images/loaded-fries-80b7fd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Masala Fries",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍟",
+      "image": "assets/catalog-images/masala-fries-b9ad0d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Fajita Pizza (Small)",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🍕",
+      "image": "assets/catalog-images/chicken-fajita-pizza-4b580a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Tikka Pizza (Small)",
+      "unit": "piece",
+      "price": 1150,
+      "icon": "🍕",
+      "image": "assets/catalog-images/chicken-tikka-pizza-1e657a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Cheese Lovers Pizza (Small)",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "🍕",
+      "image": "assets/catalog-images/cheese-lovers-pizza-fc5a93.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Garlic Bread (4pc)",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🥖",
+      "image": "assets/catalog-images/garlic-bread-add097.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chicken Wings Buffalo (8pc)",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🍗",
+      "image": "assets/catalog-images/chicken-wings-buffalo-1e65ed.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Club Sandwich",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🥪",
+      "image": "assets/catalog-images/club-sandwich-884579.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Grilled Sandwich",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🥪",
+      "image": "assets/catalog-images/grilled-sandwich-0dc1e9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jonathan Borba",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/fast-food-dcaab7.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Jonathan Borba",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/burger-with-fries-8l8Yl2ruUsg",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Chinese",
+    "items": [
+     {
+      "name": "Chicken Chow Mein",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍜",
+      "image": "assets/catalog-images/chicken-chow-mein-dc7d8b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Vegetable Chow Mein",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍜",
+      "image": "assets/catalog-images/vegetable-chow-mein-deed49.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Fried Rice",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍚",
+      "image": "assets/catalog-images/chicken-fried-rice-06e7bd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Egg Fried Rice",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍳",
+      "image": "assets/catalog-images/egg-fried-rice-5809b7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kung Pao Chicken",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🍗",
+      "image": "assets/catalog-images/kung-pao-chicken-dc1498.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sweet & Sour Chicken",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🍗",
+      "image": "assets/catalog-images/sweet-sour-chicken-aa440f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Manchurian",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🥘",
+      "image": "assets/catalog-images/chicken-manchurian-191f77.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Hot & Sour Soup",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍲",
+      "image": "assets/catalog-images/hot-sour-soup-a4ab91.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chicken Corn Soup",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🍲",
+      "image": "assets/catalog-images/chicken-corn-soup-714824.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Spring Rolls (4pc)",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🥠",
+      "image": "assets/catalog-images/spring-rolls-9b75e3.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/chinese-3b2611.webp"
+   },
+   {
+    "name": "Drinks & Shakes",
+    "items": [
+     {
+      "name": "Fresh Orange Juice",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍊",
+      "nameUrdu": "تازہ سنگترے کا رس",
+      "image": "assets/catalog-images/orange-juice-245c8f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mango Shake",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🥭",
+      "image": "assets/catalog-images/mango-shake-870d0f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Banana Shake",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍌",
+      "image": "assets/catalog-images/banana-shake-f7bc56.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chocolate Shake",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🍫",
+      "image": "assets/catalog-images/chocolate-shake-de772e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Strawberry Shake",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🍓",
+      "image": "assets/catalog-images/strawberry-shake-25e515.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dates Shake",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🌴",
+      "image": "assets/catalog-images/dates-shake-v2-a9dd88.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cold Coffee",
+      "unit": "piece",
+      "price": 450,
+      "icon": "☕",
+      "image": "assets/catalog-images/cold-coffee-ce2eb7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mint Margarita",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍋",
+      "image": "assets/catalog-images/mint-margarita-deaa8e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pina Colada",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍍",
+      "image": "assets/catalog-images/pina-colada-70676c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kashmiri Chai",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🩷",
+      "nameUrdu": "کشمیری چائے",
+      "image": "assets/catalog-images/kashmiri-chai-d55900.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Doodh Patti",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🍵",
+      "nameUrdu": "دودھ پتی",
+      "image": "assets/catalog-images/doodh-patti-168b32.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mineral Water 500ml",
+      "unit": "piece",
+      "price": 120,
+      "icon": "💧",
+      "image": "assets/catalog-images/mineral-water-f69dcc.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/drinks-shakes-076598.webp"
+   },
+   {
+    "name": "Desserts",
+    "items": [
+     {
+      "name": "Gulab Jamun (4pc)",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🍩",
+      "nameUrdu": "گلاب جامن",
+      "image": "assets/catalog-images/gulab-jamun-bf85b4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kheer",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🍚",
+      "nameUrdu": "کھیر",
+      "image": "assets/catalog-images/kheer-932b59.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shahi Tukra",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍞",
+      "nameUrdu": "شاہی ٹکڑا",
+      "image": "assets/catalog-images/shahi-tukra-b68522.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chocolate Brownie",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍫",
+      "image": "assets/catalog-images/chocolate-brownie-e857f0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ice Cream Scoop (2)",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🍨",
+      "nameUrdu": "آئس کریم",
+      "image": "assets/catalog-images/ice-cream-scoop-cc49b2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Falooda",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍧",
+      "nameUrdu": "فالودہ",
+      "image": "assets/catalog-images/falooda-d2319c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rabri",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🍮",
+      "nameUrdu": "ربڑی",
+      "image": "assets/catalog-images/rabri-d0dc91.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kulfi Falooda",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🍦",
+      "nameUrdu": "قلفی فالودہ",
+      "image": "assets/catalog-images/kulfi-falooda-b652a0.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/desserts-66ea83.webp"
+   },
+   {
+    "name": "Roti, Naan & Sides",
+    "items": [
+     {
+      "name": "Tandoori Roti",
+      "unit": "piece",
+      "price": 30,
+      "icon": "🫓",
+      "nameUrdu": "تندوری روٹی",
+      "image": "assets/catalog-images/tandoori-roti-52bf12.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Roghni Naan",
+      "unit": "piece",
+      "price": 70,
+      "icon": "🫓",
+      "nameUrdu": "روغنی نان",
+      "image": "assets/catalog-images/roghni-naan-990097.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Garlic Naan",
+      "unit": "piece",
+      "price": 90,
+      "icon": "🧄",
+      "image": "assets/catalog-images/garlic-naan-b2908f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cheese Naan",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🧀",
+      "image": "assets/catalog-images/cheese-naan-1b5aab.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Raita",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🍶",
+      "nameUrdu": "رائتہ",
+      "image": "assets/catalog-images/raita-014cf4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mint Chutney",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🌿",
+      "nameUrdu": "پودینے کی چٹنی",
+      "image": "assets/catalog-images/mint-chutney-b877b6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Green Salad",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🥗",
+      "image": "assets/catalog-images/green-salad-a108b0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fries (Side)",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🍟",
+      "image": "assets/catalog-images/fries-db720b.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/roti-naan-sides-914faf.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Pharmacy / Medical Store",
+  "icon": "💊",
+  "categories": [
+   {
+    "name": "Pain Relief & Fever",
+    "items": [
+     {
+      "name": "Paracetamol 500mg Strip of 10",
+      "unit": "packet",
+      "price": 40,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Paracetamol 650mg Strip of 10",
+      "unit": "packet",
+      "price": 60,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Paracetamol 250mg Strip of 10",
+      "unit": "packet",
+      "price": 35,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Ibuprofen 400mg Strip of 10",
+      "unit": "packet",
+      "price": 80,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Diclofenac Sodium 50mg Strip of 20",
+      "unit": "packet",
+      "price": 90,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mefenamic Acid 250mg Strip of 10",
+      "unit": "packet",
+      "price": 70,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Piroxicam 20mg Strip of 10",
+      "unit": "packet",
+      "price": 80,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Ketorolac 10mg Strip of 10",
+      "unit": "packet",
+      "price": 90,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Aspirin 75mg Strip of 20",
+      "unit": "packet",
+      "price": 70,
+      "icon": "💊",
+      "image": "assets/catalog-images/aspirin-strip-v2-5fb53f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww"
+     },
+     {
+      "name": "Naproxen 250mg Strip of 10",
+      "unit": "packet",
+      "price": 85,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Flurbiprofen 100mg Strip of 20",
+      "unit": "packet",
+      "price": 95,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Etoricoxib 60mg Strip of 10",
+      "unit": "packet",
+      "price": 200,
+      "icon": "💊",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Diclofenac Gel Tube 30g",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🧴",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Methyl Salicylate Balm Jar 40g",
+      "unit": "piece",
+      "price": 170,
+      "icon": "🫙",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Muscle Relaxant Cream Tube 30g",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🧴",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Pain Relief Spray Bottle 100ml",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🧴",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Ibuprofen Suspension Bottle 100ml",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🍶",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Paracetamol Syrup Bottle 120ml",
+      "unit": "piece",
+      "price": 130,
+      "icon": "🍶",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Paracetamol 125mg Syrup Bottle 90ml",
+      "unit": "piece",
+      "price": 110,
+      "icon": "🍶",
+      "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Gizem Nikomedi",
+       "profileUrl": "https://unsplash.com/@gnikomedi",
+       "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/oOW6Iju06T0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/pain-relief-fever-b528d3.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1719319384377-5f5a45b2f0d1?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbiUyMFJlbGllZiUyMCUyMCUyMEZldmVyfGVufDF8fHx8MTc5MjI1NTUyOXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Gizem Nikomedi",
+     "profileUrl": "https://unsplash.com/@gnikomedi",
+     "photoUrl": "https://unsplash.com/photos/the-word-war-spelled-out-of-pills-on-a-blue-background-oOW6Iju06T0",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Cold, Cough & Allergy",
+    "items": [
+     {
+      "name": "Cetirizine 10mg Strip of 10",
+      "unit": "packet",
+      "price": 60,
+      "icon": "💊",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Loratadine 10mg Strip of 10",
+      "unit": "packet",
+      "price": 80,
+      "icon": "💊",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Fexofenadine 120mg Strip of 10",
+      "unit": "packet",
+      "price": 150,
+      "icon": "💊",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chlorpheniramine 4mg Strip of 20",
+      "unit": "packet",
+      "price": 50,
+      "icon": "💊",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Levocetirizine 5mg Strip of 10",
+      "unit": "packet",
+      "price": 90,
+      "icon": "💊",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Dextromethorphan Cough Syrup 120ml",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍶",
+      "image": "assets/catalog-images/dextromethorphan-cough-syrup-18c4c4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Ambroxol Cough Syrup 120ml",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🍶",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Honey Cough Lozenges Box of 24",
+      "unit": "box",
+      "price": 130,
+      "icon": "🍯",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Menthol Inhaler Stick",
+      "unit": "piece",
+      "price": 90,
+      "icon": "👃",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Vapor Rub Jar 50g",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🫙",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Nasal Decongestant Spray Bottle 15ml",
+      "unit": "piece",
+      "price": 220,
+      "icon": "👃",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Anti-Allergy Eye Drops Bottle 10ml",
+      "unit": "piece",
+      "price": 250,
+      "icon": "👁️",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Saline Nasal Drops Bottle 15ml",
+      "unit": "piece",
+      "price": 130,
+      "icon": "👃",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Steam Inhaler Cup",
+      "unit": "piece",
+      "price": 250,
+      "icon": "♨️",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Throat Soothing Tablets Strip of 20",
+      "unit": "packet",
+      "price": 100,
+      "icon": "🍬",
+      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Vitamin C + Zinc Cold Tablets Strip of 10",
+      "unit": "packet",
+      "price": 140,
+      "icon": "💊",
+      "image": "assets/catalog-images/vitamin-c-zinc-10b595.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Heather Barnes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Heather Barnes",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Digestive Health",
+    "items": [
+     {
+      "name": "Omeprazole 20mg Strip of 14",
+      "unit": "packet",
+      "price": 120,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Esomeprazole 20mg Strip of 14",
+      "unit": "packet",
+      "price": 160,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Antacid Chewable Tablets Strip of 20",
+      "unit": "packet",
+      "price": 80,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Antacid Syrup Bottle 200ml",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🍶",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "ORS Sachet",
+      "unit": "piece",
+      "price": 25,
+      "icon": "🧂",
+      "image": "assets/catalog-images/ors-sachet-e2deed.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "ORS Box of 10 Sachets",
+      "unit": "box",
+      "price": 220,
+      "icon": "🧂",
+      "image": "assets/catalog-images/ors-9ba669.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Loperamide 2mg Strip of 10",
+      "unit": "packet",
+      "price": 60,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Lactulose Syrup Bottle 120ml",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🍶",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Domperidone 10mg Strip of 20",
+      "unit": "packet",
+      "price": 90,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Simethicone Drops Bottle 15ml",
+      "unit": "piece",
+      "price": 150,
+      "icon": "💧",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Activated Charcoal Tablets Strip of 10",
+      "unit": "packet",
+      "price": 100,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Glycerin Suppositories Box of 6",
+      "unit": "box",
+      "price": 120,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Probiotic Sachets Box of 10",
+      "unit": "box",
+      "price": 400,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Digestive Enzyme Tablets Strip of 20",
+      "unit": "packet",
+      "price": 140,
+      "icon": "💊",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Isabgol Husk Packet 100g",
+      "unit": "packet",
+      "price": 180,
+      "icon": "🌾",
+      "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Christine Sandu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/digestive-health-v2-3d48dc.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Christine Sandu",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/white-and-blue-medication-pill-blister-pack-jwWtZrm67VI",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "First Aid & Wound Care",
+    "items": [
+     {
+      "name": "Adhesive Bandage Box of 100",
+      "unit": "box",
+      "price": 200,
+      "icon": "🩹",
+      "image": "assets/catalog-images/adhesive-bandage-100-3488aa.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Elastic Crepe Bandage 4 inch",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🩹",
+      "image": "assets/catalog-images/first-aid-wound-care-745dc1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cotton Roll 200g",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🧻",
+      "image": "assets/catalog-images/first-aid-wound-care-745dc1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cotton Balls Packet",
+      "unit": "packet",
+      "price": 80,
+      "icon": "🧻",
+      "image": "assets/catalog-images/cotton-balls-packet-a74da5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Sterile Gauze Pads Box of 25",
+      "unit": "box",
+      "price": 180,
+      "icon": "🩹",
+      "image": "assets/catalog-images/sterile-gauze-pads-25-d92c98.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Medical Adhesive Tape Roll",
+      "unit": "piece",
+      "price": 70,
+      "icon": "🩹",
+      "image": "assets/catalog-images/medical-adhesive-tape-roll-7c1916.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Antiseptic Liquid Bottle 250ml",
+      "unit": "piece",
+      "price": 160,
+      "icon": "🧴",
+      "image": "assets/catalog-images/antiseptic-liquid-bottle-v2-9605b3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Povidone Iodine Ointment Tube 20g",
+      "unit": "piece",
+      "price": 130,
+      "icon": "🧴",
+      "image": "assets/catalog-images/first-aid-wound-care-745dc1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hydrogen Peroxide Bottle 100ml",
+      "unit": "piece",
+      "price": 140,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hydrogen-peroxide-bottle-f8a318.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Surgical Spirit Bottle 100ml",
+      "unit": "piece",
+      "price": 140,
+      "icon": "🧴",
+      "image": "assets/catalog-images/surgical-spirit-bottle-ace150.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Burn Relief Cream Tube 25g",
+      "unit": "piece",
+      "price": 160,
+      "icon": "🧴",
+      "image": "assets/catalog-images/first-aid-wound-care-745dc1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Triangular Bandage",
+      "unit": "piece",
+      "price": 90,
+      "icon": "🩹",
+      "image": "assets/catalog-images/triangular-bandage-176fbd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "First Aid Kit Box",
+      "unit": "box",
+      "price": 1200,
+      "icon": "🧰",
+      "image": "assets/catalog-images/first-aid-kit-v2-c4429b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Digital Thermometer",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🌡️",
+      "image": "assets/catalog-images/digital-thermometer-605d9f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Forehead Thermometer Strips Pack of 10",
+      "unit": "packet",
+      "price": 60,
+      "icon": "🌡️",
+      "image": "assets/catalog-images/first-aid-wound-care-745dc1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hand Sanitizer Bottle 200ml",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hand-sanitizer-bottle-fa7f93.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Instant Cold Pack",
+      "unit": "piece",
+      "price": 180,
+      "icon": "❄️",
+      "image": "assets/catalog-images/instant-cold-153727.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mathurin NAPOLY",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/first-aid-wound-care-745dc1.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1624638760852-8ede1666ab07?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Mathurin NAPOLY",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/open-red-medical-bag-with-supplies-MaKsx8JNbiI",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Baby & Mother Care",
+    "items": [
+     {
+      "name": "Baby Diapers Pack of 20",
+      "unit": "packet",
+      "price": 650,
+      "icon": "👶",
+      "image": "assets/catalog-images/baby-diapers-20-612f35.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Wipes Pack of 80",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🧻",
+      "image": "assets/catalog-images/baby-wipes-80-a21fd7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Lotion Bottle 200ml",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-lotion-bottle-b559eb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Shampoo Bottle 200ml",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-shampoo-bottle-201f9f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Powder Jar 200g",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🫙",
+      "image": "assets/catalog-images/baby-mother-care-b9b634.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Baby Oil Bottle 200ml",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-oil-bottle-fec389.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1750085036915-6e21c6981586?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmFieSUyMG9pbCUyMGJvdHRsZSUyMHByb2R1Y3R8ZW58MXx8fHwxNzkyMjU1NTA4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "https://unsplash.com/@zoshuacolah",
+       "photoUrl": "https://unsplash.com/photos/johnsons-baby-oil-and-lotion-are-displayed-8XtQp4UVB34",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/8XtQp4UVB34/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmFieSUyMG9pbCUyMGJvdHRsZSUyMHByb2R1Y3R8ZW58MXx8fHwxNzkyMjU1NTA4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Baby Feeding Bottle 250ml",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍼",
+      "image": "assets/catalog-images/baby-feeding-bottle-edd165.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Silicone Nipples Set of 2",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🍼",
+      "image": "assets/catalog-images/silicone-nipples-2-bf5a2f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Diaper Rash Cream Tube 50g",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-mother-care-b9b634.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Baby Soap Bar",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🧼",
+      "image": "assets/catalog-images/baby-soap-bar-1e341d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Towel",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧣",
+      "image": "assets/catalog-images/baby-towel-b38777.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Kids Multivitamin Syrup Bottle 120ml",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🍶",
+      "image": "assets/catalog-images/baby-mother-care-b9b634.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Iron Drops Bottle 15ml",
+      "unit": "piece",
+      "price": 180,
+      "icon": "💧",
+      "image": "assets/catalog-images/iron-drops-bottle-8b0a2b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Teething Gel Tube 15g",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-mother-care-b9b634.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Natracare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/baby-mother-care-b9b634.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1734599397715-f030c6d206a0?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Natracare",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-diaper-bag-filled-with-baby-items-and-a-stuffed-animal-aMca3BHUvmU",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Chronic Care & Devices",
+    "items": [
+     {
+      "name": "Metformin 500mg Strip of 20",
+      "unit": "packet",
+      "price": 120,
+      "icon": "💊",
+      "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Glibenclamide 5mg Strip of 20",
+      "unit": "packet",
+      "price": 90,
+      "icon": "💊",
+      "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Amlodipine 5mg Strip of 20",
+      "unit": "packet",
+      "price": 110,
+      "icon": "💊",
+      "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Losartan 50mg Strip of 20",
+      "unit": "packet",
+      "price": 180,
+      "icon": "💊",
+      "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Atorvastatin 20mg Strip of 20",
+      "unit": "packet",
+      "price": 220,
+      "icon": "💊",
+      "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Thyroxine 50mcg Strip of 50",
+      "unit": "packet",
+      "price": 180,
+      "icon": "💊",
+      "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Blood Pressure Monitor",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🩺",
+      "image": "assets/catalog-images/blood-pressure-monitor-60ee1f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Digital Glucometer",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🩸",
+      "image": "assets/catalog-images/digital-glucometer-bd6b37.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Blood Glucose Test Strips Box of 50",
+      "unit": "box",
+      "price": 1400,
+      "icon": "🩸",
+      "image": "assets/catalog-images/blood-glucose-test-strips-3901a1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Insulin Syringes Box of 10",
+      "unit": "box",
+      "price": 150,
+      "icon": "💉",
+      "image": "assets/catalog-images/insulin-syringes-v2-5b59ef.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Alcohol Swabs Box of 100",
+      "unit": "box",
+      "price": 200,
+      "icon": "🩹",
+      "image": "assets/catalog-images/alcohol-swabs-100-9e0be2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Nebulizer Machine",
+      "unit": "piece",
+      "price": 5500,
+      "icon": "💨",
+      "image": "assets/catalog-images/nebulizer-machine-v2-8a385e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Digital Pulse Oximeter",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🩺",
+      "image": "assets/catalog-images/digital-pulse-oximeter-b4e51a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hot Water Bag 2 Litre",
+      "unit": "piece",
+      "price": 350,
+      "icon": "♨️",
+      "image": "assets/catalog-images/hot-water-bag-8218a3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Surgical Gloves Box of 100",
+      "unit": "box",
+      "price": 600,
+      "icon": "🧤",
+      "image": "assets/catalog-images/surgical-gloves-100-e6d301.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Face Masks Box of 50",
+      "unit": "box",
+      "price": 350,
+      "icon": "😷",
+      "image": "assets/catalog-images/face-masks-50-2a693d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Mockup Graphics",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Mockup Graphics",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Vitamins & Supplements",
+    "items": [
+     {
+      "name": "Vitamin C 500mg Chewable Strip of 20",
+      "unit": "packet",
+      "price": 150,
+      "icon": "💊",
+      "image": "assets/catalog-images/vitamins-supplements-682b3f.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Vitamin D3 Drops Bottle 15ml",
+      "unit": "piece",
+      "price": 280,
+      "icon": "💧",
+      "image": "assets/catalog-images/vitamins-supplements-682b3f.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Calcium + Vitamin D Tablets Bottle of 60",
+      "unit": "piece",
+      "price": 450,
+      "icon": "💊",
+      "image": "assets/catalog-images/calcium-vitamin-d-v2-39b2fa.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Multivitamin Strip of 20",
+      "unit": "packet",
+      "price": 200,
+      "icon": "💊",
+      "image": "assets/catalog-images/vitamins-supplements-682b3f.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Iron + Folic Acid Strip of 30",
+      "unit": "packet",
+      "price": 160,
+      "icon": "💊",
+      "image": "assets/catalog-images/iron-folic-acid-9ce660.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Zinc 20mg Strip of 20",
+      "unit": "packet",
+      "price": 180,
+      "icon": "💊",
+      "image": "assets/catalog-images/zinc-strip-20-6cad32.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "B-Complex Strip of 20",
+      "unit": "packet",
+      "price": 170,
+      "icon": "💊",
+      "image": "assets/catalog-images/b-complex-strip-20-cf0e91.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Cod Liver Oil Bottle of 60",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🐟",
+      "image": "assets/catalog-images/cod-liver-oil-bottle-v2-55db4c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Omega-3 Capsules Bottle of 30",
+      "unit": "piece",
+      "price": 800,
+      "icon": "💊",
+      "image": "assets/catalog-images/vitamins-supplements-682b3f.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Folic Acid 5mg Strip of 20",
+      "unit": "packet",
+      "price": 90,
+      "icon": "💊",
+      "image": "assets/catalog-images/vitamins-supplements-682b3f.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Vitamin E 400mg Strip of 10",
+      "unit": "packet",
+      "price": 250,
+      "icon": "💊",
+      "image": "assets/catalog-images/vitamin-e-strip-10-eeb1a2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Electrolyte Powder Box of 6",
+      "unit": "box",
+      "price": 250,
+      "icon": "🧂",
+      "image": "assets/catalog-images/electrolyte-powder-6-9a3229.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Glucosamine Tablets Bottle of 30",
+      "unit": "piece",
+      "price": 650,
+      "icon": "💊",
+      "image": "assets/catalog-images/vitamins-supplements-682b3f.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jellybee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/vitamins-supplements-682b3f.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1627467959547-8e44da7aa00a?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Jellybee",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/3-glass-bottles-on-brown-wooden-table-GpDSgnWFmwM",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Cosmetics & Beauty",
+  "icon": "💄",
+  "categories": [
+   {
+    "name": "Skin Care",
+    "items": [
+     {
+      "name": "Face Wash Tube 100ml",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧴",
+      "image": "assets/catalog-images/face-wash-tube-946335.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Moisturizing Cream Jar 100ml",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🫙",
+      "image": "assets/catalog-images/skin-care-fe37e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Fairness Cream Jar 50ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🫙",
+      "image": "assets/catalog-images/fairness-cream-jar-6b9863.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Sunscreen Lotion SPF 50",
+      "unit": "piece",
+      "price": 650,
+      "icon": "☀️",
+      "image": "assets/catalog-images/skin-care-fe37e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Rose Water Bottle 120ml",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🌹",
+      "image": "assets/catalog-images/rose-water-bottle-0768ae.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Facial Cleanser Bottle 150ml",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🧴",
+      "image": "assets/catalog-images/skin-care-fe37e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Skin Toner Bottle 100ml",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🧴",
+      "image": "assets/catalog-images/skin-toner-bottle-9576fd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Night Cream Jar 50ml",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🌙",
+      "image": "assets/catalog-images/night-cream-jar-324fe5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Under-Eye Cream Tube 15ml",
+      "unit": "piece",
+      "price": 600,
+      "icon": "👁️",
+      "image": "assets/catalog-images/under-eye-cream-tube-3704b7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Face Scrub Tube 100ml",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧴",
+      "image": "assets/catalog-images/skin-care-fe37e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Sheet Mask",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🎭",
+      "image": "assets/catalog-images/sheet-mask-v2-6827fe.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Aloe Vera Gel Tube 150ml",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🌿",
+      "image": "assets/catalog-images/skin-care-fe37e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Body Lotion Bottle 200ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧴",
+      "image": "assets/catalog-images/body-lotion-bottle-215406.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Petroleum Jelly Jar 100ml",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🫙",
+      "image": "assets/catalog-images/skin-care-fe37e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cold Cream Jar 60ml",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🫙",
+      "image": "assets/catalog-images/cold-cream-jar-v2-1bd886.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Lip Balm Stick",
+      "unit": "piece",
+      "price": 150,
+      "icon": "💋",
+      "image": "assets/catalog-images/lip-balm-stick-131b2b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Face Serum Bottle 30ml",
+      "unit": "piece",
+      "price": 900,
+      "icon": "💧",
+      "image": "assets/catalog-images/face-serum-v2-fb90b9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+     },
+     {
+      "name": "Anti-Acne Gel Tube 20g",
+      "unit": "piece",
+      "price": 420,
+      "icon": "🧴",
+      "image": "assets/catalog-images/skin-care-fe37e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Fleur Kaan",
+       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/skin-care-fe37e3.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Fleur Kaan",
+     "profileUrl": "https://unsplash.com/@fleuraimeekaan",
+     "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Hair Care",
+    "items": [
+     {
+      "name": "Shampoo Bottle 340ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧴",
+      "image": "assets/catalog-images/shampoo-bottle-v2-5eadfd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Conditioner Bottle 200ml",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🧴",
+      "image": "assets/catalog-images/conditioner-bottle-059394.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Oil Bottle 200ml",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hair-oil-bottle-product-v2-f76ba6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Dye Box",
+      "unit": "box",
+      "price": 450,
+      "icon": "🎨",
+      "image": "assets/catalog-images/hair-dye-2ddaf8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Color Cream Box",
+      "unit": "box",
+      "price": 520,
+      "icon": "🎨",
+      "image": "assets/catalog-images/hair-color-cream-09a163.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Serum Bottle 50ml",
+      "unit": "piece",
+      "price": 650,
+      "icon": "💧",
+      "image": "assets/catalog-images/hair-care-1abfa4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hair Mask Jar 200ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🫙",
+      "image": "assets/catalog-images/hair-mask-jar-5a201a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Gel Tube 150ml",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hair-care-1abfa4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hair Spray Bottle 200ml",
+      "unit": "piece",
+      "price": 480,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hair-spray-bottle-94affb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Anti-Dandruff Shampoo 180ml",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🧴",
+      "image": "assets/catalog-images/anti-dandruff-shampoo-61b7c9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dry Shampoo Spray 150ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hair-care-1abfa4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hair Straightening Cream Jar",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🫙",
+      "image": "assets/catalog-images/hair-care-1abfa4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Curl Defining Cream Tube",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hair-care-1abfa4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hair Clips Set of 6",
+      "unit": "packet",
+      "price": 150,
+      "icon": "📎",
+      "image": "assets/catalog-images/hair-clips-6-e16305.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Wide-Tooth Comb",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🪮",
+      "image": "assets/catalog-images/wide-tooth-comb-e2329c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Brush",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🪮",
+      "image": "assets/catalog-images/hair-brush-0c9a34.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Taylor Beach",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/hair-care-1abfa4.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Taylor Beach",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/three-bottles-of-lotion-sitting-on-a-table-next-to-a-potted-plant-kwu9Ny5dKOE",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Makeup",
+    "items": [
+     {
+      "name": "Liquid Foundation Bottle",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🧴",
+      "image": "assets/catalog-images/liquid-foundation-bottle-370392.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Compact Powder",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🪞",
+      "image": "assets/catalog-images/compact-powder-v2-cd9a8f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Concealer Stick",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/concealer-stick-20095e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Blush Palette",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🎨",
+      "image": "assets/catalog-images/blush-palette-9fa1cf.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Eyeshadow Palette 12 Shades",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🎨",
+      "image": "assets/catalog-images/makeup-2ae04b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mascara",
+      "unit": "piece",
+      "price": 550,
+      "icon": "👁️",
+      "image": "assets/catalog-images/mascara-b0cbc9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Eyeliner Pencil",
+      "unit": "piece",
+      "price": 350,
+      "icon": "✏️",
+      "image": "assets/catalog-images/eyeliner-pencil-2841d9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Kajal Stick",
+      "unit": "piece",
+      "price": 200,
+      "icon": "✏️",
+      "nameUrdu": "کاجل",
+      "image": "assets/catalog-images/makeup-2ae04b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Lipstick",
+      "unit": "piece",
+      "price": 450,
+      "icon": "💄",
+      "image": "assets/catalog-images/lipstick-1e86fc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Lip Gloss Tube",
+      "unit": "piece",
+      "price": 380,
+      "icon": "💋",
+      "image": "assets/catalog-images/makeup-2ae04b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Lip Liner Set of 3",
+      "unit": "packet",
+      "price": 300,
+      "icon": "✏️",
+      "image": "assets/catalog-images/lip-liner-3-2ac755.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Makeup Brushes Set of 12",
+      "unit": "box",
+      "price": 850,
+      "icon": "🖌️",
+      "image": "assets/catalog-images/makeup-brushes-12-f6f914.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Beauty Blender Sponge",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🧽",
+      "image": "assets/catalog-images/makeup-2ae04b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Makeup Remover Wipes Pack of 25",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🧻",
+      "image": "assets/catalog-images/makeup-2ae04b.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Face Primer Tube",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🧴",
+      "image": "assets/catalog-images/face-primer-tube-41fa17.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Setting Spray Bottle",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🧴",
+      "image": "assets/catalog-images/setting-spray-bottle-4f9378.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Highlighter Palette",
+      "unit": "piece",
+      "price": 600,
+      "icon": "✨",
+      "image": "assets/catalog-images/highlighter-palette-fea08e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     },
+     {
+      "name": "Nail Polish Bottle",
+      "unit": "piece",
+      "price": 280,
+      "icon": "💅",
+      "image": "assets/catalog-images/nail-polish-bottle-59fd99.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Shamblen Studios",
+       "profileUrl": "https://unsplash.com/@shamblenstudios",
+       "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xwM61TPMlYk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww"
+     }
+    ],
+    "image": "assets/catalog-images/makeup-2ae04b.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8TWFrZXVwfGVufDF8fHx8MTc5MjI1NjI1M3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Shamblen Studios",
+     "profileUrl": "https://unsplash.com/@shamblenstudios",
+     "photoUrl": "https://unsplash.com/photos/pink-and-brown-makeup-brush-set-xwM61TPMlYk",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Mehndi & Traditional",
+    "items": [
+     {
+      "name": "Mehndi Cone",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🤲",
+      "nameUrdu": "مہندی",
+      "image": "assets/catalog-images/mehndi-cone-2146f3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Red Mehndi Powder Packet 100g",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🤲",
+      "nameUrdu": "مہندی",
+      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Black Mehndi Packet",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🤲",
+      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Mehndi Oil Bottle 60ml",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🧴",
+      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Mehndi Stencil Stickers Pack",
+      "unit": "packet",
+      "price": 180,
+      "icon": "✨",
+      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Hair Henna Powder Packet 200g",
+      "unit": "packet",
+      "price": 200,
+      "icon": "🌿",
+      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Sindoor Box",
+      "unit": "piece",
+      "price": 120,
+      "icon": "💄",
+      "image": "assets/catalog-images/sindoor-6ca146.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bindi Packet of 20",
+      "unit": "packet",
+      "price": 80,
+      "icon": "🔴",
+      "nameUrdu": "بندی",
+      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Alta Bottle 15ml",
+      "unit": "piece",
+      "price": 150,
+      "icon": "💅",
+      "nameUrdu": "آلتا",
+      "image": "assets/catalog-images/alta-bottle-0c0f1a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Surma Stick",
+      "unit": "piece",
+      "price": 180,
+      "icon": "👁️",
+      "nameUrdu": "سرمہ",
+      "image": "assets/catalog-images/surma-stick-11a6c8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kohl Pencil",
+      "unit": "piece",
+      "price": 100,
+      "icon": "✏️",
+      "image": "assets/catalog-images/kohl-pencil-83b7a0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mehndi Design Book",
+      "unit": "piece",
+      "price": 300,
+      "icon": "📖",
+      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/mehndi-traditional-a77da0.webp"
+   },
+   {
+    "name": "Fragrances & Salon",
+    "items": [
+     {
+      "name": "Eau de Toilette Bottle 100ml",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "🌸",
+      "image": "assets/catalog-images/eau-de-toilette-bottle-622c96.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Perfume Spray 50ml",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🌸",
+      "image": "assets/catalog-images/perfume-spray-046045.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Attar Bottle 12ml",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🧴",
+      "nameUrdu": "عطر",
+      "image": "assets/catalog-images/attar-bottle-d31855.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Deodorant Spray 150ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧴",
+      "image": "assets/catalog-images/deodorant-spray-2345dc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Roll-On Deodorant 50ml",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧴",
+      "image": "assets/catalog-images/roll-on-deodorant-8b2dc1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Body Spray 120ml",
+      "unit": "piece",
+      "price": 480,
+      "icon": "🧴",
+      "image": "assets/catalog-images/body-spray-v2-e193ea.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Talcum Powder Tin 200g",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🫙",
+      "image": "assets/catalog-images/fragrances-salon-ef6100.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hair Cutting Scissors",
+      "unit": "piece",
+      "price": 650,
+      "icon": "✂️",
+      "image": "assets/catalog-images/hair-cutting-scissors-db81d5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Clipper Machine",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "💈",
+      "image": "assets/catalog-images/hair-clipper-machine-894526.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hair Dryer 2000W",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "💨",
+      "image": "assets/catalog-images/hair-dryer-dfc6dc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Nail Cutter Set of 3",
+      "unit": "packet",
+      "price": 350,
+      "icon": "✂️",
+      "image": "assets/catalog-images/nail-cutter-3-3a90e1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Manicure Set",
+      "unit": "box",
+      "price": 700,
+      "icon": "💅",
+      "image": "assets/catalog-images/manicure-33cd0d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Pedicure Kit",
+      "unit": "box",
+      "price": 900,
+      "icon": "🦶",
+      "image": "assets/catalog-images/pedicure-kit-e2dc7d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Facial Kit Box of 6 Steps",
+      "unit": "box",
+      "price": 1400,
+      "icon": "🧖",
+      "image": "assets/catalog-images/fragrances-salon-ef6100.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Wax Strips Pack of 20",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🩹",
+      "image": "assets/catalog-images/wax-strips-20-216089.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Threading Thread Spool",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🧵",
+      "image": "assets/catalog-images/threading-thread-spool-510140.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jeroen den Otter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/fragrances-salon-ef6100.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Jeroen den Otter",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/bleu-de-chanel-perfume-bottle-2b0JeJTEclQ",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Crockery, Kitchenware & Plastics",
+  "icon": "🍽️",
+  "categories": [
+   {
+    "name": "Steel Kitchenware",
+    "items": [
+     {
+      "name": "Steel Dinner Plate",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/steel-dinner-plate-c0a7e7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Bowl",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🥣",
+      "image": "assets/catalog-images/steel-bowl-c08300.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Glass",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🥛",
+      "image": "assets/catalog-images/steel-glass-53849a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Water Jug 2 Litre",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🫖",
+      "image": "assets/catalog-images/steel-water-jug-v2-49ea61.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Cooking Pot 5 Litre",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🍲",
+      "image": "assets/catalog-images/steel-cooking-pot-a0a7f4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Kadai",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🍳",
+      "image": "assets/catalog-images/steel-kadai-a47ec1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Spoon Set of 6",
+      "unit": "box",
+      "price": 350,
+      "icon": "🥄",
+      "image": "assets/catalog-images/steel-spoon-6-9eb4fb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Serving Tray",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/steel-serving-tray-d70a03.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Lunch Box 3 Tier",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍱",
+      "image": "assets/catalog-images/steel-kitchenware-d95b65.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Steel Tea Pot",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🫖",
+      "image": "assets/catalog-images/steel-tea-pot-f978a1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Dinner Set 32 Pieces",
+      "unit": "box",
+      "price": 6500,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/steel-dinner-e45483.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Storage Containers Set of 3",
+      "unit": "packet",
+      "price": 800,
+      "icon": "🫙",
+      "image": "assets/catalog-images/steel-storage-containers-3-1c93c7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Water Bottle 1 Litre",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍶",
+      "image": "assets/catalog-images/steel-water-bottle-8110d0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Milk Pot 2 Litre",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🥛",
+      "image": "assets/catalog-images/steel-milk-pot-c2255f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhaW5sZXNzJTIwc3RlZWwlMjBjb29raW5nJTIwcG90fGVufDF8fHx8MTc5MjI1NTUwNHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Justus Menke",
+       "profileUrl": "https://unsplash.com/@justusmenke",
+       "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/RSpq9P2vttE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhaW5sZXNzJTIwc3RlZWwlMjBjb29raW5nJTIwcG90fGVufDF8fHx8MTc5MjI1NTUwNHww",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/steel-kitchenware-d95b65.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1604414499020-f9ac575bc5ec?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Justus Menke",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/stainless-steel-cooking-pots-on-stainless-steel-tray-RSpq9P2vttE",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Plastic Storage & Household",
+    "items": [
+     {
+      "name": "Plastic Storage Container 5 Litre",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🫙",
+      "image": "assets/catalog-images/plastic-storage-container-b08f3c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Food Storage Box Set of 5",
+      "unit": "packet",
+      "price": 700,
+      "icon": "📦",
+      "image": "assets/catalog-images/food-storage-5-4a72e5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Water Jug",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🫖",
+      "image": "assets/catalog-images/plastic-water-jug-775c1c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Bucket 20 Litre",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🪣",
+      "image": "assets/catalog-images/plastic-bucket-e0661e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Mug",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🥛",
+      "image": "assets/catalog-images/plastic-mug-4c2898.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Laundry Basket",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧺",
+      "image": "assets/catalog-images/plastic-laundry-basket-b76447.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Serving Tray",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/plastic-serving-tray-c733f0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Dustbin with Lid",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🗑️",
+      "image": "assets/catalog-images/plastic-dustbin-lid-fbcd51.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Stool",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🪑",
+      "image": "assets/catalog-images/plastic-stool-2fe222.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Chair",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🪑",
+      "image": "assets/catalog-images/plastic-chair-c929f5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Folding Table",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🪑",
+      "image": "assets/catalog-images/plastic-folding-table-61d3b2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Water Cooler 14 Litre",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🧊",
+      "image": "assets/catalog-images/plastic-water-cooler-v2-e4235b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Plate Set of 6",
+      "unit": "packet",
+      "price": 500,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/plastic-plate-6-cf5099.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plastic Clothes Hangers Pack of 12",
+      "unit": "packet",
+      "price": 300,
+      "icon": "👕",
+      "image": "assets/catalog-images/plastic-clothes-hangers-12-2ce507.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/plastic-storage-household-1103ef.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1576729388723-8699e1a2bb23?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Syed Hussaini",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/orange-blue-and-green-plastic-containers-F2JwUVuRz2I",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Melamine & Dinnerware",
+    "items": [
+     {
+      "name": "Melamine Dinner Set 36 Pieces",
+      "unit": "box",
+      "price": 4500,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/melamine-dinner-v2-508de1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Melamine Dinner Plate",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/melamine-dinner-plate-v2-d36cdc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Melamine Bowl",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🥣",
+      "image": "assets/catalog-images/melamine-bowl-e6fe42.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Melamine Cup Set of 6",
+      "unit": "packet",
+      "price": 600,
+      "icon": "☕",
+      "image": "assets/catalog-images/melamine-cup-v2-8f4270.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Melamine Serving Tray",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/melamine-serving-v2-2a65fc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Melamine Soup Set",
+      "unit": "box",
+      "price": 1200,
+      "icon": "🍲",
+      "image": "assets/catalog-images/melamine-soup-v2-beda10.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bone China Cup Set of 6",
+      "unit": "packet",
+      "price": 1800,
+      "icon": "☕",
+      "image": "assets/catalog-images/bone-china-cup-6-9fd5ec.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ceramic Mug",
+      "unit": "piece",
+      "price": 250,
+      "icon": "☕",
+      "image": "assets/catalog-images/ceramic-mug-49c49e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ceramic Bowl Set of 4",
+      "unit": "packet",
+      "price": 700,
+      "icon": "🥣",
+      "image": "assets/catalog-images/ceramic-bowl-4-0f41dc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ceramic Serving Dish Set",
+      "unit": "box",
+      "price": 1500,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/ceramic-serving-dish-a33605.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/melamine-dinnerware-86979c.webp"
+   },
+   {
+    "name": "Cooking Tools",
+    "items": [
+     {
+      "name": "Non-Stick Frying Pan",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "🍳",
+      "image": "assets/catalog-images/non-stick-frying-pan-b20d65.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Non-Stick Cooking Pot",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🍲",
+      "image": "assets/catalog-images/non-stick-cooking-pot-983496.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pressure Cooker 5 Litre",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "🍲",
+      "image": "assets/catalog-images/pressure-cooker-077757.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Steel Tawa",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🫓",
+      "image": "assets/catalog-images/cooking-tools-b08c65.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Wooden Spoon Set of 4",
+      "unit": "packet",
+      "price": 250,
+      "icon": "🥄",
+      "image": "assets/catalog-images/wooden-spoon-4-eeea7b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silicone Spatula Set of 3",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🥄",
+      "image": "assets/catalog-images/cooking-tools-b08c65.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Kitchen Knife Set of 5",
+      "unit": "box",
+      "price": 800,
+      "icon": "🔪",
+      "image": "assets/catalog-images/kitchen-knife-5-1aa233.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chopping Board",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🪵",
+      "image": "assets/catalog-images/chopping-board-b40228.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Vegetable Grater",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🧀",
+      "image": "assets/catalog-images/vegetable-grater-v2-02613e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Vegetable Peeler",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🔪",
+      "image": "assets/catalog-images/vegetable-peeler-419faf.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rolling Pin with Board",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🫓",
+      "image": "assets/catalog-images/rolling-pin-board-526bbc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Masala Dabba (Spice Box)",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🫙",
+      "nameUrdu": "مصالحہ ڈبہ",
+      "image": "assets/catalog-images/masala-dabba-99e88b.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/cooking-tools-b08c65.webp"
+   },
+   {
+    "name": "Cleaning & Utility",
+    "items": [
+     {
+      "name": "Floor Mop with Stick",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🧹",
+      "image": "assets/catalog-images/cleaning-utility-a276a6.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Plastic Bucket 15 Litre",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🪣",
+      "image": "assets/catalog-images/plastic-bucket-e0661e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Small Bucket 5 Litre",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🪣",
+      "image": "assets/catalog-images/bucket-v2-679c8a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Grass Broom",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🧹",
+      "image": "assets/catalog-images/grass-broom-93c95a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dustpan with Brush",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🧹",
+      "image": "assets/catalog-images/dustpan-brush-399bda.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Scrub Pads Pack of 6",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🧽",
+      "image": "assets/catalog-images/scrub-pads-6-v2-d95920.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dish Sponges Pack of 4",
+      "unit": "packet",
+      "price": 100,
+      "icon": "🧽",
+      "image": "assets/catalog-images/dish-sponges-4-fd8c9c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Toilet Brush",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🧹",
+      "image": "assets/catalog-images/toilet-brush-2aaf62.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glass Cleaner Spray 500ml",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🧴",
+      "image": "assets/catalog-images/glass-cleaner-spray-256aa5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Washing Line Rope 20m",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🪢",
+      "image": "assets/catalog-images/cleaning-utility-a276a6.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/cleaning-utility-a276a6.webp"
+   },
+   {
+    "name": "Glass & Serving",
+    "items": [
+     {
+      "name": "Drinking Glass Set of 6",
+      "unit": "packet",
+      "price": 600,
+      "icon": "🥛",
+      "image": "assets/catalog-images/drinking-glass-6-ce3042.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glass Water Jug",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🫖",
+      "image": "assets/catalog-images/glass-water-jug-cb5772.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tea Cup Set of 6",
+      "unit": "packet",
+      "price": 700,
+      "icon": "☕",
+      "image": "assets/catalog-images/tea-cup-6-62db37.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1738197112505-f79710be93b5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8dGVhJTIwY3VwJTIwYW5kJTIwc2F1Y2VyJTIwc2V0fGVufDF8fHx8MTc5MjI1NTUxOHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Townsend Walton",
+       "profileUrl": "https://unsplash.com/@twalton",
+       "photoUrl": "https://unsplash.com/photos/a-white-coffee-cup-sitting-on-top-of-a-black-table-BYYvJl3tIqY",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/BYYvJl3tIqY/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8dGVhJTIwY3VwJTIwYW5kJTIwc2F1Y2VyJTIwc2V0fGVufDF8fHx8MTc5MjI1NTUxOHww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Drinking Glasses Dozen",
+      "unit": "dozen",
+      "price": 800,
+      "icon": "🥛",
+      "image": "assets/catalog-images/drinking-glasses-dozen-v2-86d2a7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glass Fruit Bowl",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍎",
+      "image": "assets/catalog-images/glass-fruit-bowl-0b1f83.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cake Stand",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍰",
+      "image": "assets/catalog-images/cake-stand-v2-f7677a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glass Storage Jar Set of 3",
+      "unit": "packet",
+      "price": 750,
+      "icon": "🫙",
+      "image": "assets/catalog-images/glass-storage-jar-3-3d8ab5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Serving Platter",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/serving-platter-669710.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ice Cube Tray",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🧊",
+      "image": "assets/catalog-images/ice-cube-tray-e2a983.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glass Dessert Cups Set of 6",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🍨",
+      "image": "assets/catalog-images/glass-dessert-cups-6-0d875d.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/glass-serving-v2-c782a6.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Furniture & Home Decor",
+  "icon": "🛋️",
+  "categories": [
+   {
+    "name": "Beds & Bedroom",
+    "items": [
+     {
+      "name": "Single Bed",
+      "unit": "piece",
+      "price": 18000,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/single-bed-ef9906.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Double Bed",
+      "unit": "piece",
+      "price": 28000,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/double-bed-3fd0cd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Charpai (Woven Rope Bed)",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🛏️",
+      "nameUrdu": "چارپائی",
+      "image": "assets/catalog-images/charpai-209e2d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Single Mattress",
+      "unit": "piece",
+      "price": 9000,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/single-mattress-c041ba.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Double Mattress",
+      "unit": "piece",
+      "price": 16000,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/double-mattress-80c60f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bed Sheet Set of 3",
+      "unit": "packet",
+      "price": 1500,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/bed-sheet-3-v2-f5213b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pillow Pair",
+      "unit": "packet",
+      "price": 900,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/pillow-d9c182.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Almari 3-Door",
+      "unit": "piece",
+      "price": 35000,
+      "icon": "🗄️",
+      "nameUrdu": "الماری",
+      "image": "assets/catalog-images/beds-bedroom-2f88c4.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Dressing Table with Mirror",
+      "unit": "piece",
+      "price": 14000,
+      "icon": "🪞",
+      "image": "assets/catalog-images/dressing-table-mirror-50794a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bedside Table",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/bedside-table-45de62.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Double Blanket",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🛌",
+      "image": "assets/catalog-images/double-blanket-81e47d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Quilt Set",
+      "unit": "packet",
+      "price": 3200,
+      "icon": "🛌",
+      "image": "assets/catalog-images/quilt-aa01b2.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/beds-bedroom-2f88c4.webp"
+   },
+   {
+    "name": "Seating",
+    "items": [
+     {
+      "name": "Sofa Set 5-Seater",
+      "unit": "piece",
+      "price": 55000,
+      "icon": "🛋️",
+      "image": "assets/catalog-images/sofa-5-seater-v2-428d1a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sofa Set 7-Seater",
+      "unit": "piece",
+      "price": 75000,
+      "icon": "🛋️",
+      "image": "assets/catalog-images/sofa-7-seater-66b3cb.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Armchair",
+      "unit": "piece",
+      "price": 9000,
+      "icon": "🪑",
+      "image": "assets/catalog-images/armchair-1152f7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sheesham Wood Chair",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🪑",
+      "image": "assets/catalog-images/sheesham-wood-chair-b2bbdd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Office Chair",
+      "unit": "piece",
+      "price": 8500,
+      "icon": "🪑",
+      "image": "assets/catalog-images/office-chair-faf380.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rocking Chair",
+      "unit": "piece",
+      "price": 7000,
+      "icon": "🪑",
+      "image": "assets/catalog-images/rocking-chair-a401bc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wooden Bench",
+      "unit": "piece",
+      "price": 6000,
+      "icon": "🪑",
+      "image": "assets/catalog-images/wooden-bench-c76084.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bean Bag",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🛋️",
+      "image": "assets/catalog-images/bean-bag-58f554.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cushion Set of 5",
+      "unit": "packet",
+      "price": 1200,
+      "icon": "🛋️",
+      "image": "assets/catalog-images/cushion-5-d739f7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sofa Cover Set",
+      "unit": "packet",
+      "price": 2800,
+      "icon": "🛋️",
+      "image": "assets/catalog-images/sofa-cover-e9f1c2.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/seating-b12082.webp"
+   },
+   {
+    "name": "Tables",
+    "items": [
+     {
+      "name": "Dining Table 6-Seater",
+      "unit": "piece",
+      "price": 25000,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/dining-table-6-seater-44df10.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Coffee Table",
+      "unit": "piece",
+      "price": 8000,
+      "icon": "🪑",
+      "image": "assets/catalog-images/coffee-table-ad4aa9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Study Table",
+      "unit": "piece",
+      "price": 7000,
+      "icon": "📚",
+      "image": "assets/catalog-images/study-table-362de0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Center Table",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🪑",
+      "image": "assets/catalog-images/center-table-cdf954.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Console Table",
+      "unit": "piece",
+      "price": 9000,
+      "icon": "🪑",
+      "image": "assets/catalog-images/console-table-e4ec9d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Folding Table",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🪑",
+      "image": "assets/catalog-images/folding-table-v2-6b8240.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "TV Stand",
+      "unit": "piece",
+      "price": 11000,
+      "icon": "📺",
+      "image": "assets/catalog-images/tv-stand-4e18b3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Computer Table",
+      "unit": "piece",
+      "price": 8500,
+      "icon": "💻",
+      "image": "assets/catalog-images/computer-table-2702a6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ironing Board",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "👕",
+      "image": "assets/catalog-images/ironing-board-a146af.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Nesting Tables Set of 3",
+      "unit": "packet",
+      "price": 5500,
+      "icon": "🪑",
+      "image": "assets/catalog-images/nesting-tables-3-v2-29e97a.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/tables-651ae5.webp"
+   },
+   {
+    "name": "Curtains & Flooring",
+    "items": [
+     {
+      "name": "Curtain Pair",
+      "unit": "packet",
+      "price": 1800,
+      "icon": "🪟",
+      "image": "assets/catalog-images/curtain-6439bc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Curtain Rod Set",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🪟",
+      "image": "assets/catalog-images/curtain-rod-ed769f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Window Blinds",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🪟",
+      "image": "assets/catalog-images/window-blinds-v2-34376b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Carpet 8x10 ft",
+      "unit": "piece",
+      "price": 12000,
+      "icon": "🧶",
+      "image": "assets/catalog-images/carpet-8x-6b5ee9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Prayer Mat",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🕌",
+      "nameUrdu": "جائے نماز",
+      "image": "assets/catalog-images/prayer-mat-81bfb0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Door Mat",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🚪",
+      "image": "assets/catalog-images/door-mat-28929b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Floor Rug",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "🧶",
+      "image": "assets/catalog-images/floor-rug-44db64.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Table Runner",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🍽️",
+      "image": "assets/catalog-images/table-runner-v2-e49c0d.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/curtains-flooring-v2-dcb521.webp"
+   },
+   {
+    "name": "Decor & Lighting",
+    "items": [
+     {
+      "name": "Wall Clock",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🕐",
+      "image": "assets/catalog-images/wall-clock-97ce0f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Table Lamp",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "💡",
+      "image": "assets/catalog-images/table-lamp-77296e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Floor Lamp",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "💡",
+      "image": "assets/catalog-images/floor-lamp-v2-647cfd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chandelier",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "💡",
+      "image": "assets/catalog-images/chandelier-f94608.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wall Art Frame",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🖼️",
+      "image": "assets/catalog-images/wall-art-frame-ac31df.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Photo Frame Set of 3",
+      "unit": "packet",
+      "price": 600,
+      "icon": "🖼️",
+      "image": "assets/catalog-images/photo-frame-3-cd924d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Artificial Plant",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🪴",
+      "image": "assets/catalog-images/artificial-plant-6a2cf6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ceramic Vase",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🏺",
+      "image": "assets/catalog-images/ceramic-vase-3e3868.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wall Mirror",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🪞",
+      "image": "assets/catalog-images/wall-mirror-261c06.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Candle Holder Set of 2",
+      "unit": "packet",
+      "price": 500,
+      "icon": "🕯️",
+      "image": "assets/catalog-images/candle-holder-2-v2-a56de3.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/decor-lighting-2c5ebd.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Toys & Baby Care",
+  "icon": "🧸",
+  "categories": [
+   {
+    "name": "Dolls & Action Figures",
+    "items": [
+     {
+      "name": "Fashion Doll",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🧸",
+      "image": "assets/catalog-images/fashion-doll-73f88a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Doll Play Set",
+      "unit": "box",
+      "price": 1200,
+      "icon": "🧸",
+      "image": "assets/catalog-images/doll-play-2024cb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Action Figure",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🦸",
+      "image": "assets/catalog-images/action-figure-44fc93.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Remote Control Car",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🚗",
+      "image": "assets/catalog-images/remote-control-car-728f8f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Remote Control Helicopter",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🚁",
+      "image": "assets/catalog-images/remote-control-helicopter-986bd4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Toy Dart Gun",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🔫",
+      "image": "assets/catalog-images/toy-dart-gun-3adf32.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dancing Robot Toy",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🤖",
+      "image": "assets/catalog-images/dancing-robot-toy-6b2231.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dinosaur Figures Set of 6",
+      "unit": "packet",
+      "price": 900,
+      "icon": "🦕",
+      "image": "assets/catalog-images/dinosaur-figures-6-44f5b1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Superhero Figures Set of 4",
+      "unit": "packet",
+      "price": 1100,
+      "icon": "🦸",
+      "image": "assets/catalog-images/superhero-figures-4-701b8f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Toy Kitchen Set",
+      "unit": "box",
+      "price": 1600,
+      "icon": "🍳",
+      "image": "assets/catalog-images/toy-kitchen-abea3c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Doctor Play Set",
+      "unit": "box",
+      "price": 950,
+      "icon": "🩺",
+      "image": "assets/catalog-images/doctor-play-v2-abc0dc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Tool Play Set",
+      "unit": "box",
+      "price": 850,
+      "icon": "🔧",
+      "image": "assets/catalog-images/tool-play-cf4ef4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tapio Haaja",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/dolls-action-figures-7b389b.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1546792913-cfec613d2163?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Tapio Haaja",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/assorted-doll-collection-07cKMGEjCnE",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Building & Learning",
+    "items": [
+     {
+      "name": "Building Blocks Set of 100",
+      "unit": "box",
+      "price": 1500,
+      "icon": "🧱",
+      "image": "assets/catalog-images/building-blocks-100-v2-6786d9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Brick Construction Box",
+      "unit": "box",
+      "price": 2200,
+      "icon": "🧱",
+      "image": "assets/catalog-images/brick-construction-7c1aee.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Jigsaw Puzzle 500 Pieces",
+      "unit": "box",
+      "price": 600,
+      "icon": "🧩",
+      "image": "assets/catalog-images/jigsaw-puzzle-093c69.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Alphabet Learning Set",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🔤",
+      "image": "assets/catalog-images/alphabet-learning-9d731c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Number Counting Toy",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🔢",
+      "image": "assets/catalog-images/number-counting-toy-v2-f1b681.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shape Sorter Cube",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🔷",
+      "image": "assets/catalog-images/shape-sorter-cube-129822.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Magnetic Tiles Set",
+      "unit": "box",
+      "price": 1800,
+      "icon": "🧲",
+      "image": "assets/catalog-images/magnetic-tiles-a7ac25.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Stacking Rings Toy",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🎯",
+      "image": "assets/catalog-images/stacking-rings-toy-1eb522.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wooden Abacus",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🔢",
+      "image": "assets/catalog-images/wooden-abacus-08c463.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Science Experiment Kit",
+      "unit": "box",
+      "price": 1300,
+      "icon": "🔬",
+      "image": "assets/catalog-images/science-experiment-kit-208a20.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/building-learning-e42617.webp"
+   },
+   {
+    "name": "Ride-On & Outdoor",
+    "items": [
+     {
+      "name": "Kids Tricycle",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🚲",
+      "image": "assets/catalog-images/kids-tricycle-v2-248383.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Bicycle 16 inch",
+      "unit": "piece",
+      "price": 12000,
+      "icon": "🚲",
+      "image": "assets/catalog-images/kids-bicycle-4bef94.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kick Scooter",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🛴",
+      "image": "assets/catalog-images/kick-scooter-4ce32c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Skateboard",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🛹",
+      "image": "assets/catalog-images/skateboard-974a2f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Football Size 5",
+      "unit": "piece",
+      "price": 900,
+      "icon": "⚽",
+      "image": "assets/catalog-images/football-size-5-e3a66e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cricket Bat",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🏏",
+      "image": "assets/catalog-images/ride-on-outdoor-v2-832787.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Tennis Balls Set of 3",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🎾",
+      "image": "assets/catalog-images/tennis-balls-3-ef098b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Badminton Racket Set",
+      "unit": "packet",
+      "price": 1500,
+      "icon": "🏸",
+      "image": "assets/catalog-images/badminton-racket-d875d3.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/ride-on-outdoor-v2-832787.webp"
+   },
+   {
+    "name": "Baby Essentials",
+    "items": [
+     {
+      "name": "Baby Diapers Pack of 24",
+      "unit": "packet",
+      "price": 750,
+      "icon": "👶",
+      "image": "assets/catalog-images/baby-diapers-24-5bea9d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Wipes Pack of 72",
+      "unit": "packet",
+      "price": 420,
+      "icon": "🧻",
+      "image": "assets/catalog-images/baby-wipes-72-fc3a2a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Milk Powder Tin 400g",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🍼",
+      "image": "assets/catalog-images/baby-essentials-7b6496.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Baby Feeding Bottle 250ml",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍼",
+      "image": "assets/catalog-images/baby-feeding-bottle-edd165.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Lotion 200ml",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-lotion-bc427e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Shampoo 200ml",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🧴",
+      "image": "assets/catalog-images/baby-shampoo-7f1b47.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Soap Bar",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🧼",
+      "image": "assets/catalog-images/baby-soap-bar-1e341d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Hooded Towel",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧣",
+      "image": "assets/catalog-images/baby-essentials-7b6496.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Baby Blanket",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🛌",
+      "image": "assets/catalog-images/baby-blanket-v2-c429e0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Carrier",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "👶",
+      "image": "assets/catalog-images/baby-carrier-fb5bbc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Teether Set of 3",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🍼",
+      "image": "assets/catalog-images/teether-3-b4283d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Rattle Set of 4",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🔔",
+      "image": "assets/catalog-images/baby-rattle-4-f71bcd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jaye Haych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/baby-essentials-7b6496.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Jaye Haych",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Soft Toys & Games",
+    "items": [
+     {
+      "name": "Large Teddy Bear",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "🧸",
+      "image": "assets/catalog-images/teddy-bear-434a2e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Small Teddy Bear",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🧸",
+      "image": "assets/catalog-images/teddy-bear-434a2e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Plush Bunny",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🐰",
+      "image": "assets/catalog-images/plush-bunny-fcbe45.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ludo Board Game",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🎲",
+      "image": "assets/catalog-images/ludo-board-game-8bbb5e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1642056446796-8c7d1dcb630b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bHVkbyUyMGJvYXJkJTIwZ2FtZXxlbnwxfHx8fDE3OTIyNTU1MDN8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "VD Photography",
+       "profileUrl": "https://unsplash.com/@vdphotography",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-dice-on-a-board-game-pCvyg4e_Kn4",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/pCvyg4e_Kn4/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bHVkbyUyMGJvYXJkJTIwZ2FtZXxlbnwxfHx8fDE3OTIyNTU1MDN8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chess Set",
+      "unit": "box",
+      "price": 800,
+      "icon": "♟️",
+      "image": "assets/catalog-images/chess-0727c2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Carrom Board",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🎯",
+      "image": "assets/catalog-images/carrom-board-ea622e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Playing Cards Deck",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🃏",
+      "image": "assets/catalog-images/playing-cards-deck-6f5edd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Water Gun",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🔫",
+      "image": "assets/catalog-images/water-gun-v2-39e164.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/soft-toys-games-6317e6.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Pet, Poultry Feed & Veterinary",
+  "icon": "🐔",
+  "categories": [
+   {
+    "name": "Poultry Feed",
+    "items": [
+     {
+      "name": "Broiler Starter Feed 50kg",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🌾",
+      "image": "assets/catalog-images/poultry-feed-966b4e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Layer Feed 50kg",
+      "unit": "piece",
+      "price": 6200,
+      "icon": "🌾",
+      "image": "assets/catalog-images/layer-feed-bfefd1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chick Starter Crumb 25kg",
+      "unit": "piece",
+      "price": 3400,
+      "icon": "🌾",
+      "image": "assets/catalog-images/poultry-feed-966b4e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Maize Feed 50kg",
+      "unit": "piece",
+      "price": 5800,
+      "icon": "🌽",
+      "image": "assets/catalog-images/maize-feed-20015d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wheat Bran 20kg",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🌾",
+      "image": "assets/catalog-images/wheat-bran-31f735.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rice Polish 20kg",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🍚",
+      "image": "assets/catalog-images/rice-polish-fd951c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fish Meal 5kg",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🐟",
+      "image": "assets/catalog-images/fish-meal-4d1e62.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bone Meal 5kg",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🦴",
+      "image": "assets/catalog-images/bone-meal-fe22dd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mineral Mixture 1kg",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🧂",
+      "image": "assets/catalog-images/mineral-mixture-4cc7e5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Vitamin Premix Packet",
+      "unit": "packet",
+      "price": 600,
+      "icon": "💊",
+      "image": "assets/catalog-images/poultry-feed-966b4e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Mustard Cake 20kg",
+      "unit": "piece",
+      "price": 2400,
+      "icon": "🌾",
+      "image": "assets/catalog-images/mustard-cake-2aeb4e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sunflower Meal 10kg",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🌻",
+      "image": "assets/catalog-images/sunflower-meal-39c89f.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/poultry-feed-966b4e.webp"
+   },
+   {
+    "name": "Pet Food",
+    "items": [
+     {
+      "name": "Dog Dry Food 5kg Bag",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🐶",
+      "image": "assets/catalog-images/pet-food-f4f2dc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Dog Food 1kg Pack",
+      "unit": "packet",
+      "price": 750,
+      "icon": "🐶",
+      "image": "assets/catalog-images/dog-food-6d32dd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cat Dry Food 2kg",
+      "unit": "packet",
+      "price": 2200,
+      "icon": "🐱",
+      "image": "assets/catalog-images/cat-dry-food-705bd4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cat Wet Food Cans Pack of 12",
+      "unit": "box",
+      "price": 1800,
+      "icon": "🐱",
+      "image": "assets/catalog-images/cat-wet-food-cans-5df0df.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bird Seed Mix 1kg",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🐦",
+      "image": "assets/catalog-images/bird-seed-mix-b243d5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Parrot Food Mix 1kg",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🦜",
+      "image": "assets/catalog-images/pet-food-f4f2dc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Fish Flakes Jar",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🐟",
+      "image": "assets/catalog-images/pet-food-f4f2dc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Fish Pellets Pack",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🐟",
+      "image": "assets/catalog-images/fish-pellets-a6abdf.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rabbit Pellets 1kg",
+      "unit": "packet",
+      "price": 500,
+      "icon": "🐰",
+      "image": "assets/catalog-images/rabbit-pellets-a54a46.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Hamster Food Pack",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🐹",
+      "image": "assets/catalog-images/hamster-food-d324e7.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/pet-food-f4f2dc.webp"
+   },
+   {
+    "name": "Bird & Small Animal Supplies",
+    "items": [
+     {
+      "name": "Bird Cage Medium",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🐦",
+      "image": "assets/catalog-images/bird-cage-v2-c44541.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bird Water Feeder",
+      "unit": "piece",
+      "price": 300,
+      "icon": "💧",
+      "image": "assets/catalog-images/bird-water-feeder-01657d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pet Food Bowl",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🥣",
+      "image": "assets/catalog-images/pet-food-bowl-9c2fd7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wooden Bird Perch",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🪵",
+      "image": "assets/catalog-images/wooden-bird-perch-ea64ce.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bird Nest Box",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🏠",
+      "image": "assets/catalog-images/bird-nest-0dad94.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bird Toys Set",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🧸",
+      "image": "assets/catalog-images/bird-toys-efe7db.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Aquarium 2ft",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🐠",
+      "image": "assets/catalog-images/aquarium-0a3bfe.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Aquarium Filter",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "💧",
+      "image": "assets/catalog-images/aquarium-filter-e5efad.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/bird-small-animal-supplies-eced04.webp"
+   },
+   {
+    "name": "Veterinary Basics",
+    "items": [
+     {
+      "name": "Deworming Tablets Box of 10",
+      "unit": "box",
+      "price": 600,
+      "icon": "💊",
+      "image": "assets/catalog-images/deworming-tablets-v2-926689.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Flea Powder Bottle 100g",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧴",
+      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Antiseptic Spray for Animals 100ml",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🧴",
+      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Livestock Wound Ointment",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🧴",
+      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Cattle Calcium Supplement 1kg",
+      "unit": "packet",
+      "price": 500,
+      "icon": "🐄",
+      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Poultry Electrolyte Powder",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🐔",
+      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Poultry Drinker 5 Litre",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🐔",
+      "image": "assets/catalog-images/poultry-drinker-0f0399.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Poultry Feeder Tray",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🐔",
+      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Heat Lamp Bulb 250W",
+      "unit": "piece",
+      "price": 400,
+      "icon": "💡",
+      "image": "assets/catalog-images/heat-lamp-bulb-af6468.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pet Shampoo Bottle 250ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧴",
+      "image": "assets/catalog-images/pet-shampoo-bottle-455f10.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/veterinary-basics-f47b8c.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Stationery, Books & Printing",
+  "icon": "📚",
+  "categories": [
+   {
+    "name": "Writing",
+    "items": [
+     {
+      "name": "Ball Pen",
+      "unit": "piece",
+      "price": 30,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/ball-pen-v2-30fa51.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gel Pen",
+      "unit": "piece",
+      "price": 60,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/gel-pen-f50523.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fountain Pen",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/fountain-pen-c54cf7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Lead Pencil",
+      "unit": "piece",
+      "price": 20,
+      "icon": "✏️",
+      "image": "assets/catalog-images/lead-pencil-7c75ad.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pencil Box",
+      "unit": "piece",
+      "price": 180,
+      "icon": "📦",
+      "image": "assets/catalog-images/pencil-b1e217.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Eraser",
+      "unit": "piece",
+      "price": 20,
+      "icon": "🧽",
+      "image": "assets/catalog-images/eraser-1432aa.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sharpener",
+      "unit": "piece",
+      "price": 30,
+      "icon": "✏️",
+      "image": "assets/catalog-images/sharpener-cb7592.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Highlighter Set of 4",
+      "unit": "packet",
+      "price": 220,
+      "icon": "🖍️",
+      "image": "assets/catalog-images/highlighter-4-4c369c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Marker Set of 6",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/marker-6-40ee06.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Permanent Marker",
+      "unit": "piece",
+      "price": 80,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/permanent-marker-v2-d0c0b4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Whiteboard Marker",
+      "unit": "piece",
+      "price": 90,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/whiteboard-marker-010346.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pen Refills Pack of 10",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🖊️",
+      "image": "assets/catalog-images/pen-refills-10-e3f9dc.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/writing-af96ab.webp"
+   },
+   {
+    "name": "Paper & Notebooks",
+    "items": [
+     {
+      "name": "A4 Paper Ream 500 Sheets",
+      "unit": "piece",
+      "price": 950,
+      "icon": "📄",
+      "image": "assets/catalog-images/paper-notebooks-7ef400.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Single Line Notebook",
+      "unit": "piece",
+      "price": 150,
+      "icon": "📓",
+      "image": "assets/catalog-images/single-line-notebook-v2-9b6608.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Math Notebook",
+      "unit": "piece",
+      "price": 140,
+      "icon": "📓",
+      "image": "assets/catalog-images/math-notebook-47c4ac.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Drawing Book",
+      "unit": "piece",
+      "price": 120,
+      "icon": "📓",
+      "image": "assets/catalog-images/drawing-book-8fc26b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Graph Notebook",
+      "unit": "piece",
+      "price": 160,
+      "icon": "📓",
+      "image": "assets/catalog-images/graph-notebook-v2-12a406.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hardcover Diary",
+      "unit": "piece",
+      "price": 600,
+      "icon": "📔",
+      "image": "assets/catalog-images/hardcover-diary-288441.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Register 200 Pages",
+      "unit": "piece",
+      "price": 350,
+      "icon": "📒",
+      "image": "assets/catalog-images/register-200-pages-v2-339290.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Register 400 Pages",
+      "unit": "piece",
+      "price": 650,
+      "icon": "📒",
+      "image": "assets/catalog-images/register-400-pages-8dd83a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Sticky Notes Pack",
+      "unit": "packet",
+      "price": 180,
+      "icon": "📝",
+      "image": "assets/catalog-images/sticky-notes-048262.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Envelopes Pack of 10",
+      "unit": "packet",
+      "price": 150,
+      "icon": "✉️",
+      "image": "assets/catalog-images/envelopes-10-0e8043.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Chart Paper",
+      "unit": "piece",
+      "price": 40,
+      "icon": "📄",
+      "image": "assets/catalog-images/chart-paper-7bd052.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Brown Paper Roll",
+      "unit": "piece",
+      "price": 300,
+      "icon": "📜",
+      "image": "assets/catalog-images/brown-paper-roll-32fee5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Tracing Paper Pack",
+      "unit": "packet",
+      "price": 200,
+      "icon": "📄",
+      "image": "assets/catalog-images/tracing-paper-71a52e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "File Folder",
+      "unit": "piece",
+      "price": 60,
+      "icon": "📁",
+      "image": "assets/catalog-images/file-folder-v2-939103.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Bernd Klutsch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/paper-notebooks-7ef400.webp",
+    "imageUrl": "https://images.unsplash.com/flagged/photo-1558963675-94dc9c4a66a9?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Bernd Klutsch",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/pile-of-books-nE2HV5AUXFo",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Art & Craft",
+    "items": [
+     {
+      "name": "Color Pencils Box of 12",
+      "unit": "box",
+      "price": 350,
+      "icon": "🖍️",
+      "image": "assets/catalog-images/color-pencils-12-20d63e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wax Crayons Box of 12",
+      "unit": "box",
+      "price": 250,
+      "icon": "🖍️",
+      "image": "assets/catalog-images/wax-crayons-12-7be247.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Watercolor Paint Set",
+      "unit": "box",
+      "price": 400,
+      "icon": "🎨",
+      "image": "assets/catalog-images/watercolor-paint-v2-5d9fc0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Poster Colors Set of 12",
+      "unit": "box",
+      "price": 550,
+      "icon": "🎨",
+      "image": "assets/catalog-images/poster-colors-12-v2-526d53.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Paint Brushes Set of 6",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🖌️",
+      "image": "assets/catalog-images/paint-brushes-6-e35d68.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glue Stick",
+      "unit": "piece",
+      "price": 80,
+      "icon": "🧴",
+      "image": "assets/catalog-images/glue-stick-32029c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glue Bottle 100ml",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🧴",
+      "image": "assets/catalog-images/glue-bottle-600b2d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Craft Scissors",
+      "unit": "piece",
+      "price": 180,
+      "icon": "✂️",
+      "image": "assets/catalog-images/craft-scissors-333edc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Craft Paper Pack",
+      "unit": "packet",
+      "price": 250,
+      "icon": "📄",
+      "image": "assets/catalog-images/craft-paper-f281f9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tape Roll",
+      "unit": "piece",
+      "price": 90,
+      "icon": "📦",
+      "image": "assets/catalog-images/tape-roll-374aa9.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/art-craft-v2-cabef2.webp"
+   },
+   {
+    "name": "Office & Desk",
+    "items": [
+     {
+      "name": "Stapler",
+      "unit": "piece",
+      "price": 350,
+      "icon": "📎",
+      "image": "assets/catalog-images/stapler-v2-b7ae9c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Staple Pins Box",
+      "unit": "box",
+      "price": 120,
+      "icon": "📎",
+      "image": "assets/catalog-images/staple-pins-d7f28c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1559743341-7fef133c7c6a?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhcGxlciUyMGFuZCUyMHN0YXBsZXN8ZW58MXx8fHwxNzkyMjU1NTExfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Brett Jordan",
+       "profileUrl": "https://unsplash.com/@brett_jordan",
+       "photoUrl": "https://unsplash.com/photos/black-and-orange-optima-stapler-xG5caIE3tLU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xG5caIE3tLU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8c3RhcGxlciUyMGFuZCUyMHN0YXBsZXN8ZW58MXx8fHwxNzkyMjU1NTExfDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Paper Clips Box",
+      "unit": "box",
+      "price": 100,
+      "icon": "📎",
+      "image": "assets/catalog-images/paper-clips-4ae9b2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Paper Punch",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🕳️",
+      "image": "assets/catalog-images/paper-punch-9261f9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Calculator 12-Digit",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🧮",
+      "image": "assets/catalog-images/calculator-12-digit-009a54.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Desk Organizer",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🗂️",
+      "image": "assets/catalog-images/desk-organizer-v2-0dba16.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Stamp Pad",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🖨️",
+      "image": "assets/catalog-images/stamp-pad-4e157b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Custom Rubber Stamp",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🖨️",
+      "image": "assets/catalog-images/office-desk-149283.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Paper Cutter",
+      "unit": "piece",
+      "price": 250,
+      "icon": "✂️",
+      "image": "assets/catalog-images/paper-cutter-9f2a9e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Correction Tape",
+      "unit": "piece",
+      "price": 120,
+      "icon": "📝",
+      "image": "assets/catalog-images/correction-tape-6f3b6d.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/office-desk-149283.webp"
+   },
+   {
+    "name": "School Supplies",
+    "items": [
+     {
+      "name": "Geometry Box",
+      "unit": "box",
+      "price": 450,
+      "icon": "📐",
+      "image": "assets/catalog-images/geometry-d9c633.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "School Bag",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🎒",
+      "image": "assets/catalog-images/school-bag-product-v2-4a2fdc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Lunch Box",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🍱",
+      "image": "assets/catalog-images/lunch-f1e8a2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "School Water Bottle",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🍶",
+      "image": "assets/catalog-images/school-water-bottle-v2-e69749.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Compass Divider",
+      "unit": "piece",
+      "price": 120,
+      "icon": "📐",
+      "image": "assets/catalog-images/compass-divider-112082.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Protractor Set",
+      "unit": "packet",
+      "price": 150,
+      "icon": "📐",
+      "image": "assets/catalog-images/protractor-fd9a22.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ruler 12 inch",
+      "unit": "piece",
+      "price": 60,
+      "icon": "📏",
+      "image": "assets/catalog-images/ruler-eada47.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Scale Set of 3",
+      "unit": "packet",
+      "price": 100,
+      "icon": "📏",
+      "image": "assets/catalog-images/scale-3-ba279a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Exam Board",
+      "unit": "piece",
+      "price": 350,
+      "icon": "📋",
+      "image": "assets/catalog-images/exam-board-v2-6358e0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Uniform Belt",
+      "unit": "piece",
+      "price": 250,
+      "icon": "👔",
+      "image": "assets/catalog-images/uniform-belt-v2-960087.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "School Tie",
+      "unit": "piece",
+      "price": 200,
+      "icon": "👔",
+      "image": "assets/catalog-images/school-tie-v2-887588.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "School Socks Pair",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🧦",
+      "image": "assets/catalog-images/school-socks-v2-fa99ac.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640025867572-f6b3a8410c81?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Zm9sZGVkJTIwc29ja3MlMjBwYWlyfGVufDF8fHx8MTc5MjI1NTUxMHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "NIKHIL",
+       "profileUrl": "https://unsplash.com/@vinikhill",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-socks-laying-on-top-of-a-yellow-surface-Xd_YG4iJLUo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Xd_YG4iJLUo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Zm9sZGVkJTIwc29ja3MlMjBwYWlyfGVufDF8fHx8MTc5MjI1NTUxMHww",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/school-supplies-v2-69dbf7.webp"
+   },
+   {
+    "name": "Books & Printing",
+    "items": [
+     {
+      "name": "Quran with Urdu Translation",
+      "unit": "piece",
+      "price": 900,
+      "icon": "📖",
+      "nameUrdu": "قرآن مجید",
+      "image": "assets/catalog-images/quran-urdu-translation-ab2823.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "English-Urdu Dictionary",
+      "unit": "piece",
+      "price": 650,
+      "icon": "📖",
+      "image": "assets/catalog-images/english-urdu-dictionary-c6ea2e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "English Grammar Book",
+      "unit": "piece",
+      "price": 450,
+      "icon": "📖",
+      "image": "assets/catalog-images/english-grammar-book-product-v2-adaa82.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Story Book",
+      "unit": "piece",
+      "price": 300,
+      "icon": "📖",
+      "image": "assets/catalog-images/kids-story-book-v2-557332.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Coloring Book",
+      "unit": "piece",
+      "price": 250,
+      "icon": "📖",
+      "image": "assets/catalog-images/coloring-book-f1d545.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Paperback Novel",
+      "unit": "piece",
+      "price": 700,
+      "icon": "📖",
+      "image": "assets/catalog-images/paperback-novel-d7320f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Poetry Book (Diwan)",
+      "unit": "piece",
+      "price": 500,
+      "icon": "📖",
+      "nameUrdu": "دیوان",
+      "image": "assets/catalog-images/poetry-book-c2bb32.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Exam Past Papers Book",
+      "unit": "piece",
+      "price": 550,
+      "icon": "📖",
+      "image": "assets/catalog-images/books-printing-f6fea0.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Photocopy (per page)",
+      "unit": "piece",
+      "price": 5,
+      "icon": "📄",
+      "image": "assets/catalog-images/photocopy-6ecb4f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Printout (per page)",
+      "unit": "piece",
+      "price": 10,
+      "icon": "🖨️",
+      "image": "assets/catalog-images/printout-20c933.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Spiral Binding",
+      "unit": "piece",
+      "price": 150,
+      "icon": "📎",
+      "image": "assets/catalog-images/spiral-binding-2903d1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Lamination (per sheet)",
+      "unit": "piece",
+      "price": 60,
+      "icon": "📄",
+      "image": "assets/catalog-images/lamination-388584.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/books-printing-f6fea0.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Mobile & Electronics",
+  "icon": "📱",
+  "categories": [
+   {
+    "name": "Phone Accessories",
+    "items": [
+     {
+      "name": "Tempered Glass Protector 11D",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🛡️",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Transparent Silicone Back Cover",
+      "unit": "piece",
+      "price": 350,
+      "icon": "📱",
+      "image": "assets/catalog-images/transparent-silicone-v2-474313.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Printed Designer Back Cover",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🎨",
+      "image": "assets/catalog-images/printed-designer-back-cover-eb9e60.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Leather Flip Pouch Cover",
+      "unit": "piece",
+      "price": 850,
+      "icon": "👝",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Metal Ring Holder Stand",
+      "unit": "piece",
+      "price": 250,
+      "icon": "💍",
+      "image": "assets/catalog-images/metal-ring-holder-stand-3e7467.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Pop Socket Grip",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🔘",
+      "image": "assets/catalog-images/pop-socket-grip-bdc332.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Neck Strap Lanyard",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🎗️",
+      "image": "assets/catalog-images/neck-strap-lanyard-076d2e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Bluetooth Selfie Stick",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🤳",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Flexible Mobile Tripod",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🎥",
+      "image": "assets/catalog-images/flexible-mobile-tripod-dfbb7b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Car Dashboard Mobile Holder",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🚗",
+      "image": "assets/catalog-images/car-dashboard-mobile-holder-222087.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Bike Handle Mobile Holder",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🏍️",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Foldable Desktop Mobile Stand",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🖥️",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "PUBG Finger Sleeves Pair",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🎮",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mobile Game Trigger Pair",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🎯",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Phone Cooling Fan Attachment",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "❄️",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "USB OTG Adapter Type-C",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🔌",
+      "image": "assets/catalog-images/usb-otg-adapter-type-576245.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "SIM Ejector Pin 5-pack",
+      "unit": "packet",
+      "price": 100,
+      "icon": "📌",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mobile Camera Lens Kit 3-in-1",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "📷",
+      "image": "assets/catalog-images/mobile-camera-lens-kit-c75e83.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Charging Port Dust Plugs 10-pack",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🔌",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Earphone Carry Case",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🎧",
+      "image": "assets/catalog-images/earphone-carry-case-v2-f9ffe8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Smart Watch Silicone Strap",
+      "unit": "piece",
+      "price": 650,
+      "icon": "⌚",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "OTG Card Reader",
+      "unit": "piece",
+      "price": 550,
+      "icon": "💾",
+      "image": "assets/catalog-images/otg-card-reader-c7408a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+     },
+     {
+      "name": "Phone Camera Protector Ring",
+      "unit": "piece",
+      "price": 200,
+      "icon": "📷",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Magnetic Car Mount Vent Clip",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🧲",
+      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vadim Sherbakov",
+       "profileUrl": "https://unsplash.com/@madebyvadim",
+       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/phone-accessories-7e4585.webp",
+    "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Vadim Sherbakov",
+     "profileUrl": "https://unsplash.com/@madebyvadim",
+     "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Chargers & Power",
+    "items": [
+     {
+      "name": "Fast Charger 25W",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🔌",
+      "image": "assets/catalog-images/fast-charger-5497cd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Super Fast Charger 45W",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "⚡",
+      "image": "assets/catalog-images/super-fast-charger-1b4754.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "GaN Charger 65W",
+      "unit": "piece",
+      "price": 3950,
+      "icon": "⚡",
+      "image": "assets/catalog-images/gan-charger-v2-4ae1bb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Type-C Fast Cable 1m",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🔗",
+      "image": "assets/catalog-images/type-c-fast-cable-9d3241.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Type-C Cable 2m Braided",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🔗",
+      "image": "assets/catalog-images/chargers-power-v2-e852e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "iPhone Lightning Cable 1m",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🍎",
+      "image": "assets/catalog-images/chargers-power-v2-e852e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Micro USB Cable 1m",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🔗",
+      "image": "assets/catalog-images/micro-usb-cable-1m-d83d53.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "3-in-1 Multi Charging Cable",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🔗",
+      "image": "assets/catalog-images/3-in-1-multi-c5a0b8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1572721546624-05bf65ad7679?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8dXNiJTIwY2hhcmdpbmclMjBjYWJsZXN8ZW58MXx8fHwxNzkyMjU1NDk3fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lucian Alexe",
+       "profileUrl": "https://unsplash.com/@lucian_alexe",
+       "photoUrl": "https://unsplash.com/photos/orange-usb-cables-yh0UtueiZ-I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/yh0UtueiZ-I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8dXNiJTIwY2hhcmdpbmclMjBjYWJsZXN8ZW58MXx8fHwxNzkyMjU1NDk3fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Power Bank 10000mAh",
+      "unit": "piece",
+      "price": 3450,
+      "icon": "🔋",
+      "image": "assets/catalog-images/power-bank-de84d7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Power Bank 20000mAh",
+      "unit": "piece",
+      "price": 5450,
+      "icon": "🔋",
+      "image": "assets/catalog-images/power-bank-de84d7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Wireless Charging Pad 15W",
+      "unit": "piece",
+      "price": 1950,
+      "icon": "📶",
+      "image": "assets/catalog-images/wireless-charging-pad-e29a00.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "MagSafe Magnetic Charger",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "🧲",
+      "image": "assets/catalog-images/magsafe-magnetic-charger-8cb9d8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Dual USB Car Charger",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🚗",
+      "image": "assets/catalog-images/chargers-power-v2-e852e3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Universal Travel Adapter",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🌍",
+      "image": "assets/catalog-images/universal-travel-adapter-9b730d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Surge Protector Power Strip 6 Socket",
+      "unit": "piece",
+      "price": 1650,
+      "icon": "🔌",
+      "image": "assets/catalog-images/surge-protector-power-strip-7fcbec.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Type-C to 3.5mm Audio Adapter",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🎧",
+      "image": "assets/catalog-images/type-c-to-audio-v2-d8b23c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     },
+     {
+      "name": "Retractable 3-in-1 Cable",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🔗",
+      "image": "assets/catalog-images/retractable-3-in-1-aacf14.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1788958783968-4f4a08777b3b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmV0cmFjdGFibGUlMjB1c2IlMjBjYWJsZXxlbnwxfHx8fDE3OTIyNTU0OTh8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Krossover Gifts",
+       "profileUrl": "https://unsplash.com/@krossovergiftsuae",
+       "photoUrl": "https://unsplash.com/photos/retractable-multi-connector-charging-cable-Ya4x-Mi_rj0",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Ya4x-Mi_rj0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cmV0cmFjdGFibGUlMjB1c2IlMjBjYWJsZXxlbnwxfHx8fDE3OTIyNTU0OTh8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "20W PD Fast Charger",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "⚡",
+      "image": "assets/catalog-images/pd-fast-charger-614c8b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Markus Winkler",
+       "profileUrl": "https://unsplash.com/@markuswinkler",
+       "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/UP_RojtnvTU/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA"
+     }
+    ],
+    "image": "assets/catalog-images/chargers-power-v2-e852e3.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Q2hhcmdlcnMlMjAlMjAlMjBQb3dlcnxlbnwxfHx8fDE3OTIyNTU1MzJ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Markus Winkler",
+     "profileUrl": "https://unsplash.com/@markuswinkler",
+     "photoUrl": "https://unsplash.com/photos/white-and-blue-coated-wires-UP_RojtnvTU",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Earbuds & Audio",
+    "items": [
+     {
+      "name": "TWS Wireless Earbuds",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "🎧",
+      "image": "assets/catalog-images/tws-wireless-earbuds-1d68e4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "ANC Pro Wireless Earbuds",
+      "unit": "piece",
+      "price": 4950,
+      "icon": "🎧",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Bluetooth Neckband",
+      "unit": "piece",
+      "price": 1950,
+      "icon": "🎵",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Type-C Wired Handsfree",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🎧",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "3.5mm Wired Handsfree",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🎧",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mini Bluetooth Speaker",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🔊",
+      "image": "assets/catalog-images/bluetooth-speaker-5e7677.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Party Bluetooth Speaker",
+      "unit": "piece",
+      "price": 8950,
+      "icon": "🔊",
+      "image": "assets/catalog-images/party-bluetooth-speaker-1e868a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Bluetooth Karaoke Microphone",
+      "unit": "piece",
+      "price": 2950,
+      "icon": "🎤",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Over-Ear Headphones",
+      "unit": "piece",
+      "price": 3450,
+      "icon": "🎧",
+      "image": "assets/catalog-images/over-ear-headphones-650c90.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Portable FM Radio",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "📻",
+      "image": "assets/catalog-images/portable-fm-radio-059c9c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "AUX Cable 1m",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🔗",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Earbud Silicone Tips 6-pack",
+      "unit": "packet",
+      "price": 200,
+      "icon": "🎧",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Bone Conduction Headphones",
+      "unit": "piece",
+      "price": 4950,
+      "icon": "🎧",
+      "image": "assets/catalog-images/bone-conduction-headphones-5d5a20.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "USB-C DAC Audio Dongle",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🎧",
+      "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Daniel Romero",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/earbuds-audio-381b9d.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Daniel Romero",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-apple-airpods-AgLMrojqjAM",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "TVs & Home Entertainment",
+    "items": [
+     {
+      "name": "LED TV 32 inch",
+      "unit": "piece",
+      "price": 42000,
+      "icon": "📺",
+      "image": "assets/catalog-images/led-tv-fb520f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED TV 43 inch 4K",
+      "unit": "piece",
+      "price": 72000,
+      "icon": "📺",
+      "image": "assets/catalog-images/led-tv-4k-99de4f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED TV 55 inch 4K",
+      "unit": "piece",
+      "price": 115000,
+      "icon": "📺",
+      "image": "assets/catalog-images/led-tv-4k-99de4f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "TV Wall Mount Bracket 32-55",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🔧",
+      "image": "assets/catalog-images/tv-wall-mount-bracket-361531.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Universal TV Remote",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🎛️",
+      "image": "assets/catalog-images/universal-tv-remote-1ac56d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Android TV Box 4K",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "📦",
+      "image": "assets/catalog-images/android-tv-4k-d04273.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dish Antenna 6ft",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "📡",
+      "image": "assets/catalog-images/dish-antenna-9127a3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LNB Single",
+      "unit": "piece",
+      "price": 650,
+      "icon": "📡",
+      "image": "assets/catalog-images/lnb-single-e75d6c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "HDMI Cable 1.5m",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🔗",
+      "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "HDMI Cable 5m",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🔗",
+      "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "TV Trolley Stand",
+      "unit": "piece",
+      "price": 5500,
+      "icon": "📺",
+      "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Satellite Finder Meter",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "📡",
+      "image": "assets/catalog-images/satellite-finder-meter-1831b6.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp"
+   },
+   {
+    "name": "Fans & Cooling",
+    "items": [
+     {
+      "name": "Ceiling Fan 56 inch AC",
+      "unit": "piece",
+      "price": 9500,
+      "icon": "🌀",
+      "nameUrdu": "پنکھا",
+      "image": "assets/catalog-images/ceiling-fan-ac-108ed3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Inverter Ceiling Fan 56 inch",
+      "unit": "piece",
+      "price": 13500,
+      "icon": "🌀",
+      "image": "assets/catalog-images/inverter-ceiling-fan-8373bf.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ceiling Fan Remote Control Kit",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "🎛️",
+      "image": "assets/catalog-images/ceiling-fan-remote-control-d2c7a0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pedestal Fan 18 inch",
+      "unit": "piece",
+      "price": 7500,
+      "icon": "🌀",
+      "image": "assets/catalog-images/pedestal-fan-aedabb.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Table Fan 12 inch",
+      "unit": "piece",
+      "price": 3800,
+      "icon": "🌀",
+      "image": "assets/catalog-images/table-fan-b68d28.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rechargeable Table Fan 12 inch",
+      "unit": "piece",
+      "price": 5200,
+      "icon": "🔋",
+      "image": "assets/catalog-images/fans-cooling-102a39.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Exhaust Fan 10 inch",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "💨",
+      "image": "assets/catalog-images/exhaust-fan-v2-22eee6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bracket Fan 18 inch",
+      "unit": "piece",
+      "price": 6800,
+      "icon": "🌀",
+      "image": "assets/catalog-images/bracket-fan-v2-7b6b06.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fan Regulator Switch",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🎚️",
+      "image": "assets/catalog-images/fan-regulator-switch-v2-e5c484.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fan Capacitor 2.5uF",
+      "unit": "piece",
+      "price": 180,
+      "icon": "⚡",
+      "image": "assets/catalog-images/fans-cooling-102a39.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Solar DC Fan 12 inch",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "☀️",
+      "image": "assets/catalog-images/solar-dc-fan-47f571.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wall Fan 16 inch",
+      "unit": "piece",
+      "price": 5800,
+      "icon": "🌀",
+      "image": "assets/catalog-images/wall-fan-7ef55d.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/fans-cooling-102a39.webp"
+   },
+   {
+    "name": "Batteries & Small Appliances",
+    "items": [
+     {
+      "name": "AA Battery 4-pack",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🔋",
+      "image": "assets/catalog-images/aa-battery-4-87ef3b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "AAA Battery 4-pack",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🔋",
+      "image": "assets/catalog-images/aaa-battery-4-a08465.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "9V Battery",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🔋",
+      "image": "assets/catalog-images/battery-d67c92.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "CR2032 Button Cell 5-pack",
+      "unit": "packet",
+      "price": 250,
+      "icon": "🔋",
+      "image": "assets/catalog-images/cr2032-button-cell-5-3bcef5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "AA Rechargeable Battery 4-pack",
+      "unit": "packet",
+      "price": 1450,
+      "icon": "🔋",
+      "image": "assets/catalog-images/aa-rechargeable-battery-4-343c34.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rechargeable LED Torch",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🔦",
+      "image": "assets/catalog-images/rechargeable-led-torch-b770d3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Emergency Light",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-emergency-light-490a86.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Electric Mosquito Racket",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🦟",
+      "image": "assets/catalog-images/electric-mosquito-racket-ff4233.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Electric Kettle 1.8L",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "🫖",
+      "image": "assets/catalog-images/electric-kettle-9d0266.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dry Iron",
+      "unit": "piece",
+      "price": 1950,
+      "icon": "👔",
+      "image": "assets/catalog-images/dry-iron-a6fb20.webp",
+      "imageLevel": "item"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "shopType": "Electrical Shop",
+  "icon": "💡",
+  "categories": [
+   {
+    "name": "Wires & Cables",
+    "items": [
+     {
+      "name": "Copper Wire 3/29 90m Roll",
+      "unit": "piece",
+      "price": 9500,
+      "icon": "🧵",
+      "nameUrdu": "تار",
+      "image": "assets/catalog-images/copper-wire-3-29-v2-377a72.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Copper Wire 7/29 90m Roll",
+      "unit": "piece",
+      "price": 14500,
+      "icon": "🧵",
+      "image": "assets/catalog-images/copper-wire-7-29-v2-d9456f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Copper Wire 7/36 90m Roll",
+      "unit": "piece",
+      "price": 18500,
+      "icon": "🧵",
+      "image": "assets/catalog-images/copper-wire-7-36-f597c4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Flexible Wire 2 Core 90m Roll",
+      "unit": "piece",
+      "price": 6800,
+      "icon": "🧵",
+      "image": "assets/catalog-images/flexible-wire-2-core-v2-3acbe6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Flexible Wire 3 Core 90m Roll",
+      "unit": "piece",
+      "price": 9200,
+      "icon": "🧵",
+      "image": "assets/catalog-images/flexible-wire-v2-80a599.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "PVC Wire 1.5mm 90m",
+      "unit": "piece",
+      "price": 7200,
+      "icon": "🧵",
+      "image": "assets/catalog-images/wires-cables-8eba2e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Earth Wire Green 90m Roll",
+      "unit": "piece",
+      "price": 5400,
+      "icon": "🟢",
+      "image": "assets/catalog-images/wires-cables-8eba2e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Telephone Wire 2 Pair 100m",
+      "unit": "piece",
+      "price": 3800,
+      "icon": "☎️",
+      "image": "assets/catalog-images/wires-cables-8eba2e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "LAN Cable Cat6 100m Roll",
+      "unit": "piece",
+      "price": 12500,
+      "icon": "🌐",
+      "image": "assets/catalog-images/wires-cables-8eba2e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Coaxial Cable RG6 100m Roll",
+      "unit": "piece",
+      "price": 8900,
+      "icon": "📡",
+      "image": "assets/catalog-images/wires-cables-8eba2e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Service Drop Wire 2 Core 25m Bundle",
+      "unit": "piece",
+      "price": 2400,
+      "icon": "🧵",
+      "image": "assets/catalog-images/service-drop-wire-2-e0fe4c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cable Tie 100-pack",
+      "unit": "packet",
+      "price": 250,
+      "icon": "🔗",
+      "image": "assets/catalog-images/cable-tie-100-v2-21d79f.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/wires-cables-8eba2e.webp"
+   },
+   {
+    "name": "Switches & Boards",
+    "items": [
+     {
+      "name": "Switch Plate 1 Gang",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🔲",
+      "image": "assets/catalog-images/switch-plate-1-gang-v2-a007d5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Switch Plate 2 Gang",
+      "unit": "piece",
+      "price": 420,
+      "icon": "🔲",
+      "image": "assets/catalog-images/switch-plate-2-gang-v2-021dcc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Switch Plate 4 Gang",
+      "unit": "piece",
+      "price": 680,
+      "icon": "🔲",
+      "image": "assets/catalog-images/switch-plate-4-gang-2729ea.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Switch Plate 6 Gang",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🔲",
+      "image": "assets/catalog-images/switch-plate-6-gang-6560e6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Switch Plate 8 Gang",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "🔲",
+      "image": "assets/catalog-images/switch-plate-8-gang-cc1cba.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Switch Plate 12 Gang",
+      "unit": "piece",
+      "price": 1850,
+      "icon": "🔲",
+      "image": "assets/catalog-images/switch-plate-12-gang-5ed582.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fan Dimmer Regulator",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🎚️",
+      "image": "assets/catalog-images/switches-boards-1cc01e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "13A Power Socket 3-Pin",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🔌",
+      "image": "assets/catalog-images/power-socket-3-pin-1c1a8f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "5A Power Socket 2-Pin",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🔌",
+      "image": "assets/catalog-images/power-socket-2-pin-80f205.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Universal Multi Socket 5-in-1",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🔌",
+      "image": "assets/catalog-images/switches-boards-1cc01e.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Door Bell Push Button",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🔔",
+      "image": "assets/catalog-images/door-bell-push-button-58fe25.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1704075877553-0d4a318459d7?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZG9vcmJlbGwlMjBidXR0b258ZW58MXx8fHwxNzkyMjU1NTEyfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Jack Gardner",
+       "profileUrl": "https://unsplash.com/@jackgardner",
+       "photoUrl": "https://unsplash.com/photos/a-person-pressing-a-button-on-a-wooden-door-e5Lq11USENs",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/e5Lq11USENs/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZG9vcmJlbGwlMjBidXR0b258ZW58MXx8fHwxNzkyMjU1NTEyfDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Concealed Switch Box 7x4",
+      "unit": "piece",
+      "price": 180,
+      "icon": "📦",
+      "image": "assets/catalog-images/switches-boards-1cc01e.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/switches-boards-1cc01e.webp"
+   },
+   {
+    "name": "Breakers & Panels",
+    "items": [
+     {
+      "name": "MCB 6A Single Pole",
+      "unit": "piece",
+      "price": 650,
+      "icon": "⚡",
+      "image": "assets/catalog-images/mcb-single-pole-0ebab2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "MCB 16A Single Pole",
+      "unit": "piece",
+      "price": 680,
+      "icon": "⚡",
+      "image": "assets/catalog-images/mcb-single-pole-0ebab2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "MCB 32A Single Pole",
+      "unit": "piece",
+      "price": 720,
+      "icon": "⚡",
+      "image": "assets/catalog-images/mcb-single-pole-0ebab2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "MCB 63A Double Pole",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "⚡",
+      "image": "assets/catalog-images/breakers-panels-cc1610.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Changeover Switch 32A",
+      "unit": "piece",
+      "price": 1850,
+      "icon": "🔀",
+      "image": "assets/catalog-images/changeover-switch-76401e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Changeover Switch 63A",
+      "unit": "piece",
+      "price": 2950,
+      "icon": "🔀",
+      "image": "assets/catalog-images/changeover-switch-76401e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Distribution Board 4 Way",
+      "unit": "piece",
+      "price": 1650,
+      "icon": "📋",
+      "image": "assets/catalog-images/distribution-board-4-way-977474.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Distribution Board 8 Way",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "📋",
+      "image": "assets/catalog-images/distribution-board-8-way-d5a642.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Distribution Board 12 Way",
+      "unit": "piece",
+      "price": 3450,
+      "icon": "📋",
+      "image": "assets/catalog-images/distribution-board-12-way-65526f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Digital Panel Voltmeter",
+      "unit": "piece",
+      "price": 950,
+      "icon": "📟",
+      "image": "assets/catalog-images/digital-panel-voltmeter-v2-1a5b27.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/breakers-panels-cc1610.webp"
+   },
+   {
+    "name": "Bulbs & Lights",
+    "items": [
+     {
+      "name": "LED Bulb 5W",
+      "unit": "piece",
+      "price": 180,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Bulb 7W",
+      "unit": "piece",
+      "price": 220,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Bulb 9W",
+      "unit": "piece",
+      "price": 260,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Bulb 12W",
+      "unit": "piece",
+      "price": 320,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Bulb 18W",
+      "unit": "piece",
+      "price": 450,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Bulb 25W",
+      "unit": "piece",
+      "price": 650,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Bulb 40W",
+      "unit": "piece",
+      "price": 950,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-bulb-0c9ff1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Panel Light 12W Round",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🔆",
+      "image": "assets/catalog-images/led-panel-light-round-ed808b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Flood Light 50W",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "🔦",
+      "image": "assets/catalog-images/led-flood-light-v2-420e3f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Tube Light 4ft",
+      "unit": "piece",
+      "price": 850,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-tube-light-df85c4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sensor Night Lamp",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🌙",
+      "image": "assets/catalog-images/sensor-night-lamp-7a54c3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chandelier Bulb Candle Type",
+      "unit": "piece",
+      "price": 380,
+      "icon": "🕯️",
+      "image": "assets/catalog-images/bulbs-lights-2b7e2f.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/bulbs-lights-2b7e2f.webp"
+   },
+   {
+    "name": "Fans & Motors",
+    "items": [
+     {
+      "name": "Ceiling Fan 56 inch",
+      "unit": "piece",
+      "price": 9800,
+      "icon": "🌀",
+      "nameUrdu": "پنکھا",
+      "image": "assets/catalog-images/ceiling-fan-b9f3c9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Inverter Fan 56 inch",
+      "unit": "piece",
+      "price": 13800,
+      "icon": "🌀",
+      "image": "assets/catalog-images/inverter-fan-a0a2e5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Exhaust Fan 8 inch Plastic",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "💨",
+      "image": "assets/catalog-images/exhaust-fan-plastic-147c52.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Exhaust Fan 12 inch Metal",
+      "unit": "piece",
+      "price": 4200,
+      "icon": "💨",
+      "image": "assets/catalog-images/exhaust-fan-metal-651617.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bracket Fan 18 inch",
+      "unit": "piece",
+      "price": 6900,
+      "icon": "🌀",
+      "image": "assets/catalog-images/bracket-fan-v2-7b6b06.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Water Pump 1 HP",
+      "unit": "piece",
+      "price": 12500,
+      "icon": "💧",
+      "image": "assets/catalog-images/water-pump-1-hp-v2-062fbe.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ceiling Fan Remote Kit",
+      "unit": "piece",
+      "price": 1350,
+      "icon": "🎛️",
+      "image": "assets/catalog-images/fans-motors-bb800d.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Motor Capacitor 4uF",
+      "unit": "piece",
+      "price": 220,
+      "icon": "⚡",
+      "image": "assets/catalog-images/fans-motors-bb800d.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/fans-motors-bb800d.webp"
+   },
+   {
+    "name": "UPS, Inverter & Solar",
+    "items": [
+     {
+      "name": "UPS 1000VA",
+      "unit": "piece",
+      "price": 28000,
+      "icon": "🔋",
+      "image": "assets/catalog-images/ups-1000va-e017ff.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "UPS 1500VA",
+      "unit": "piece",
+      "price": 38000,
+      "icon": "🔋",
+      "image": "assets/catalog-images/ups-1500va-a3b6f2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Solar Inverter 1.2KVA",
+      "unit": "piece",
+      "price": 42000,
+      "icon": "☀️",
+      "image": "assets/catalog-images/ups-inverter-solar-f773d9.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Solar Inverter 3KVA",
+      "unit": "piece",
+      "price": 95000,
+      "icon": "☀️",
+      "image": "assets/catalog-images/ups-inverter-solar-f773d9.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Solar Panel 180W",
+      "unit": "piece",
+      "price": 16500,
+      "icon": "☀️",
+      "image": "assets/catalog-images/solar-panel-e3ac32.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Solar Panel 550W",
+      "unit": "piece",
+      "price": 42000,
+      "icon": "☀️",
+      "image": "assets/catalog-images/solar-panel-e3ac32.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "PWM Solar Charge Controller 30A",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🎛️",
+      "image": "assets/catalog-images/pwm-solar-charge-controller-28da1a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "MPPT Solar Charge Controller 60A",
+      "unit": "piece",
+      "price": 28000,
+      "icon": "🎛️",
+      "image": "assets/catalog-images/mppt-solar-charge-controller-6edd02.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dry Battery 100Ah",
+      "unit": "piece",
+      "price": 32000,
+      "icon": "🔋",
+      "image": "assets/catalog-images/ups-inverter-solar-f773d9.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Dry Battery 200Ah",
+      "unit": "piece",
+      "price": 58000,
+      "icon": "🔋",
+      "image": "assets/catalog-images/ups-inverter-solar-f773d9.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Tall Tubular Battery 230Ah",
+      "unit": "piece",
+      "price": 72000,
+      "icon": "🔋",
+      "image": "assets/catalog-images/ups-inverter-solar-f773d9.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "UPS Battery Trolley",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🛒",
+      "image": "assets/catalog-images/ups-inverter-solar-f773d9.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Battery Terminal Clamp Pair",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🔗",
+      "image": "assets/catalog-images/battery-terminal-clamp-287075.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Solar Panel Mounting Stand",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🔧",
+      "image": "assets/catalog-images/solar-panel-mounting-stand-8f1985.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "DC Ceiling Fan 12V",
+      "unit": "piece",
+      "price": 8500,
+      "icon": "🌀",
+      "image": "assets/catalog-images/dc-ceiling-fan-76443f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Solar Flood Light 100W",
+      "unit": "piece",
+      "price": 12500,
+      "icon": "🔦",
+      "image": "assets/catalog-images/solar-flood-light-fe58b7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Lara John",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/ups-inverter-solar-f773d9.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Lara John",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Hardware & Paint",
+  "icon": "🔧",
+  "categories": [
+   {
+    "name": "Hand Tools",
+    "items": [
+     {
+      "name": "Claw Hammer",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🔨",
+      "nameUrdu": "ہتھوڑا",
+      "image": "assets/catalog-images/claw-hammer-3e8c08.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Ball Pein Hammer 500g",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🔨",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Screwdriver Set 6pc",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🪛",
+      "image": "assets/catalog-images/screwdriver-v2-170531.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Flat Screwdriver 6 inch",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🪛",
+      "image": "assets/catalog-images/flat-screwdriver-v2-25e39a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Star Screwdriver Set 5pc",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🪛",
+      "image": "assets/catalog-images/star-screwdriver-15258c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Adjustable Wrench 10 inch",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🔧",
+      "image": "assets/catalog-images/adjustable-wrench-0a279a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Adjustable Wrench 12 inch",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "🔧",
+      "image": "assets/catalog-images/adjustable-wrench-0a279a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Combination Plier 8 inch",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🪠",
+      "image": "assets/catalog-images/combination-plier-056c95.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Long Nose Plier 8 inch",
+      "unit": "piece",
+      "price": 680,
+      "icon": "🪠",
+      "image": "assets/catalog-images/long-nose-plier-5d03b2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Wire Cutter 6 inch",
+      "unit": "piece",
+      "price": 550,
+      "icon": "✂️",
+      "image": "assets/catalog-images/wire-cutter-34bbdc.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Cutting Plier 8 inch",
+      "unit": "piece",
+      "price": 720,
+      "icon": "🪠",
+      "image": "assets/catalog-images/cutting-plier-c2ef42.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Measuring Tape 5m",
+      "unit": "piece",
+      "price": 450,
+      "icon": "📏",
+      "image": "assets/catalog-images/measuring-tape-5m-d91aa8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Spirit Level 12 inch",
+      "unit": "piece",
+      "price": 650,
+      "icon": "📐",
+      "image": "assets/catalog-images/spirit-level-438d1f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Hacksaw Frame",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🪚",
+      "image": "assets/catalog-images/hacksaw-frame-eb7439.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Hacksaw Blade 12 inch 10-pack",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🪚",
+      "image": "assets/catalog-images/hacksaw-blade-10-d3ba2b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Allen Key Set 9pc",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🔩",
+      "image": "assets/catalog-images/allen-key-8cd5b2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Spanner Set 14pc",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "🔧",
+      "image": "assets/catalog-images/spanner-v2-09434f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Pipe Wrench 14 inch",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🔧",
+      "image": "assets/catalog-images/pipe-wrench-v2-49a0c6.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     },
+     {
+      "name": "Wire Stripper Tool",
+      "unit": "piece",
+      "price": 450,
+      "icon": "✂️",
+      "image": "assets/catalog-images/wire-stripper-tool-5d748c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Todd Quackenbush",
+       "profileUrl": "https://unsplash.com/@toddquackenbush",
+       "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IClZBVw5W5A/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/reserve/oIpwxeeSPy1cnwYpqJ1w_Dufer%20Collateral%20test.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8SGFuZCUyMFRvb2xzfGVufDF8fHx8MTc5MjI1NTUzMXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Todd Quackenbush",
+     "profileUrl": "https://unsplash.com/@toddquackenbush",
+     "photoUrl": "https://unsplash.com/photos/vintage-tools-on-dark-wooden-planks-IClZBVw5W5A",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Power Tools",
+    "items": [
+     {
+      "name": "Drill Machine 13mm",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🔩",
+      "image": "assets/catalog-images/drill-machine-a0d256.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Angle Grinder 4 inch",
+      "unit": "piece",
+      "price": 5200,
+      "icon": "⚙️",
+      "image": "assets/catalog-images/angle-grinder-d8eb1c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Jigsaw Machine",
+      "unit": "piece",
+      "price": 7800,
+      "icon": "🪚",
+      "image": "assets/catalog-images/jigsaw-machine-3c9af8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Heat Gun",
+      "unit": "piece",
+      "price": 3450,
+      "icon": "🔥",
+      "image": "assets/catalog-images/heat-gun-5dc78f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Electric Blower",
+      "unit": "piece",
+      "price": 3850,
+      "icon": "💨",
+      "image": "assets/catalog-images/electric-blower-592b7c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rotary Tool Kit",
+      "unit": "piece",
+      "price": 4950,
+      "icon": "⚙️",
+      "image": "assets/catalog-images/rotary-tool-kit-9771b9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "HSS Drill Bit Set 13pc",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🔩",
+      "image": "assets/catalog-images/power-tools-b88461.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Grinder Cutting Disc 4 inch 5-pack",
+      "unit": "packet",
+      "price": 550,
+      "icon": "💿",
+      "image": "assets/catalog-images/grinder-cutting-v2-6c01f4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Soldering Iron 60W",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🔥",
+      "image": "assets/catalog-images/soldering-iron-v2-f09e96.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Caulking Gun",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🔫",
+      "image": "assets/catalog-images/caulking-gun-d0651e.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/power-tools-b88461.webp"
+   },
+   {
+    "name": "Locks & Door Fittings",
+    "items": [
+     {
+      "name": "Door Handle Lock Set",
+      "unit": "piece",
+      "price": 2450,
+      "icon": "🔒",
+      "image": "assets/catalog-images/door-handle-lock-258d67.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Deadbolt Lock",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🔒",
+      "image": "assets/catalog-images/deadbolt-lock-aa0f54.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Padlock 40mm",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🔒",
+      "image": "assets/catalog-images/padlock-d618d9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Padlock 50mm",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🔒",
+      "image": "assets/catalog-images/padlock-d618d9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Padlock 63mm",
+      "unit": "piece",
+      "price": 1050,
+      "icon": "🔒",
+      "image": "assets/catalog-images/padlock-d618d9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Drawer Lock",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🔒",
+      "image": "assets/catalog-images/drawer-lock-2238fa.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Sliding Door Lock",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🔒",
+      "image": "assets/catalog-images/sliding-door-lock-3ca5fe.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Cabinet Hinges Pair",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🚪",
+      "image": "assets/catalog-images/cabinet-hinges-d0cb49.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Door Hinges 4 inch Pair",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🚪",
+      "image": "assets/catalog-images/door-hinges-c7391e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Tower Bolt 6 inch",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🔩",
+      "image": "assets/catalog-images/tower-bolt-75bf6c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Tower Bolt 10 inch",
+      "unit": "piece",
+      "price": 480,
+      "icon": "🔩",
+      "image": "assets/catalog-images/tower-bolt-75bf6c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Door Chain Guard",
+      "unit": "piece",
+      "price": 380,
+      "icon": "⛓️",
+      "image": "assets/catalog-images/door-chain-guard-4cb862.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Door Eye Viewer",
+      "unit": "piece",
+      "price": 450,
+      "icon": "👁️",
+      "image": "assets/catalog-images/door-eye-viewer-008a56.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Magnetic Door Catcher Pair",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🧲",
+      "image": "assets/catalog-images/locks-door-fittings-536a19.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cabinet Handle 128mm",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🚪",
+      "image": "assets/catalog-images/cabinet-handle-v2-849469.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Door Stopper Rubber",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🛑",
+      "image": "assets/catalog-images/locks-door-fittings-536a19.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Zaqy Al Fattah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/locks-door-fittings-536a19.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1555529902-5261145633bf?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Zaqy Al Fattah",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/silver-padlock-Lexcm-6FHRU",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Paints",
+    "items": [
+     {
+      "name": "Plastic Emulsion 4L",
+      "unit": "litre",
+      "price": 2200,
+      "icon": "🎨",
+      "nameUrdu": "رنگ",
+      "image": "assets/catalog-images/plastic-emulsion-v2-c60e75.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Plastic Emulsion 15L Bucket",
+      "unit": "piece",
+      "price": 7800,
+      "icon": "🪣",
+      "image": "assets/catalog-images/paints-a3ed19.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Enamel Paint 1L",
+      "unit": "litre",
+      "price": 950,
+      "icon": "🎨",
+      "image": "assets/catalog-images/enamel-paint-f45fb8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFpbnQlMjBjYW4lMjBhbmQlMjBicnVzaHxlbnwxfHx8fDE3OTIyNTU1MDF8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sven Brandsma",
+       "profileUrl": "https://unsplash.com/@seffen99",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/kerFMg52cUA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFpbnQlMjBjYW4lMjBhbmQlMjBicnVzaHxlbnwxfHx8fDE3OTIyNTU1MDF8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Enamel Paint 4L",
+      "unit": "litre",
+      "price": 3400,
+      "icon": "🎨",
+      "image": "assets/catalog-images/enamel-paint-f45fb8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Weather Shield 4L",
+      "unit": "litre",
+      "price": 4200,
+      "icon": "🏠",
+      "image": "assets/catalog-images/weather-shield-ea9962.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Distemper 20kg Bag",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🎨",
+      "image": "assets/catalog-images/paints-a3ed19.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Wall Putty 20kg Bag",
+      "unit": "piece",
+      "price": 1650,
+      "icon": "🧱",
+      "image": "assets/catalog-images/paints-a3ed19.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Wall Primer 1L",
+      "unit": "litre",
+      "price": 650,
+      "icon": "🎨",
+      "image": "assets/catalog-images/wall-primer-1cb17a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Wall Primer 4L",
+      "unit": "litre",
+      "price": 2300,
+      "icon": "🎨",
+      "image": "assets/catalog-images/wall-primer-1cb17a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Wood Varnish 1L",
+      "unit": "litre",
+      "price": 1250,
+      "icon": "🪵",
+      "image": "assets/catalog-images/wood-varnish-7a5cf1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Paint Thinner 1L",
+      "unit": "litre",
+      "price": 550,
+      "icon": "🧴",
+      "image": "assets/catalog-images/paint-thinner-b95faa.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Turpentine Oil 1L",
+      "unit": "litre",
+      "price": 750,
+      "icon": "🧴",
+      "image": "assets/catalog-images/turpentine-oil-25f3ed.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1718210719917-c6e1cd5be085?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFpbnQlMjB0aGlubmVyJTIwYm90dGxlfGVufDF8fHx8MTc5MjI1NTUxNHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Kedibone Isaac Makhumisane",
+       "profileUrl": "https://unsplash.com/@isaax_the_artist",
+       "photoUrl": "https://unsplash.com/photos/a-glass-bottle-with-water-inside-of-it-IuPRQCp5LFE",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/IuPRQCp5LFE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFpbnQlMjB0aGlubmVyJTIwYm90dGxlfGVufDF8fHx8MTc5MjI1NTUxNHww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Paint Roller 9 inch",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🖌️",
+      "image": "assets/catalog-images/paints-a3ed19.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Paint Brush 2 inch",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🖌️",
+      "image": "assets/catalog-images/paint-brush-1707fe.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Paint Brush 4 inch",
+      "unit": "piece",
+      "price": 320,
+      "icon": "🖌️",
+      "image": "assets/catalog-images/paint-brush-1707fe.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Spray Paint Can 400ml",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🎨",
+      "image": "assets/catalog-images/spray-paint-can-31c649.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Paint Tray 9 inch",
+      "unit": "piece",
+      "price": 280,
+      "icon": "🖌️",
+      "image": "assets/catalog-images/paint-tray-4edcc3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     },
+     {
+      "name": "Putty Knife 3 inch",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🔪",
+      "image": "assets/catalog-images/putty-knife-b2f52b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Art Institute of Chicago",
+       "profileUrl": "https://unsplash.com/@artchicago",
+       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+     }
+    ],
+    "image": "assets/catalog-images/paints-a3ed19.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Art Institute of Chicago",
+     "profileUrl": "https://unsplash.com/@artchicago",
+     "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Fasteners & Consumables",
+    "items": [
+     {
+      "name": "Wood Screws 1 inch 100pc",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🔩",
+      "image": "assets/catalog-images/wood-screws-7bffef.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Wood Screws 2 inch 100pc",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🔩",
+      "image": "assets/catalog-images/wood-screws-7bffef.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Gypsum Screws 1 inch 100pc",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🔩",
+      "image": "assets/catalog-images/fasteners-consumables-2b2be3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Nails 2 inch 1kg",
+      "unit": "kg",
+      "price": 320,
+      "icon": "📌",
+      "image": "assets/catalog-images/nails-c63e24.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Nails 3 inch 1kg",
+      "unit": "kg",
+      "price": 320,
+      "icon": "📌",
+      "image": "assets/catalog-images/nails-c63e24.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Wall Plugs 100pc",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🔩",
+      "image": "assets/catalog-images/wall-plugs-v2-f3549c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Expansion Bolts M8 10pc",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🔩",
+      "image": "assets/catalog-images/fasteners-consumables-2b2be3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cable Clips 100pc",
+      "unit": "packet",
+      "price": 250,
+      "icon": "🔗",
+      "image": "assets/catalog-images/cable-clips-ded498.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Super Glue 20g",
+      "unit": "gram",
+      "price": 150,
+      "icon": "🧴",
+      "image": "assets/catalog-images/fasteners-consumables-2b2be3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "M-Seal Epoxy 100g",
+      "unit": "gram",
+      "price": 280,
+      "icon": "🧪",
+      "image": "assets/catalog-images/fasteners-consumables-2b2be3.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Sandpaper 100 Grit 10-sheet",
+      "unit": "packet",
+      "price": 250,
+      "icon": "📄",
+      "image": "assets/catalog-images/sandpaper-100-grit-10-aa904d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Steel Wire Brush",
+      "unit": "piece",
+      "price": 220,
+      "icon": "🧹",
+      "image": "assets/catalog-images/steel-wire-brush-848c2c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "G Clamp 4 inch",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🗜️",
+      "image": "assets/catalog-images/g-clamp-0568d9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milad Fallah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/fasteners-consumables-2b2be3.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1613945831677-383c19ad7721?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Milad Fallah",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/silver-screw-lot-on-brown-wooden-table-wwZYL4BYFto",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Sanitary & Plumbing",
+    "items": [
+     {
+      "name": "PVC Pipe 1 inch 10ft",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🚿",
+      "image": "assets/catalog-images/pvc-pipe-3a9bd9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "PVC Pipe 3/4 inch 10ft",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🚿",
+      "image": "assets/catalog-images/pvc-pipe-3-4a2b72.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "PVC Elbow 1 inch",
+      "unit": "piece",
+      "price": 80,
+      "icon": "🔧",
+      "image": "assets/catalog-images/pvc-elbow-8c97b5.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "PVC Tee 1 inch",
+      "unit": "piece",
+      "price": 95,
+      "icon": "🔧",
+      "image": "assets/catalog-images/pvc-tee-baf94b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "PVC Solvent Cement 100g",
+      "unit": "gram",
+      "price": 220,
+      "icon": "🧴",
+      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Brass Bib Tap",
+      "unit": "piece",
+      "price": 1250,
+      "icon": "🚰",
+      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Angle Cock Valve",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🚰",
+      "image": "assets/catalog-images/angle-cock-v2-f9ee04.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Muslim Shower Set",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🚿",
+      "image": "assets/catalog-images/muslim-shower-dfdec8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Basin Waste Coupling",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🚰",
+      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "PPR Pipe 1 inch 12ft",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🚿",
+      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "PPR Elbow 1 inch",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🔧",
+      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Shower Head ABS",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🚿",
+      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp"
+   },
+   {
+    "name": "Ladders & Access",
+    "items": [
+     {
+      "name": "Step Ladder 4ft",
+      "unit": "piece",
+      "price": 4200,
+      "icon": "🪜",
+      "image": "assets/catalog-images/step-ladder-543088.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Aluminum Ladder 8ft",
+      "unit": "piece",
+      "price": 8500,
+      "icon": "🪜",
+      "image": "assets/catalog-images/aluminum-ladder-1b3831.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/ladders-access-0dc01d.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Building Material",
+  "icon": "🏗️",
+  "categories": [
+   {
+    "name": "Cement",
+    "items": [
+     {
+      "name": "Lucky Cement Bag 50kg",
+      "unit": "piece",
+      "price": 1380,
+      "icon": "🏗️",
+      "nameUrdu": "سیمنٹ",
+      "image": "assets/catalog-images/lucky-cement-bag-fc4e38.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "DG Cement Bag 50kg",
+      "unit": "piece",
+      "price": 1370,
+      "icon": "🏗️",
+      "image": "assets/catalog-images/cement-5cb91a.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Maple Leaf Cement Bag 50kg",
+      "unit": "piece",
+      "price": 1360,
+      "icon": "🏗️",
+      "image": "assets/catalog-images/cement-5cb91a.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Bestway Cement Bag 50kg",
+      "unit": "piece",
+      "price": 1350,
+      "icon": "🏗️",
+      "image": "assets/catalog-images/cement-5cb91a.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Fauji Cement Bag 50kg",
+      "unit": "piece",
+      "price": 1360,
+      "icon": "🏗️",
+      "image": "assets/catalog-images/cement-5cb91a.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Pioneer Cement Bag 50kg",
+      "unit": "piece",
+      "price": 1340,
+      "icon": "🏗️",
+      "image": "assets/catalog-images/cement-5cb91a.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "White Cement Bag 40kg",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "⬜",
+      "image": "assets/catalog-images/white-cement-bag-4e677c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sulphate Resistant Cement 50kg",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🏗️",
+      "image": "assets/catalog-images/cement-5cb91a.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/cement-5cb91a.webp"
+   },
+   {
+    "name": "Bricks & Blocks",
+    "items": [
+     {
+      "name": "First Class Bricks (Awwal)",
+      "unit": "piece",
+      "price": 26,
+      "icon": "🧱",
+      "nameUrdu": "اینٹ",
+      "image": "assets/catalog-images/first-class-bricks-adbf3e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Second Class Bricks",
+      "unit": "piece",
+      "price": 18,
+      "icon": "🧱",
+      "image": "assets/catalog-images/second-class-bricks-eaf440.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Over-burnt Bricks",
+      "unit": "piece",
+      "price": 12,
+      "icon": "🧱",
+      "image": "assets/catalog-images/over-burnt-bricks-v2-a0e52a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Concrete Block 4 inch",
+      "unit": "piece",
+      "price": 65,
+      "icon": "🧱",
+      "image": "assets/catalog-images/concrete-block-v2-f9a2d7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Concrete Block 6 inch",
+      "unit": "piece",
+      "price": 85,
+      "icon": "🧱",
+      "image": "assets/catalog-images/concrete-block-v2-f9a2d7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Concrete Block 8 inch",
+      "unit": "piece",
+      "price": 110,
+      "icon": "🧱",
+      "image": "assets/catalog-images/concrete-block-v2-f9a2d7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fly Ash Bricks",
+      "unit": "piece",
+      "price": 20,
+      "icon": "🧱",
+      "image": "assets/catalog-images/fly-ash-bricks-v2-d3ff97.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Roof Khaprail Tiles 100pc",
+      "unit": "packet",
+      "price": 9000,
+      "icon": "🏠",
+      "image": "assets/catalog-images/roof-khaprail-tiles-b8b631.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/bricks-blocks-b7e180.webp"
+   },
+   {
+    "name": "Steel / Sarya",
+    "items": [
+     {
+      "name": "Steel Bar 6mm (Sarya)",
+      "unit": "kg",
+      "price": 248,
+      "icon": "🔩",
+      "nameUrdu": "سریا",
+      "image": "assets/catalog-images/steel-bar-098f83.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Steel Bar 8mm (Sarya)",
+      "unit": "kg",
+      "price": 250,
+      "icon": "🔩",
+      "image": "assets/catalog-images/steel-bar-098f83.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Steel Bar 10mm (Sarya)",
+      "unit": "kg",
+      "price": 255,
+      "icon": "🔩",
+      "image": "assets/catalog-images/steel-bar-098f83.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Steel Bar 12mm (Sarya)",
+      "unit": "kg",
+      "price": 260,
+      "icon": "🔩",
+      "image": "assets/catalog-images/steel-bar-098f83.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Steel Bar 16mm (Sarya)",
+      "unit": "kg",
+      "price": 262,
+      "icon": "🔩",
+      "image": "assets/catalog-images/steel-bar-098f83.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Steel Bar 20mm (Sarya)",
+      "unit": "kg",
+      "price": 265,
+      "icon": "🔩",
+      "image": "assets/catalog-images/steel-bar-098f83.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Binding Wire 1kg Coil",
+      "unit": "kg",
+      "price": 320,
+      "icon": "🧵",
+      "image": "assets/catalog-images/binding-wire-coil-9eb499.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "MS Angle 1.5 inch 20ft",
+      "unit": "piece",
+      "price": 2400,
+      "icon": "📐",
+      "image": "assets/catalog-images/ms-angle-9cf620.webp",
+      "imageLevel": "item"
+     }
+    ]
+   },
+   {
+    "name": "Sand & Crush",
+    "items": [
+     {
+      "name": "Ravi Sand 100cft Load",
+      "unit": "piece",
+      "price": 24000,
+      "icon": "🏖️",
+      "nameUrdu": "ریت",
+      "image": "assets/catalog-images/sand-crush-v2-2617f3.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Chenab Sand 100cft Load",
+      "unit": "piece",
+      "price": 26000,
+      "icon": "🏖️",
+      "image": "assets/catalog-images/sand-crush-v2-2617f3.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Margalla Crush 100cft Load",
+      "unit": "piece",
+      "price": 32000,
+      "icon": "🪨",
+      "image": "assets/catalog-images/sand-crush-v2-2617f3.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Sargodha Crush 100cft Load",
+      "unit": "piece",
+      "price": 28000,
+      "icon": "🪨",
+      "image": "assets/catalog-images/sand-crush-v2-2617f3.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Bajri 100cft Load",
+      "unit": "piece",
+      "price": 22000,
+      "icon": "🪨",
+      "image": "assets/catalog-images/sand-crush-v2-2617f3.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Stone Dust 100cft Load",
+      "unit": "piece",
+      "price": 14000,
+      "icon": "🪨",
+      "image": "assets/catalog-images/sand-crush-v2-2617f3.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/sand-crush-v2-2617f3.webp"
+   },
+   {
+    "name": "Tiles, Marble & Finishing",
+    "items": [
+     {
+      "name": "Ceramic Floor Tile 24x24",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🟫",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Ceramic Wall Tile 12x18",
+      "unit": "piece",
+      "price": 90,
+      "icon": "🟫",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Porcelain Tile 24x48",
+      "unit": "piece",
+      "price": 950,
+      "icon": "🟫",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Skirting Tile 4x24",
+      "unit": "piece",
+      "price": 140,
+      "icon": "🟫",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Mosaic Tile Sheet",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🎨",
+      "image": "assets/catalog-images/mosaic-tile-sheet-e4ead3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA"
+     },
+     {
+      "name": "White Marble per sq ft",
+      "unit": "piece",
+      "price": 180,
+      "icon": "⬜",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Black Granite per sq ft",
+      "unit": "piece",
+      "price": 450,
+      "icon": "⬛",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Marble Chips per sq ft",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🪨",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Tile Bond Adhesive 20kg",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🧱",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Tile Grout 1kg",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🧴",
+      "image": "assets/catalog-images/tile-grout-02fe35.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA"
+     },
+     {
+      "name": "POP Bag 40kg",
+      "unit": "piece",
+      "price": 950,
+      "icon": "⬜",
+      "image": "assets/catalog-images/pop-bag-81e0ba.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA"
+     },
+     {
+      "name": "Gypsum Board 4x8",
+      "unit": "piece",
+      "price": 1450,
+      "icon": "🟫",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "False Ceiling Tile 2x2",
+      "unit": "piece",
+      "price": 220,
+      "icon": "⬜",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Flush Door 3x7",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🚪",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Steel Door Frame",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🚪",
+      "image": "assets/catalog-images/steel-door-frame-6877f3.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA"
+     },
+     {
+      "name": "Water Tank 500L",
+      "unit": "piece",
+      "price": 9500,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/water-tank-491563.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA"
+     },
+     {
+      "name": "Water Tank 1000L",
+      "unit": "piece",
+      "price": 15000,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/water-tank-491563.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA"
+     },
+     {
+      "name": "Wire Mesh Roll 4x50ft",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🔗",
+      "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Gypsum Powder 20kg",
+      "unit": "piece",
+      "price": 650,
+      "icon": "⬜",
+      "image": "assets/catalog-images/gypsum-powder-35cdd2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Tile Merchant Ireland",
+       "profileUrl": "https://unsplash.com/@tilemerchant",
+       "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/v9oBtvRCKHk/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA"
+     },
+     {
+      "name": "Block Adhesive 20kg",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "🧱",
+      "image": "assets/catalog-images/block-adhesive-9610f5.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1575493438282-4e0fb32d1bdd?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Y2VtZW50JTIwYmFnJTIwY29uc3RydWN0aW9ufGVufDF8fHx8MTc5MjI1NTUwNXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Marjan Aghazadeh",
+       "profileUrl": "https://unsplash.com/@marjan_aghazadeh",
+       "photoUrl": "https://unsplash.com/photos/man-standing-beside-sack-seG0b5qw09w",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/seG0b5qw09w/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Y2VtZW50JTIwYmFnJTIwY29uc3RydWN0aW9ufGVufDF8fHx8MTc5MjI1NTUwNXww",
+      "imageSource": "unsplash"
+     }
+    ],
+    "image": "assets/catalog-images/tiles-marble-finishing-ba54f4.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1706629503586-2731f65587ae?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8VGlsZXMlMjAlMjBNYXJibGUlMjAlMjAlMjBGaW5pc2hpbmd8ZW58MXx8fHwxNzkyMjU1NTI4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Tile Merchant Ireland",
+     "profileUrl": "https://unsplash.com/@tilemerchant",
+     "photoUrl": "https://unsplash.com/photos/three-chairs-sitting-on-a-marble-floor-in-a-room-v9oBtvRCKHk",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Clothing & Garments",
+  "icon": "👕",
+  "categories": [
+   {
+    "name": "Men's Shalwar Kameez Fabric",
+    "items": [
+     {
+      "name": "Wash n Wear Suit 4m",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "👔",
+      "nameUrdu": "شلوار قمیض",
+      "image": "assets/catalog-images/wash-n-wear-suit-2e1321.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Pure Cotton Suit 4m",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Boski Suit 4m",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Latha Suit 4m",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Khaddar Suit 4m Winter",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Gul Ahmed Wash n Wear 4m",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "J. Wash n Wear 4m",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "👔",
+      "image": "assets/catalog-images/j-wash-n-wear-b435a2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Al Karam Wash n Wear 4m",
+      "unit": "piece",
+      "price": 2600,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Off-White Latha Suit 4m",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Navy Blue Wash n Wear 4m",
+      "unit": "piece",
+      "price": 1900,
+      "icon": "👔",
+      "image": "assets/catalog-images/navy-blue-wash-n-099eb2.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Grey Cotton Suit 4m",
+      "unit": "piece",
+      "price": 2300,
+      "icon": "👔",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Kurta Cloth 2.5m",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "👕",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "White Shalwar 2.5m",
+      "unit": "piece",
+      "price": 900,
+      "icon": "👖",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     },
+     {
+      "name": "Black Shalwar 2.5m",
+      "unit": "piece",
+      "price": 900,
+      "icon": "👖",
+      "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Vishal Banik",
+       "profileUrl": "https://unsplash.com/@vishalbanik16",
+       "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/V6T99SnUCyA/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1517146783983-418c681b56c5?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8ZmFicmljJTIwcm9sbHMlMjB0ZXh0aWxlJTIwc2hvcHxlbnwxfHx8fDE3OTIyNTU0ODV8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Vishal Banik",
+     "profileUrl": "https://unsplash.com/@vishalbanik16",
+     "photoUrl": "https://unsplash.com/photos/photo-of-assorted-color-thread-spool-lot-V6T99SnUCyA",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Ready-Made Men's Wear",
+    "items": [
+     {
+      "name": "Ready Shalwar Kameez",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "👔",
+      "image": "assets/catalog-images/ready-shalwar-kameez-200560.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "White Kurta",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "👕",
+      "image": "assets/catalog-images/white-kurta-v2-9fa5f1.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Men's Waistcoat",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🦺",
+      "image": "assets/catalog-images/men-s-waistcoat-a57066.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Denim Jeans Pant",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "👖",
+      "image": "assets/catalog-images/denim-jeans-pant-4f643e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Formal Shirt",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "👔",
+      "image": "assets/catalog-images/formal-shirt-v2-6393a4.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Polo Shirt",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "👕",
+      "image": "assets/catalog-images/polo-shirt-v2-dd6dec.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Men's Hoodie",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🧥",
+      "image": "assets/catalog-images/men-s-hoodie-cf4891.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Sweatshirt",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🧥",
+      "image": "assets/catalog-images/sweatshirt-632302.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Denim Jacket",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🧥",
+      "image": "assets/catalog-images/denim-jacket-f8bd00.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Tracksuit 2pc",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🏃",
+      "image": "assets/catalog-images/tracksuit-2c3795.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Wool Shawl Gents",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "🧣",
+      "image": "assets/catalog-images/ready-made-men-s-wear-caf5e6.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Kurti Ladies",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "👗",
+      "image": "assets/catalog-images/ready-made-men-s-wear-caf5e6.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Gents Night Suit",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "🌙",
+      "image": "assets/catalog-images/gents-night-suit-v2-0bdcf9.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Waldemar Brandt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/ready-made-men-s-wear-caf5e6.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1561053720-76cd73ff22c3?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Waldemar Brandt",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Ladies Suits & Fabric",
+    "items": [
+     {
+      "name": "Lawn 3pc Unstitched",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "👗",
+      "nameUrdu": "لان",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Lawn 2pc Unstitched",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "👗",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Cambric 3pc Unstitched",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "👗",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chiffon 3pc Unstitched",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "👗",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Khaddar 3pc Winter",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "👗",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Linen 3pc Unstitched",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "👗",
+      "image": "assets/catalog-images/linen-unstitched-c289c7.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Gul Ahmed Lawn 3pc",
+      "unit": "piece",
+      "price": 4200,
+      "icon": "👗",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Sana Safinaz Lawn 3pc",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "👗",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Maria B 3pc",
+      "unit": "piece",
+      "price": 5200,
+      "icon": "👗",
+      "image": "assets/catalog-images/maria-b-73abaf.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Al Karam 3pc",
+      "unit": "piece",
+      "price": 3800,
+      "icon": "👗",
+      "image": "assets/catalog-images/al-karam-v2-2f10d0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Embroidered Net 3pc",
+      "unit": "piece",
+      "price": 5500,
+      "icon": "👗",
+      "image": "assets/catalog-images/embroidered-net-v2-12b017.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Lawn Dupatta",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🧕",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Chiffon Dupatta",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🧕",
+      "image": "assets/catalog-images/chiffon-dupatta-f549eb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Plain Trouser Ladies",
+      "unit": "piece",
+      "price": 800,
+      "icon": "👖",
+      "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Black Abaya",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🧕",
+      "nameUrdu": "عبایا",
+      "image": "assets/catalog-images/black-abaya-e4df53.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Hijab Scarf",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🧕",
+      "nameUrdu": "حجاب",
+      "image": "assets/catalog-images/hijab-scarf-4c6f16.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Niqab",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧕",
+      "image": "assets/catalog-images/niqab-f1f96f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/ladies-suits-fabric-d29ac1.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1640767760729-7bfb6ce43ad4?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Cosmin Ursea",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colors-of-cloth-on-a-shelf-vOFQ7q7Kky8",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Undergarments & Hosiery",
+    "items": [
+     {
+      "name": "Gents Banyan Vest",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🎽",
+      "nameUrdu": "بنیان",
+      "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Gents Brief 3-pack",
+      "unit": "packet",
+      "price": 600,
+      "icon": "🩲",
+      "image": "assets/catalog-images/gents-brief-3-9558a7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ladies Bra",
+      "unit": "piece",
+      "price": 450,
+      "icon": "👙",
+      "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Ladies Panty 3-pack",
+      "unit": "packet",
+      "price": 500,
+      "icon": "🩲",
+      "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Cotton Socks Pair",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🧦",
+      "nameUrdu": "موزے",
+      "image": "assets/catalog-images/cotton-socks-03ec2b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ankle Socks 3-pack",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🧦",
+      "image": "assets/catalog-images/ankle-socks-3-be67ab.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Winter Thermal Upper",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🥶",
+      "image": "assets/catalog-images/winter-thermal-upper-364898.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Winter Thermal Lower",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🥶",
+      "image": "assets/catalog-images/winter-thermal-lower-v2-045a72.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cotton Handkerchief",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🤧",
+      "nameUrdu": "رومال",
+      "image": "assets/catalog-images/cotton-handkerchief-v2-2ac17b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Prayer Cap (Topi)",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🕌",
+      "nameUrdu": "ٹوپی",
+      "image": "assets/catalog-images/prayer-cap-v2-68d703.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp"
+   },
+   {
+    "name": "Kids Wear",
+    "items": [
+     {
+      "name": "Baby Suit 0-6 Months",
+      "unit": "piece",
+      "price": 600,
+      "icon": "👶",
+      "image": "assets/catalog-images/baby-suit-0-ee91e4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Baby Romper",
+      "unit": "piece",
+      "price": 500,
+      "icon": "👶",
+      "image": "assets/catalog-images/baby-romper-v2-28a015.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Shalwar Kameez",
+      "unit": "piece",
+      "price": 900,
+      "icon": "👦",
+      "image": "assets/catalog-images/kids-shalwar-kameez-f8bc40.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Frock",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "👧",
+      "image": "assets/catalog-images/kids-frock-b6cc8e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Jeans",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "👖",
+      "image": "assets/catalog-images/kids-jeans-b0ea4f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids T-Shirt",
+      "unit": "piece",
+      "price": 500,
+      "icon": "👕",
+      "image": "assets/catalog-images/kids-t-shirt-c60d75.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Hoodie",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "🧥",
+      "image": "assets/catalog-images/kids-hoodie-9a379c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Sweater",
+      "unit": "piece",
+      "price": 1300,
+      "icon": "🧶",
+      "image": "assets/catalog-images/kids-sweater-v2-cc2f41.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Baby Blanket",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/baby-blanket-v2-c429e0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Baby Cap Set",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🧢",
+      "image": "assets/catalog-images/baby-cap-v2-ac0126.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "School Uniform Shirt",
+      "unit": "piece",
+      "price": 700,
+      "icon": "👔",
+      "image": "assets/catalog-images/school-uniform-shirt-product-v2-eaaaaa.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "School Uniform Pant",
+      "unit": "piece",
+      "price": 900,
+      "icon": "👖",
+      "image": "assets/catalog-images/kids-wear-f55100.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/kids-wear-f55100.webp"
+   },
+   {
+    "name": "Winter Wear",
+    "items": [
+     {
+      "name": "Ladies Wool Shawl",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🧣",
+      "nameUrdu": "شال",
+      "image": "assets/catalog-images/winter-wear-a13618.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Pashmina Shawl",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🧣",
+      "image": "assets/catalog-images/pashmina-shawl-eb0685.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Gents Muffler",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🧣",
+      "image": "assets/catalog-images/winter-wear-a13618.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Wool Cap",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🧢",
+      "image": "assets/catalog-images/wool-cap-449e3c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Wool Gloves Pair",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🧤",
+      "image": "assets/catalog-images/wool-gloves-d2d403.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Wool Socks 3-pack",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🧦",
+      "image": "assets/catalog-images/wool-socks-3-0ef24b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Gents Sweater",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🧶",
+      "image": "assets/catalog-images/winter-wear-a13618.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Ladies Sweater",
+      "unit": "piece",
+      "price": 2400,
+      "icon": "🧶",
+      "image": "assets/catalog-images/ladies-sweater-d00b7c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Sweater Vest",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🦺",
+      "image": "assets/catalog-images/sweater-vest-045417.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Puffer Jacket",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🧥",
+      "image": "assets/catalog-images/puffer-jacket-1a5ff0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Single Blanket",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/single-blanket-06963d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Double Blanket",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "🛏️",
+      "image": "assets/catalog-images/double-blanket-81e47d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Baby Winter Suit",
+      "unit": "piece",
+      "price": 900,
+      "icon": "👶",
+      "image": "assets/catalog-images/winter-wear-a13618.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Kids Winter Cap",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🧢",
+      "image": "assets/catalog-images/kids-winter-cap-b8596b.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Amanda Vick",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/winter-wear-a13618.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Amanda Vick",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/one-cowboy-hat-and-five-jackets-hanged-on-clothes-rack-ohWf6YuzOQk",
+     "source": "Unsplash"
+    }
+   }
+  ]
+ },
+ {
+  "shopType": "Footwear",
+  "icon": "👞",
+  "categories": [
+   {
+    "name": "Chappal",
+    "items": [
+     {
+      "name": "Peshawari Chappal",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🩴",
+      "nameUrdu": "چپل",
+      "image": "assets/catalog-images/peshawari-chappal-6f2b42.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Peshawari Chappal Premium",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🩴",
+      "image": "assets/catalog-images/peshawari-chappal-6f2b42.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kohati Chappal",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🩴",
+      "image": "assets/catalog-images/chappal-b9c7fb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Leather Chappal Gents",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🩴",
+      "image": "assets/catalog-images/chappal-b9c7fb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Rubber Hawai Chappal",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🩴",
+      "image": "assets/catalog-images/chappal-b9c7fb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Foam Slipper",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🩴",
+      "image": "assets/catalog-images/chappal-b9c7fb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Bathroom Slipper",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🩴",
+      "image": "assets/catalog-images/bathroom-slipper-2731b2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ladies Fancy Chappal",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "👡",
+      "image": "assets/catalog-images/chappal-b9c7fb.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Kids Chappal",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🩴",
+      "image": "assets/catalog-images/kids-chappal-v2-ac0e8f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Medicated Chappal",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🩴",
+      "image": "assets/catalog-images/chappal-b9c7fb.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/chappal-b9c7fb.webp"
+   },
+   {
+    "name": "Sandals & Slippers",
+    "items": [
+     {
+      "name": "Ladies Heel Sandal",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "👠",
+      "image": "assets/catalog-images/ladies-heel-sandal-a8e16f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ladies Flat Sandal",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "👡",
+      "image": "assets/catalog-images/ladies-flat-sandal-v2-d1fc7d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gents Leather Sandal",
+      "unit": "piece",
+      "price": 2000,
+      "icon": "👞",
+      "image": "assets/catalog-images/sandals-slippers-793990.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Flip Flops",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🩴",
+      "image": "assets/catalog-images/flip-flops-565272.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wedge Heel Sandal",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "👠",
+      "image": "assets/catalog-images/wedge-heel-sandal-631cc1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kolhapuri Chappal",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🩴",
+      "image": "assets/catalog-images/kolhapuri-chappal-aa0bbf.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Velvet Slipper Ladies",
+      "unit": "piece",
+      "price": 900,
+      "icon": "👡",
+      "image": "assets/catalog-images/velvet-slipper-ladies-85a3c1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cork Slipper",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "🩴",
+      "image": "assets/catalog-images/cork-slipper-v2-b6270a.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/sandals-slippers-793990.webp"
+   },
+   {
+    "name": "Joggers & Sports Shoes",
+    "items": [
+     {
+      "name": "Canvas Shoes",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "👟",
+      "image": "assets/catalog-images/canvas-shoes-ce87f4.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Running Joggers",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "👟",
+      "image": "assets/catalog-images/running-joggers-3e3de0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Football Studs",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "⚽",
+      "image": "assets/catalog-images/football-studs-41772c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Badminton Shoes",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🏸",
+      "image": "assets/catalog-images/badminton-shoes-a5a33d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "White Tennis Shoes",
+      "unit": "piece",
+      "price": 2000,
+      "icon": "👟",
+      "image": "assets/catalog-images/white-tennis-shoes-451faa.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "High Ankle Sneakers",
+      "unit": "piece",
+      "price": 2600,
+      "icon": "👟",
+      "image": "assets/catalog-images/joggers-sports-shoes-814b58.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Kids Sports Shoes",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "👟",
+      "image": "assets/catalog-images/kids-sports-shoes-v2-d0ab76.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gym Trainers",
+      "unit": "piece",
+      "price": 2400,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/gym-trainers-v2-97e1bb.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Slip-on Loafers",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "👞",
+      "image": "assets/catalog-images/slip-on-loafers-8e5e7e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Walking Shoes",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "👟",
+      "image": "assets/catalog-images/walking-shoes-v2-eeb012.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/joggers-sports-shoes-814b58.webp"
+   },
+   {
+    "name": "Formal & School Shoes",
+    "items": [
+     {
+      "name": "Gents Oxford Shoes",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "👞",
+      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Gents Loafers",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "👞",
+      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Ladies Pumps",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "👠",
+      "image": "assets/catalog-images/ladies-pumps-99ca93.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ladies Khussa",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "👡",
+      "nameUrdu": "کھسہ",
+      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Bridal Khussa",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "👡",
+      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Boys School Shoes",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "👞",
+      "image": "assets/catalog-images/boys-school-shoes-product-v2-b2df5f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Girls School Shoes",
+      "unit": "piece",
+      "price": 1300,
+      "icon": "👞",
+      "image": "assets/catalog-images/girls-school-shoes-d3129b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "White PT Shoes",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "👟",
+      "image": "assets/catalog-images/white-pt-shoes-v2-14d684.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Safety Shoes Steel Toe",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "🥾",
+      "image": "assets/catalog-images/safety-shoes-steel-toe-0b9c67.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Peshawari Chapli School",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "🩴",
+      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp"
+   },
+   {
+    "name": "Socks & Shoe Care",
+    "items": [
+     {
+      "name": "Cotton Socks Pair",
+      "unit": "piece",
+      "price": 120,
+      "icon": "🧦",
+      "image": "assets/catalog-images/cotton-socks-03ec2b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ankle Socks 3-pack",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🧦",
+      "image": "assets/catalog-images/ankle-socks-3-be67ab.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shoe Polish Black",
+      "unit": "piece",
+      "price": 250,
+      "icon": "👞",
+      "image": "assets/catalog-images/shoe-polish-black-fff2d6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shoe Polish Brown",
+      "unit": "piece",
+      "price": 250,
+      "icon": "👞",
+      "image": "assets/catalog-images/shoe-polish-brown-v2-bf89db.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shoe Brush",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🧹",
+      "image": "assets/catalog-images/shoe-brush-d0bdf0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shoe Insoles Pair",
+      "unit": "piece",
+      "price": 300,
+      "icon": "👟",
+      "image": "assets/catalog-images/shoe-insoles-9b6486.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shoe Laces Pair",
+      "unit": "piece",
+      "price": 100,
+      "icon": "🪢",
+      "image": "assets/catalog-images/shoe-laces-850b37.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/socks-shoe-care-4204f2.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Auto & Motorcycle Parts",
+  "icon": "🏍️",
+  "categories": [
+   {
+    "name": "70cc Bike Engine Parts",
+    "items": [
+     {
+      "name": "Piston Kit 70cc",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "⚙️",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Cylinder Kit 70cc",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "⚙️",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Clutch Plates Set 70cc",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "⚙️",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Clutch Cable 70cc",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🔗",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Accelerator Cable 70cc",
+      "unit": "piece",
+      "price": 200,
+      "icon": "🔗",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Front Brake Cable 70cc",
+      "unit": "piece",
+      "price": 180,
+      "icon": "🔗",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Chain Sprocket Set 70cc",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "⛓️",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Drive Chain 420",
+      "unit": "piece",
+      "price": 900,
+      "icon": "⛓️",
+      "image": "assets/catalog-images/drive-chain-420-f341da.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Spark Plug",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🔌",
+      "image": "assets/catalog-images/spark-plug-537992.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "CDI Unit 70cc",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "⚡",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Ignition Coil",
+      "unit": "piece",
+      "price": 900,
+      "icon": "⚡",
+      "image": "assets/catalog-images/ignition-coil-6cbbbf.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Rectifier Regulator",
+      "unit": "piece",
+      "price": 800,
+      "icon": "⚡",
+      "image": "assets/catalog-images/rectifier-regulator-71e350.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Engine Oil Seal Kit",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🔩",
+      "image": "assets/catalog-images/engine-oil-seal-kit-cb375c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     },
+     {
+      "name": "Spark Plug Wrench",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🔧",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Chad Kirchoff",
+       "profileUrl": "https://unsplash.com/@cakirchoff",
+       "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/xe-e69j6-Ds/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3JjeWNsZSUyMGVuZ2luZSUyMHBhcnRzfGVufDF8fHx8MTc5MjI1NTQ4OHww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Chad Kirchoff",
+     "profileUrl": "https://unsplash.com/@cakirchoff",
+     "photoUrl": "https://unsplash.com/photos/gray-and-black-engine-xe-e69j6-Ds",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Bike Body & Electrical",
+    "items": [
+     {
+      "name": "Headlight Assembly 70cc",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "💡",
+      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Headlight Bulb 12V",
+      "unit": "piece",
+      "price": 250,
+      "icon": "💡",
+      "image": "assets/catalog-images/headlight-bulb-ddd5a7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tail Light 70cc",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🔴",
+      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Indicator Set 4pc",
+      "unit": "packet",
+      "price": 800,
+      "icon": "🟠",
+      "image": "assets/catalog-images/indicator-330d9b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Side Mirror Pair",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🪞",
+      "image": "assets/catalog-images/side-mirror-6fba0c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fuel Tank Cap",
+      "unit": "piece",
+      "price": 450,
+      "icon": "⛽",
+      "image": "assets/catalog-images/fuel-tank-cap-4c468b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Handle Grip Pair",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🏍️",
+      "image": "assets/catalog-images/handle-grip-1ae1a2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Horn 12V",
+      "unit": "piece",
+      "price": 500,
+      "icon": "📯",
+      "image": "assets/catalog-images/horn-5cf73e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bike Battery 12V 5Ah",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🔋",
+      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Speedometer Cable",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🧵",
+      "image": "assets/catalog-images/speedometer-cable-63a1cf.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Number Plate Frame",
+      "unit": "piece",
+      "price": 250,
+      "icon": "🔢",
+      "image": "assets/catalog-images/number-plate-frame-ddb5de.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bike Hazard Flasher",
+      "unit": "piece",
+      "price": 600,
+      "icon": "⚠️",
+      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/bike-body-electrical-721986.webp"
+   },
+   {
+    "name": "Tyres & Tubes",
+    "items": [
+     {
+      "name": "Bike Tyre 2.50-17",
+      "unit": "piece",
+      "price": 3000,
+      "icon": "🛞",
+      "image": "assets/catalog-images/bike-tyre-v2-097273.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bike Tyre 2.75-17",
+      "unit": "piece",
+      "price": 3400,
+      "icon": "🛞",
+      "image": "assets/catalog-images/tyres-tubes-0e5089.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Bike Tyre 3.00-17",
+      "unit": "piece",
+      "price": 3800,
+      "icon": "🛞",
+      "image": "assets/catalog-images/tyres-tubes-0e5089.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Bike Tube 17 inch",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🛞",
+      "image": "assets/catalog-images/bike-tube-ba5304.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bike Tube 18 inch",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🛞",
+      "image": "assets/catalog-images/bike-tube-ba5304.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Puncture Repair Kit",
+      "unit": "piece",
+      "price": 400,
+      "icon": "🩹",
+      "image": "assets/catalog-images/puncture-repair-kit-376959.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Foot Air Pump",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "💨",
+      "image": "assets/catalog-images/foot-air-pump-48448c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Valve Caps 4-pack",
+      "unit": "packet",
+      "price": 150,
+      "icon": "🔩",
+      "image": "assets/catalog-images/valve-caps-4-95bf89.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Car Tyre 165/70 R13",
+      "unit": "piece",
+      "price": 16000,
+      "icon": "🚗",
+      "image": "assets/catalog-images/car-tyre-165-70-abb2a7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Car Tyre 185/65 R14",
+      "unit": "piece",
+      "price": 22000,
+      "icon": "🚗",
+      "image": "assets/catalog-images/tyres-tubes-0e5089.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/tyres-tubes-0e5089.webp"
+   },
+   {
+    "name": "Oils & Lubricants",
+    "items": [
+     {
+      "name": "Engine Oil 20W-50 1L",
+      "unit": "litre",
+      "price": 950,
+      "icon": "🛢️",
+      "nameUrdu": "موبل آئل",
+      "image": "assets/catalog-images/engine-oil-50-v2-58ca90.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Engine Oil 10W-30 1L",
+      "unit": "litre",
+      "price": 1050,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/engine-oil-30-b0a4cd.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Honda 4T Engine Oil 1L",
+      "unit": "litre",
+      "price": 1100,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/oils-lubricants-7f1041.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Havoline Engine Oil 1L",
+      "unit": "litre",
+      "price": 1000,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/havoline-engine-oil-d71d66.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gear Oil 1L",
+      "unit": "litre",
+      "price": 900,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/gear-oil-590e74.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Brake Oil 500ml",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🧴",
+      "image": "assets/catalog-images/brake-oil-b632e0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Grease Tin 500g",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🧴",
+      "image": "assets/catalog-images/grease-tin-500g-60be6a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chain Lube Spray",
+      "unit": "piece",
+      "price": 800,
+      "icon": "⛓️",
+      "image": "assets/catalog-images/chain-lube-spray-89e920.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Radiator Coolant 1L",
+      "unit": "litre",
+      "price": 700,
+      "icon": "💧",
+      "image": "assets/catalog-images/radiator-coolant-b64a1a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1677230017863-cae4537fd688?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Y2FyJTIwY29vbGFudCUyMGJvdHRsZXxlbnwxfHx8fDE3OTIyNTU1MDZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Sincerely Media",
+       "profileUrl": "https://unsplash.com/@sincerelymedia",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-the-engine-of-a-car-Wt4Hi25MT7g",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/Wt4Hi25MT7g/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Y2FyJTIwY29vbGFudCUyMGJvdHRsZXxlbnwxfHx8fDE3OTIyNTU1MDZ8MA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Hydraulic Oil 1L",
+      "unit": "litre",
+      "price": 850,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/hydraulic-oil-v2-b974fb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613214293055-5678e2f6d7de?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3IlMjBvaWwlMjBib3R0bGV8ZW58MXx8fHwxNzkyMjU1NTA5fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Benjamin Brunner",
+       "profileUrl": "https://unsplash.com/@ben_brunner",
+       "photoUrl": "https://unsplash.com/photos/black-and-white-plastic-bottle-9ZTpCjmwL2M",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/9ZTpCjmwL2M/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8bW90b3IlMjBvaWwlMjBib3R0bGV8ZW58MXx8fHwxNzkyMjU1NTA5fDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Engine Flush 500ml",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🧴",
+      "image": "assets/catalog-images/engine-flush-897435.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/oils-lubricants-7f1041.webp"
+   },
+   {
+    "name": "Car Basics",
+    "items": [
+     {
+      "name": "Car Battery 12V 70Ah",
+      "unit": "piece",
+      "price": 28000,
+      "icon": "🔋",
+      "image": "assets/catalog-images/car-basics-c7936a.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Wiper Blade 22 inch",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🚗",
+      "image": "assets/catalog-images/wiper-blade-95151a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Wiper Blade 18 inch",
+      "unit": "piece",
+      "price": 750,
+      "icon": "🚗",
+      "image": "assets/catalog-images/wiper-blade-95151a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Car Horn Pair",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "📯",
+      "image": "assets/catalog-images/car-horn-edeb3d.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1628248345481-9427c5d0df15?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Y2FyJTIwaG9ybiUyMGNsb3NldXB8ZW58MXx8fHwxNzkyMjU1NTAwfDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Milivoj Kuhar",
+       "profileUrl": "https://unsplash.com/@mimithecook",
+       "photoUrl": "https://unsplash.com/photos/red-and-silver-steel-outdoor-light-YiUWEeBuydo",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/YiUWEeBuydo/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8Y2FyJTIwaG9ybiUyMGNsb3NldXB8ZW58MXx8fHwxNzkyMjU1NTAwfDA",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Headlight Bulb H4",
+      "unit": "piece",
+      "price": 800,
+      "icon": "💡",
+      "image": "assets/catalog-images/headlight-bulb-h4-4a1c21.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "LED Headlight H4 Pair",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "💡",
+      "image": "assets/catalog-images/car-basics-c7936a.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Car Air Freshener",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🌸",
+      "image": "assets/catalog-images/car-air-freshener-72c233.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Car Floor Mats Set",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🚗",
+      "image": "assets/catalog-images/car-floor-mats-ea4df8.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Car Seat Covers Set",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "💺",
+      "image": "assets/catalog-images/car-seat-covers-9c6849.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Car Shampoo 1L",
+      "unit": "litre",
+      "price": 600,
+      "icon": "🧴",
+      "image": "assets/catalog-images/car-shampoo-15f24c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Microfiber Cloth 3-pack",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🧽",
+      "image": "assets/catalog-images/microfiber-cloth-3-8980bd.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Car Polish 500ml",
+      "unit": "piece",
+      "price": 750,
+      "icon": "✨",
+      "image": "assets/catalog-images/car-polish-9f72fe.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Reverse Camera Kit",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "📷",
+      "image": "assets/catalog-images/reverse-camera-kit-88805c.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Theo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/car-basics-c7936a.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Theo",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Accessories & Riding Gear",
+    "items": [
+     {
+      "name": "Bike Cover",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🏍️",
+      "image": "assets/catalog-images/bike-cover-f5b12b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Car Cover",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🚗",
+      "image": "assets/catalog-images/car-cover-b9f5fb.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cable Lock",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🔒",
+      "image": "assets/catalog-images/cable-lock-3f96a8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Disc Lock with Alarm",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🔒",
+      "image": "assets/catalog-images/disc-lock-alarm-2832e2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tool Kit 46pc",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🧰",
+      "image": "assets/catalog-images/tool-kit-190878.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Helmet Open Face",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🪖",
+      "image": "assets/catalog-images/helmet-open-face-4ed384.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Helmet Full Face",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🪖",
+      "image": "assets/catalog-images/helmet-full-face-e09bf7.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Riding Gloves",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🧤",
+      "image": "assets/catalog-images/riding-gloves-a778c0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Knee Guards Pair",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "🦵",
+      "image": "assets/catalog-images/knee-guards-v2-c9ece1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "LED Fog Lamps Pair",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "💡",
+      "image": "assets/catalog-images/led-fog-lamps-c26adc.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/accessories-riding-gear-d10ea3.webp"
+   },
+   {
+    "name": "Filters & Service",
+    "items": [
+     {
+      "name": "Air Filter 70cc",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🫧",
+      "image": "assets/catalog-images/filters-service-406ae5.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Oil Filter Car",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🛢️",
+      "image": "assets/catalog-images/oil-filter-car-1e0963.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Fuel Filter",
+      "unit": "piece",
+      "price": 350,
+      "icon": "⛽",
+      "image": "assets/catalog-images/fuel-filter-9c1c84.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Car Air Filter",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🫧",
+      "image": "assets/catalog-images/car-air-filter-e1db0a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cabin Filter",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🫧",
+      "image": "assets/catalog-images/cabin-filter-3b86ca.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Front Brake Pads Set",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🛑",
+      "image": "assets/catalog-images/front-brake-pads-v2-9a3582.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Rear Brake Shoes 70cc",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🛑",
+      "image": "assets/catalog-images/filters-service-406ae5.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "70cc Service Kit (Oil+Plug+Filter)",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🧰",
+      "image": "assets/catalog-images/filters-service-406ae5.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Dashboard Shiner",
+      "unit": "piece",
+      "price": 650,
+      "icon": "✨",
+      "image": "assets/catalog-images/filters-service-406ae5.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Tyre Shiner Spray",
+      "unit": "piece",
+      "price": 550,
+      "icon": "✨",
+      "image": "assets/catalog-images/filters-service-406ae5.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/filters-service-406ae5.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Agriculture - Seeds, Fertilizer & Pesticides",
+  "icon": "🌾",
+  "categories": [
+   {
+    "name": "Fertilizers (Khad)",
+    "items": [
+     {
+      "name": "DAP Bag 50kg",
+      "unit": "piece",
+      "price": 14500,
+      "icon": "🌾",
+      "nameUrdu": "کھاد",
+      "image": "assets/catalog-images/dap-bag-1c0f12.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Urea Bag 50kg",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🌾",
+      "image": "assets/catalog-images/urea-bag-367bc8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "SOP Bag 50kg",
+      "unit": "piece",
+      "price": 12000,
+      "icon": "🌾",
+      "image": "assets/catalog-images/sop-bag-v2-10dcdf.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "NPK 15-15-15 Bag 50kg",
+      "unit": "piece",
+      "price": 9500,
+      "icon": "🌾",
+      "image": "assets/catalog-images/npk-15-15-15-c4c495.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "SSP Bag 50kg",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🌾",
+      "image": "assets/catalog-images/ssp-bag-5bca91.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "CAN Bag 50kg",
+      "unit": "piece",
+      "price": 5200,
+      "icon": "🌾",
+      "image": "assets/catalog-images/can-bag-7a39e0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Zinc Sulphate 5kg",
+      "unit": "packet",
+      "price": 1800,
+      "icon": "⚗️",
+      "image": "assets/catalog-images/zinc-sulphate-v2-e1b09e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Boron 3kg",
+      "unit": "packet",
+      "price": 1500,
+      "icon": "⚗️",
+      "image": "assets/catalog-images/boron-05d638.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gypsum Bag 50kg",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "⬜",
+      "image": "assets/catalog-images/gypsum-bag-3a7cd6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Humic Acid 1kg",
+      "unit": "packet",
+      "price": 900,
+      "icon": "🧪",
+      "image": "assets/catalog-images/humic-acid-v2-849ccc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Epsom Salt 25kg",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🧂",
+      "image": "assets/catalog-images/epsom-salt-c51c65.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Organic Compost 40kg",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🌱",
+      "image": "assets/catalog-images/organic-compost-7e21a4.webp",
+      "imageLevel": "item"
+     }
+    ]
+   },
+   {
+    "name": "Seeds",
+    "items": [
+     {
+      "name": "Wheat Seed 50kg",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🌾",
+      "nameUrdu": "بیج",
+      "image": "assets/catalog-images/wheat-seed-3ce27a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Paddy Seed 20kg",
+      "unit": "piece",
+      "price": 9000,
+      "icon": "🌾",
+      "image": "assets/catalog-images/paddy-seed-799ca6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Maize Hybrid Seed 4kg",
+      "unit": "packet",
+      "price": 4500,
+      "icon": "🌽",
+      "image": "assets/catalog-images/maize-hybrid-seed-9a29ab.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cotton Seed 10kg",
+      "unit": "piece",
+      "price": 5500,
+      "icon": "☁️",
+      "image": "assets/catalog-images/cotton-seed-c3dc9f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mustard Seed 5kg",
+      "unit": "packet",
+      "price": 2200,
+      "icon": "🌼",
+      "image": "assets/catalog-images/mustard-seed-85203f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sunflower Hybrid 2kg",
+      "unit": "packet",
+      "price": 2800,
+      "icon": "🌻",
+      "image": "assets/catalog-images/sunflower-hybrid-e8bf98.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Onion Seed 1kg",
+      "unit": "packet",
+      "price": 1800,
+      "icon": "🧅",
+      "image": "assets/catalog-images/onion-seed-e0ea50.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Potato Seed 50kg",
+      "unit": "piece",
+      "price": 7000,
+      "icon": "🥔",
+      "image": "assets/catalog-images/potato-seed-e8eca6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bajra Fodder Seed 10kg",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🌾",
+      "image": "assets/catalog-images/seeds-0739fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Barseem Clover Seed 10kg",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "🍀",
+      "image": "assets/catalog-images/seeds-0739fa.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Vegetable Seeds Mix Pack",
+      "unit": "packet",
+      "price": 650,
+      "icon": "🥬",
+      "image": "assets/catalog-images/vegetable-seeds-mix-c5684d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tomato Hybrid Seed 100g",
+      "unit": "packet",
+      "price": 950,
+      "icon": "🍅",
+      "image": "assets/catalog-images/seeds-0739fa.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/seeds-0739fa.webp"
+   },
+   {
+    "name": "Pesticides & Sprays",
+    "items": [
+     {
+      "name": "Bifenthrin 1L",
+      "unit": "litre",
+      "price": 2800,
+      "icon": "🧪",
+      "nameUrdu": "اسپرے",
+      "image": "assets/catalog-images/bifenthrin-v2-b67f0c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Lambda Cyhalothrin 500ml",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🧪",
+      "image": "assets/catalog-images/lambda-cyhalothrin-4b0637.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Imidacloprid 500ml",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "🧪",
+      "image": "assets/catalog-images/imidacloprid-5a8e12.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Glyphosate 1L",
+      "unit": "litre",
+      "price": 2200,
+      "icon": "🧪",
+      "image": "assets/catalog-images/glyphosate-4b322e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Atrazine 1kg",
+      "unit": "packet",
+      "price": 1800,
+      "icon": "🧪",
+      "image": "assets/catalog-images/atrazine-0df789.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Mancozeb 400g",
+      "unit": "packet",
+      "price": 900,
+      "icon": "🧪",
+      "image": "assets/catalog-images/pesticides-sprays-ed7f90.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Copper Oxychloride 1kg",
+      "unit": "packet",
+      "price": 1500,
+      "icon": "🧪",
+      "image": "assets/catalog-images/copper-oxychloride-aaa733.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Emamectin 200ml",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🧪",
+      "image": "assets/catalog-images/pesticides-sprays-ed7f90.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Chlorpyrifos 1L",
+      "unit": "litre",
+      "price": 2400,
+      "icon": "🧪",
+      "image": "assets/catalog-images/chlorpyrifos-f86794.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pendimethalin 1L",
+      "unit": "litre",
+      "price": 2600,
+      "icon": "🧪",
+      "image": "assets/catalog-images/pendimethalin-v2-348a2b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "2,4-D Amine 1L",
+      "unit": "litre",
+      "price": 1800,
+      "icon": "🧪",
+      "image": "assets/catalog-images/pesticides-sprays-ed7f90.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Sulphur 1kg",
+      "unit": "packet",
+      "price": 700,
+      "icon": "🧪",
+      "image": "assets/catalog-images/sulphur-e67c5e.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/pesticides-sprays-ed7f90.webp"
+   },
+   {
+    "name": "Spray Equipment",
+    "items": [
+     {
+      "name": "Knapsack Sprayer 20L",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🧴",
+      "image": "assets/catalog-images/knapsack-sprayer-a21e67.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Battery Sprayer 20L",
+      "unit": "piece",
+      "price": 12000,
+      "icon": "🔋",
+      "image": "assets/catalog-images/spray-equipment-v2-8fefb6.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Hand Pressure Sprayer 5L",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🧴",
+      "image": "assets/catalog-images/hand-pressure-sprayer-47b454.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Brass Spray Nozzle",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🔩",
+      "image": "assets/catalog-images/brass-spray-nozzle-03cbed.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Spray Hose 50ft",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🧵",
+      "image": "assets/catalog-images/spray-hose-a42f7b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Petrol Mist Blower",
+      "unit": "piece",
+      "price": 28000,
+      "icon": "💨",
+      "image": "assets/catalog-images/spray-equipment-v2-8fefb6.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Protective Spray Suit",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🦺",
+      "image": "assets/catalog-images/protective-spray-suit-f39e28.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Measuring Cylinder 1L",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🧪",
+      "image": "assets/catalog-images/measuring-cylinder-f2f5d9.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/spray-equipment-v2-8fefb6.webp"
+   },
+   {
+    "name": "Farm Tools",
+    "items": [
+     {
+      "name": "Spade (Kassi)",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "⛏️",
+      "nameUrdu": "کسی",
+      "image": "assets/catalog-images/spade-v2-02fb58.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Hoe (Kudal)",
+      "unit": "piece",
+      "price": 900,
+      "icon": "⛏️",
+      "image": "assets/catalog-images/hoe-v2-c283f9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Sickle (Daranti)",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🌾",
+      "nameUrdu": "درانتی",
+      "image": "assets/catalog-images/sickle-v2-8c5350.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Axe (Kulhara)",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "🪓",
+      "nameUrdu": "کلہاڑا",
+      "image": "assets/catalog-images/axe-ed4dd6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shovel (Belcha)",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "⛏️",
+      "image": "assets/catalog-images/shovel-9c8a40.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Garden Rake",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🧹",
+      "image": "assets/catalog-images/garden-rake-v2-df71d1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wheelbarrow",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🛒",
+      "image": "assets/catalog-images/wheelbarrow-23d916.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Pruning Shears",
+      "unit": "piece",
+      "price": 950,
+      "icon": "✂️",
+      "image": "assets/catalog-images/pruning-shears-d10da8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Water Pipe 2 inch 100ft",
+      "unit": "piece",
+      "price": 8500,
+      "icon": "🚿",
+      "image": "assets/catalog-images/water-pipe-b3513a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Nylon Rope 1kg",
+      "unit": "kg",
+      "price": 600,
+      "icon": "🪢",
+      "image": "assets/catalog-images/nylon-rope-8a6239.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/farm-tools-d39e92.webp"
+   },
+   {
+    "name": "Soil & Irrigation",
+    "items": [
+     {
+      "name": "Soil pH Meter",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🧪",
+      "image": "assets/catalog-images/soil-ph-meter-ad96a8.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Soil Moisture Meter",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "💧",
+      "image": "assets/catalog-images/soil-moisture-meter-78e2e9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Drip Lateral 16mm 100m",
+      "unit": "piece",
+      "price": 9500,
+      "icon": "💧",
+      "image": "assets/catalog-images/soil-irrigation-698550.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Sprinkler Head",
+      "unit": "piece",
+      "price": 900,
+      "icon": "💦",
+      "image": "assets/catalog-images/sprinkler-head-6c98a9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "PVC Pipe 2 inch 10ft",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🚿",
+      "image": "assets/catalog-images/pvc-pipe-3a9bd9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Foot Valve 2 inch",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🔩",
+      "image": "assets/catalog-images/foot-valve-product-v2-d400ec.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/soil-irrigation-698550.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Jewelry & Watches",
+  "icon": "💎",
+  "categories": [
+   {
+    "name": "Gold Jewelry",
+    "items": [
+     {
+      "name": "Ladies Gold Ring",
+      "unit": "piece",
+      "price": 220000,
+      "icon": "💍",
+      "nameUrdu": "انگوٹھی",
+      "image": "assets/catalog-images/ladies-gold-ring-cc0b85.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gold Earrings Pair",
+      "unit": "piece",
+      "price": 180000,
+      "icon": "👂",
+      "nameUrdu": "بالیاں",
+      "image": "assets/catalog-images/gold-earrings-64f24e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gold Chain 1 Tola",
+      "unit": "piece",
+      "price": 300000,
+      "icon": "⛓️",
+      "nameUrdu": "چین",
+      "image": "assets/catalog-images/gold-jewelry-803cb1.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Gold Bangles Pair",
+      "unit": "piece",
+      "price": 450000,
+      "icon": "🔶",
+      "nameUrdu": "کنگن",
+      "image": "assets/catalog-images/gold-bangles-11d034.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gold Locket",
+      "unit": "piece",
+      "price": 95000,
+      "icon": "📿",
+      "nameUrdu": "لاکٹ",
+      "image": "assets/catalog-images/gold-locket-6fbbc0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gold Nose Pin",
+      "unit": "piece",
+      "price": 45000,
+      "icon": "👃",
+      "nameUrdu": "نتھلی",
+      "image": "assets/catalog-images/gold-nose-pin-0e5727.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gold Bracelet",
+      "unit": "piece",
+      "price": 260000,
+      "icon": "⌚",
+      "image": "assets/catalog-images/gold-bracelet-95e91d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gold Tops Pair",
+      "unit": "piece",
+      "price": 120000,
+      "icon": "✨",
+      "image": "assets/catalog-images/gold-tops-5c8836.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/gold-jewelry-803cb1.webp"
+   },
+   {
+    "name": "Silver Jewelry",
+    "items": [
+     {
+      "name": "Silver Ring",
+      "unit": "piece",
+      "price": 8000,
+      "icon": "💍",
+      "nameUrdu": "چاندی کی انگوٹھی",
+      "image": "assets/catalog-images/silver-ring-f0ca5f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silver Chain",
+      "unit": "piece",
+      "price": 25000,
+      "icon": "⛓️",
+      "image": "assets/catalog-images/silver-chain-6be5a1.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silver Bangles Pair",
+      "unit": "piece",
+      "price": 35000,
+      "icon": "🔶",
+      "image": "assets/catalog-images/silver-bangles-c95d7b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silver Earrings Pair",
+      "unit": "piece",
+      "price": 12000,
+      "icon": "👂",
+      "image": "assets/catalog-images/silver-earrings-f9c081.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silver Locket",
+      "unit": "piece",
+      "price": 15000,
+      "icon": "📿",
+      "image": "assets/catalog-images/silver-locket-7ee52f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silver Bracelet",
+      "unit": "piece",
+      "price": 18000,
+      "icon": "⌚",
+      "image": "assets/catalog-images/silver-bracelet-v2-192458.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silver Anklet Pair (Payal)",
+      "unit": "piece",
+      "price": 14000,
+      "icon": "🦶",
+      "nameUrdu": "پائل",
+      "image": "assets/catalog-images/silver-anklet-2fe2bc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Silver Nose Pin",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "👃",
+      "image": "assets/catalog-images/silver-nose-pin-0cb60b.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/silver-jewelry-b9f812.webp"
+   },
+   {
+    "name": "Artificial Jewelry",
+    "items": [
+     {
+      "name": "Artificial Bangles Set",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🔶",
+      "image": "assets/catalog-images/artificial-bangles-e3018b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Artificial Earrings",
+      "unit": "piece",
+      "price": 600,
+      "icon": "👂",
+      "image": "assets/catalog-images/artificial-earrings-086e76.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Artificial Necklace Set",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "📿",
+      "image": "assets/catalog-images/artificial-necklace-v2-9fb503.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Artificial Ring",
+      "unit": "piece",
+      "price": 450,
+      "icon": "💍",
+      "image": "assets/catalog-images/artificial-ring-v2-c28a05.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Bridal Set Artificial",
+      "unit": "piece",
+      "price": 8000,
+      "icon": "👰",
+      "image": "assets/catalog-images/bridal-artificial-v2-894aa6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tikka Jhumar Set",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "✨",
+      "nameUrdu": "ٹکہ",
+      "image": "assets/catalog-images/artificial-jewelry-9f1ff1.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Matha Patti",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "✨",
+      "image": "assets/catalog-images/matha-patti-c1696b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Artificial Kamarbandh",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "⛓️",
+      "image": "assets/catalog-images/artificial-jewelry-9f1ff1.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Pearl Mala",
+      "unit": "piece",
+      "price": 2000,
+      "icon": "📿",
+      "image": "assets/catalog-images/pearl-mala-v2-cf0b5f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Hair Accessories Bridal Set",
+      "unit": "piece",
+      "price": 950,
+      "icon": "💇",
+      "image": "assets/catalog-images/hair-accessories-bridal-5874b8.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/artificial-jewelry-9f1ff1.webp"
+   },
+   {
+    "name": "Watches & Clocks",
+    "items": [
+     {
+      "name": "Gents Quartz Watch",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "⌚",
+      "nameUrdu": "گھڑی",
+      "image": "assets/catalog-images/watches-clocks-1d18a6.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Ladies Quartz Watch",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "⌚",
+      "image": "assets/catalog-images/ladies-quartz-watch-9a1e6c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Digital Sports Watch",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "⌚",
+      "image": "assets/catalog-images/digital-sports-watch-v2-5820e9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Smart Watch",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "⌚",
+      "image": "assets/catalog-images/smart-watch-v2-520993.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Couple Watch Set",
+      "unit": "piece",
+      "price": 6000,
+      "icon": "⌚",
+      "image": "assets/catalog-images/couple-watch-71785d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wall Clock",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🕐",
+      "image": "assets/catalog-images/wall-clock-97ce0f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Alarm Clock",
+      "unit": "piece",
+      "price": 950,
+      "icon": "⏰",
+      "image": "assets/catalog-images/alarm-clock-fee75e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Leather Watch Strap",
+      "unit": "piece",
+      "price": 800,
+      "icon": "⌚",
+      "image": "assets/catalog-images/leather-watch-strap-be784d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Watch Battery Cell",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🔋",
+      "image": "assets/catalog-images/watch-battery-cell-9a42c0.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Kids Watch",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "⌚",
+      "image": "assets/catalog-images/kids-watch-185e09.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/watches-clocks-1d18a6.webp"
+   },
+   {
+    "name": "Repair & Services",
+    "items": [
+     {
+      "name": "Watch Battery Replacement",
+      "unit": "piece",
+      "price": 300,
+      "icon": "🔧",
+      "image": "assets/catalog-images/watch-battery-replacement-fe2b9f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Watch Glass Replacement",
+      "unit": "piece",
+      "price": 800,
+      "icon": "🔧",
+      "image": "assets/catalog-images/watch-glass-v2-32de36.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Gold Polish Service",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "✨",
+      "image": "assets/catalog-images/gold-polish-service-4a53dc.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ring Resizing Service",
+      "unit": "piece",
+      "price": 1000,
+      "icon": "💍",
+      "image": "assets/catalog-images/ring-resizing-service-f4b799.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/repair-services-4f8536.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Sports & Fitness",
+  "icon": "🏏",
+  "categories": [
+   {
+    "name": "Cricket",
+    "items": [
+     {
+      "name": "Cricket Bat English Willow",
+      "unit": "piece",
+      "price": 8500,
+      "icon": "🏏",
+      "nameUrdu": "بیٹ",
+      "image": "assets/catalog-images/cricket-bat-english-willow-40a835.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cricket Bat Kashmir Willow",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🏏",
+      "image": "assets/catalog-images/cricket-bat-kashmir-willow-cc100c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tennis Ball 3-pack",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🎾",
+      "nameUrdu": "گیند",
+      "image": "assets/catalog-images/tennis-ball-3-e413d2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Season Ball",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🔴",
+      "image": "assets/catalog-images/season-ball-719112.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cricket Kit Bag",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🎒",
+      "image": "assets/catalog-images/cricket-kit-bag-fc15ca.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Batting Gloves",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🧤",
+      "image": "assets/catalog-images/batting-gloves-39a061.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Batting Pads",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🦵",
+      "image": "assets/catalog-images/batting-pads-dba865.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cricket Helmet",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "🪖",
+      "image": "assets/catalog-images/cricket-helmet-5d9ede.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wooden Stumps Set",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "🏏",
+      "image": "assets/catalog-images/wooden-stumps-7bca67.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Abdominal Guard",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🛡️",
+      "image": "assets/catalog-images/abdominal-guard-81c590.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Wheelie Kit Bag",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🎒",
+      "image": "assets/catalog-images/cricket-a90edc.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Grip Cone 3-pack",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🏏",
+      "image": "assets/catalog-images/grip-cone-3-130b2c.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/cricket-a90edc.webp"
+   },
+   {
+    "name": "Football",
+    "items": [
+     {
+      "name": "Football Size 5",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "⚽",
+      "image": "assets/catalog-images/football-size-5-e3a66e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Football Size 4",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "⚽",
+      "image": "assets/catalog-images/football-size-4-4ba6ec.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Futsal Ball",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "⚽",
+      "image": "assets/catalog-images/futsal-ball-ace68a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Goalkeeper Gloves",
+      "unit": "piece",
+      "price": 1400,
+      "icon": "🧤",
+      "image": "assets/catalog-images/goalkeeper-gloves-405c4a.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shin Guards",
+      "unit": "piece",
+      "price": 700,
+      "icon": "🦵",
+      "image": "assets/catalog-images/shin-guards-655a67.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Football Pump",
+      "unit": "piece",
+      "price": 600,
+      "icon": "💨",
+      "image": "assets/catalog-images/football-pump-44592d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Referee Whistle",
+      "unit": "piece",
+      "price": 250,
+      "icon": "📯",
+      "image": "assets/catalog-images/referee-whistle-4fae63.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Training Cones 10-pack",
+      "unit": "packet",
+      "price": 900,
+      "icon": "🔶",
+      "image": "assets/catalog-images/training-cones-10-31af71.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/football-449a5f.webp"
+   },
+   {
+    "name": "Badminton & Racket Sports",
+    "items": [
+     {
+      "name": "Badminton Racket Pair",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🏸",
+      "image": "assets/catalog-images/badminton-racket-d875d3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Shuttlecock 6-pack",
+      "unit": "packet",
+      "price": 900,
+      "icon": "🏸",
+      "image": "assets/catalog-images/shuttlecock-6-ada686.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Badminton Net",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🥅",
+      "image": "assets/catalog-images/badminton-net-608ae9.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tennis Racket",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🎾",
+      "image": "assets/catalog-images/tennis-racket-d07ea6.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Tennis Balls 3-pack",
+      "unit": "packet",
+      "price": 1200,
+      "icon": "🎾",
+      "image": "assets/catalog-images/tennis-balls-3-ef098b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Squash Racket",
+      "unit": "piece",
+      "price": 3800,
+      "icon": "🎾",
+      "image": "assets/catalog-images/squash-racket-0a1244.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Table Tennis Bats Pair",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "🏓",
+      "image": "assets/catalog-images/table-tennis-bats-35d973.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "TT Balls 6-pack",
+      "unit": "packet",
+      "price": 500,
+      "icon": "🏓",
+      "image": "assets/catalog-images/tt-balls-6-7f0ebd.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/badminton-racket-sports-512c12.webp"
+   },
+   {
+    "name": "Gym & Fitness",
+    "items": [
+     {
+      "name": "Dumbbell 5kg Pair",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🏋️",
+      "nameUrdu": "ڈمبل",
+      "image": "assets/catalog-images/dumbbell-v2-f0206a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Dumbbell 10kg Pair",
+      "unit": "piece",
+      "price": 8500,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/dumbbell-v2-f0206a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Kettlebell 12kg",
+      "unit": "piece",
+      "price": 6500,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/kettlebell-68a20e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Barbell Rod 5ft",
+      "unit": "piece",
+      "price": 4500,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/gym-fitness-97d494.webp",
+      "imageLevel": "category",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "",
+      "imageSource": "unsplash"
+     },
+     {
+      "name": "Weight Plate 10kg",
+      "unit": "piece",
+      "price": 3200,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/weight-plate-f780fb.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Bench Press Bench",
+      "unit": "piece",
+      "price": 18000,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/bench-press-bench-d88a9a.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Skipping Rope",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🪢",
+      "image": "assets/catalog-images/skipping-rope-2c5a4e.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Yoga Mat",
+      "unit": "piece",
+      "price": 1500,
+      "icon": "🧘",
+      "image": "assets/catalog-images/yoga-mat-2a7058.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Gym Gloves",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🧤",
+      "image": "assets/catalog-images/gym-gloves-4cdd34.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Resistance Bands Set",
+      "unit": "piece",
+      "price": 1800,
+      "icon": "🎗️",
+      "image": "assets/catalog-images/resistance-bands-v2-49a20f.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Doorway Pull-up Bar",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/doorway-pull-up-bar-7e1534.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Push-up Bars Pair",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "🏋️",
+      "image": "assets/catalog-images/push-up-bars-577068.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Ab Wheel",
+      "unit": "piece",
+      "price": 1100,
+      "icon": "⭕",
+      "image": "assets/catalog-images/ab-wheel-3ebc75.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     },
+     {
+      "name": "Gym Water Bottle",
+      "unit": "piece",
+      "price": 800,
+      "icon": "💧",
+      "image": "assets/catalog-images/gym-water-bottle-e424f0.webp",
+      "imageLevel": "item",
+      "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Danielle Cerullo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+       "source": "Unsplash"
+      },
+      "downloadLocation": ""
+     }
+    ],
+    "image": "assets/catalog-images/gym-fitness-97d494.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Danielle Cerullo",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/woman-standing-surrounded-by-exercise-equipment-CQfNt66ttZM",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Outdoor & Indoor Games",
+    "items": [
+     {
+      "name": "Volleyball",
+      "unit": "piece",
+      "price": 1600,
+      "icon": "🏐",
+      "image": "assets/catalog-images/volleyball-c26e25.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Basketball",
+      "unit": "piece",
+      "price": 2200,
+      "icon": "🏀",
+      "image": "assets/catalog-images/basketball-c71a18.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Hockey Stick",
+      "unit": "piece",
+      "price": 2800,
+      "icon": "🏑",
+      "image": "assets/catalog-images/hockey-stick-985a08.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Carrom Board",
+      "unit": "piece",
+      "price": 3500,
+      "icon": "🎯",
+      "image": "assets/catalog-images/carrom-board-ea622e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Carrom Coins Set",
+      "unit": "piece",
+      "price": 600,
+      "icon": "⭕",
+      "image": "assets/catalog-images/carrom-coins-c6fe0d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ludo Board",
+      "unit": "piece",
+      "price": 450,
+      "icon": "🎲",
+      "image": "assets/catalog-images/ludo-board-09aa6d.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Chess Set",
+      "unit": "piece",
+      "price": 1200,
+      "icon": "♟️",
+      "image": "assets/catalog-images/chess-0727c2.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dart Board",
+      "unit": "piece",
+      "price": 2500,
+      "icon": "🎯",
+      "image": "assets/catalog-images/dart-board-05e142.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/outdoor-indoor-games-97a3aa.webp"
+   }
+  ]
+ },
+ {
+  "shopType": "Paan & Tobacco Shop",
+  "icon": "🍃",
+  "categories": [
+   {
+    "name": "Paan Ingredients",
+    "items": [
+     {
+      "name": "Betel Leaf (Paan Patta) dozen",
+      "unit": "dozen",
+      "price": 150,
+      "icon": "🍃",
+      "nameUrdu": "پان",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Areca Nut (Supari) 250g",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🌰",
+      "nameUrdu": "سپاری",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Slaked Lime (Chuna) 100g",
+      "unit": "packet",
+      "price": 150,
+      "icon": "⬜",
+      "nameUrdu": "چونا",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Kattha 100g",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🟤",
+      "nameUrdu": "کتھا",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Cardamom (Elaichi) 50g",
+      "unit": "packet",
+      "price": 600,
+      "icon": "🫛",
+      "nameUrdu": "الائچی",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Coconut Powder 250g",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🥥",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Fennel Seeds (Saunf) 250g",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🌱",
+      "nameUrdu": "سونف",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     },
+     {
+      "name": "Gulkand 100g",
+      "unit": "packet",
+      "price": 250,
+      "icon": "🌹",
+      "nameUrdu": "گل قند",
+      "image": "assets/catalog-images/paan-ingredients-1c67bd.webp",
+      "imageLevel": "category"
+     }
+    ],
+    "image": "assets/catalog-images/paan-ingredients-1c67bd.webp"
+   },
+   {
+    "name": "Supari & Chewables",
+    "items": [
+     {
+      "name": "Sweet Supari Pouch",
+      "unit": "packet",
+      "price": 450,
+      "icon": "🌰",
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
+     },
+     {
+      "name": "Roasted Supari 250g",
+      "unit": "packet",
+      "price": 500,
+      "icon": "🌰",
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
+     },
+     {
+      "name": "Saunf Supari Mix 250g",
+      "unit": "packet",
+      "price": 350,
+      "icon": "🌱",
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
+     },
+     {
+      "name": "Elaichi Dana 100g",
+      "unit": "packet",
+      "price": 400,
+      "icon": "🫛",
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
+     },
+     {
+      "name": "Coconut Supari 250g",
+      "unit": "packet",
+      "price": 300,
+      "icon": "🥥",
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
+     },
+     {
+      "name": "Mitha Pan Masala 200g",
+      "unit": "packet",
+      "price": 550,
+      "icon": "🍬",
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
+     }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "credit": {
+     "name": "Praswin Prakashan",
+     "profileUrl": "https://unsplash.com/@praswinprakashan",
+     "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+     "source": "Unsplash"
+    }
+   },
+   {
+    "name": "Cigarettes (Retail Packs)",
+    "items": [
+     {
+      "name": "Gold Leaf Pack 20",
+      "unit": "piece",
+      "price": 650,
+      "icon": "🚬",
+      "image": "assets/catalog-images/gold-leaf-20-f4e943.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Marlboro Pack 20",
+      "unit": "piece",
+      "price": 850,
+      "icon": "🚬",
+      "image": "assets/catalog-images/marlboro-20-2cf50b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Dunhill Pack 20",
+      "unit": "piece",
+      "price": 900,
+      "icon": "🚬",
+      "image": "assets/catalog-images/dunhill-20-4c9f6e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Capstan Pack 20",
+      "unit": "piece",
+      "price": 550,
+      "icon": "🚬",
+      "image": "assets/catalog-images/capstan-20-daae1c.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Morven Gold Pack 20",
+      "unit": "piece",
+      "price": 600,
+      "icon": "🚬",
+      "image": "assets/catalog-images/morven-gold-20-fbe02e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "K2 Pack 20",
+      "unit": "piece",
+      "price": 500,
+      "icon": "🚬",
+      "image": "assets/catalog-images/k-20-f8a08e.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Red & White Pack 20",
+      "unit": "piece",
+      "price": 520,
+      "icon": "🚬",
+      "image": "assets/catalog-images/red-white-20-764a14.webp",
+      "imageLevel": "item"
+     }
+    ]
+   },
+   {
+    "name": "Smoking Accessories",
+    "items": [
+     {
+      "name": "Gas Lighter",
+      "unit": "piece",
+      "price": 150,
+      "icon": "🔥",
+      "nameUrdu": "لائٹر",
+      "image": "assets/catalog-images/gas-lighter-9d94a3.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Matchbox 10-pack",
+      "unit": "packet",
+      "price": 120,
+      "icon": "🔥",
+      "image": "assets/catalog-images/matchbox-10-102b3f.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Cigarette Case",
+      "unit": "piece",
+      "price": 400,
+      "icon": "📦",
+      "image": "assets/catalog-images/cigarette-case-b1cd7b.webp",
+      "imageLevel": "item"
+     },
+     {
+      "name": "Ashtray",
+      "unit": "piece",
+      "price": 350,
+      "icon": "🚬",
+      "image": "assets/catalog-images/ashtray-4a769e.webp",
+      "imageLevel": "item"
+     }
+    ],
+    "image": "assets/catalog-images/smoking-accessories-cc27db.webp"
+   }
+  ]
+ }
+];
+
+export const MASTER_CATALOG_ITEM_COUNT = 1720;
