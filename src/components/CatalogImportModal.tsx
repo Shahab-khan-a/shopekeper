@@ -44,14 +44,33 @@ export function mapCatalogCategory(categoryName: string, shopType: string): Prod
 
 /** Best displayable URI for a catalog item: hotlinked photo first, bundled photo second. */
 export function resolveCatalogImageUri(item: CatalogItem): string | undefined {
-  if (item.imageUrl) return item.imageUrl;
+  // Bundled photo first: the app is offline-first, so the on-device image
+  // always shows — the hotlinked URL is only a fallback for items that
+  // have no bundled photo of their own.
   if (item.image && CATALOG_IMAGE_MAP[item.image]) {
     try {
-      return RNImage.resolveAssetSource(CATALOG_IMAGE_MAP[item.image]).uri;
+      const asset: unknown = CATALOG_IMAGE_MAP[item.image];
+      // Web bundles hand back an asset object that already carries a uri
+      // (and react-native-web has no Image.resolveAssetSource); native
+      // bundles hand back a registry number that needs resolving.
+      if (typeof asset === 'string') return asset;
+      if (asset && typeof asset === 'object' && 'uri' in asset) {
+        const uri = (asset as { uri?: unknown }).uri;
+        if (typeof uri === 'string' && uri) return uri;
+      }
+      if (typeof asset === 'number') {
+        const src = RNImage.resolveAssetSource(asset) as
+          | { uri?: string }
+          | string
+          | null;
+        const uri = typeof src === 'string' ? src : src?.uri;
+        if (uri) return uri;
+      }
     } catch {
-      return undefined;
+      // fall through to the hotlink
     }
   }
+  if (item.imageUrl) return item.imageUrl;
   return undefined;
 }
 
@@ -231,7 +250,7 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
                   existingNames.has(item.name.trim().toLowerCase()) || addedNow.has(item.name);
                 return (
                   <View style={[styles.itemRow, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                    <ProductImage uri={resolveCatalogImageUri(item)} style={styles.thumb} />
+                    <ProductImage uri={resolveCatalogImageUri(item)} style={styles.thumb} containerStyle={styles.thumb} />
                     <View style={styles.itemText}>
                       <Text style={[styles.itemName, { color: theme.text }]} numberOfLines={1}>
                         {item.name}
