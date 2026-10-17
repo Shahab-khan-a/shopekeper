@@ -18,6 +18,8 @@ import { useShop } from '@/context/ShopContext';
 import { Colors, ThemeColors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { CameraModal } from '@/components/CameraModal';
 import { CurrencyPickerModal } from '@/components/CurrencyPickerModal';
+import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
+import { MASTER_CATALOG } from '@/data/masterCatalog';
 import { findCurrency } from '@/constants/currencies';
 import { buildImportTemplateJSON } from '@/constants/sampleData';
 import * as Linking from 'expo-linking';
@@ -132,6 +134,7 @@ export const SettingsScreen: React.FC = () => {
   const [activeSegment, setActiveSegment] = useState<Segment>('profile');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
+  const [isShopTypePickerOpen, setIsShopTypePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
@@ -850,6 +853,42 @@ export const SettingsScreen: React.FC = () => {
               )}
             </Pressable>
           </View>
+
+          {/* Product Catalog — shop type drives what loads in the Products tab */}
+          <Section title={language === 'ur' ? 'پروڈکٹ کیٹلاگ' : 'Product Catalog'} theme={theme}>
+            <RowItem
+              icon="storefront-outline"
+              iconColor="#0D9488"
+              iconBg="#CCFBF1"
+              label={language === 'ur' ? 'دکان کی قسم' : 'Shop Type'}
+              sublabel={
+                settings.catalogShopType ||
+                (language === 'ur' ? 'منتخب نہیں — منتخب کرنے کے لیے دبائیں' : 'Not selected — tap to choose')
+              }
+              theme={theme}
+              onPress={() => setIsShopTypePickerOpen(true)}
+            />
+            <RowItem
+              icon="library-outline"
+              iconColor="#7C3AED"
+              iconBg="#EDE9FE"
+              label={language === 'ur' ? 'کیٹلاگ اشیاء' : 'Catalog Items'}
+              sublabel={
+                settings.catalogShopType
+                  ? `${MASTER_CATALOG.find((s) => s.shopType === settings.catalogShopType)?.categories.reduce((n, c) => n + c.items.length, 0) ?? 0} ${language === 'ur' ? 'اشیاء پروڈکٹس ٹیب میں لوڈ ہوں گی' : 'items will load in the Products tab'}`
+                  : language === 'ur'
+                    ? 'قسم منتخب کریں تاکہ اس کی اشیاء لوڈ ہوں'
+                    : 'Pick a shop type to load its items'
+              }
+              theme={theme}
+              last
+              onPress={() => setIsShopTypePickerOpen(true)}
+            />
+          </Section>
+          <ShopTypePickerModal
+            visible={isShopTypePickerOpen}
+            onClose={() => setIsShopTypePickerOpen(false)}
+          />
 
           {/* Contact */}
           <Section title={t('contactSection')} theme={theme}>

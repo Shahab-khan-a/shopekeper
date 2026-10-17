@@ -18,6 +18,7 @@ import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { IconButton } from '@/components/ui/IconButton';
 import { ProductImage } from '@/components/ProductImage';
+import { CatalogImportModal } from '@/components/CatalogImportModal';
 
 const CATEGORIES: (ProductCategory | 'LowStock')[] = [
   'All',
@@ -55,6 +56,7 @@ export const ProductsScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock'>('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -105,7 +107,22 @@ export const ProductsScreen: React.FC = () => {
             <Ionicons name="add" size={20} color="#FFFFFF" />
             <Text style={styles.addProdText}>{t('addProductBtn')}</Text>
           </Pressable>
+
+          <Pressable
+            onPress={() => setIsCatalogOpen(true)}
+            style={({ pressed }) => [
+              styles.addProdBtn,
+              { backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border },
+              pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
+            ]}>
+            <Ionicons name="library-outline" size={18} color={theme.text} />
+            <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+              {language === 'ur' ? 'کیٹلاگ' : 'Catalog'}
+            </Text>
+          </Pressable>
         </View>
+
+        <CatalogImportModal visible={isCatalogOpen} onClose={() => setIsCatalogOpen(false)} />
 
         {/* ── Category Filter Pills ── */}
         <ScrollView
