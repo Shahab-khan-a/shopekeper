@@ -10,6 +10,8 @@ import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { CartItem, CustomerKhata, PaymentMethod, Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
+import { TourBeacon } from '@/components/TourBeacon';
+import { ShopStoreLoader } from '@/components/ShopStoreLoader';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -54,6 +56,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
   const {
     products,
+    isProductsLoading,
     khata,
     sales,
     completeSale,
@@ -65,6 +68,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     showAlert,
     saleViewMode,
     setSaleViewMode,
+    tourStep,
+    setTourStep,
+    loadStapleProducts,
+    endHandsOnTour,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
@@ -98,6 +105,16 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [isCheckoutDrawerOpen, setIsCheckoutDrawerOpen] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Auto-preload staples for Step 1 of hands-on tour if catalog is empty & clean cart
+  useEffect(() => {
+    if (tourStep === 1) {
+      if (products.length === 0) {
+        loadStapleProducts(20).catch(() => {});
+      }
+      setCart([]);
+    }
+  }, [tourStep, products.length, loadStapleProducts]);
   const checkoutScrollRef = useRef<ScrollView>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -150,23 +167,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Top frequent products for Quick Add — keep lean (6 max)
-  const topProducts = useMemo(() => {
-    const freq: Record<string, number> = {};
-    sales.forEach((sale) => {
-      sale.items?.forEach((item: any) => {
-        const id = item.product?.id || item.productId;
-        if (id) freq[id] = (freq[id] || 0) + item.quantity;
-      });
-    });
-    const inStock = products.filter((p) => p.stock > 0);
-    if (Object.keys(freq).length === 0) {
-      return inStock.slice(0, 6);
-    }
-    return [...inStock]
-      .sort((a, b) => (freq[b.id] || 0) - (freq[a.id] || 0))
-      .slice(0, 6);
-  }, [products, sales]);
+
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return products.filter((p) => {
@@ -271,8 +272,20 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     return opts.slice(0, 4);
   }, [grandTotal, settings.currencySymbol, language]);
 
+  // Tour Step 3: Exact tender note target (guarantees targeting the correct note)
+  const targetTourOption = useMemo(() => {
+    if (tourStep !== 3 || smartTenderOptions.length === 0) return null;
+    const note500 = smartTenderOptions.find((o) => o.amount === 500);
+    if (note500) return note500;
+    const aboveTotal = smartTenderOptions.find((o) => o.amount > grandTotal);
+    return aboveTotal || smartTenderOptions[1] || smartTenderOptions[0];
+  }, [tourStep, smartTenderOptions, grandTotal]);
+
   // Cart actions
   const addToCart = (product: Product, delta: number = 1) => {
+    if (tourStep === 1) {
+      setTourStep(2);
+    }
     if (product.stock <= 0) {
       showAlert({
         type: 'warning',
@@ -654,6 +667,9 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   };
 
   const openCheckoutDrawer = () => {
+    if (tourStep === 2) {
+      setTourStep(3);
+    }
     if (paymentMethod === 'cash' && (!tenderedCash || tenderedCash === '0')) {
       setTenderedCash(grandTotal.toString());
     }
@@ -933,6 +949,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       setLastCompletedSale(result.sale);
       setShowSuccessToast(true);
 
+      // Advance hands-on tour to Step 5 (Receipt & Khata)
+      if (tourStep === 4 && result.sale) {
+        setActiveReceipt(result.sale);
+        setTourStep(5);
+      }
+
       // Auto-dismiss toast after 8 seconds
       if (toastTimer.current) clearTimeout(toastTimer.current);
       toastTimer.current = setTimeout(() => {
@@ -1193,18 +1215,34 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             <View style={styles.smartTenderGrid}>
               {smartTenderOptions.map((opt) => {
                 const isSelected = tenderedCash === opt.amount.toString();
+                const isTargetTourNote =
+                  tourStep === 3 && targetTourOption && opt.amount === targetTourOption.amount;
                 return (
-                  <Pressable
-                    key={opt.amount}
-                    onPress={() => setTenderedCash(opt.amount.toString())}
-                    style={({ pressed }) => [
-                      styles.smartTenderCard,
-                      {
-                        backgroundColor: isSelected ? theme.primary : theme.card,
-                        borderColor: isSelected ? theme.primary : theme.border,
-                      },
-                      pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-                    ]}>
+                  <View key={opt.amount} style={styles.smartTenderCol}>
+                    {isTargetTourNote && (
+                      <TourBeacon
+                        textUrdu={language === 'ur' ? `${targetTourOption.label} پر ٹیپ کریں` : `Tap ${targetTourOption.label}`}
+                        textEn={`Tap ${targetTourOption.label}`}
+                        position="top"
+                        onSkip={endHandsOnTour}
+                      />
+                    )}
+                    <Pressable
+                      onPress={() => {
+                        setTenderedCash(opt.amount.toString());
+                        if (tourStep === 3) {
+                          setTourStep(4);
+                        }
+                      }}
+                      style={({ pressed }) => [
+                        styles.smartTenderCard,
+                        {
+                          backgroundColor: isSelected ? theme.primary : theme.card,
+                          borderColor: isSelected ? theme.primary : isTargetTourNote ? '#10B981' : theme.border,
+                          borderWidth: isTargetTourNote ? 2 : 1,
+                        },
+                        pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                      ]}>
                     <Text
                       style={[
                         styles.smartTenderLabel,
@@ -1222,6 +1260,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       </Text>
                     ) : null}
                   </Pressable>
+                  </View>
                 );
               })}
             </View>
@@ -1975,44 +2014,61 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           const valState = getCheckoutValidationState();
           const isDisabled = !valState.isValid || isProcessing;
           return (
-            <Pressable
-              disabled={isDisabled}
-              onPress={handleGenerateBill}
-              accessibilityLabel={valState.btnLabel}
-              accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.completeSaleBtn,
-                {
-                  backgroundColor: valState.btnColor,
-                  opacity: isDisabled && !isProcessing ? 0.75 : 1,
-                },
-                pressed && !isDisabled && { transform: [{ scale: 0.985 }] },
-              ]}>
-              {isProcessing ? (
-                <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 6 }} />
-              ) : (
-                <Ionicons
-                  name={valState.icon as any}
-                  size={20}
-                  color={valState.textColor}
+            <View style={{ position: 'relative' }}>
+              {tourStep === 4 && (
+                <TourBeacon
+                  textUrdu="سیل مکمل کرنے کے لیے ٹیپ کریں"
+                  textEn="Tap Complete Sale"
+                  position="top"
+                  onSkip={endHandsOnTour}
                 />
               )}
-              <Text
-                style={[
-                  styles.completeSaleBtnText,
-                  { color: valState.textColor },
-                ]}
-                numberOfLines={1}
-                adjustsFontSizeToFit={true}
-                minimumFontScale={0.82}
-                ellipsizeMode="tail">
-                {isProcessing
-                  ? language === 'ur'
-                    ? 'پروسیس ہو رہا ہے...'
-                    : 'Processing...'
-                  : valState.btnLabel}
-              </Text>
-            </Pressable>
+              <Pressable
+                disabled={isDisabled}
+                onPress={() => {
+                  if (tourStep === 4) {
+                    setTourStep(5);
+                  }
+                  handleGenerateBill();
+                }}
+                accessibilityLabel={valState.btnLabel}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.completeSaleBtn,
+                  {
+                    backgroundColor: valState.btnColor,
+                    borderColor: tourStep === 4 ? '#34D399' : 'transparent',
+                    borderWidth: tourStep === 4 ? 2.5 : 0,
+                    opacity: isDisabled && !isProcessing ? 0.75 : 1,
+                  },
+                  pressed && !isDisabled && { transform: [{ scale: 0.985 }] },
+                ]}>
+                {isProcessing ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 6 }} />
+                ) : (
+                  <Ionicons
+                    name={valState.icon as any}
+                    size={20}
+                    color={valState.textColor}
+                  />
+                )}
+                <Text
+                  style={[
+                    styles.completeSaleBtnText,
+                    { color: valState.textColor },
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit={true}
+                  minimumFontScale={0.82}
+                  ellipsizeMode="tail">
+                  {isProcessing
+                    ? language === 'ur'
+                      ? 'پروسیس ہو رہا ہے...'
+                      : 'Processing...'
+                    : valState.btnLabel}
+                </Text>
+              </Pressable>
+            </View>
           );
         })()}
       </View>
@@ -2142,63 +2198,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 </View>
               </View>
 
-              {/* Compact Quick Add — frequent items only (hidden while searching) */}
-              {topProducts.length > 0 && !searchQuery ? (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.favRowScroll}
-                  contentContainerStyle={styles.favRowContent}>
-                  <View style={[styles.favLead, { backgroundColor: 'rgba(255, 255, 255, 0.18)' }]}>
-                    <Ionicons name="flash" size={11} color="#FDE68A" />
-                  </View>
-                  {topProducts.map((product) => {
-                    const isOut = product.stock <= 0;
-                    const inCart = cart.find((it) => it.product.id === product.id);
-
-                    return (
-                      <Pressable
-                        key={product.id}
-                        disabled={isOut}
-                        onPress={() => addToCart(product)}
-                        accessibilityLabel={`Quick add ${product.name}`}
-                        accessibilityRole="button"
-                        style={({ pressed }) => [
-                          styles.favChip,
-                          {
-                            backgroundColor: inCart
-                              ? '#FFFFFF'
-                              : 'rgba(255, 255, 255, 0.16)',
-                            borderColor: inCart
-                              ? '#FFFFFF'
-                              : 'rgba(255, 255, 255, 0.26)',
-                            opacity: isOut ? 0.4 : 1,
-                          },
-                          pressed && !isOut && { transform: [{ scale: 0.96 }] },
-                        ]}>
-                        <Text
-                          style={[
-                            styles.favChipName,
-                            { color: inCart ? '#064E3B' : '#FFFFFF' },
-                          ]}
-                          numberOfLines={1}>
-                          {getProductName(product)}
-                        </Text>
-                        {inCart ? (
-                          <View style={[styles.favChipBadge, { backgroundColor: '#064E3B' }]}>
-                            <Text style={[styles.favChipBadgeText, { color: '#FFFFFF' }]}>{inCart.quantity}</Text>
-                          </View>
-                        ) : (
-                          <Text style={[styles.favChipPrice, { color: '#A7F3D0' }]}>
-                            {settings.currencySymbol}
-                            {formatCompactPrice(product.price)}
-                          </Text>
-                        )}
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              ) : null}
 
               {/* Category Filter Pills — frosted glass */}
               <ScrollView
@@ -2225,7 +2224,9 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
           {/* Products List / Grid or Empty State */}
           <View style={styles.catalogItemsWrap}>
-          {products.length === 0 ? (
+          {isProductsLoading && products.length === 0 ? (
+            <ShopStoreLoader viewMode={viewMode} />
+          ) : products.length === 0 ? (
             <View style={styles.catalogEmptyContainer}>
               <View style={[styles.catalogEmptyIconBox, { backgroundColor: theme.primaryLight }]}>
                 <Ionicons name="cube-outline" size={50} color={theme.primary} />
@@ -2284,36 +2285,50 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               </Pressable>
             </View>
           ) : (
-            <ScrollView
-              style={styles.catalogScroll}
-              contentContainerStyle={[
-                viewMode === 'grid' ? styles.catalogGrid : styles.catalogList,
-                // Generous bottom padding so catalog products scroll completely clear of the unified POS dock
-                !isWideScreen && cart.length > 0 && { paddingBottom: 150 },
-              ]}
-              keyboardShouldPersistTaps="handled">
-              {filteredProducts.map((product) => {
-                const isOut = product.stock <= 0;
-                const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
-                const inCartItem = cart.find((it) => it.product.id === product.id);
+            <>
+              {/* Hands-On Tour Step 1 Centered Top Banner */}
+              {tourStep === 1 && (
+                <View style={styles.tourStep1CenterBar}>
+                  <TourBeacon
+                    textUrdu="چینی پر ٹیپ کر کے بل میں شامل کریں"
+                    textEn="Tap Sugar to Add to Cart"
+                    position="header"
+                    onSkip={endHandsOnTour}
+                  />
+                </View>
+              )}
 
-                if (viewMode === 'list') {
-                  // ================= Enhanced Modern List Row =================
-                  return (
-                    <Pressable
-                      key={product.id}
-                      disabled={isOut}
-                      onPress={() => !inCartItem && addToCart(product)}
-                      style={({ pressed }) => [
-                        styles.listRow,
-                        {
-                          backgroundColor: theme.card,
-                          borderColor: inCartItem ? theme.primary : theme.border,
-                          borderWidth: inCartItem ? 1.5 : 1,
-                          opacity: isOut ? 0.6 : 1,
-                        },
-                        pressed && !isOut && !inCartItem && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-                      ]}>
+          <ScrollView
+            style={styles.catalogScroll}
+            contentContainerStyle={[
+              viewMode === 'grid' ? styles.catalogGrid : styles.catalogList,
+              // Generous bottom padding so catalog products scroll completely clear of the unified POS dock
+              !isWideScreen && cart.length > 0 && { paddingBottom: 150 },
+            ]}
+            keyboardShouldPersistTaps="handled">
+            {filteredProducts.map((product) => {
+              const isOut = product.stock <= 0;
+              const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
+              const inCartItem = cart.find((it) => it.product.id === product.id);
+              const isTargetSugar = tourStep === 1 && filteredProducts.indexOf(product) === 0;
+
+              if (viewMode === 'list') {
+                // ================= Enhanced Modern List Row =================
+                return (
+                  <Pressable
+                    key={product.id}
+                    disabled={isOut}
+                    onPress={() => !inCartItem && addToCart(product)}
+                    style={({ pressed }) => [
+                      styles.listRow,
+                      {
+                        backgroundColor: theme.card,
+                        borderColor: isTargetSugar ? '#10B981' : inCartItem ? theme.primary : theme.border,
+                        borderWidth: isTargetSugar ? 2.5 : inCartItem ? 1.5 : 1,
+                        opacity: isOut ? 0.6 : 1,
+                      },
+                      pressed && !isOut && !inCartItem && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+                    ]}>
                       {/* Left: Thumbnail Image */}
                       <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
                         <ProductImage
@@ -2465,8 +2480,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       {
                         width: gridColWidth,
                         backgroundColor: theme.card,
-                        borderColor: inCartItem ? theme.primary : theme.border,
-                        borderWidth: inCartItem ? 1.5 : 1,
+                        borderColor: isTargetSugar ? '#10B981' : inCartItem ? theme.primary : theme.border,
+                        borderWidth: isTargetSugar ? 2.5 : inCartItem ? 1.5 : 1,
                         opacity: isOut ? 0.6 : 1,
                       },
                       pressed && !isOut && !inCartItem && { transform: [{ scale: 0.98 }] },
@@ -2615,6 +2630,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 );
               })}
             </ScrollView>
+            </>
           )}
           </View>
 
@@ -2711,35 +2727,54 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               </View>
 
               {/* Row 2: Full-Width Primary Checkout Hero Button */}
-              <Pressable
-                onPress={openCheckoutDrawer}
-                style={({ pressed }) => [
-                  styles.dockHeroCheckoutBtn,
-                  { backgroundColor: theme.primary },
-                  pressed && { opacity: 0.94, transform: [{ scale: 0.985 }] },
-                ]}
-                accessibilityLabel="View bill and proceed to payment"
-                accessibilityRole="button">
-                <View style={styles.dockHeroLeft}>
-                  <View style={styles.dockBadge}>
-                    <Ionicons name="cart" size={18} color={theme.primary} />
-                    <Text style={styles.dockBadgeCount}>{totalItemsCount}</Text>
+              <View style={{ position: 'relative' }}>
+                {tourStep === 2 && (
+                  <TourBeacon
+                    textUrdu="بل وصول کرنے کے لیے ٹیپ کریں"
+                    textEn="Tap to View Bill & Tender"
+                    position="top"
+                    onSkip={endHandsOnTour}
+                  />
+                )}
+                <Pressable
+                  onPress={() => {
+                    if (tourStep === 2) {
+                      setTourStep(3);
+                    }
+                    openCheckoutDrawer();
+                  }}
+                  style={({ pressed }) => [
+                    styles.dockHeroCheckoutBtn,
+                    {
+                      backgroundColor: theme.primary,
+                      borderColor: tourStep === 2 ? '#34D399' : 'transparent',
+                      borderWidth: tourStep === 2 ? 2.5 : 0,
+                    },
+                    pressed && { opacity: 0.94, transform: [{ scale: 0.985 }] },
+                  ]}
+                  accessibilityLabel="View bill and proceed to payment"
+                  accessibilityRole="button">
+                  <View style={styles.dockHeroLeft}>
+                    <View style={styles.dockBadge}>
+                      <Ionicons name="cart" size={18} color={theme.primary} />
+                      <Text style={styles.dockBadgeCount}>{totalItemsCount}</Text>
+                    </View>
+                    <View style={styles.dockPriceCol}>
+                      <Text style={styles.dockItemsLabel}>
+                        {totalItemsCount} {t('itemsInCart')}
+                      </Text>
+                      <Text style={styles.dockGrandTotal} numberOfLines={1}>
+                        {settings.currencySymbol} {formatCompactPrice(grandTotal)}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.dockPriceCol}>
-                    <Text style={styles.dockItemsLabel}>
-                      {totalItemsCount} {t('itemsInCart')}
-                    </Text>
-                    <Text style={styles.dockGrandTotal} numberOfLines={1}>
-                      {settings.currencySymbol} {formatCompactPrice(grandTotal)}
-                    </Text>
-                  </View>
-                </View>
 
-                <View style={styles.dockHeroRightPill}>
-                  <Text style={styles.dockHeroActionText}>{t('viewBill')}</Text>
-                  <Ionicons name="arrow-forward" size={17} color="#FFFFFF" />
-                </View>
-              </Pressable>
+                  <View style={styles.dockHeroRightPill}>
+                    <Text style={styles.dockHeroActionText}>{t('viewBill')}</Text>
+                    <Ionicons name="arrow-forward" size={17} color="#FFFFFF" />
+                  </View>
+                </Pressable>
+              </View>
             </View>
           )}
 
@@ -2952,53 +2987,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  favRowScroll: {
-    maxHeight: 34,
-  },
-  favRowContent: {
-    gap: 6,
-    alignItems: 'center',
-    paddingRight: 4,
-  },
-  favLead: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  favChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    position: 'relative',
-  },
-  favChipName: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    maxWidth: 78,
-  },
-  favChipPrice: {
-    fontSize: 10.5,
-    fontWeight: '600',
-  },
-  favChipBadge: {
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-  },
-  favChipBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '800',
-  },
+
   categoryPill: {
     paddingHorizontal: 13,
     paddingVertical: 6,
@@ -4207,13 +4196,28 @@ const styles = StyleSheet.create({
   smartTenderGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'space-between',
+    rowGap: 8,
+    width: '100%',
     marginVertical: 4,
   },
-  smartTenderCard: {
+  tourStep1CenterBar: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    zIndex: 9999,
+  },
+  smartTenderCol: {
     width: '48.5%',
+    position: 'relative',
+  },
+  smartTenderCard: {
+    width: '100%',
+    minHeight: 54,
     paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 14,
     borderWidth: 1.5,
     alignItems: 'center',
@@ -4224,10 +4228,12 @@ const styles = StyleSheet.create({
   smartTenderLabel: {
     fontSize: 14,
     fontWeight: '800',
+    textAlign: 'center',
   },
   smartTenderSub: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
+    textAlign: 'center',
   },
   cashInputWrap: {
     flexDirection: 'row',

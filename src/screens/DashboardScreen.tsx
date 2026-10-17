@@ -21,6 +21,8 @@ import {
   Text,
   View,
 } from 'react-native';
+import { TourBeacon } from '@/components/TourBeacon';
+import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const DashboardScreen: React.FC = () => {
@@ -46,56 +48,11 @@ export const DashboardScreen: React.FC = () => {
     user,
     t,
     language,
-    showAlert,
-    loadStapleProducts,
+    tourStep,
+    endHandsOnTour,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
-
-  // Day-0 Kiryana Setup State
-  const [isLoadingStaples, setIsLoadingStaples] = useState(false);
-  const [isSetupCardDismissed, setIsSetupCardDismissed] = useState(false);
-
-  useEffect(() => {
-    AsyncStorage.getItem('@shopkeeper_setup_card_dismissed')
-      .then((val) => {
-        if (val === 'true') {
-          setIsSetupCardDismissed(true);
-        }
-      })
-      .catch(() => { });
-  }, []);
-
-  const handleDismissSetupCard = async () => {
-    setIsSetupCardDismissed(true);
-    await AsyncStorage.setItem('@shopkeeper_setup_card_dismissed', 'true').catch(() => { });
-  };
-
-  const hasProducts = products.length > 0;
-  const hasCustomers = khata.length > 0;
-  const hasSales = sales.length > 0;
-  const isStoreSetupComplete = hasProducts && hasCustomers && hasSales;
-  const completedStepsCount = (hasProducts ? 1 : 0) + (hasCustomers ? 1 : 0) + (hasSales ? 1 : 0);
-  const showSetupCard = !isSetupCardDismissed && !isStoreSetupComplete;
-
-  const handleLoadStaples = async () => {
-    setIsLoadingStaples(true);
-    try {
-      await loadStapleProducts(20);
-      showAlert({
-        type: 'success',
-        title: language === 'ur' ? '20 اشیاء لوڈ ہو گئیں!' : 'Top 20 Staples Loaded!',
-        message:
-          language === 'ur'
-            ? 'مرحلہ 1 مکمل! چینی، آٹا، گھی، دالیں وغیرہ شامل ہو گئیں۔ اب مرحلہ 2 میں گاہک کھاتہ درج کریں یا مرحلہ 3 میں پہلی سیل بنائیں۔'
-            : 'Step 1 complete! 20 essential staples added. Proceed to Step 2 (Customer Ledger) or Step 3 (First Sale).',
-      });
-    } catch (e: any) {
-      console.error('[Dashboard] Error loading staples:', e);
-    } finally {
-      setIsLoadingStaples(false);
-    }
-  };
 
   // Show only a few (top 3) most recent sales on home to prevent crowding busy shops
   const MAX_HOME_RECENT_SALES = 3;
@@ -335,7 +292,16 @@ export const DashboardScreen: React.FC = () => {
         </View>
 
         {/* ── Cash Register / Cash-in-Drawer Hero Card ── */}
-        <View style={[styles.drawerActionStrip, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <View style={{ position: 'relative' }}>
+          {tourStep === 7 && (
+            <TourBeacon
+              textUrdu="آپ کی سیل کا نقد کیش براہ راست گلہ میں شامل ہو چکا ہے!"
+              textEn="Your sale cash has been added to the register live!"
+              position="top"
+              onSkip={endHandsOnTour}
+            />
+          )}
+          <View style={[styles.drawerActionStrip, { backgroundColor: theme.card, borderColor: theme.border }]}>
           {/* Header Row: Title + Info on left, Record Expense Button on right */}
           <View style={styles.drawerTopRow}>
             <Pressable
@@ -389,6 +355,7 @@ export const DashboardScreen: React.FC = () => {
             </Text>
           </Pressable>
         </View>
+        </View>
 
         {/* ── Evening Closing Prompt Banner (Auto-triggers after 5 PM or when sales exist) ── */}
         {(new Date().getHours() >= 17 || todaySales.length > 0) && (
@@ -421,266 +388,6 @@ export const DashboardScreen: React.FC = () => {
               </Text>
             </View>
           </Pressable>
-        )}
-
-        
-        {/* ── Day-0 Rapid Store Setup Card (Checklist stays visible until all milestones completed or dismissed) ── */}
-        {showSetupCard && (
-          <View style={[styles.setupCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <View style={styles.setupCardHeader}>
-              <View style={[styles.setupIconWrap, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="sparkles" size={20} color="#059669" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.setupTitle, { color: theme.text }]}>
-                  {language === 'ur' ? 'دکان شروع کرنے کے آسان 3 مراحل' : 'Quick 3-Step Store Setup'}
-                </Text>
-                <Text style={[styles.setupSubtitle, { color: theme.textSecondary }]}>
-                  {language === 'ur'
-                    ? `${completedStepsCount} از 3 مرحلے مکمل`
-                    : `${completedStepsCount} of 3 steps completed`}
-                </Text>
-              </View>
-
-              <View style={[styles.setupBadge, { backgroundColor: completedStepsCount > 0 ? '#D1FAE5' : theme.surfaceSubtle }]}>
-                <Text style={[styles.setupBadgeText, { color: completedStepsCount > 0 ? '#059669' : theme.textSecondary }]}>
-                  {completedStepsCount}/3
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={handleDismissSetupCard}
-                hitSlop={8}
-                style={({ pressed }) => [styles.dismissBtn, pressed && { opacity: 0.6 }]}>
-                <Ionicons name="close" size={18} color={theme.textMuted} />
-              </Pressable>
-            </View>
-
-            {/* Progress track */}
-            <View style={[styles.progressBarTrack, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#E2E8F0' }]}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    backgroundColor: '#059669',
-                    width: `${Math.max(8, Math.round((completedStepsCount / 3) * 100))}%`,
-                  },
-                ]}
-              />
-            </View>
-
-            {/* Step 1: Add Staples or Custom Product */}
-            <View
-              style={[
-                styles.setupStepBox,
-                {
-                  backgroundColor: hasProducts
-                    ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
-                    : theme.surfaceSubtle,
-                  borderColor: hasProducts ? theme.success : theme.border,
-                },
-              ]}>
-              <View style={styles.setupStepTop}>
-                <View
-                  style={[
-                    styles.stepNumBubble,
-                    { backgroundColor: hasProducts ? theme.success : theme.primary },
-                  ]}>
-                  {hasProducts ? (
-                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
-                  ) : (
-                    <Text style={styles.stepNumText}>1</Text>
-                  )}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.stepTitle, { color: theme.text }]}>
-                    {hasProducts
-                      ? (language === 'ur' ? 'اشیاء شامل ہیں' : 'Inventory Ready')
-                      : (language === 'ur' ? 'دکان میں اشیاء شامل کریں' : 'Add Inventory Products')}
-                  </Text>
-                  <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
-                    {hasProducts
-                      ? (language === 'ur' ? `دکان میں ${products.length} اشیاء محفوظ ہیں` : `${products.length} products ready in catalog`)
-                      : (language === 'ur'
-                        ? 'چینی، آٹا، گھی، دالیں اور چائے کی پتی 1 کلک میں لوڈ کریں'
-                        : 'Load top 20 Pakistani staples with verified prices or add custom item')}
-                  </Text>
-                </View>
-                {hasProducts ? (
-                  <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
-                    <Text style={[styles.stepDoneText, { color: '#059669' }]}>
-                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-
-              {!hasProducts && (
-                <View style={styles.stepButtonsRow}>
-                  <Pressable
-                    onPress={handleLoadStaples}
-                    disabled={isLoadingStaples}
-                    style={({ pressed }) => [
-                      styles.loadStaplesBtn,
-                      { backgroundColor: '#059669' },
-                      pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-                    ]}>
-                    {isLoadingStaples ? (
-                      <Text style={styles.loadStaplesText}>
-                        {language === 'ur' ? 'لوڈ ہو رہا ہے...' : 'Loading...'}
-                      </Text>
-                    ) : (
-                      <>
-                        <Ionicons name="flash" size={15} color="#FFFFFF" />
-                        <Text style={styles.loadStaplesText}>
-                          {language === 'ur' ? '⚡ 20 اہم اشیاء لوڈ کریں' : '⚡ Load Top 20 Staples'}
-                        </Text>
-                      </>
-                    )}
-                  </Pressable>
-
-                  <Pressable
-                    onPress={() => setIsAddProductOpen(true)}
-                    style={({ pressed }) => [
-                      styles.customProductBtn,
-                      { borderColor: theme.border, backgroundColor: theme.card },
-                      pressed && { opacity: 0.8 },
-                    ]}>
-                    <Ionicons name="add" size={15} color={theme.text} />
-                    <Text style={[styles.customProductText, { color: theme.text }]}>
-                      {language === 'ur' ? '+ نیا آئٹم' : '+ Custom Item'}
-                    </Text>
-                  </Pressable>
-                </View>
-              )}
-            </View>
-
-            {/* Step 2: Add Customer Udhaar */}
-            <View
-              style={[
-                styles.setupStepBox,
-                {
-                  backgroundColor: hasCustomers
-                    ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
-                    : theme.surfaceSubtle,
-                  borderColor: hasCustomers
-                    ? theme.success
-                    : (!hasCustomers && hasProducts ? theme.primary : theme.border),
-                  borderWidth: !hasCustomers && hasProducts ? 1.5 : 1,
-                },
-              ]}>
-              <View style={styles.setupStepTop}>
-                <View
-                  style={[
-                    styles.stepNumBubble,
-                    { backgroundColor: hasCustomers ? theme.success : theme.secondary },
-                  ]}>
-                  {hasCustomers ? (
-                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
-                  ) : (
-                    <Text style={styles.stepNumText}>2</Text>
-                  )}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.stepTitle, { color: theme.text }]}>
-                    {hasCustomers
-                      ? (language === 'ur' ? 'گاہک کھاتہ فعال ہے' : 'Customer Ledger Active')
-                      : (language === 'ur' ? 'پرانا ادھار کھاتہ درج کریں' : 'Register Customer Ledger')}
-                  </Text>
-                  <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
-                    {hasCustomers
-                      ? (language === 'ur' ? `کھاتے میں ${khata.length} گاہک محفوظ ہیں` : `${khata.length} customers in ledger`)
-                      : (language === 'ur'
-                        ? 'بہی کھاتہ سے اپنے پرانے ادھار گاہک اور سابقہ بقایا لکھیں'
-                        : 'Transfer customer names and opening debt balances from your notebook')}
-                  </Text>
-                </View>
-                {hasCustomers ? (
-                  <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
-                    <Text style={[styles.stepDoneText, { color: '#059669' }]}>
-                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
-                    </Text>
-                  </View>
-                ) : (
-                  <Pressable
-                    onPress={() => setActiveTab('khata')}
-                    style={({ pressed }) => [
-                      styles.stepActionBtn,
-                      { backgroundColor: theme.primary, borderColor: theme.primary },
-                      pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
-                    ]}>
-                    <Ionicons name="person-add" size={14} color="#FFFFFF" />
-                    <Text style={[styles.stepActionText, { color: '#FFFFFF' }]}>
-                      {language === 'ur' ? 'نیا گاہک' : 'Add Customer'}
-                    </Text>
-                  </Pressable>
-                )}
-              </View>
-            </View>
-
-            {/* Step 3: First Sale */}
-            <View
-              style={[
-                styles.setupStepBox,
-                {
-                  backgroundColor: hasSales
-                    ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
-                    : theme.surfaceSubtle,
-                  borderColor: hasSales
-                    ? theme.success
-                    : (!hasSales && hasProducts ? '#7C3AED' : theme.border),
-                  borderWidth: !hasSales && hasProducts ? 1.5 : 1,
-                },
-              ]}>
-              <View style={styles.setupStepTop}>
-                <View
-                  style={[
-                    styles.stepNumBubble,
-                    { backgroundColor: hasSales ? theme.success : '#7C3AED' },
-                  ]}>
-                  {hasSales ? (
-                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
-                  ) : (
-                    <Text style={styles.stepNumText}>3</Text>
-                  )}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.stepTitle, { color: theme.text }]}>
-                    {hasSales
-                      ? (language === 'ur' ? 'سیل کا ریکارڈ موجود ہے' : 'First Sale Completed')
-                      : (language === 'ur' ? 'پہلی سیل اور بل بنائیں' : 'Create First Sale Bill')}
-                  </Text>
-                  <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
-                    {hasSales
-                      ? (language === 'ur' ? `${sales.length} بل بنائے جا چکے ہیں` : `${sales.length} sales recorded`)
-                      : (language === 'ur'
-                        ? 'نقد فروخت یا ادھار بل کا پرنٹ و واٹس ایپ رسید'
-                        : 'Fast counter billing with instant WhatsApp receipt sharing')}
-                  </Text>
-                </View>
-                {hasSales ? (
-                  <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
-                    <Text style={[styles.stepDoneText, { color: '#059669' }]}>
-                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
-                    </Text>
-                  </View>
-                ) : (
-                  <Pressable
-                    onPress={() => setActiveTab('sale')}
-                    style={({ pressed }) => [
-                      styles.stepActionBtn,
-                      { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
-                      pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
-                    ]}>
-                    <Ionicons name="receipt-outline" size={14} color="#FFFFFF" />
-                    <Text style={[styles.stepActionText, { color: '#FFFFFF' }]}>
-                      {language === 'ur' ? 'سیل بنائیں' : 'Start Sale'}
-                    </Text>
-                  </Pressable>
-                )}
-              </View>
-            </View>
-          </View>
         )}
 
         {/* ── Sales Analytics & Trends Chart ── */}
@@ -981,6 +688,21 @@ export const DashboardScreen: React.FC = () => {
           <SaleScreen isModal onClose={() => setIsSaleModalOpen(false)} />
         </SafeAreaView>
       </Modal>
+
+      {/* Hands-On Tour Step 7: Completion & Celebration */}
+      {tourStep === 7 && (
+        <FloatingTourPrompt
+          bottom={10}
+          badgeUrdu="مبارک ہو! 🎉"
+          badgeEn="All Done! 🎉"
+          messageUrdu="آپ نے سیل کرنا، گاہک کا کھاتہ، اور گلہ کا حساب سیکھ لیا ہے۔ اب اپنی دکان چلائیں۔"
+          messageEn="You've mastered live billing, customer khata, and cash drawer balance."
+          buttonUrdu="دکان شروع کریں 🚀"
+          buttonEn="Start Using DigiShop 🚀"
+          onPressButton={endHandsOnTour}
+          onSkip={endHandsOnTour}
+        />
+      )}
     </View>
   );
 };
@@ -1486,150 +1208,5 @@ const styles = StyleSheet.create({
   drawerFormulaSub: {
     fontSize: 11.5,
     fontWeight: '500',
-  },
-
-  // Day-0 Setup Card
-  setupCard: {
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    padding: Spacing.md,
-    marginTop: 6,
-    marginBottom: Spacing.sm,
-    gap: Spacing.md,
-    ...Shadows.sm,
-  },
-  setupCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  setupIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  setupTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-  },
-  setupSubtitle: {
-    fontSize: 11.5,
-    marginTop: 2,
-  },
-  setupBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.sm,
-  },
-  setupBadgeText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#059669',
-  },
-  setupStepBox: {
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    padding: Spacing.md,
-    gap: Spacing.sm,
-  },
-  setupStepTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  stepNumBubble: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepNumText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  stepTitle: {
-    fontSize: 13.5,
-    fontWeight: '700',
-  },
-  stepDesc: {
-    fontSize: 11,
-    marginTop: 1,
-    lineHeight: 15,
-  },
-  stepButtonsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 4,
-  },
-  loadStaplesBtn: {
-    flex: 1.6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    borderRadius: BorderRadius.md,
-  },
-  loadStaplesText: {
-    color: '#FFFFFF',
-    fontSize: 12.5,
-    fontWeight: '800',
-  },
-  customProductBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-  },
-  customProductText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  stepActionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-  },
-  stepActionText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  dismissBtn: {
-    padding: 4,
-    marginLeft: Spacing.xs,
-  },
-  progressBarTrack: {
-    height: 5,
-    borderRadius: 3,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  stepDoneBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.sm,
-  },
-  stepDoneText: {
-    fontSize: 11,
-    fontWeight: '800',
   },
 });

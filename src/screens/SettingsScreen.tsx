@@ -320,6 +320,8 @@ export const SettingsScreen: React.FC = () => {
     deleteAccount,
     syncNow,
     setIsAuthModalOpen,
+    setIsOnboardingOpen,
+    startHandsOnTour,
     showAlert,
   } = useShop();
 
@@ -1795,6 +1797,15 @@ export const SettingsScreen: React.FC = () => {
           )}
           {/* About & Legal Section */}
           <Section title={t('aboutLegal')} theme={theme}>
+            <RowItem
+              icon="school-outline"
+              iconColor="#059669"
+              iconBg="#D1FAE5"
+              label={language === 'ur' ? 'ایپ کا تعارف اور گائیڈ' : 'App Tour & Interactive Guide'}
+              sublabel={language === 'ur' ? 'کاؤنٹر، کھاتہ اور گلہ کی پریکٹس دوبارہ کریں' : 'Replay interactive practice session anytime'}
+              onPress={startHandsOnTour}
+              theme={theme}
+            />
             <RowItem
               icon="shield-checkmark-outline"
               iconColor="#2563EB"

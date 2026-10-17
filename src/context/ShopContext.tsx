@@ -66,11 +66,13 @@ interface ShopContextType {
 
   // Products
   products: Product[];
+  isProductsLoading: boolean;
   addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Product>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   getProductById: (id: string) => Product | undefined;
   getProducts: () => Product[];
+  refreshProducts: () => Promise<Product[]>;
 
   // Transaction Engine (Local ACID Transactions)
   completeSale: (input: CompleteSaleInput) => Promise<SaleResult>;
@@ -159,6 +161,12 @@ interface ShopContextType {
   setIsAuthModalOpen: (open: boolean) => void;
   isEditShopOpen: boolean;
   setIsEditShopOpen: (open: boolean) => void;
+  isOnboardingOpen: boolean;
+  setIsOnboardingOpen: (open: boolean) => void;
+  tourStep: number;
+  setTourStep: (step: number) => void;
+  startHandsOnTour: () => Promise<void>;
+  endHandsOnTour: () => Promise<void>;
   isLoaded: boolean;
   alertConfig: AlertConfig | null;
   showAlert: (config: AlertConfig) => void;
@@ -196,6 +204,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [saleViewMode, setSaleViewModeState] = useState<'grid' | 'list'>(cachedSaleViewMode);
   const [productsViewMode, setProductsViewModeState] = useState<'grid' | 'list'>(cachedProductsViewMode);
   const [products, setProducts] = useState<Product[]>([]);
+  const [isProductsLoading, setIsProductsLoading] = useState<boolean>(true);
   const [sales, setSales] = useState<Sale[]>([]);
   const [khata, setKhata] = useState<CustomerKhata[]>([]);
   const [settings, setSettings] = useState<ShopSettings>(INITIAL_SETTINGS);
@@ -216,7 +225,34 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isEditShopOpen, setIsEditShopOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [tourStep, setTourStep] = useState<number>(0);
   const [alertConfig, setAlertConfig] = useState<AlertConfig | null>(null);
+
+  // Check if initial hands-on clickthrough tour should launch
+  useEffect(() => {
+    AsyncStorage.getItem('@shopkeeper_onboarding_completed')
+      .then((val) => {
+        if (!val) {
+          setIsOnboardingOpen(true);
+          setTourStep(1);
+          setActiveTab('sale');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const endHandsOnTour = useCallback(async () => {
+    setTourStep(0);
+    setIsOnboardingOpen(false);
+    await AsyncStorage.setItem('@shopkeeper_onboarding_completed', 'true').catch(() => {});
+  }, []);
+
+  const startHandsOnTour = useCallback(async () => {
+    setActiveTab('sale');
+    setTourStep(1);
+    setIsOnboardingOpen(true);
+  }, []);
 
   const showAlert = useCallback((config: AlertConfig) => {
     setAlertConfig(config);
@@ -250,6 +286,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       console.warn('[ShopContext] refreshProducts error:', e);
       return [];
+    } finally {
+      setIsProductsLoading(false);
     }
   }, []);
 
@@ -365,6 +403,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('[ShopContext] Error during local boot:', err);
       } finally {
         setIsLoaded(true);
+        setIsProductsLoading(false);
       }
     }
 
@@ -943,6 +982,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user?.uid, clearStoreData]);
 
   const loadDemoData = useCallback(async () => {
+    setIsProductsLoading(true);
     try {
       for (const p of SAMPLE_PRODUCTS) {
         await ProductRepository.insert(p, 'synced');
@@ -989,6 +1029,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ]);
     } catch (err) {
       console.error('[ShopContext] Error loading demo data:', err);
+    } finally {
+      setIsProductsLoading(false);
     }
   }, [user?.uid, refreshProducts, refreshSales, refreshKhata, refreshPendingCount]);
 
@@ -997,6 +1039,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const loadStapleProducts = useCallback(
     async (count = 20) => {
+      setIsProductsLoading(true);
       try {
         const staplesToLoad = STAPLE_ITEMS.slice(0, count);
         const now = Date.now();
@@ -1064,6 +1107,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await refreshPendingCount();
       } catch (err) {
         console.error('[ShopContext] Error loading staple products:', err);
+      } finally {
+        setIsProductsLoading(false);
       }
     },
     [user?.uid, refreshProducts, refreshPendingCount]
@@ -1251,11 +1296,13 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       activeTab,
       setActiveTab,
       products,
+      isProductsLoading,
       addProduct,
       updateProduct,
       deleteProduct,
       getProductById,
       getProducts,
+      refreshProducts,
       completeSale,
       refundSale,
       recordCustomerPayment,
@@ -1304,6 +1351,12 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthModalOpen,
       isEditShopOpen,
       setIsEditShopOpen,
+      isOnboardingOpen,
+      setIsOnboardingOpen,
+      tourStep,
+      setTourStep,
+      startHandsOnTour,
+      endHandsOnTour,
       user,
       authLoading,
       isOnline,
@@ -1328,11 +1381,13 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [
       activeTab,
       products,
+      isProductsLoading,
       addProduct,
       updateProduct,
       deleteProduct,
       getProductById,
       getProducts,
+      refreshProducts,
       completeSale,
       refundSale,
       recordCustomerPayment,
@@ -1345,6 +1400,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       khata,
       addCustomer,
       addCustomerPayment,
+      addCustomerCredit,
       totalUdhaarReceivable,
       getCustomers,
       getDashboardStats,
@@ -1373,6 +1429,10 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAddProductOpen,
       isAuthModalOpen,
       isEditShopOpen,
+      isOnboardingOpen,
+      tourStep,
+      startHandsOnTour,
+      endHandsOnTour,
       user,
       authLoading,
       isOnline,

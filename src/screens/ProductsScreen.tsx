@@ -8,11 +8,13 @@ import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
+import { ShopStoreLoader } from '@/components/ShopStoreLoader';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,6 +28,9 @@ const CATEGORIES: (ProductCategory | 'LowStock')[] = PRODUCTS_FILTER_CATEGORIES;
 export const ProductsScreen: React.FC = () => {
   const {
     products,
+    isProductsLoading,
+    isLoaded,
+    refreshProducts,
     deleteProduct,
     setEditingProduct,
     setIsAddProductOpen,
@@ -48,6 +53,23 @@ export const ProductsScreen: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock'>('All');
   const viewMode = productsViewMode;
   const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // If products are not loaded or empty on mount, trigger fresh fetch
+  useEffect(() => {
+    if (products.length === 0 && !isProductsLoading && isLoaded) {
+      refreshProducts();
+    }
+  }, [products.length, isProductsLoading, isLoaded, refreshProducts]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshProducts();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const setViewModePersist = (mode: 'grid' | 'list') => {
     setProductsViewMode(mode);
@@ -304,7 +326,9 @@ export const ProductsScreen: React.FC = () => {
         </View>
 
         {/* Products Display */}
-        {filteredProducts.length === 0 ? (
+        {isProductsLoading || isRefreshing || (!isLoaded && products.length === 0) ? (
+          <ShopStoreLoader viewMode={viewMode} />
+        ) : filteredProducts.length === 0 ? (
           <EmptyState
             icon="search-outline"
             title={language === 'ur' ? 'کوئی پروڈکٹ نہیں ملا' : 'No products found'}
@@ -327,7 +351,15 @@ export const ProductsScreen: React.FC = () => {
           <ScrollView
             style={styles.productsScroll}
             contentContainerStyle={styles.productsList}
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                colors={[theme.primary]}
+                tintColor={theme.primary}
+              />
+            }>
             {filteredProducts.map((product) => {
               const isOut = product.stock <= 0;
               const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
@@ -489,7 +521,15 @@ export const ProductsScreen: React.FC = () => {
           <ScrollView
             style={styles.productsScroll}
             contentContainerStyle={styles.productsGrid}
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                colors={[theme.primary]}
+                tintColor={theme.primary}
+              />
+            }>
             {filteredProducts.map((product) => (
               <View key={product.id} style={styles.cardContainer}>
                 <ProductCard

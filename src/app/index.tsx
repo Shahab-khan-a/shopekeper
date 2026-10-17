@@ -10,6 +10,7 @@ import { ProductModal } from '@/components/ProductModal';
 import { ReceiptModal } from '@/components/ReceiptModal';
 import { AuthModal } from '@/components/AuthModal';
 import { EditShopModal } from '@/components/EditShopModal';
+import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { LoginScreen } from '@/screens/LoginScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { SaleScreen } from '@/screens/SaleScreen';
@@ -35,6 +36,11 @@ export default function App() {
     setIsAuthModalOpen,
     isEditShopOpen,
     setIsEditShopOpen,
+    isOnboardingOpen,
+    setIsOnboardingOpen,
+    tourStep,
+    setTourStep,
+    endHandsOnTour,
     user,
     authLoading,
     isLoaded,
@@ -77,7 +83,12 @@ export default function App() {
         setIsEditShopOpen(false);
         return true;
       }
-      // 6. Navigation Stack: If in Sale, Products, History, or Khata, back navigates to Dashboard
+      // 6. Dismiss Onboarding modal if active
+      if (isOnboardingOpen) {
+        setIsOnboardingOpen(false);
+        return true;
+      }
+      // 7. Navigation Stack: If in Sale, Products, History, or Khata, back navigates to Dashboard
       // (SettingsScreen has its own dedicated handler to prompt if store form is dirty)
       if (activeTab !== 'dashboard' && activeTab !== 'settings') {
         setActiveTab('dashboard');
@@ -96,6 +107,7 @@ export default function App() {
     isAddProductOpen,
     isAuthModalOpen,
     isEditShopOpen,
+    isOnboardingOpen,
     activeTab,
     hideAlert,
     setActiveReceipt,
@@ -103,6 +115,7 @@ export default function App() {
     setEditingProduct,
     setIsAuthModalOpen,
     setIsEditShopOpen,
+    setIsOnboardingOpen,
     setActiveTab,
   ]);
 
@@ -231,6 +244,24 @@ export default function App() {
             visible={isEditShopOpen}
             onClose={() => setIsEditShopOpen(false)}
           />
+
+          {/* Hands-On Tour Step 5: Floating prompt over receipt to visit Khata */}
+          {tourStep === 5 && (
+            <FloatingTourPrompt
+              badgeUrdu="پہلی سیل مکمل ✓"
+              badgeEn="Step 1 Complete ✓"
+              messageUrdu="زبردست! آپ کی پہلی سیل 3 سیکنڈ میں بن گئی۔ اب کسٹمر کھاتہ دیکھیں۔"
+              messageEn="Great job! First sale made in 3 seconds. Now discover customer Khata."
+              buttonUrdu="گاہک کھاتہ دیکھیں ➔"
+              buttonEn="Open Customer Khata ➔"
+              onPressButton={() => {
+                setActiveReceipt(null);
+                setActiveTab('khata');
+                setTourStep(6);
+              }}
+              onSkip={endHandsOnTour}
+            />
+          )}
         </View>
       </SafeAreaView>
     );
