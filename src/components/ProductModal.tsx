@@ -102,6 +102,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [categorySearch, setCategorySearch] = useState('');
   const [unitSearch, setUnitSearch] = useState('');
   const [barcode, setBarcode] = useState('');
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
   const [image, setImage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -119,6 +120,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setIsUnitOpen(false);
     setCategorySearch('');
     setUnitSearch('');
+    setShowMoreDetails(!!productToEdit);
     if (productToEdit) {
       setName(productToEdit.name);
       setNameUrdu(productToEdit.nameUrdu || '');
@@ -577,6 +579,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     />
                   </View>
 
+                  {/* More details toggle — optional fields stay one tap away */}
+                  <Pressable onPress={() => setShowMoreDetails((v) => !v)} style={styles.moreToggle}>
+                    <Text style={[styles.moreToggleText, { color: theme.primary }]}>
+                      {language === 'ur' ? 'مزید تفصیلات (اختیاری)' : 'More details (optional)'}
+                    </Text>
+                    <Ionicons name={showMoreDetails ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
+                  </Pressable>
+                  {showMoreDetails && (
+                    <>
                   {/* Name (Urdu) */}
                   <View style={styles.inputWrap}>
                     <Text style={[styles.inputLabel, { color: theme.text }]}>{t('productNameUrdu')}</Text>
@@ -918,12 +929,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       </View>
                     )}
                   </View>
+                    </>
+                  )}
                 </View>
 
                 {/* ── Section 2: Pricing & Profit Calculator ── */}
                 <View style={[styles.formSectionCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
                   <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                    {language === 'ur' ? 'قیمت اور منافع' : '2. Pricing & Profit Margin'}
+                    {language === 'ur' ? 'قیمت' : '2. Price'}
                   </Text>
 
                   <View style={styles.rowInputs}>
@@ -945,6 +958,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       />
                     </View>
 
+                    {showMoreDetails && (
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.inputLabel, { color: theme.text }]}>
                         {t('cost')} ({settings.currencySymbol})
@@ -958,10 +972,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         onChangeText={setCostPrice}
                       />
                     </View>
+                    )}
                   </View>
 
                   {/* Live Profit Banner */}
-                  {parsedPrice > 0 ? (
+                  {showMoreDetails && parsedPrice > 0 ? (
                     <View style={[styles.profitBanner, { backgroundColor: theme.successLight, borderColor: theme.success }]}>
                       <Ionicons name="trending-up" size={20} color={theme.success} />
                       <View style={{ flex: 1 }}>
@@ -979,7 +994,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 {/* ── Section 3: Stock & Barcode ── */}
                 <View style={[styles.formSectionCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
                   <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                    {language === 'ur' ? 'اسٹاک اور بارکوڈ' : '3. Inventory & Barcode'}
+                    {language === 'ur' ? 'اسٹاک' : '3. Stock'}
                   </Text>
 
                   {/* Stock Input & Shortcuts */}
@@ -1016,6 +1031,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </View>
                   </View>
 
+                  {showMoreDetails && (
+                    <>
                   {/* Barcode & Auto SKU */}
                   <View style={styles.inputWrap}>
                     <Text style={[styles.inputLabel, { color: theme.text }]}>{t('barcodeOrSku')}</Text>
@@ -1042,6 +1059,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       </Pressable>
                     </View>
                   </View>
+                    </>
+                  )}
                 </View>
               </ScrollView>
 
@@ -1093,6 +1112,16 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  moreToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  moreToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
   kavContainer: {
     flex: 1,
   },

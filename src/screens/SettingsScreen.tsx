@@ -74,8 +74,9 @@ const InlineField: React.FC<{
   placeholder?: string;
   keyboardType?: 'default' | 'phone-pad' | 'email-address' | 'numeric';
   onSubmitEditing?: () => void;
+  onBlur?: () => void;
   theme: ThemeColors;
-}> = ({ value, onChangeText, placeholder, keyboardType = 'default', onSubmitEditing, theme }) => (
+}> = ({ value, onChangeText, placeholder, keyboardType = 'default', onSubmitEditing, onBlur, theme }) => (
   <TextInput
     value={value}
     onChangeText={onChangeText}
@@ -83,6 +84,7 @@ const InlineField: React.FC<{
     placeholderTextColor={theme.textMuted}
     keyboardType={keyboardType}
     onSubmitEditing={onSubmitEditing}
+    onBlur={onBlur}
     style={[styles.inlineInput, { color: theme.text }]}
     textAlign="right"
   />
@@ -130,9 +132,10 @@ export const SettingsScreen: React.FC = () => {
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [activeSegment, setActiveSegment] = useState<Segment>('profile');
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const [showImportBox, setShowImportBox] = useState(false);
@@ -256,36 +259,37 @@ export const SettingsScreen: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
+  /** Writes every settings field to storage. Silent by design: the screen
+   *  auto-saves, so there is no Save button anywhere anymore. */
+  const persistSettings = async () => {
+    await updateSettings({
+      profileImage: profileImage.trim() || undefined,
+      shopName: shopName.trim(),
+      shopNameUrdu: shopNameUrdu.trim(),
+      ownerName: ownerName.trim(),
+      businessType: businessType.trim(),
+      phone: phone.trim(),
+      alternatePhone: alternatePhone.trim(),
+      email: email.trim(),
+      address: address.trim(),
+      city: city.trim(),
+      taxNumber: taxNumber.trim(),
+      paymentDetails: paymentDetails.trim(),
+      businessHours: businessHours.trim(),
+      footerNote: footerNote.trim(),
+      footerNoteUrdu: footerNoteUrdu.trim(),
+      lowStockThreshold: parseInt(lowStockThreshold, 10) || 5,
+    });
+  };
+
+  const handleAutoSave = async () => {
     try {
-      await updateSettings({
-        profileImage: profileImage.trim() || undefined,
-        shopName: shopName.trim(),
-        shopNameUrdu: shopNameUrdu.trim(),
-        ownerName: ownerName.trim(),
-        businessType: businessType.trim(),
-        phone: phone.trim(),
-        alternatePhone: alternatePhone.trim(),
-        email: email.trim(),
-        address: address.trim(),
-        city: city.trim(),
-        taxNumber: taxNumber.trim(),
-        paymentDetails: paymentDetails.trim(),
-        businessHours: businessHours.trim(),
-        footerNote: footerNote.trim(),
-        footerNoteUrdu: footerNoteUrdu.trim(),
-        lowStockThreshold: parseInt(lowStockThreshold, 10) || 5,
-      });
-      if (Platform.OS === 'web') {
-        window.alert(t('settingsSaved'));
-      } else {
-        Alert.alert(t('success'), t('settingsSaved'));
-      }
-    } finally {
-      setIsSaving(false);
+      await persistSettings();
+    } catch (e) {
+      console.warn('[Settings] Auto-save failed:', e);
     }
   };
+
 
   const handleExport = () => {
     const jsonStr = exportDataJSON();
@@ -612,22 +616,7 @@ export const SettingsScreen: React.FC = () => {
           {t('settingsTitle')}
         </Text>
 
-        <Pressable
-          onPress={handleSave}
-          disabled={isSaving}
-          style={({ pressed }) => [
-            styles.saveBtn,
-            { backgroundColor: theme.primary },
-            (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.97 }] },
-          ]}
-        >
-          <Ionicons
-            name={isSaving ? 'hourglass-outline' : 'checkmark'}
-            size={15}
-            color="#FFFFFF"
-          />
-          <Text style={styles.saveBtnText}>{isSaving ? '...' : t('save')}</Text>
-        </Pressable>
+
       </View>
 
       {/* ── Google Cloud Quick Status Banner ─────────────────────────────── */}
@@ -698,6 +687,10 @@ export const SettingsScreen: React.FC = () => {
       </View>
 
       {/* ════════════════════════ PROFILE TAB ════════════════════════════════ */}
+      <Text style={[styles.autoSaveHint, { color: theme.textMuted }]}>
+        {language === 'ur' ? '✓ تبدیلیاں خودکار طور پر محفوظ ہو جاتی ہیں' : '✓ Changes save automatically — no Save button needed'}
+      </Text>
+
       {activeSegment === 'profile' && (
         <>
           {/* Avatar Card */}
@@ -817,85 +810,59 @@ export const SettingsScreen: React.FC = () => {
           {/* Store Info */}
           <Section title={t('identitySection')} theme={theme}>
             <RowItem icon="storefront-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('ownerNameLabel')} theme={theme}>
-              <InlineField value={ownerName} onChangeText={setOwnerName} onSubmitEditing={handleSave} placeholder={user?.displayName || "e.g. Shop Owner"} theme={theme} />
+              <InlineField value={ownerName} onChangeText={setOwnerName} onBlur={handleAutoSave} onSubmitEditing={handleAutoSave} placeholder={user?.displayName || "e.g. Shop Owner"} theme={theme} />
             </RowItem>
             <RowItem icon="business-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('shopNameLabel')} theme={theme}>
-              <InlineField value={shopName} onChangeText={setShopName} onSubmitEditing={handleSave} placeholder={user?.displayName ? `${user.displayName}'s Store` : "e.g. My Store"} theme={theme} />
+              <InlineField value={shopName} onChangeText={setShopName} onBlur={handleAutoSave} onSubmitEditing={handleAutoSave} placeholder={user?.displayName ? `${user.displayName}'s Store` : "e.g. My Store"} theme={theme} />
             </RowItem>
             <RowItem icon="text-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('shopNameUrduLabel')} theme={theme} last>
-              <InlineField value={shopNameUrdu} onChangeText={setShopNameUrdu} onSubmitEditing={handleSave} placeholder={user?.displayName ? `${user.displayName} اسٹور` : "مثلاً: میری دکان"} theme={theme} />
+              <InlineField value={shopNameUrdu} onChangeText={setShopNameUrdu} onBlur={handleAutoSave} onSubmitEditing={handleAutoSave} placeholder={user?.displayName ? `${user.displayName} اسٹور` : "مثلاً: میری دکان"} theme={theme} />
             </RowItem>
           </Section>
-
-          {/* Quick Save Store Identity Action */}
-          <View style={styles.quickSaveContainer}>
-            <Pressable
-              onPress={handleSave}
-              disabled={isSaving}
-              style={({ pressed }) => [
-                styles.quickSaveBannerBtn,
-                { backgroundColor: theme.primary },
-                pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
-              ]}
-            >
-              {isSaving ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
-                  <Text style={styles.quickSaveBannerBtnText}>
-                    {language === 'ur' ? 'دکان کا نام محفوظ کریں' : 'Save Store Name'}
-                  </Text>
-                </>
-              )}
-            </Pressable>
-          </View>
 
           {/* Contact */}
           <Section title={t('contactSection')} theme={theme}>
             <RowItem icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('phoneLabel')} theme={theme}>
-              <InlineField value={phone} onChangeText={setPhone} placeholder="0300-1234567" keyboardType="phone-pad" theme={theme} />
+              <InlineField value={phone} onChangeText={setPhone} placeholder="0300-1234567" keyboardType="phone-pad" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
+            <Pressable onPress={() => setShowMoreDetails((v) => !v)} style={styles.moreToggle}>
+              <Text style={[styles.moreToggleText, { color: theme.primary }]}>
+                {language === 'ur' ? 'مزید تفصیلات (اختیاری)' : 'More shop details (optional)'}
+              </Text>
+              <Ionicons name={showMoreDetails ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
+            </Pressable>
+            {showMoreDetails && (
+              <>
             <RowItem icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('altPhoneLabel')} theme={theme}>
-              <InlineField value={alternatePhone} onChangeText={setAlternatePhone} placeholder="0321-9876543" keyboardType="phone-pad" theme={theme} />
+              <InlineField value={alternatePhone} onChangeText={setAlternatePhone} placeholder="0321-9876543" keyboardType="phone-pad" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
             <RowItem icon="mail-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('emailLabel')} theme={theme}>
-              <InlineField value={email} onChangeText={setEmail} placeholder="store@gmail.com" keyboardType="email-address" theme={theme} />
+              <InlineField value={email} onChangeText={setEmail} placeholder="store@gmail.com" keyboardType="email-address" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
             <RowItem icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('cityLabel')} theme={theme}>
-              <InlineField value={city} onChangeText={setCity} placeholder="e.g. Lahore" theme={theme} />
+              <InlineField value={city} onChangeText={setCity} placeholder="e.g. Lahore" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
             <RowItem icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('addressLabel')} theme={theme} last>
-              <InlineField value={address} onChangeText={setAddress} placeholder="Shop #14, Market" theme={theme} />
+              <InlineField value={address} onChangeText={setAddress} placeholder="Shop #14, Market" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
+              </>
+            )}
           </Section>
 
-          {/* Payment & Tax */}
+          {/* Payment & Tax — optional details, hidden until "More shop details" is opened */}
+          {showMoreDetails && (
           <Section title={t('paymentSection')} theme={theme}>
             <RowItem icon="wallet-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('paymentDetailsLabel')} theme={theme}>
-              <InlineField value={paymentDetails} onChangeText={setPaymentDetails} placeholder="EasyPaisa: 0300-…" theme={theme} />
+              <InlineField value={paymentDetails} onChangeText={setPaymentDetails} placeholder="EasyPaisa: 0300-…" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
             <RowItem icon="document-text-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('taxNumberLabel')} theme={theme}>
-              <InlineField value={taxNumber} onChangeText={setTaxNumber} placeholder="NTN-XXXXXXX-X" theme={theme} />
+              <InlineField value={taxNumber} onChangeText={setTaxNumber} placeholder="NTN-XXXXXXX-X" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
             <RowItem icon="time-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('businessHoursLabel')} theme={theme} last>
-              <InlineField value={businessHours} onChangeText={setBusinessHours} placeholder="08:00 AM – 11:30 PM" theme={theme} />
+              <InlineField value={businessHours} onChangeText={setBusinessHours} placeholder="08:00 AM – 11:30 PM" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
           </Section>
-
-          {/* Save */}
-          <Pressable
-            onPress={handleSave}
-            disabled={isSaving}
-            style={({ pressed }) => [
-              styles.fullSaveBtn,
-              { backgroundColor: theme.primary },
-              (pressed || isSaving) && { opacity: 0.8 },
-            ]}
-          >
-            <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-            <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
-          </Pressable>
+          )}
         </>
       )}
 
@@ -938,6 +905,15 @@ export const SettingsScreen: React.FC = () => {
             </RowItem>
           </Section>
 
+          {/* Advanced — powerful options most keepers never need, one tap away */}
+          <Pressable onPress={() => setShowAdvanced((v) => !v)} style={[styles.moreToggle, { justifyContent: 'space-between', paddingHorizontal: 4 }]}>
+            <Text style={[styles.moreToggleText, { color: theme.text, fontSize: 14 }]}>
+              {language === 'ur' ? '⚙ ایڈوانسڈ سیٹنگز' : '⚙ Advanced Settings'}
+            </Text>
+            <Ionicons name={showAdvanced ? 'chevron-up' : 'chevron-down'} size={18} color={theme.textMuted} />
+          </Pressable>
+          {showAdvanced && (
+            <>
           {/* Billing */}
           <Section title={t('billingSection')} theme={theme}>
             <RowItem
@@ -963,29 +939,19 @@ export const SettingsScreen: React.FC = () => {
               </View>
             </RowItem>
             <RowItem icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('lowStockThresholdLabel')} theme={theme}>
-              <InlineField value={lowStockThreshold} onChangeText={setLowStockThreshold} keyboardType="numeric" placeholder="5" theme={theme} />
+              <InlineField value={lowStockThreshold} onChangeText={setLowStockThreshold} keyboardType="numeric" placeholder="5" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
             <RowItem icon="receipt-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('billFooterLabel')} theme={theme}>
-              <InlineField value={footerNote} onChangeText={setFooterNote} placeholder="Thank you!" theme={theme} />
+              <InlineField value={footerNote} onChangeText={setFooterNote} placeholder="Thank you!" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
             <RowItem icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('billFooterUrduLabel')} theme={theme} last>
-              <InlineField value={footerNoteUrdu} onChangeText={setFooterNoteUrdu} placeholder="شکریہ" theme={theme} />
+              <InlineField value={footerNoteUrdu} onChangeText={setFooterNoteUrdu} placeholder="شکریہ" onBlur={handleAutoSave} theme={theme} />
             </RowItem>
           </Section>
+            </>
+          )}
 
           {/* Save Preferences */}
-          <Pressable
-            onPress={handleSave}
-            disabled={isSaving}
-            style={({ pressed }) => [
-              styles.fullSaveBtn,
-              { backgroundColor: theme.primary },
-              (pressed || isSaving) && { opacity: 0.8 },
-            ]}
-          >
-            <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-            <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
-          </Pressable>
 
           {/* Google Cloud Backup & Account Section */}
           <Section title={t('googleAccount')} theme={theme}>
@@ -1261,6 +1227,8 @@ export const SettingsScreen: React.FC = () => {
             </View>
           </Section>
 
+          {showAdvanced && (
+            <>
           {/* Data Management */}
           <Section title={t('dataManagement')} theme={theme}>
             <RowItem
@@ -1292,6 +1260,8 @@ export const SettingsScreen: React.FC = () => {
               last
             />
           </Section>
+            </>
+          )}
 
           {/* Import Box */}
           {showImportBox && (
@@ -1436,6 +1406,23 @@ const styles = StyleSheet.create({
   },
 
   // Segment
+  autoSaveHint: {
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: Spacing.sm,
+  },
+  moreToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+  },
+  moreToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
   segmentWrap: {
     flexDirection: 'row',
     borderRadius: BorderRadius.full,

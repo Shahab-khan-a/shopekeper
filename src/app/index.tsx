@@ -24,6 +24,7 @@ import { Colors, BorderRadius, Shadows } from '@/constants/theme';
 export default function App() {
   const {
     activeTab,
+    setActiveTab,
     settings,
     isAddProductOpen,
     setIsAddProductOpen,
@@ -110,7 +111,7 @@ export default function App() {
     };
   }, [catalogFlagKey, settings.catalogShopType]);
 
-  const handleFinishCatalogOnboarding = async () => {
+  const handleFinishCatalogOnboarding = async (loadedCount: number) => {
     if (catalogFlagKey) {
       try {
         await AsyncStorage.setItem(catalogFlagKey, 'true');
@@ -119,6 +120,10 @@ export default function App() {
       }
     }
     setIsCatalogStepCompleted(true);
+    // Stocked the shelves? Land him on New Sale so his first success is a bill.
+    if (loadedCount > 0) {
+      setActiveTab('sale');
+    }
   };
 
   // 1. Initial Local Database Loading Splash (only waits for local SQLite/IndexedDB, <100ms)

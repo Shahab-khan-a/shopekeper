@@ -4,11 +4,13 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomerKhata } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { KhataModal } from '@/components/KhataModal';
+import { AddCustomerModal } from '@/components/AddCustomerModal';
 import { CustomerKhataCard } from '@/components/CustomerKhataCard';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
@@ -25,6 +27,7 @@ export const KhataScreen: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<KhataFilter>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerKhata | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [expandedCustId, setExpandedCustId] = useState<string | null>(null);
 
   const pendingCount = useMemo(() => khata.filter((c) => c.totalDebt > 0).length, [khata]);
@@ -142,6 +145,20 @@ export const KhataScreen: React.FC = () => {
           />
         </View>
 
+        {/* ── Add Customer (direct, no sale needed) ── */}
+        <Pressable
+          onPress={() => setIsAddCustomerOpen(true)}
+          style={({ pressed }) => [
+            styles.addCustomerBtn,
+            { borderColor: theme.primary, backgroundColor: theme.primaryLight },
+            pressed && { opacity: 0.85 },
+          ]}>
+          <Ionicons name="person-add-outline" size={17} color={theme.primary} />
+          <Text style={[styles.addCustomerText, { color: theme.primary }]}>
+            {language === 'ur' ? 'نیا گاہک شامل کریں' : 'Add Customer'}
+          </Text>
+        </Pressable>
+
         {/* ── Customers List ── */}
         {filteredCustomers.length === 0 ? (
           <EmptyState
@@ -150,7 +167,7 @@ export const KhataScreen: React.FC = () => {
             subtitle={
               searchQuery
                 ? (language === 'ur' ? 'مختلف نام یا فون نمبر سے تلاش کریں' : 'Try a different name or phone number.')
-                : (language === 'ur' ? 'ابھی کوئی اُدھار کھاتہ نہیں ہے' : 'No customers match the current filter.')
+                : (language === 'ur' ? 'ابھی کوئی اُدھار گاہک نہیں ہے۔ پہلا گاہک شامل کریں۔' : 'No udhaar customers yet. Add your first customer.')
             }
             actionLabel={!searchQuery && selectedFilter === 'all' ? t('newBillBtn') : undefined}
             onAction={!searchQuery && selectedFilter === 'all' ? () => setActiveTab('sale') : undefined}
@@ -174,6 +191,7 @@ export const KhataScreen: React.FC = () => {
       </View>
 
       {/* Payment Received Modal */}
+      <AddCustomerModal visible={isAddCustomerOpen} onClose={() => setIsAddCustomerOpen(false)} />
       <KhataModal
         customer={selectedCustomer}
         visible={isPaymentModalOpen}
@@ -234,6 +252,20 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.md,
   },
   searchWrap: { marginBottom: Spacing.sm },
+  addCustomerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    borderWidth: 1.5,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 10,
+    marginTop: Spacing.sm,
+  },
+  addCustomerText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
   filterRow: {
     flexDirection: 'row',
     alignItems: 'center',

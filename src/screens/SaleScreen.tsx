@@ -180,22 +180,14 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
   // Cart actions
   const addToCart = (product: Product, delta: number = 1) => {
-    if (product.stock <= 0) {
-      if (Platform.OS === 'web') {
-        window.alert(t('outOfStockWarn'));
-      } else {
-        Alert.alert(t('warningAlert'), t('outOfStockWarn'));
-      }
-      return;
-    }
-
+    const doAdd = () => {
     const existingIndex = cart.findIndex((item) => item.product.id === product.id);
 
     if (existingIndex >= 0) {
       const existingItem = cart[existingIndex];
       const newQty = existingItem.quantity + delta;
 
-      if (newQty > product.stock) {
+      if (product.stock > 0 && newQty > product.stock) {
         const warnMsg = `${t('stockExceededWarn')} (Available: ${product.stock} ${product.unit})`;
         if (Platform.OS === 'web') {
           window.alert(warnMsg);
@@ -228,6 +220,27 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         },
       ]);
     }
+    };
+
+    if (product.stock <= 0) {
+      // Never hard-block a sale. Catalog-loaded items start at stock 0
+      // (not yet counted), so blocking here would stop the keeper's very
+      // first bill — warn, and let him confirm instead.
+      const msg =
+        language === 'ur'
+          ? 'اس آئٹم کا اسٹاک 0 دکھ رہا ہے۔ پھر بھی بل میں شامل کریں؟'
+          : 'This item shows 0 in stock. Add it to the bill anyway?';
+      if (Platform.OS === 'web') {
+        if (window.confirm(msg)) doAdd();
+      } else {
+        Alert.alert(t('warningAlert'), msg, [
+          { text: t('cancel'), style: 'cancel' },
+          { text: language === 'ur' ? 'شامل کریں' : 'Add Anyway', onPress: doAdd },
+        ]);
+      }
+      return;
+    }
+    doAdd();
   };
 
   const updateQuantity = (productId: string, delta: number) => {
@@ -236,7 +249,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         if (item.product.id === productId) {
           const newQty = item.quantity + delta;
 
-          if (delta > 0 && newQty > item.product.stock) {
+          if (delta > 0 && item.product.stock > 0 && newQty > item.product.stock) {
             const warnMsg = `${t('stockExceededWarn')} (Stock: ${item.product.stock})`;
             if (Platform.OS === 'web') {
               window.alert(warnMsg);
@@ -1080,7 +1093,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   return (
                     <Pressable
                       key={product.id}
-                      disabled={isOut}
                       onPress={() => addToCart(product)}
                       accessibilityLabel={`Quick add ${product.name}`}
                       accessibilityRole="button"
@@ -1242,7 +1254,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                           {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
                         </Text>
                         <Text style={[styles.listRowMeta, { color: theme.textMuted }]}>
-                          {product.category} • {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
+                          {product.category} • {`${product.stock} ${product.unit}`}
                         </Text>
                       </View>
                     </View>
@@ -1270,7 +1282,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         </View>
                       ) : (
                         <Pressable
-                          disabled={isOut}
                           onPress={() => addToCart(product)}
                           style={[
                             styles.listAddBtn,
@@ -1302,7 +1313,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               return (
                 <Pressable
                   key={product.id}
-                  disabled={isOut}
                   onPress={() => !inCartItem && addToCart(product)}
                   style={({ pressed }) => [
                     styles.gridCard,
@@ -1338,7 +1348,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                             : theme.success,
                         },
                       ]}>
-                      {isOut ? t('soldOut') : `${product.stock} ${product.unit}`}
+                      {`${product.stock} ${product.unit}`}
                     </Text>
                   </View>
 
@@ -1386,7 +1396,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       </View>
                     ) : (
                       <Pressable
-                        disabled={isOut}
                         onPress={() => addToCart(product)}
                         style={[
                           styles.cardAddBtn,

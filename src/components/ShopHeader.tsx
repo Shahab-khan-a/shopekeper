@@ -15,6 +15,7 @@ export const ShopHeader: React.FC = () => {
     setIsAuthModalOpen,
     setIsEditShopOpen,
     user,
+    isGuestMode,
     isOnline,
     syncStatus,
     pendingSyncCount,
@@ -145,7 +146,9 @@ export const ShopHeader: React.FC = () => {
 
       {/* Right: Controls */}
       <View style={styles.rightSection}>
-        {/* Sync Status Pill */}
+        {/* Sync Status Pill — hidden in guest mode: a guest shop is
+            local-only, so a permanent "pending" counter only confuses. */}
+        {!isGuestMode && (
         <Pressable
           onPress={handleSyncPillPress}
           accessibilityLabel="Sync Status Indicator"
@@ -157,6 +160,7 @@ export const ShopHeader: React.FC = () => {
           <Ionicons name={pill.icon} size={13} color={pill.color} />
           <Text style={[styles.syncPillText, { color: pill.color }]}>{pill.label}</Text>
         </Pressable>
+        )}
 
         {/* Alert Badge */}
         {totalAlerts > 0 && (

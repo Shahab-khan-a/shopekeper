@@ -16,8 +16,12 @@ import { ProductImage } from '@/components/ProductImage';
 import { mapCatalogCategory, resolveCatalogImageUri } from '@/components/CatalogImportModal';
 
 interface CatalogSetupScreenProps {
-  /** Called when the keeper finishes (loaded items) or skips the setup. */
-  onDone: () => void;
+  /**
+   * Called when the keeper finishes or skips the setup. Receives how many
+   * items were loaded (0 when skipped) so the app can land him on the
+   * New Sale tab for his first bill.
+   */
+  onDone: (loadedCount: number) => void;
 }
 
 type Row =
@@ -110,12 +114,14 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
   const loadItems = async () => {
     if (!chosen || loading) return;
     setLoading(true);
+    let added = 0;
     try {
       const existing = new Set(products.map((p) => p.name.trim().toLowerCase()));
       for (const cat of chosen.categories) {
         for (const item of cat.items) {
           if (!selected.has(item.name)) continue;
           if (existing.has(item.name.trim().toLowerCase())) continue;
+          added++;
           await addProduct({
             name: item.name,
             nameUrdu: item.nameUrdu,
@@ -132,7 +138,7 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
     } finally {
       setLoading(false);
     }
-    onDone();
+    onDone(added);
   };
 
   return (
@@ -204,7 +210,7 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
               <Text style={styles.primaryBtnText}>{ur ? 'آگے بڑھیں' : 'Continue'}</Text>
               <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
             </Pressable>
-            <Pressable onPress={onDone} style={styles.skipBtn}>
+            <Pressable onPress={() => onDone(0)} style={styles.skipBtn}>
               <Text style={[styles.skipText, { color: theme.textMuted }]}>
                 {ur ? 'ابھی چھوڑیں — بعد میں خود اشیاء شامل کروں گا' : 'Skip for now — I will add items myself'}
               </Text>
@@ -298,7 +304,7 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
                   {ur ? '← دکان کی قسم بدلیں' : '← Change shop type'}
                 </Text>
               </Pressable>
-              <Pressable onPress={onDone} disabled={loading} style={styles.skipBtn}>
+              <Pressable onPress={() => onDone(0)} disabled={loading} style={styles.skipBtn}>
                 <Text style={[styles.skipText, { color: theme.textMuted }]}>
                   {ur ? 'ابھی چھوڑیں' : 'Skip for now'}
                 </Text>

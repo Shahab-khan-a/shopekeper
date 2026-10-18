@@ -867,9 +867,23 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return products.filter((p) => p.stock > 0 && p.stock <= threshold);
   }, [products, settings.lowStockThreshold]);
 
+  // Out-of-stock only matters for items the shop actually sells — a product
+  // that has never appeared on a bill (e.g. just loaded from the catalog)
+  // must not raise a day-one alarm.
+  const soldProductIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const s of sales) {
+      for (const it of s.items) {
+        const pid = it.productId ?? it.product?.id;
+        if (pid) ids.add(pid);
+      }
+    }
+    return ids;
+  }, [sales]);
+
   const outOfStockProducts = useMemo(() => {
-    return products.filter((p) => p.stock <= 0);
-  }, [products]);
+    return products.filter((p) => p.stock <= 0 && soldProductIds.has(p.id));
+  }, [products, soldProductIds]);
 
   // Investment & Financial Stock Metrics
   const {
