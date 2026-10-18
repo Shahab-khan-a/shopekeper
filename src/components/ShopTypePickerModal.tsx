@@ -20,9 +20,10 @@ interface ShopTypePickerModalProps {
 }
 
 /**
- * Lets the shopkeeper pick ONE shop type from the master catalog
- * (Settings → Product Catalog). The Products tab catalog import then
- * loads only that type's items.
+ * Lets the shopkeeper pick ONE shop type from the master catalog (opened
+ * from the Products tab catalog import). The catalog import then loads
+ * only that type's items. First-run selection happens in
+ * CatalogSetupScreen instead.
  */
 export const ShopTypePickerModal: React.FC<ShopTypePickerModalProps> = ({ visible, onClose }) => {
   const { settings, updateSettings, language } = useShop();

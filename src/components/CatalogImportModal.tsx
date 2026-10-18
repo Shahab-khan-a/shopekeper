@@ -22,6 +22,8 @@ import { ProductImage } from '@/components/ProductImage';
 interface CatalogImportModalProps {
   visible: boolean;
   onClose: () => void;
+  /** Opens the shop-type picker (used when no type has been chosen yet). */
+  onChooseType?: () => void;
 }
 
 type Row =
@@ -75,11 +77,11 @@ export function resolveCatalogImageUri(item: CatalogItem): string | undefined {
 }
 
 /**
- * Products-tab catalog import. Loads ONLY the shop type selected in
- * Settings → Product Catalog, so a keeper stocks his shop by tapping
- * items instead of typing them.
+ * Products-tab catalog import. Loads ONLY the shop type the keeper chose
+ * during first-run setup (or later via the picker on this screen), so he
+ * can top up his shop by tapping items instead of typing them.
  */
-export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible, onClose }) => {
+export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible, onClose, onChooseType }) => {
   const { settings, products, addProduct, language } = useShop();
   const insets = useSafeAreaInsets();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -187,14 +189,24 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
             </Text>
             <Text style={[styles.emptyText, { color: theme.textMuted }]}>
               {ur
-                ? 'سیٹنگز ← پروڈکٹ کیٹلاگ میں جا کر اپنی دکان کی قسم منتخب کریں۔ پھر یہاں صرف اسی قسم کی اشیاء لوڈ ہوں گی۔'
-                : 'Go to Settings → Product Catalog and pick your shop type. Only that type’s items will load here.'}
+                ? 'اپنی دکان کی قسم منتخب کریں — پھر یہاں صرف اسی قسم کی تیار اشیاء، تصاویر اور قیمتوں کے ساتھ لوڈ ہوں گی۔'
+                : 'Pick your shop type — then only that type’s ready-made items will load here, with photos and prices.'}
             </Text>
-            <Pressable
-              onPress={onClose}
-              style={[styles.primaryBtn, { backgroundColor: theme.primary }]}>
-              <Text style={styles.primaryBtnText}>{ur ? 'ٹھیک ہے' : 'OK'}</Text>
-            </Pressable>
+            {onChooseType ? (
+              <Pressable
+                onPress={onChooseType}
+                style={[styles.primaryBtn, { backgroundColor: theme.primary }]}>
+                <Text style={styles.primaryBtnText}>
+                  {ur ? 'دکان کی قسم منتخب کریں' : 'Choose Shop Type'}
+                </Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={onClose}
+                style={[styles.primaryBtn, { backgroundColor: theme.primary }]}>
+                <Text style={styles.primaryBtnText}>{ur ? 'ٹھیک ہے' : 'OK'}</Text>
+              </Pressable>
+            )}
           </View>
         ) : (
           <>

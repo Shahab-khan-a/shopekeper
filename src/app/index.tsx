@@ -12,6 +12,7 @@ import { AuthModal } from '@/components/AuthModal';
 import { EditShopModal } from '@/components/EditShopModal';
 import { LoginScreen } from '@/screens/LoginScreen';
 import { ConnectDriveScreen } from '@/screens/ConnectDriveScreen';
+import { CatalogSetupScreen } from '@/screens/CatalogSetupScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { ProductsScreen } from '@/screens/ProductsScreen';
@@ -74,6 +75,50 @@ export default function App() {
       }
     }
     setIsDriveStepCompleted(true);
+  };
+
+  // Track if the keeper has completed (or skipped) the first-run catalog
+  // setup — pick a shop type and load its ready-made items. Applies to both
+  // signed-in users and guest mode; the flag is stored per identity.
+  const [isCatalogStepCompleted, setIsCatalogStepCompleted] = useState<boolean | null>(null);
+  const catalogFlagKey = user
+    ? `@shopkeeper_catalog_onboarded_${user.uid}`
+    : isGuestMode
+      ? '@shopkeeper_catalog_onboarded_guest'
+      : null;
+
+  useEffect(() => {
+    if (!catalogFlagKey) {
+      setIsCatalogStepCompleted(null);
+      return;
+    }
+    // A shop that already chose a catalog type never needs the setup step.
+    if (settings.catalogShopType) {
+      setIsCatalogStepCompleted(true);
+      return;
+    }
+    let cancelled = false;
+    AsyncStorage.getItem(catalogFlagKey)
+      .then((val) => {
+        if (!cancelled) setIsCatalogStepCompleted(val === 'true');
+      })
+      .catch(() => {
+        if (!cancelled) setIsCatalogStepCompleted(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [catalogFlagKey, settings.catalogShopType]);
+
+  const handleFinishCatalogOnboarding = async () => {
+    if (catalogFlagKey) {
+      try {
+        await AsyncStorage.setItem(catalogFlagKey, 'true');
+      } catch (e) {
+        console.warn('[App] Error storing catalog onboarding flag:', e);
+      }
+    }
+    setIsCatalogStepCompleted(true);
   };
 
   // 1. Initial Local Database Loading Splash (only waits for local SQLite/IndexedDB, <100ms)
@@ -173,7 +218,43 @@ export default function App() {
     );
   }
 
-  // 5. Authenticated or Guest Mode -> Show Main Store POS App
+  // 5. First Run - Check Catalog Setup Status
+  if ((user || isGuestMode) && isCatalogStepCompleted === null) {
+    return (
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
+        <StatusBar
+          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.surface}
+        />
+        <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
+          <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
+            <Ionicons name="storefront" size={36} color="#FFFFFF" />
+          </View>
+        </View>
+        <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
+        <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
+        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
+        <Text style={[styles.loadingSub, { color: theme.textMuted, marginTop: 12 }]}>
+          Setting up your store...
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  // 6. First Run - Catalog Setup (choose shop type, tick items, load them in)
+  if ((user || isGuestMode) && !isCatalogStepCompleted) {
+    return (
+      <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
+        <StatusBar
+          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.surface}
+        />
+        <CatalogSetupScreen onDone={handleFinishCatalogOnboarding} />
+      </SafeAreaView>
+    );
+  }
+
+  // 7. Authenticated or Guest Mode -> Show Main Store POS App
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'dashboard':

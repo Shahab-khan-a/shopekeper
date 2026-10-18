@@ -19,6 +19,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { IconButton } from '@/components/ui/IconButton';
 import { ProductImage } from '@/components/ProductImage';
 import { CatalogImportModal } from '@/components/CatalogImportModal';
+import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
 
 const CATEGORIES: (ProductCategory | 'LowStock')[] = [
   'All',
@@ -57,6 +58,7 @@ export const ProductsScreen: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock'>('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [isTypePickerOpen, setIsTypePickerOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -122,7 +124,18 @@ export const ProductsScreen: React.FC = () => {
           </Pressable>
         </View>
 
-        <CatalogImportModal visible={isCatalogOpen} onClose={() => setIsCatalogOpen(false)} />
+        <CatalogImportModal
+          visible={isCatalogOpen}
+          onClose={() => setIsCatalogOpen(false)}
+          onChooseType={() => {
+            setIsCatalogOpen(false);
+            setIsTypePickerOpen(true);
+          }}
+        />
+        <ShopTypePickerModal
+          visible={isTypePickerOpen}
+          onClose={() => setIsTypePickerOpen(false)}
+        />
 
         {/* ── Category Filter Pills ── */}
         <ScrollView
