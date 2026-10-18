@@ -47,7 +47,7 @@ const TabItem: React.FC<{
             ) : (
               <Ionicons
                 name={icon}
-                size={22}
+                size={24}
                 color="#FFFFFF"
               />
             )}
@@ -88,7 +88,7 @@ const TabItem: React.FC<{
           ) : (
             <Ionicons
               name={`${icon}-outline` as any}
-              size={20}
+              size={23}
               color={theme.tabBarInactive}
             />
           )}
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   tabLabel: {
-    fontSize: 9.5,
+    fontSize: 12,
     textAlign: 'center',
     letterSpacing: 0.1,
   },

@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   productName: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '800',
     lineHeight: 19,
     letterSpacing: -0.2,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   priceValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '900',
     letterSpacing: -0.3,
   },

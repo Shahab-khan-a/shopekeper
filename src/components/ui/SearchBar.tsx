@@ -15,7 +15,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChangeText,
   placeholder = 'Search...',
-  height = 46,
+  height = 50,
 }) => {
   const { settings } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '500',
   },
 });

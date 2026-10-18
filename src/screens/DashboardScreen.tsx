@@ -556,8 +556,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 4,
   },
-  metricLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.4 },
-  metricValue: { fontSize: 20, fontWeight: '800', letterSpacing: -0.5 },
+  metricLabel: { fontSize: 11.5, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
+  metricValue: { fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
 
   // Alert Section
   alertSection: {
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
   saleCustomer: { fontSize: 14, fontWeight: '700' },
   saleTime: { fontSize: 11, fontWeight: '500' },
   saleRight: { alignItems: 'flex-end', gap: 4 },
-  saleAmount: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3 },
+  saleAmount: { fontSize: 16, fontWeight: '800', letterSpacing: -0.3 },
   // Finance & Investment Grid
   financeGrid: {
     gap: Spacing.md,

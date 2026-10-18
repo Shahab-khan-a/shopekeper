@@ -1674,9 +1674,9 @@ const styles = StyleSheet.create({
     paddingRight: 40,
   },
   gridName: {
-    fontSize: 13,
+    fontSize: 14.5,
     fontWeight: '700',
-    lineHeight: 17,
+    lineHeight: 19,
   },
   gridCategory: {
     fontSize: 11,
@@ -1689,7 +1689,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   gridPrice: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
@@ -1697,13 +1697,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
   },
   cardAddBtnText: {
-    fontSize: 11,
+    fontSize: 12.5,
     fontWeight: '800',
   },
   cardStepper: {
@@ -1770,7 +1770,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   listRowPrice: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '800',
   },
   inlineStepper: {
@@ -2284,14 +2284,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: BorderRadius.xl,
     ...Shadows.md,
   },
   completeSaleBtnText: {
     color: '#FFFFFF',
     fontWeight: '800',
-    fontSize: 14,
+    fontSize: 16,
     letterSpacing: 0.2,
   },
 
