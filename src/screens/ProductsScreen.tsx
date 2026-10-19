@@ -32,9 +32,6 @@ export const ProductsScreen: React.FC = () => {
     setEditingProduct,
     setIsAddProductOpen,
     settings,
-    totalInventoryInvestment,
-    totalInventoryRetailValue,
-    totalExpectedStockProfit,
     t,
     language,
     lowStockProducts,
@@ -88,10 +85,6 @@ export const ProductsScreen: React.FC = () => {
     return counts;
   }, [products]);
 
-  const profitPct =
-    totalInventoryInvestment > 0
-      ? ((totalExpectedStockProfit / totalInventoryInvestment) * 100).toFixed(1)
-      : '0.0';
 
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.4)';
   const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
@@ -154,7 +147,7 @@ export const ProductsScreen: React.FC = () => {
             </Pressable>
           </View>
 
-          {/* ── 3 Visual Inventory Summary Pillars (Items, Stock Value, Est. Profit) ── */}
+          {/* ── 3 Inventory Summary Pillars (Items, Low Stock, Out of Stock) ── */}
           <View style={styles.compactMetricBar}>
             {/* 1. Total Catalog Items */}
             <View style={styles.compactMetricItem}>
@@ -178,45 +171,45 @@ export const ProductsScreen: React.FC = () => {
 
             <View style={styles.compactMetricDivider} />
 
-            {/* 2. Total Retail Stock Worth */}
+            {/* 2. Low Stock — the count he acts on */}
             <View style={styles.compactMetricItem}>
               <Text style={styles.compactMetricTitle} numberOfLines={1}>
-                {language === 'ur' ? 'کل مال' : 'Stock Value'}
+                {language === 'ur' ? 'کم اسٹاک' : 'Low Stock'}
               </Text>
               <View style={styles.metricValRow}>
-                <Ionicons name="pricetag" size={10} color="#A7F3D0" />
+                <Ionicons name="warning" size={11} color="#FDE68A" />
                 <Text
                   style={styles.compactMetricBold}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   minimumFontScale={0.7}>
-                  {settings.currencySymbol}{formatCompactPrice(totalInventoryRetailValue)}
+                  {lowStockProducts.length}
                 </Text>
               </View>
               <Text style={styles.compactMetricSub} numberOfLines={1}>
-                {language === 'ur' ? 'فروخت رقم' : 'retail worth'}
+                {language === 'ur' ? 'جلد منگوائیں' : 'reorder soon'}
               </Text>
             </View>
 
             <View style={styles.compactMetricDivider} />
 
-            {/* 3. Expected Profit in Rupees + Margin % */}
+            {/* 3. Out of Stock */}
             <View style={styles.compactMetricItem}>
-              <Text style={[styles.compactMetricTitle, { color: '#6EE7B7' }]} numberOfLines={1}>
-                {language === 'ur' ? 'متوقع منافع' : 'Est. Profit'}
+              <Text style={styles.compactMetricTitle} numberOfLines={1}>
+                {language === 'ur' ? 'ختم شدہ' : 'Out of Stock'}
               </Text>
               <View style={styles.metricValRow}>
-                <Ionicons name="trending-up" size={11} color="#6EE7B7" />
+                <Ionicons name="close-circle" size={11} color="#FCA5A5" />
                 <Text
-                  style={[styles.compactMetricBold, { color: '#6EE7B7' }]}
+                  style={styles.compactMetricBold}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   minimumFontScale={0.7}>
-                  +{settings.currencySymbol}{formatCompactPrice(totalExpectedStockProfit)}
+                  {outOfStockProducts.length}
                 </Text>
               </View>
-              <Text style={[styles.compactMetricSub, { color: '#6EE7B7' }]} numberOfLines={1}>
-                {profitPct}% {language === 'ur' ? 'مارجن' : 'margin'}
+              <Text style={styles.compactMetricSub} numberOfLines={1}>
+                {language === 'ur' ? 'اسٹاک ختم' : 'sold out'}
               </Text>
             </View>
           </View>

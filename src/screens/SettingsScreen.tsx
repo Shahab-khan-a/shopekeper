@@ -327,6 +327,8 @@ export const SettingsScreen: React.FC = () => {
 
   const [activeSegment, setActiveSegment] = useState<Segment>('profile');
   const [segContainerWidth, setSegContainerWidth] = useState(0);
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const segAnim = useRef(new Animated.Value(0)).current;
 
   const handleSegmentPress = (seg: Segment) => {
@@ -1242,6 +1244,14 @@ export const SettingsScreen: React.FC = () => {
                 placeholder="0300-1234567" keyboardType="phone-pad"
                 theme={theme}
               />
+              <Pressable onPress={() => setShowMoreDetails((v) => !v)} style={styles.moreToggle}>
+                <Text style={[styles.moreToggleText, { color: theme.primary }]}>
+                  {language === 'ur' ? 'مزید تفصیلات (اختیاری)' : 'More shop details (optional)'}
+                </Text>
+                <Ionicons name={showMoreDetails ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
+              </Pressable>
+              {showMoreDetails && (
+                <>
               <StackedField
                 icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE"
                 label={t('altPhoneLabel')}
@@ -1287,6 +1297,8 @@ export const SettingsScreen: React.FC = () => {
                   }, 150);
                 }}
               />
+                </>
+              )}
             </View>
           </View>
 
@@ -1372,6 +1384,16 @@ export const SettingsScreen: React.FC = () => {
             </View>
           </Section>
 
+          {/* Advanced toggle — billing + data tools live behind it */}
+          <Pressable onPress={() => setShowAdvanced((v) => !v)} style={styles.moreToggle}>
+            <Text style={[styles.moreToggleText, { color: theme.primary }]}>
+              {language === 'ur' ? '⚙ ایڈوانسڈ سیٹنگز' : '⚙ Advanced Settings'}
+            </Text>
+            <Ionicons name={showAdvanced ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
+          </Pressable>
+
+          {showAdvanced && (
+            <>
           {/* Billing */}
           <View style={styles.sectionWrap}>
             <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('billingSection').toUpperCase()}</Text>
@@ -1433,6 +1455,9 @@ export const SettingsScreen: React.FC = () => {
               />
             </View>
           </View>
+
+            </>
+          )}
 
           {/* ── Save Settings Button ── */}
           <Pressable
@@ -1735,6 +1760,8 @@ export const SettingsScreen: React.FC = () => {
           </Section>
 
           {/* Data Management */}
+          {showAdvanced && (
+            <>
           <Section title={t('dataManagement')} theme={theme}>
             <RowItem
               icon="download-outline"
@@ -1793,6 +1820,9 @@ export const SettingsScreen: React.FC = () => {
               </Pressable>
             </View>
           )}
+            </>
+          )}
+
           {/* About & Legal Section */}
           <Section title={t('aboutLegal')} theme={theme}>
             <RowItem
@@ -2123,6 +2153,14 @@ const styles = StyleSheet.create({
   },
 
 // Save button — single prominent CTA at bottom of each tab
+  moreToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+  },
+  moreToggleText: { fontSize: 13.5, fontWeight: '700' },
   fullSaveBtn: {
     flexDirection: 'row',
     alignItems: 'center',

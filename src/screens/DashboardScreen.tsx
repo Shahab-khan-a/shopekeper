@@ -110,6 +110,7 @@ export const DashboardScreen: React.FC = () => {
 
   // Day-end summary modal & Cash Drawer Tally
   const [showDayEnd, setShowDayEnd] = useState(false);
+  const [showReports, setShowReports] = useState(false);
   const [isCashOutModalOpen, setIsCashOutModalOpen] = useState(false);
   const [todayCashOutTotal, setTodayCashOutTotal] = useState(0);
 
@@ -263,9 +264,9 @@ export const DashboardScreen: React.FC = () => {
             </Text>
           </Pressable>
 
-          {/* 2. Today's Profit */}
+          {/* 2. Low Stock (actionable — profit lives in Day-End / Reports below) */}
           <Pressable
-            onPress={() => setShowDayEnd(true)}
+            onPress={() => setActiveTab('products')}
             style={({ pressed }) => [
               styles.metricCard,
               { backgroundColor: theme.card },
@@ -273,17 +274,22 @@ export const DashboardScreen: React.FC = () => {
             ]}>
             <View style={styles.metricHeaderRow}>
               <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-                {language === 'ur' ? 'آج کا منافع' : "Today's Profit"}
+                {language === 'ur' ? 'کم اسٹاک' : 'Low Stock'}
               </Text>
-              <Ionicons name="trending-up-outline" size={15} color="#059669" />
+              <Ionicons name="warning-outline" size={15} color={theme.warning} />
             </View>
-            <Text style={[styles.metricValue, { color: '#059669' }]} numberOfLines={1}>
-              +{settings.currencySymbol} {Math.max(0, todayGrossProfit).toLocaleString()}
+            <Text
+              style={[
+                styles.metricValue,
+                { color: lowStockProducts.length + outOfStockProducts.length > 0 ? theme.warning : theme.text },
+              ]}
+              numberOfLines={1}>
+              {lowStockProducts.length + outOfStockProducts.length}
             </Text>
-            <Text style={[styles.metricSubHint, { color: '#059669' }]} numberOfLines={1}>
-              {todaySalesTotal > 0
-                ? `${Math.round((todayGrossProfit / todaySalesTotal) * 100)}% ${language === 'ur' ? 'منافع مارجن' : 'margin'}`
-                : language === 'ur' ? 'سیل کا منافع' : 'Net profit'}
+            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
+              {lowStockProducts.length + outOfStockProducts.length > 0
+                ? language === 'ur' ? 'آئٹمز ختم ہونے والے ہیں' : 'items to reorder'
+                : language === 'ur' ? 'تمام اسٹاک موجود ہے' : 'All stocked up'}
             </Text>
           </Pressable>
 
@@ -683,6 +689,23 @@ export const DashboardScreen: React.FC = () => {
           </View>
         )}
 
+        {/* ── Reports (collapsed by default — keeper's Home stays cash-first) ── */}
+        <Pressable
+          onPress={() => setShowReports((v) => !v)}
+          style={({ pressed }) => [
+            styles.reportsToggle,
+            { backgroundColor: theme.card, borderColor: theme.border },
+            pressed && { opacity: 0.85 },
+          ]}>
+          <Ionicons name="bar-chart-outline" size={17} color={theme.primary} />
+          <Text style={[styles.reportsToggleText, { color: theme.text }]}>
+            {language === 'ur' ? 'رپورٹس اور منافع' : 'Reports & Profit'}
+          </Text>
+          <Ionicons name={showReports ? 'chevron-up' : 'chevron-down'} size={16} color={theme.textMuted} />
+        </Pressable>
+
+        {showReports && (
+          <>
         {/* ── Sales Analytics & Trends Chart ── */}
         <SalesChart sales={sales} />
 
@@ -792,6 +815,9 @@ export const DashboardScreen: React.FC = () => {
             </View>
           </Pressable>
         </View>
+
+          </>
+        )}
 
         {/* ── Stock Alerts ── */}
         {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
@@ -1113,6 +1139,17 @@ const styles = StyleSheet.create({
   },
 
   // Alert Section
+  reportsToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginTop: 14,
+  },
+  reportsToggleText: { flex: 1, fontSize: 14, fontWeight: '700' },
   alertSection: {
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
