@@ -2,6 +2,7 @@ import { Platform, TurboModuleRegistry } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
+import * as FileSystem from 'expo-file-system/legacy';
 import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
 import { ImageCacheService } from './imageCacheService';
 
@@ -27,6 +28,8 @@ const FOLDER_CACHE_KEY = '@shopkeeper_gdrive_folder_cache';
 class GoogleDriveService {
   private currentAuth: GoogleDriveAuth | null = null;
   private folderCache: DriveFolderCache | null = null;
+  /** In-memory dedup: saleKey → real Drive file id, populated only after a confirmed upload */
+  private uploadedBillCache = new Map<string, string>();
 
   /**
    * Loads saved credentials from AsyncStorage
@@ -434,7 +437,7 @@ class GoogleDriveService {
   }
 
   /**
-   * Ensure root and subfolders exist in user's 5 TB Google Drive
+   * Ensure root and subfolders exist in user's Google Drive
    */
   async ensureFolders(token?: string): Promise<DriveFolderCache> {
     if (this.folderCache) return this.folderCache;
@@ -492,13 +495,22 @@ class GoogleDriveService {
   }
 
   /**
-   * Uploads an individual sale / bill receipt directly to the Bills folder in Google Drive
-   * Completely resilient: never throws or crashes the UI
+   * Uploads an individual sale / bill receipt directly to the Bills folder in Google Drive.
+   * Idempotent within a session: returns the cached result if this sale was already uploaded.
+   * Completely resilient: never throws or crashes the UI.
    */
   async uploadBillToDrive(
     sale: any,
     shopSettings?: any
   ): Promise<{ id: string; name: string } | null> {
+    // Dedup: return the real Drive file id cached from the first successful upload this session
+    const saleKey = sale?.id;
+    if (saleKey) {
+      const cachedDriveId = this.uploadedBillCache.get(saleKey);
+      if (cachedDriveId) {
+        return { id: cachedDriveId, name: `bill_${saleKey}.json` };
+      }
+    }
     try {
       const auth = await this.getSavedAuth();
       if (!auth) return null;
@@ -525,7 +537,7 @@ class GoogleDriveService {
         discount: sale.discount || 0,
         grandTotal: sale.grandTotal ?? sale.total,
         paymentMethod: sale.paymentMethod || 'cash',
-        shopName: shopSettings?.shopName || 'Shopkeeper POS',
+        shopName: shopSettings?.shopName || 'DigiShop',
         shopPhone: shopSettings?.phone || '',
         shopAddress: shopSettings?.address || '',
         syncedAt: new Date().toISOString(),
@@ -560,7 +572,11 @@ class GoogleDriveService {
 
       if (res.ok) {
         const data = await res.json();
-        return { id: data.id, name: filename };
+        // Only treat as success if Drive returned a real file id
+        if (data?.id) {
+          if (saleKey) this.uploadedBillCache.set(saleKey, data.id);
+          return { id: data.id, name: filename };
+        }
       }
       return null;
     } catch (err) {
@@ -570,7 +586,7 @@ class GoogleDriveService {
   }
 
   /**
-   * Helper to find an existing folder or create one in the user's 5 TB Google Drive
+   * Helper to find an existing folder or create one in the user's Google Drive
    */
   private async findOrCreateFolder(accessToken: string, name: string, parentId?: string): Promise<string> {
     let q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
@@ -621,7 +637,7 @@ class GoogleDriveService {
   }
 
   /**
-   * Uploads a product image directly to the 5 TB Google Drive
+   * Uploads a product image directly to Google Drive
    * Returns a direct CDN thumbnail URL (https://lh3.googleusercontent.com/d/{fileId})
    */
   async uploadProductImage(imageUri: string, filename?: string): Promise<string> {
@@ -630,68 +646,136 @@ class GoogleDriveService {
 
     const folders = await this.ensureFolders(auth.accessToken);
     const resolvedName = filename || `product_${Date.now()}.jpg`;
+    const mimeType = 'image/jpeg';
 
-    // 1. Fetch image binary / blob
-    let uriToFetch = imageUri;
-    if (
-      !uriToFetch.startsWith('http') &&
-      !uriToFetch.startsWith('file://') &&
-      !uriToFetch.startsWith('data:') &&
-      !uriToFetch.startsWith('blob:') &&
-      !uriToFetch.startsWith('content://')
-    ) {
-      uriToFetch = `data:image/jpeg;base64,${uriToFetch}`;
+    if (Platform.OS === 'web') {
+      let uriToFetch = imageUri;
+      if (
+        !uriToFetch.startsWith('http') &&
+        !uriToFetch.startsWith('data:') &&
+        !uriToFetch.startsWith('blob:')
+      ) {
+        uriToFetch = `data:image/jpeg;base64,${uriToFetch}`;
+      }
+
+      const response = await fetch(uriToFetch);
+      const blob = await response.blob();
+
+      const metadata = {
+        name: resolvedName,
+        parents: [folders.imagesFolderId],
+        mimeType,
+      };
+
+      const boundary = '-------dukandar_boundary_' + Date.now();
+      const metadataHeader = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(
+        metadata
+      )}\r\n`;
+      const fileHeader = `--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`;
+      const footer = `\r\n--${boundary}--`;
+
+      const metadataBlob = new Blob([metadataHeader], { type: 'text/plain' });
+      const fileHeaderBlob = new Blob([fileHeader], { type: 'text/plain' });
+      const footerBlob = new Blob([footer], { type: 'text/plain' });
+
+      const multipartBlob = new Blob([metadataBlob, fileHeaderBlob, blob, footerBlob], {
+        type: `multipart/related; boundary=${boundary}`,
+      });
+
+      const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+          'Content-Type': `multipart/related; boundary=${boundary}`,
+        },
+        body: multipartBlob,
+      });
+
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json();
+        throw new Error(err?.error?.message || 'Failed to upload image to Google Drive.');
+      }
+
+      const fileData = await uploadRes.json();
+      const fileId = fileData.id;
+      ImageCacheService.set(fileId, imageUri).catch(() => {});
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
     }
 
-    const response = await fetch(uriToFetch);
-    const blob = await response.blob();
-    const mimeType = blob.type || 'image/jpeg';
+    // --- Native Mobile (Android & iOS): Streamed Resumable Upload via FileSystem ---
+    let localFileUri = imageUri;
+    let isTempFile = false;
 
-    // 2. Prepare multipart upload
-    const metadata = {
-      name: resolvedName,
-      parents: [folders.imagesFolderId],
-      mimeType,
-    };
+    try {
+      if (imageUri.startsWith('data:')) {
+        const base64Index = imageUri.indexOf('base64,');
+        const base64Content = base64Index !== -1 ? imageUri.slice(base64Index + 7) : imageUri;
+        const tempPath = `${FileSystem.cacheDirectory || ''}upload_${Date.now()}_${resolvedName}`;
+        await FileSystem.writeAsStringAsync(tempPath, base64Content, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        localFileUri = tempPath;
+        isTempFile = true;
+      }
 
-    const boundary = '-------dukandar_boundary_' + Date.now();
-    const metadataHeader = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(
-      metadata
-    )}\r\n`;
-    const fileHeader = `--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`;
-    const footer = `\r\n--${boundary}--`;
+      // Step 1: Initiate Resumable Upload Session
+      const initRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+          'Content-Type': 'application/json; charset=UTF-8',
+          'X-Upload-Content-Type': mimeType,
+        },
+        body: JSON.stringify({
+          name: resolvedName,
+          parents: [folders.imagesFolderId],
+          mimeType,
+        }),
+      });
 
-    const metadataBlob = new Blob([metadataHeader], { type: 'text/plain' });
-    const fileHeaderBlob = new Blob([fileHeader], { type: 'text/plain' });
-    const footerBlob = new Blob([footer], { type: 'text/plain' });
+      if (!initRes.ok) {
+        let errMessage = 'Failed to initiate Google Drive upload.';
+        try {
+          const errData = await initRes.json();
+          errMessage = errData?.error?.message || errMessage;
+        } catch {}
+        throw new Error(errMessage);
+      }
 
-    const multipartBlob = new Blob([metadataBlob, fileHeaderBlob, blob, footerBlob], {
-      type: `multipart/related; boundary=${boundary}`,
-    });
+      const locationUrl = initRes.headers.get('Location') || initRes.headers.get('location');
+      if (!locationUrl) {
+        throw new Error('Google Drive did not return an upload location.');
+      }
 
-    // 3. Upload to Google Drive
-    const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${auth.accessToken}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`,
-      },
-      body: multipartBlob,
-    });
+      // Step 2: Stream binary content directly from disk
+      const uploadResult = await FileSystem.uploadAsync(locationUrl, localFileUri, {
+        httpMethod: 'PUT',
+        uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+        headers: {
+          'Content-Type': mimeType,
+        },
+      });
 
-    if (!uploadRes.ok) {
-      const err = await uploadRes.json();
-      throw new Error(err?.error?.message || 'Failed to upload image to Google Drive.');
+      if (uploadResult.status < 200 || uploadResult.status >= 300) {
+        let errMessage = `Upload failed with status ${uploadResult.status}`;
+        try {
+          const parsed = JSON.parse(uploadResult.body);
+          errMessage = parsed?.error?.message || errMessage;
+        } catch {}
+        throw new Error(errMessage);
+      }
+
+      const fileData = JSON.parse(uploadResult.body);
+      const fileId = fileData.id;
+
+      // Cache locally for instant offline display
+      ImageCacheService.set(fileId, imageUri).catch(() => {});
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+    } finally {
+      if (isTempFile && localFileUri) {
+        FileSystem.deleteAsync(localFileUri, { idempotent: true }).catch(() => {});
+      }
     }
-
-    const fileData = await uploadRes.json();
-    const fileId = fileData.id;
-
-    // Cache the original image for instant offline and refresh display
-    ImageCacheService.set(fileId, imageUri).catch(() => {});
-    // 4. Return standard file reference (resolved privately via resolveDriveImageUrl with user auth)
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
-
   }
 
   /**
@@ -849,7 +933,7 @@ const activeResolutions = new Map<string, Promise<string>>();
  * Resolves a Google Drive URL or local URI into a viewable image URI.
  * If the image is stored in Google Drive:
  * 1. Checks local cache (instant)
- * 2. Fetches via Google Drive API with OAuth Bearer Token (safe for private 5 TB files)
+ * 2. Fetches via Google Drive API with OAuth Bearer Token (safe for private Drive files)
  * 3. Creates local object URL / data URL and caches it
  */
 export async function resolveDriveImageUrl(uri?: string | null): Promise<string> {

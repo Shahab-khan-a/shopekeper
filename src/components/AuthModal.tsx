@@ -261,9 +261,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose }) => {
                       <Ionicons name="shield-checkmark" size={18} color="#0284C7" />
                     </View>
                     <View style={styles.benefitTextWrap}>
-                      <Text style={[styles.benefitTitle, { color: theme.text }]}>Safe Cloud Backup</Text>
+                      <Text style={[styles.benefitTitle, { color: theme.text }]}>Reliable Cloud Backup</Text>
                       <Text style={[styles.benefitDesc, { color: theme.textMuted }]}>
-                        Never lose store records if you lose your phone or switch devices.
+                        Keep your store records protected if your phone is lost or upgraded.
                       </Text>
                     </View>
                   </View>
@@ -275,7 +275,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose }) => {
                     <View style={styles.benefitTextWrap}>
                       <Text style={[styles.benefitTitle, { color: theme.text }]}>Automatic Cloud Sync</Text>
                       <Text style={[styles.benefitDesc, { color: theme.textMuted }]}>
-                        Every sale, product addition, and Khata payment backs up in real-time.
+                        Your sales, products, and Khata payments sync seamlessly when online.
                       </Text>
                     </View>
                   </View>

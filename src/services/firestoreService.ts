@@ -47,6 +47,21 @@ export function cleanData<T>(obj: T): T {
   return obj;
 }
 
+// Helper to identify transient offline/network rejections
+export function isFirestoreOfflineError(err: any): boolean {
+  if (!err) return false;
+  const code = String(err?.code || '');
+  const msg = String(err?.message || '');
+  return (
+    code === 'unavailable' ||
+    code === 'unknown' ||
+    code === 'failed-precondition' ||
+    msg.includes('offline') ||
+    msg.includes('network-request-failed') ||
+    msg.includes('Could not reach Cloud Firestore')
+  );
+}
+
 // ==================== PRODUCTS ====================
 
 export async function saveProductToCloud(userId: string, product: Product): Promise<void> {
@@ -67,30 +82,38 @@ export async function deleteProductFromCloud(userId: string, productId: string):
 
 export async function fetchProductsFromCloud(userId: string): Promise<Product[]> {
   if (!userId) return [];
-  const colRef = getShopCollection(userId, 'products');
-  const snapshot = await getDocs(colRef);
-  return snapshot.docs.map((docSnap) => {
-    const data = docSnap.data();
-    return {
-      id: docSnap.id,
-      name: data.name,
-      nameUrdu: data.nameUrdu,
-      image: data.image || data.imageUri,
-      imageUri: data.imageUri || data.image,
-      price: data.sellingPrice ?? data.price,
-      sellingPrice: data.sellingPrice ?? data.price,
-      costPrice: data.costPrice ?? 0,
-      stock: data.stock ?? 0,
-      category: data.category || 'Others',
-      barcode: data.barcode,
-      unit: data.unit || 'piece',
-      lowStockThreshold: data.lowStockThreshold ?? 5,
-      createdAt: data.createdAt || Date.now(),
-      updatedAt: data.updatedAt || Date.now(),
-      deletedAt: data.deletedAt || null,
-      syncStatus: 'synced',
-    } as Product;
-  });
+  try {
+    const colRef = getShopCollection(userId, 'products');
+    const snapshot = await getDocs(colRef);
+    return snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        name: data.name,
+        nameUrdu: data.nameUrdu,
+        image: data.image || data.imageUri,
+        imageUri: data.imageUri || data.image,
+        price: data.sellingPrice ?? data.price,
+        sellingPrice: data.sellingPrice ?? data.price,
+        costPrice: data.costPrice ?? 0,
+        stock: data.stock ?? 0,
+        category: data.category || 'Others',
+        barcode: data.barcode,
+        unit: data.unit || 'piece',
+        lowStockThreshold: data.lowStockThreshold ?? 5,
+        createdAt: data.createdAt || Date.now(),
+        updatedAt: data.updatedAt || Date.now(),
+        deletedAt: data.deletedAt || null,
+        syncStatus: 'synced',
+      } as Product;
+    });
+  } catch (err: any) {
+    if (isFirestoreOfflineError(err)) {
+      console.log('[firestoreService] Firestore offline, returning empty products list');
+      return [];
+    }
+    throw err;
+  }
 }
 
 // ==================== SALES ====================
@@ -113,16 +136,24 @@ export async function deleteSaleFromCloud(userId: string, saleId: string): Promi
 
 export async function fetchSalesFromCloud(userId: string): Promise<Sale[]> {
   if (!userId) return [];
-  const colRef = getShopCollection(userId, 'sales');
-  const snapshot = await getDocs(colRef);
-  return snapshot.docs.map((docSnap) => {
-    const data = docSnap.data();
-    return {
-      ...data,
-      id: docSnap.id,
-      syncStatus: 'synced',
-    } as Sale;
-  });
+  try {
+    const colRef = getShopCollection(userId, 'sales');
+    const snapshot = await getDocs(colRef);
+    return snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        ...data,
+        id: docSnap.id,
+        syncStatus: 'synced',
+      } as Sale;
+    });
+  } catch (err: any) {
+    if (isFirestoreOfflineError(err)) {
+      console.log('[firestoreService] Firestore offline, returning empty sales list');
+      return [];
+    }
+    throw err;
+  }
 }
 
 // ==================== CUSTOMERS & KHATA ====================
@@ -139,16 +170,24 @@ export async function saveCustomerToCloud(userId: string, customer: CustomerKhat
 
 export async function fetchCustomersFromCloud(userId: string): Promise<CustomerKhata[]> {
   if (!userId) return [];
-  const colRef = getShopCollection(userId, 'customers');
-  const snapshot = await getDocs(colRef);
-  return snapshot.docs.map((docSnap) => {
-    const data = docSnap.data();
-    return {
-      ...data,
-      id: docSnap.id,
-      syncStatus: 'synced',
-    } as CustomerKhata;
-  });
+  try {
+    const colRef = getShopCollection(userId, 'customers');
+    const snapshot = await getDocs(colRef);
+    return snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        ...data,
+        id: docSnap.id,
+        syncStatus: 'synced',
+      } as CustomerKhata;
+    });
+  } catch (err: any) {
+    if (isFirestoreOfflineError(err)) {
+      console.log('[firestoreService] Firestore offline, returning empty customers list');
+      return [];
+    }
+    throw err;
+  }
 }
 
 export async function saveKhataTxToCloud(userId: string, tx: KhataTransaction): Promise<void> {
@@ -189,16 +228,24 @@ export async function savePaymentToCloud(userId: string, payment: Payment): Prom
 
 export async function fetchPaymentsFromCloud(userId: string): Promise<Payment[]> {
   if (!userId) return [];
-  const colRef = getShopCollection(userId, 'payments');
-  const snapshot = await getDocs(colRef);
-  return snapshot.docs.map((docSnap) => {
-    const data = docSnap.data();
-    return {
-      ...data,
-      id: docSnap.id,
-      syncStatus: 'synced',
-    } as Payment;
-  });
+  try {
+    const colRef = getShopCollection(userId, 'payments');
+    const snapshot = await getDocs(colRef);
+    return snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        ...data,
+        id: docSnap.id,
+        syncStatus: 'synced',
+      } as Payment;
+    });
+  } catch (err: any) {
+    if (isFirestoreOfflineError(err)) {
+      console.log('[firestoreService] Firestore offline, returning empty payments list');
+      return [];
+    }
+    throw err;
+  }
 }
 
 // ==================== SETTINGS ====================
@@ -215,12 +262,20 @@ export async function saveSettingsToCloud(userId: string, settings: ShopSettings
 
 export async function fetchSettingsFromCloud(userId: string): Promise<ShopSettings | null> {
   if (!userId) return null;
-  const settingsRef = getShopDoc(userId, 'settings', 'profile');
-  const snap = await getDoc(settingsRef);
-  if (snap.exists()) {
-    return snap.data() as ShopSettings;
+  try {
+    const settingsRef = getShopDoc(userId, 'settings', 'profile');
+    const snap = await getDoc(settingsRef);
+    if (snap.exists()) {
+      return snap.data() as ShopSettings;
+    }
+    return null;
+  } catch (err: any) {
+    if (isFirestoreOfflineError(err)) {
+      console.log('[firestoreService] Firestore offline, returning null settings');
+      return null;
+    }
+    throw err;
   }
-  return null;
 }
 
 // ==================== SYNC QUEUE EXECUTION ====================

@@ -158,6 +158,7 @@ export interface ShopSettings {
   language: 'ur' | 'en';
   darkMode: boolean;
   enableSound: boolean;
+  whatsappReminderLanguage?: 'en' | 'ur';
 }
 
 export type ActiveTab = 'dashboard' | 'sale' | 'products' | 'history' | 'khata' | 'settings';
@@ -214,5 +215,63 @@ export interface SyncOperation {
   data?: any;
   createdAt: number;
   retryCount: number;
+}
+
+// ==================== SUPPLIER LEDGER TYPES ====================
+
+export type SupplierTxType = 'purchase_credit' | 'payment_made';
+
+export interface SupplierTransaction {
+  id: string;
+  supplierId: string;
+  date: string; // ISO string
+  type: SupplierTxType;
+  amount: number;
+  billNumber?: string;
+  note?: string;
+  createdAt: number;
+}
+
+export interface SupplierKhata {
+  id: string;
+  name: string;
+  companyName?: string;
+  phone?: string;
+  address?: string;
+  totalPayable: number; // Positive = Shopkeeper owes supplier; Negative = Advance deposit
+  transactions: SupplierTransaction[];
+  createdAt: number;
+  lastUpdated: number;
+}
+
+// ==================== DAILY CLOSING / TALLY TYPES ====================
+
+export interface DenominationCounts {
+  note5000: number;
+  note1000: number;
+  note500: number;
+  note100: number;
+  note50: number;
+  note20: number;
+  note10: number;
+  coins: number;
+}
+
+export interface DailyClosingRecord {
+  id: string;
+  date: string; // ISO string
+  timestamp: number;
+  totalBills: number;
+  totalSales: number;
+  cashSales: number;
+  onlineSales: number;
+  udhaarSales: number;
+  debtRecovered: number; // Vasooli
+  shopExpenses: number; // Cash Out
+  expectedCash: number;
+  countedCash: number;
+  difference: number;
+  denominations: DenominationCounts;
+  notes?: string;
 }
 

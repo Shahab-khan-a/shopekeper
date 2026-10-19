@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 
 interface SearchBarProps {
@@ -18,8 +18,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   height = 50,
 }) => {
   const { settings } = useShop();
-  const theme = settings.darkMode ? Colors.dark : Colors.light;
   const [focused, setFocused] = useState(false);
+  const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const softBg = settings.darkMode ? '#1E293B' : '#FFFFFF';
+  const focusedBg = settings.darkMode ? '#0F172A' : '#FFFFFF';
+  const softBorder = settings.darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(148, 163, 184, 0.45)';
 
   return (
     <View
@@ -27,14 +30,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         styles.container,
         {
           height,
-          backgroundColor: theme.surface,
-          borderColor: focused ? theme.borderFocus : theme.border,
-          borderWidth: focused ? 1.5 : 1,
+          backgroundColor: focused ? focusedBg : softBg,
+          borderColor: focused ? theme.primary : softBorder,
+          borderWidth: 1,
         },
       ]}>
       <Ionicons
         name="search"
-        size={18}
+        size={17}
         color={focused ? theme.primary : theme.textMuted}
       />
       <TextInput
@@ -62,8 +65,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.xl,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     gap: 8,
     ...Shadows.sm,
   },

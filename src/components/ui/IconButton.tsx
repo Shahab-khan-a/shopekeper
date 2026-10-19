@@ -26,14 +26,17 @@ export const IconButton: React.FC<IconButtonProps> = ({
   const { settings } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
+  const softBg = settings.darkMode ? '#1E293B' : '#F1F5F9';
+  const softBorder = settings.darkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
+
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.btn,
         {
-          backgroundColor: bg ?? theme.surface,
-          borderColor: borderColor ?? theme.border,
+          backgroundColor: bg ?? softBg,
+          borderColor: borderColor ?? softBorder,
         },
         shadow && Shadows.sm,
         pressed && { opacity: 0.75, transform: [{ scale: 0.94 }] },
@@ -49,10 +52,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
 
 const styles = StyleSheet.create({
   btn: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1.5,
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

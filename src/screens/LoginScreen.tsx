@@ -6,6 +6,7 @@ import {
   Pressable,
   ActivityIndicator,
   ScrollView,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
@@ -24,6 +25,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
     settings,
     language,
     setLanguage,
+    isOnline,
+    setActiveTab,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -34,12 +37,25 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
   const isUrdu = language === 'ur';
 
   const handleGoogleSignIn = async () => {
+    if (!isOnline) {
+      setErrorMessage(
+        isUrdu
+          ? 'انٹرنیٹ کنکشن موجود نہیں ہے۔ گوگل سے لاگ ان کے لیے انٹرنیٹ درکار ہے، یا گیسٹ موڈ میں جاری رکھیں۔'
+          : 'No internet connection. Google Sign-In requires an active internet connection, or you can continue as Guest.'
+      );
+      return;
+    }
+
     try {
       setIsLoading(true);
       setErrorMessage(null);
       const result = await signInWithGoogle();
-      if (!result.success) {
-        setErrorMessage(result.error || 'Failed to sign in with Google');
+      if (result.success) {
+        setActiveTab('dashboard');
+      } else {
+        if (result.error && !result.error.toLowerCase().includes('cancel')) {
+          setErrorMessage(result.error);
+        }
       }
     } catch (e: any) {
       setErrorMessage(e?.message || 'An unexpected error occurred during Google sign-in.');
@@ -57,12 +73,33 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          {/* Top Bar: Language Toggle */}
+          {/* Top Bar: Status Badge & Language Switcher */}
           <View style={styles.topBar}>
-            <View style={[styles.statusBadge, { backgroundColor: '#DCFCE7' }]}>
-              <View style={styles.onlineDot} />
-              <Text style={styles.statusBadgeText}>
-                {isUrdu ? 'کلاؤڈ ریڈی' : 'Cloud Ready'}
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: isOnline ? '#DCFCE7' : '#FEF3C7' },
+              ]}
+            >
+              <View
+                style={[
+                  styles.onlineDot,
+                  { backgroundColor: isOnline ? '#16A34A' : '#D97706' },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.statusBadgeText,
+                  { color: isOnline ? '#15803D' : '#B45309' },
+                ]}
+              >
+                {isOnline
+                  ? isUrdu
+                    ? 'کلاؤڈ ریڈی'
+                    : 'Cloud Ready'
+                  : isUrdu
+                  ? 'آف لائن موڈ'
+                  : 'Offline Mode'}
               </Text>
             </View>
 
@@ -108,14 +145,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
 
           {/* Hero Branding Header */}
           <View style={styles.brandSection}>
-            <View style={[styles.logoOuter, { backgroundColor: theme.primaryLight }]}>
-              <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
-                <Ionicons name="storefront" size={26} color="#FFFFFF" />
-              </View>
+            <View style={styles.brandLogoWrap}>
+              <Image
+                source={require('@/../assets/images/mainLogoImage.png')}
+                style={styles.brandLogoImg}
+                resizeMode="contain"
+              />
             </View>
 
             <Text style={[styles.appTitle, { color: theme.text }]}>
-              {isUrdu ? 'دکاندار ایپ' : 'Shopkeeper POS'}
+              {isUrdu ? 'ڈیجی شاپ' : 'DigiShop'}
             </Text>
 
             <Text style={[styles.appSubtitle, { color: theme.textMuted }]}>
@@ -133,46 +172,46 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
             </View>
           ) : null}
 
-          {/* Key Features Grid */}
+          {/* Key Value Highlights (Informational list, not buttons) */}
           <View style={styles.featuresContainer}>
-            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureIcon, { backgroundColor: '#E0F2FE' }]}>
-                <Ionicons name="flash-outline" size={16} color="#0284C7" />
+            <View style={[styles.featureRow, isUrdu && styles.featureRowRtl]}>
+              <View style={[styles.featureIconBubble, { backgroundColor: '#E0F2FE' }]}>
+                <Ionicons name="flash-outline" size={15} color="#0284C7" />
               </View>
               <View style={styles.featureTextWrap}>
-                <Text style={[styles.featureTitle, { color: theme.text }]}>
+                <Text style={[styles.featureTitle, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}>
                   {isUrdu ? 'فوری بلنگ اور رسیدیں' : 'Fast Billing & Receipts'}
                 </Text>
-                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
+                <Text style={[styles.featureDesc, { color: theme.textMuted, textAlign: isUrdu ? 'right' : 'left' }]}>
                   {isUrdu ? 'تھرمل رسیدیں پرنٹ اور واٹس ایپ کریں' : 'Instant thermal print & WhatsApp receipts'}
                 </Text>
               </View>
             </View>
 
-            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureIcon, { backgroundColor: '#FEF3C7' }]}>
-                <Ionicons name="book-outline" size={16} color="#D97706" />
+            <View style={[styles.featureRow, isUrdu && styles.featureRowRtl]}>
+              <View style={[styles.featureIconBubble, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="book-outline" size={15} color="#D97706" />
               </View>
               <View style={styles.featureTextWrap}>
-                <Text style={[styles.featureTitle, { color: theme.text }]}>
-                  {isUrdu ? 'گاہک ادھار کھاتہ' : 'Customer Udhaar Khata'}
+                <Text style={[styles.featureTitle, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}>
+                  {isUrdu ? 'گاہک ادھار کھاتہ' : 'Customer Credit Ledger'}
                 </Text>
-                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
+                <Text style={[styles.featureDesc, { color: theme.textMuted, textAlign: isUrdu ? 'right' : 'left' }]}>
                   {isUrdu ? 'بقایا جات اور ادائیگیوں کا مکمل ریکارڈ' : 'Track dues, payments & WhatsApp follow-up'}
                 </Text>
               </View>
             </View>
 
-            <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={[styles.featureIcon, { backgroundColor: '#DCFCE7' }]}>
-                <Ionicons name="cloud-done-outline" size={16} color="#15803D" />
+            <View style={[styles.featureRow, isUrdu && styles.featureRowRtl]}>
+              <View style={[styles.featureIconBubble, { backgroundColor: '#DCFCE7' }]}>
+                <Ionicons name="cloud-done-outline" size={15} color="#15803D" />
               </View>
               <View style={styles.featureTextWrap}>
-                <Text style={[styles.featureTitle, { color: theme.text }]}>
+                <Text style={[styles.featureTitle, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}>
                   {isUrdu ? 'گوگل کلاؤڈ بیک اپ' : 'Firebase Cloud Sync'}
                 </Text>
-                <Text style={[styles.featureDesc, { color: theme.textMuted }]}>
-                  {isUrdu ? 'موبائل گم یا تبدیل ہونے پر ڈیٹا محفوظ' : 'Real-time backup, access on phone or PC'}
+                <Text style={[styles.featureDesc, { color: theme.textMuted, textAlign: isUrdu ? 'right' : 'left' }]}>
+                  {isUrdu ? 'موبائل گم یا تبدیل ہونے پر ڈیٹا محفوظ' : 'Seamless cloud sync across your devices'}
                 </Text>
               </View>
             </View>
@@ -217,19 +256,27 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
               <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
             </View>
 
-            {/* Secondary Action: Explore as Guest */}
+            {/* Secondary Action: Open Offline Store */}
             <Pressable
-              onPress={onContinueAsGuest}
+              onPress={() => {
+                setActiveTab('dashboard');
+                onContinueAsGuest();
+              }}
               style={({ pressed }) => [
                 styles.guestBtn,
                 { borderColor: theme.border, backgroundColor: theme.surfaceSubtle },
                 pressed && { opacity: 0.75, backgroundColor: theme.border },
               ]}
             >
-              <Ionicons name="enter-outline" size={16} color={theme.text} />
-              <Text style={[styles.guestBtnText, { color: theme.text }]} numberOfLines={1} ellipsizeMode="tail">
-                {isUrdu ? 'آف لائن دکان شروع کریں (گیسٹ موڈ)' : 'Continue as Guest (Offline Mode)'}
-              </Text>
+              <Ionicons name="phone-portrait-outline" size={17} color={theme.text} />
+              <View style={{ flex: 1, marginHorizontal: 8 }}>
+                <Text style={[styles.guestBtnText, { color: theme.text }]} numberOfLines={1}>
+                  {isUrdu ? 'آف لائن دکان شروع کریں (محفوظ لوکل ڈیٹا)' : 'Open Offline Store (Saved Locally)'}
+                </Text>
+                <Text style={{ fontSize: 10.5, color: theme.textMuted, marginTop: 1 }}>
+                  {isUrdu ? 'بغیر انٹرنیٹ کے تمام فیچرز مکمل کام کریں گے' : '100% offline - all data stays safe on device'}
+                </Text>
+              </View>
               <Ionicons name="chevron-forward" size={14} color={theme.textMuted} />
             </Pressable>
           </View>
@@ -342,21 +389,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
   },
-  logoOuter: {
-    width: 58,
-    height: 58,
-    borderRadius: BorderRadius.full,
+  brandLogoWrap: {
+    width: 68,
+    height: 68,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
+    ...Shadows.md,
   },
-  logoInner: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.sm,
+  brandLogoImg: {
+    width: 66,
+    height: 66,
+    borderRadius: 16,
   },
   appTitle: {
     fontSize: 21,
@@ -391,21 +440,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featuresContainer: {
-    gap: 6,
-    marginBottom: 14,
+    gap: 12,
+    marginTop: 4,
+    marginBottom: 18,
+    paddingHorizontal: 4,
   },
-  featureCard: {
+  featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    padding: 9,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
+    gap: 12,
   },
-  featureIcon: {
+  featureRowRtl: {
+    flexDirection: 'row-reverse',
+  },
+  featureIconBubble: {
     width: 30,
     height: 30,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -413,13 +464,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featureTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
+    letterSpacing: -0.2,
   },
   featureDesc: {
-    fontSize: 11,
+    fontSize: 11.5,
     marginTop: 1,
-    lineHeight: 14,
+    lineHeight: 15,
   },
   actionSection: {
     gap: 8,

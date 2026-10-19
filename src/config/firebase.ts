@@ -1,19 +1,18 @@
 // Firebase configuration for Shopkeeper App
-// Generated from Firebase project: shopkeeper-ea7d8 (Shopkeeper)
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { Platform } from 'react-native';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+// Generated from Firebase project: shopkeeper-a977a (Shopkeeper)
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { Platform } from 'react-native';
 
-export const firebaseConfig = {
-  apiKey: "AIzaSyAZqhnHssWvecRNhIGSLzLxrZVxjPbYZWg",
-  authDomain: "shopkeeper-ea7d8.firebaseapp.com",
-  projectId: "shopkeeper-ea7d8",
-  storageBucket: "shopkeeper-ea7d8.firebasestorage.app",
-  messagingSenderId: "65013515513",
-  appId: "1:65013515513:web:655869b6dca74fcdc4ce28",
-  measurementId: "G-5QHLCQ7W5F"
+const firebaseConfig = {
+  apiKey: "AIzaSyDCCCFTvkU_PdC7gakmE-2cHiEfHpAFrmE",
+  authDomain: "shopkeeper-a977a.firebaseapp.com",
+  projectId: "shopkeeper-a977a",
+  storageBucket: "shopkeeper-a977a.firebasestorage.app",
+  messagingSenderId: "800823031098",
+  appId: "1:800823031098:web:a4e2a9a886998a090e4c03",
+  measurementId: "G-EG38QBXRM7"
 };
 
 // Initialize Firebase App singleton
@@ -61,6 +60,7 @@ try {
   try {
     db = initializeFirestore(app, {
       ignoreUndefinedProperties: true,
+      experimentalForceLongPolling: Platform.OS !== 'web',
     });
   } catch {
     db = getFs(app);
@@ -69,5 +69,4 @@ try {
   db = getFirestore(app);
 }
 
-export const storage = getStorage(app);
 export { db };

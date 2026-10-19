@@ -2,13 +2,13 @@ import * as WebBrowser from 'expo-web-browser';
 import { Linking, Platform } from 'react-native';
 
 export const LEGAL_CONFIG = {
-  appName: 'Shopkeeper POS (دکاندار ایپ)',
-  packageName: 'com.shahabkhan34.ShopkeeperApp',
+  appName: 'DigiShop',
+  packageName: 'com.techflowstudio.shopkeeper',
   developerContact: 'techflow0500@gmail.com',
-  privacyPolicyUrl: 'https://shopkeeper-ea7d8.web.app/privacy-policy.html',
-  termsOfServiceUrl: 'https://shopkeeper-ea7d8.web.app/terms.html',
-  accountDeletionUrl: 'https://shopkeeper-ea7d8.web.app/delete-account.html',
-  appVersion: '1.0.0',
+  privacyPolicyUrl: 'https://shopkeeper-a977a.web.app/privacy-policy.html',
+  termsOfServiceUrl: 'https://shopkeeper-a977a.web.app/terms.html',
+  accountDeletionUrl: 'https://shopkeeper-a977a.web.app/delete-account.html',
+  appVersion: '1.0.1',
 };
 
 /**

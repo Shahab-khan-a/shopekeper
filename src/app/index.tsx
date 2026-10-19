@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ActivityIndicator, Text } from 'react-native';
+import { View, StyleSheet, StatusBar, ActivityIndicator, Text, Image, Platform, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,15 +11,15 @@ import { ReceiptModal } from '@/components/ReceiptModal';
 import { AuthModal } from '@/components/AuthModal';
 import { EditShopModal } from '@/components/EditShopModal';
 import { LoginScreen } from '@/screens/LoginScreen';
-import { ConnectDriveScreen } from '@/screens/ConnectDriveScreen';
-import { CatalogSetupScreen } from '@/screens/CatalogSetupScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { ProductsScreen } from '@/screens/ProductsScreen';
 import { HistoryScreen } from '@/screens/HistoryScreen';
 import { KhataScreen } from '@/screens/KhataScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
+import { CatalogSetupScreen } from '@/screens/CatalogSetupScreen';
 import { Colors, BorderRadius, Shadows } from '@/constants/theme';
+import { AlertModal } from '@/components/ui';
 
 export default function App() {
   const {
@@ -41,46 +41,75 @@ export default function App() {
     isLoaded,
     isGuestMode,
     continueAsGuest,
+    alertConfig,
+    hideAlert,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
-  // Track if user has completed or dismissed the post-login Google Drive setup
-  const [isDriveStepCompleted, setIsDriveStepCompleted] = useState<boolean | null>(null);
-
+  // Global Android Hardware Back Button Stack Management
   useEffect(() => {
-    if (!user) {
-      setIsDriveStepCompleted(null);
-      return;
-    }
+    if (Platform.OS !== 'android') return;
 
-    AsyncStorage.getItem(`@shopkeeper_drive_onboarded_${user.uid}`)
-      .then((val) => {
-        if (val === 'true') {
-          setIsDriveStepCompleted(true);
-        } else {
-          setIsDriveStepCompleted(false);
-        }
-      })
-      .catch(() => {
-        setIsDriveStepCompleted(false);
-      });
-  }, [user?.uid]);
-
-  const handleFinishDriveOnboarding = async () => {
-    if (user?.uid) {
-      try {
-        await AsyncStorage.setItem(`@shopkeeper_drive_onboarded_${user.uid}`, 'true');
-      } catch (e) {
-        console.warn('[App] Error storing drive onboarding flag:', e);
+    const onHardwareBack = () => {
+      // 1. Dismiss topmost Alert dialog if active
+      if (alertConfig) {
+        hideAlert();
+        return true;
       }
-    }
-    setIsDriveStepCompleted(true);
-  };
+      // 2. Dismiss Receipt modal if active
+      if (activeReceipt) {
+        setActiveReceipt(null);
+        return true;
+      }
+      // 3. Dismiss Product Add/Edit modal if active
+      if (isAddProductOpen) {
+        setIsAddProductOpen(false);
+        setEditingProduct(null);
+        return true;
+      }
+      // 4. Dismiss Auth modal if active
+      if (isAuthModalOpen) {
+        setIsAuthModalOpen(false);
+        return true;
+      }
+      // 5. Dismiss Edit Shop profile modal if active
+      if (isEditShopOpen) {
+        setIsEditShopOpen(false);
+        return true;
+      }
+      // 6. Navigation Stack: If in Sale, Products, History, or Khata, back navigates to Dashboard
+      // (SettingsScreen has its own dedicated handler to prompt if store form is dirty)
+      if (activeTab !== 'dashboard' && activeTab !== 'settings') {
+        setActiveTab('dashboard');
+        return true;
+      }
 
-  // Track if the keeper has completed (or skipped) the first-run catalog
-  // setup — pick a shop type and load its ready-made items. Applies to both
-  // signed-in users and guest mode; the flag is stored per identity.
+      // If already on Dashboard with no modals open, allow default Android back action (exit)
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+    return () => sub.remove();
+  }, [
+    alertConfig,
+    activeReceipt,
+    isAddProductOpen,
+    isAuthModalOpen,
+    isEditShopOpen,
+    activeTab,
+    hideAlert,
+    setActiveReceipt,
+    setIsAddProductOpen,
+    setEditingProduct,
+    setIsAuthModalOpen,
+    setIsEditShopOpen,
+    setActiveTab,
+  ]);
+
+  // First-run catalog setup: after sign-in or Continue as Guest, the keeper
+  // picks a shop type and loads its ready-made items (or skips). Remembered
+  // per identity so it is asked exactly once.
   const [isCatalogStepCompleted, setIsCatalogStepCompleted] = useState<boolean | null>(null);
   const catalogFlagKey = user
     ? `@shopkeeper_catalog_onboarded_${user.uid}`
@@ -126,140 +155,6 @@ export default function App() {
     }
   };
 
-  // 1. Initial Local Database Loading Splash (only waits for local SQLite/IndexedDB, <100ms)
-  if (!isLoaded) {
-    return (
-      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
-        <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.surface}
-        />
-        <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
-          <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
-            <Ionicons name="storefront" size={36} color="#FFFFFF" />
-          </View>
-        </View>
-        <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
-        <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
-        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
-        <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
-          Loading your store...
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
-  // 2. When Not Authenticated and Not in Guest Mode -> Show Login Screen
-  if (!user && !isGuestMode) {
-    if (authLoading) {
-      return (
-        <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
-          <StatusBar
-            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={theme.surface}
-          />
-          <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
-            <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
-              <Ionicons name="storefront" size={36} color="#FFFFFF" />
-            </View>
-          </View>
-          <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
-          <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
-          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
-          <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
-            Checking your account...
-          </Text>
-        </SafeAreaView>
-      );
-    }
-
-    return (
-      <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
-        <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.surface}
-        />
-        <LoginScreen onContinueAsGuest={continueAsGuest} />
-      </SafeAreaView>
-    );
-  }
-
-  // 3. Authenticated User - Check Drive Onboarding Status
-  if (user && !isGuestMode && isDriveStepCompleted === null) {
-    return (
-      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
-        <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.surface}
-        />
-        <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
-          <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
-            <Ionicons name="storefront" size={36} color="#FFFFFF" />
-          </View>
-        </View>
-        <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
-        <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
-        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
-        <Text style={[styles.loadingSub, { color: theme.textMuted, marginTop: 12 }]}>
-          Setting up your store...
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
-  // 4. Authenticated User - Connect Google Drive Screen (Post-Login Step)
-  if (user && !isGuestMode && !isDriveStepCompleted) {
-    return (
-      <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
-        <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.surface}
-        />
-        <ConnectDriveScreen
-          user={user}
-          onGoNext={handleFinishDriveOnboarding}
-        />
-      </SafeAreaView>
-    );
-  }
-
-  // 5. First Run - Check Catalog Setup Status
-  if ((user || isGuestMode) && isCatalogStepCompleted === null) {
-    return (
-      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
-        <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.surface}
-        />
-        <View style={[styles.loadingLogoOuter, { backgroundColor: theme.primaryLight }]}>
-          <View style={[styles.loadingLogoInner, { backgroundColor: theme.primary }]}>
-            <Ionicons name="storefront" size={36} color="#FFFFFF" />
-          </View>
-        </View>
-        <Text style={[styles.loadingTitle, { color: theme.text }]}>Shopkeeper POS</Text>
-        <Text style={[styles.loadingTitleUrdu, { color: theme.textMuted }]}>دکاندار پی او ایس</Text>
-        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
-        <Text style={[styles.loadingSub, { color: theme.textMuted, marginTop: 12 }]}>
-          Setting up your store...
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
-  // 6. First Run - Catalog Setup (choose shop type, tick items, load them in)
-  if ((user || isGuestMode) && !isCatalogStepCompleted) {
-    return (
-      <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
-        <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.surface}
-        />
-        <CatalogSetupScreen onDone={handleFinishCatalogOnboarding} />
-      </SafeAreaView>
-    );
-  }
-
-  // 7. Authenticated or Guest Mode -> Show Main Store POS App
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -279,52 +174,165 @@ export default function App() {
     }
   };
 
+  const renderContent = () => {
+    // 1. Initial Local Database Loading Splash (only waits for local SQLite/IndexedDB, <100ms)
+    if (!isLoaded) {
+      return (
+        <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
+          <StatusBar
+            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={theme.surface}
+          />
+          <View style={styles.loadingLogoOuter}>
+            <Image
+              source={require('@/../assets/images/mainLogoImage.png')}
+              style={styles.loadingLogoImg}
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
+          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
+          <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
+            Loading your store...
+          </Text>
+        </SafeAreaView>
+      );
+    }
+
+    // 2. When Not Authenticated and Not in Guest Mode -> Show Login Screen
+    if (!user && !isGuestMode) {
+      if (authLoading) {
+        return (
+          <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
+            <StatusBar
+              barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+              backgroundColor={theme.surface}
+            />
+            <View style={styles.loadingLogoOuter}>
+              <Image
+                source={require('@/../assets/images/mainLogoImage.png')}
+                style={styles.loadingLogoImg}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
+            <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
+            <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
+              Checking your account...
+            </Text>
+          </SafeAreaView>
+        );
+      }
+
+      return (
+        <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
+          <StatusBar
+            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={theme.surface}
+          />
+          <LoginScreen onContinueAsGuest={continueAsGuest} />
+        </SafeAreaView>
+      );
+    }
+
+    // 2.5 First-Run Catalog Setup (new keepers only, asked once)
+    if (isCatalogStepCompleted === null) {
+      return (
+        <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
+          <StatusBar
+            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={theme.surface}
+          />
+          <View style={styles.loadingLogoOuter}>
+            <Image
+              source={require('@/../assets/images/mainLogoImage.png')}
+              style={styles.loadingLogoImg}
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
+          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
+          <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
+            Setting up your store...
+          </Text>
+        </SafeAreaView>
+      );
+    }
+
+    if (!isCatalogStepCompleted) {
+      return (
+        <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
+          <StatusBar
+            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={theme.surface}
+          />
+          <CatalogSetupScreen onDone={handleFinishCatalogOnboarding} />
+        </SafeAreaView>
+      );
+    }
+
+    // 3. Authenticated or Guest Mode -> Show Main Store POS App
+    return (
+      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: theme.heroBg }]}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={theme.heroBg}
+        />
+        <View style={[styles.appContainer, { backgroundColor: theme.background }]}>
+          {/* Top Shop Brand & Settings Header */}
+          <ShopHeader />
+
+          {/* Dynamic Screen Component */}
+          <View style={styles.screenWrapper}>{renderActiveScreen()}</View>
+
+          {/* Bottom Navigation (Hidden on Settings screen) */}
+          {activeTab !== 'settings' && <BottomNav />}
+
+          {/* Global Product Add / Edit Modal */}
+          <ProductModal
+            visible={isAddProductOpen}
+            productToEdit={editingProduct}
+            onClose={() => {
+              setIsAddProductOpen(false);
+              setEditingProduct(null);
+            }}
+          />
+
+          {/* Global Thermal Receipt Modal */}
+          <ReceiptModal
+            sale={activeReceipt}
+            visible={!!activeReceipt}
+            onClose={() => setActiveReceipt(null)}
+          />
+
+          {/* Global Google Authentication & Cloud Sync Modal */}
+          <AuthModal
+            visible={isAuthModalOpen}
+            onClose={() => setIsAuthModalOpen(false)}
+          />
+
+          {/* Global Quick Edit Shop Name & Profile Modal */}
+          <EditShopModal
+            visible={isEditShopOpen}
+            onClose={() => setIsEditShopOpen(false)}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  };
+
   return (
-    <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.surface }]}>
-      <StatusBar
-        barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.surface}
+    <>
+      {renderContent()}
+      <AlertModal
+        visible={!!alertConfig}
+        type={alertConfig?.type}
+        title={alertConfig?.title || ''}
+        message={alertConfig?.message}
+        buttons={alertConfig?.buttons}
+        onClose={hideAlert}
       />
-      <View style={[styles.appContainer, { backgroundColor: theme.background }]}>
-        {/* Top Shop Brand & Settings Header */}
-        <ShopHeader />
-
-        {/* Dynamic Screen Component */}
-        <View style={styles.screenWrapper}>{renderActiveScreen()}</View>
-
-        {/* Persistent Bottom Navigation */}
-        <BottomNav />
-
-        {/* Global Product Add / Edit Modal */}
-        <ProductModal
-          visible={isAddProductOpen}
-          productToEdit={editingProduct}
-          onClose={() => {
-            setIsAddProductOpen(false);
-            setEditingProduct(null);
-          }}
-        />
-
-        {/* Global Thermal Receipt Modal */}
-        <ReceiptModal
-          sale={activeReceipt}
-          visible={!!activeReceipt}
-          onClose={() => setActiveReceipt(null)}
-        />
-
-        {/* Global Google Authentication & Cloud Sync Modal */}
-        <AuthModal
-          visible={isAuthModalOpen}
-          onClose={() => setIsAuthModalOpen(false)}
-        />
-
-        {/* Global Quick Edit Shop Name & Profile Modal */}
-        <EditShopModal
-          visible={isEditShopOpen}
-          onClose={() => setIsEditShopOpen(false)}
-        />
-      </View>
-    </SafeAreaView>
+    </>
   );
 }
 
@@ -339,19 +347,21 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   loadingLogoOuter: {
-    width: 84,
-    height: 84,
-    borderRadius: BorderRadius.full,
+    width: 88,
+    height: 88,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  loadingLogoInner: {
-    width: 68,
-    height: 68,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
     ...Shadows.md,
+  },
+  loadingLogoImg: {
+    width: 86,
+    height: 86,
+    borderRadius: 20,
   },
   loadingTitle: {
     fontSize: 22,

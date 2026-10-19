@@ -1,5 +1,5 @@
 /**
- * Configuration for Google Drive 5 TB Integration
+ * Configuration for Google Drive Integration
  */
 export const GOOGLE_DRIVE_CONFIG = {
   clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',

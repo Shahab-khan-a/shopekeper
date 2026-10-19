@@ -32,8 +32,8 @@ export const CustomerRepository = {
         nameUrdu: row.nameUrdu || undefined,
         phone: row.phone || '',
         address: row.address || undefined,
-        totalDebt: row.balance,
-        balance: row.balance,
+        totalDebt: Math.max(0, row.balance || 0),
+        balance: Math.max(0, row.balance || 0),
         transactions: txRows.map(mapRowToTx),
         createdAt: row.createdAt,
         lastUpdated: row.updatedAt,
@@ -60,8 +60,8 @@ export const CustomerRepository = {
       nameUrdu: row.nameUrdu || undefined,
       phone: row.phone || '',
       address: row.address || undefined,
-      totalDebt: row.balance,
-      balance: row.balance,
+      totalDebt: Math.max(0, row.balance || 0),
+      balance: Math.max(0, row.balance || 0),
       transactions: txRows.map(mapRowToTx),
       createdAt: row.createdAt,
       lastUpdated: row.updatedAt,
@@ -135,6 +135,7 @@ export const CustomerRepository = {
 
   async updateBalance(id: string, delta: number, db: IDatabaseAdapter = getDatabase()): Promise<void> {
     const now = Date.now();
+    // Allow negative balance to support advance customer deposits (پیشگی رقم)
     await db.run(
       `UPDATE customers SET balance = balance + ?, updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
       [delta, now, id]

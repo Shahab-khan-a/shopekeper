@@ -1,29 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Alert,
-  Platform,
-  Image,
-  Switch,
-  TextInput,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { useShop } from '@/context/ShopContext';
-import { Colors, ThemeColors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { CameraModal } from '@/components/CameraModal';
 import { CurrencyPickerModal } from '@/components/CurrencyPickerModal';
-import { findCurrency } from '@/constants/currencies';
-import { buildImportTemplateJSON } from '@/constants/sampleData';
-import * as Linking from 'expo-linking';
-import { googleDriveService, GoogleDriveAuth } from '@/services/googleDriveService';
-import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
 import { ProductImage } from '@/components/ProductImage';
+import { findCurrency } from '@/constants/currencies';
+import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
+import { buildImportTemplateJSON } from '@/constants/sampleData';
+import { BorderRadius, Colors, Shadows, Spacing, ThemeColors, Typography } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { GoogleDriveAuth, googleDriveService } from '@/services/googleDriveService';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Linking from 'expo-linking';
+import * as Sharing from 'expo-sharing';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  BackHandler,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  LayoutChangeEvent,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -67,16 +75,16 @@ const RowItem: React.FC<{
   </Pressable>
 );
 
-/** Inline editable field inside a RowItem */
+/** Inline editable field inside a RowItem (kept for legacy/non-text rows) */
 const InlineField: React.FC<{
   value: string;
   onChangeText: (t: string) => void;
   placeholder?: string;
   keyboardType?: 'default' | 'phone-pad' | 'email-address' | 'numeric';
   onSubmitEditing?: () => void;
-  onBlur?: () => void;
+  onFocus?: () => void;
   theme: ThemeColors;
-}> = ({ value, onChangeText, placeholder, keyboardType = 'default', onSubmitEditing, onBlur, theme }) => (
+}> = ({ value, onChangeText, placeholder, keyboardType = 'default', onSubmitEditing, onFocus, theme }) => (
   <TextInput
     value={value}
     onChangeText={onChangeText}
@@ -84,11 +92,100 @@ const InlineField: React.FC<{
     placeholderTextColor={theme.textMuted}
     keyboardType={keyboardType}
     onSubmitEditing={onSubmitEditing}
-    onBlur={onBlur}
+    onFocus={onFocus}
     style={[styles.inlineInput, { color: theme.text }]}
     textAlign="right"
   />
 );
+
+/**
+ * StackedField — label on top row (icon + text), full-width input below.
+ * Best-practice pattern for mobile settings forms.
+ */
+const StackedField: React.FC<{
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  iconBg: string;
+  label: string;
+  value: string;
+  onChangeText: (t: string) => void;
+  placeholder?: string;
+  keyboardType?: 'default' | 'phone-pad' | 'email-address' | 'numeric';
+  multiline?: boolean;
+  theme: ThemeColors;
+  last?: boolean;
+  onFocus?: () => void;
+}> = ({ icon, iconColor, iconBg, label, value, onChangeText, placeholder, keyboardType = 'default', multiline = false, theme, last, onFocus }) => (
+  <View
+    style={[
+      stackedStyles.fieldWrap,
+      !last && { borderBottomWidth: 1, borderBottomColor: theme.border },
+    ]}
+  >
+    {/* Label row */}
+    <View style={stackedStyles.labelRow}>
+      <View style={[stackedStyles.fieldIcon, { backgroundColor: iconBg }]}>
+        <Ionicons name={icon} size={14} color={iconColor} />
+      </View>
+      <Text style={[stackedStyles.fieldLabel, { color: theme.textSecondary }]}>{label}</Text>
+    </View>
+    {/* Full-width input */}
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor={theme.textMuted}
+      keyboardType={keyboardType}
+      multiline={multiline}
+      onFocus={onFocus}
+      style={[
+        stackedStyles.fieldInput,
+        {
+          color: theme.text,
+          backgroundColor: theme.background,
+          borderColor: theme.border,
+        },
+        multiline && { minHeight: 70, textAlignVertical: 'top' },
+      ]}
+    />
+  </View>
+);
+
+const stackedStyles = StyleSheet.create({
+  fieldWrap: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+    gap: 6,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  fieldIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    textTransform: 'uppercase',
+  },
+  fieldInput: {
+    width: '100%',
+    fontSize: 15,
+    fontWeight: '500',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+});
 
 /** Section card wrapper */
 const Section: React.FC<{ title: string; theme: ThemeColors; children: React.ReactNode }> = ({
@@ -103,6 +200,102 @@ const Section: React.FC<{ title: string; theme: ThemeColors; children: React.Rea
     </View>
   </View>
 );
+
+// ─── Language Toggle ─────────────────────────────────────────────────────────
+const TOGGLE_W = 160;
+const TOGGLE_H = 36;
+const TOGGLE_PAD = 3;
+const PILL_W = (TOGGLE_W - TOGGLE_PAD * 2) / 2;
+
+const LangToggle: React.FC<{ value: 'en' | 'ur'; onChange: (l: 'en' | 'ur') => void; theme: ThemeColors }> = ({ value, onChange, theme }) => {
+  const anim = useRef(new Animated.Value(value === 'en' ? 0 : 1)).current;
+  const handlePress = (lang: 'en' | 'ur') => {
+    if (lang === value) return;
+    onChange(lang);
+    Animated.spring(anim, { toValue: lang === 'en' ? 0 : 1, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  };
+  useEffect(() => {
+    Animated.spring(anim, { toValue: value === 'en' ? 0 : 1, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  }, [value]);
+  const pillX = anim.interpolate({ inputRange: [0, 1], outputRange: [0, PILL_W] });
+  return (
+    <View style={[toggleStyles.track, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, width: TOGGLE_W }]}>
+      <Animated.View pointerEvents="none" style={[toggleStyles.pill, { backgroundColor: theme.primary, width: PILL_W, height: TOGGLE_H - TOGGLE_PAD * 2, transform: [{ translateX: pillX }] }]} />
+      {(['en', 'ur'] as const).map((lang) => (
+        <Pressable key={lang} onPress={() => handlePress(lang)} style={toggleStyles.option}>
+          <Text style={[toggleStyles.optionText, { color: value === lang ? '#fff' : theme.textMuted }]}>
+            {lang === 'en' ? '🇬🇧 English' : '🇵🇰 اردو'}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+};
+
+// ─── Dark Mode Toggle ─────────────────────────────────────────────────────────
+const DM_W = 160;
+const DM_H = 36;
+const DM_PAD = 3;
+const DM_PILL_W = (DM_W - DM_PAD * 2) / 2;
+
+const DarkToggle: React.FC<{ value: boolean; onChange: (v: boolean) => void; theme: ThemeColors }> = ({ value, onChange, theme }) => {
+  const anim = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const handlePress = (dark: boolean) => {
+    if (dark === value) return;
+    onChange(dark);
+    Animated.spring(anim, { toValue: dark ? 1 : 0, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  };
+  useEffect(() => {
+    Animated.spring(anim, { toValue: value ? 1 : 0, damping: 18, stiffness: 220, mass: 0.6, useNativeDriver: false }).start();
+  }, [value]);
+  const pillX = anim.interpolate({ inputRange: [0, 1], outputRange: [0, DM_PILL_W] });
+  const lightActive = !value;
+  const darkActive = value;
+  return (
+    <View style={[toggleStyles.track, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, width: DM_W}]}>
+      <Animated.View pointerEvents="none" style={[toggleStyles.pill, { backgroundColor: darkActive ? '#6366F1' : theme.primary, width: DM_PILL_W, height: DM_H - DM_PAD * 2, transform: [{ translateX: pillX }] }]} />
+      <Pressable onPress={() => handlePress(false)} style={toggleStyles.option}>
+        <Ionicons name="sunny" size={13} color={lightActive ? '#fff' : theme.textMuted} />
+        <Text style={[toggleStyles.optionText, { color: lightActive ? '#fff' : theme.textMuted }]}>Light</Text>
+      </Pressable>
+      <Pressable onPress={() => handlePress(true)} style={toggleStyles.option}>
+        <Ionicons name="moon" size={13} color={darkActive ? '#fff' : theme.textMuted} />
+        <Text style={[toggleStyles.optionText, { color: darkActive ? '#fff' : theme.textMuted }]}>Dark</Text>
+      </Pressable>
+    </View>
+  );
+};
+
+const toggleStyles = StyleSheet.create({
+  track: {
+    flexDirection: 'row',
+    borderRadius: 999,
+    borderWidth: 1,
+    padding: TOGGLE_PAD,
+    position: 'relative',
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  pill: {
+    position: 'absolute',
+    top: TOGGLE_PAD,
+    left: TOGGLE_PAD,
+    borderRadius: 999,
+  },
+  option: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    zIndex: 1,
+    height: TOGGLE_H - TOGGLE_PAD * 2,
+  },
+  optionText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+});
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export const SettingsScreen: React.FC = () => {
@@ -127,22 +320,37 @@ export const SettingsScreen: React.FC = () => {
     deleteAccount,
     syncNow,
     setIsAuthModalOpen,
+    showAlert,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [activeSegment, setActiveSegment] = useState<Segment>('profile');
-  const [showMoreDetails, setShowMoreDetails] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [segContainerWidth, setSegContainerWidth] = useState(0);
+  const segAnim = useRef(new Animated.Value(0)).current;
+
+  const handleSegmentPress = (seg: Segment) => {
+    if (seg === activeSegment) return;
+    setActiveSegment(seg);
+    const toValue = seg === 'profile' ? 0 : 1;
+    Animated.spring(segAnim, {
+      toValue,
+      damping: 18,
+      stiffness: 200,
+      mass: 0.7,
+      useNativeDriver: false,
+    }).start();
+  };
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [showImportBox, setShowImportBox] = useState(false);
-  const [importJsonText, setImportJsonText] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Google Drive (5 TB)
+  // Google Drive Backup
   const [driveAuth, setDriveAuth] = useState<GoogleDriveAuth | null>(null);
   const [driveLoading, setDriveLoading] = useState(false);
   const [driveBackupLoading, setDriveBackupLoading] = useState(false);
@@ -150,6 +358,24 @@ export const SettingsScreen: React.FC = () => {
 
   useEffect(() => {
     googleDriveService.getSavedAuth().then(setDriveAuth);
+  }, []);
+
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
 
   // Profile fields (shop logo & store identity)
@@ -195,13 +421,106 @@ export const SettingsScreen: React.FC = () => {
     setLowStockThreshold(settings.lowStockThreshold.toString());
   }, [settings, user]);
 
+  // Detect whether user has modified any form field compared to current saved settings
+  const isFormDirty =
+    shopName.trim() !== (settings.shopName || '').trim() ||
+    shopNameUrdu.trim() !== (settings.shopNameUrdu || '').trim() ||
+    ownerName.trim() !== (settings.ownerName || user?.displayName || '').trim() ||
+    businessType.trim() !== (settings.businessType || 'Kiryana & General Store').trim() ||
+    phone.trim() !== (settings.phone || '').trim() ||
+    alternatePhone.trim() !== (settings.alternatePhone || '').trim() ||
+    email.trim() !== (settings.email || user?.email || '').trim() ||
+    address.trim() !== (settings.address || '').trim() ||
+    city.trim() !== (settings.city || '').trim() ||
+    taxNumber.trim() !== (settings.taxNumber || '').trim() ||
+    paymentDetails.trim() !== (settings.paymentDetails || '').trim() ||
+    businessHours.trim() !== (settings.businessHours || '').trim() ||
+    footerNote.trim() !== (settings.footerNote || '').trim() ||
+    footerNoteUrdu.trim() !== (settings.footerNoteUrdu || '').trim() ||
+    lowStockThreshold.trim() !== (settings.lowStockThreshold || 5).toString().trim() ||
+    profileImage.trim() !== (settings.profileImage && !isGoogleAvatar(settings.profileImage) ? settings.profileImage : '').trim();
+
+  // Prompt unsaved changes warning using reusable AlertModal
+  const promptUnsavedChanges = () => {
+    showAlert({
+      type: 'warning',
+      title: language === 'ur' ? 'غیر محفوظ شدہ تبدیلیاں' : 'Unsaved Changes',
+      message:
+        language === 'ur'
+          ? 'آپ نے ترتیبات میں کچھ تبدیلیاں کی ہیں۔ واپس جانے سے پہلے کیا آپ انہیں محفوظ کرنا چاہتے ہیں؟'
+          : 'You have unsaved changes in your store settings. Do you want to save them before leaving?',
+      buttons: [
+        {
+          text: language === 'ur' ? 'محفوظ کریں اور واپس جائیں' : 'Save & Exit',
+          style: 'primary',
+          icon: 'checkmark-circle',
+          onPress: async () => {
+            await handleSave();
+            setActiveTab('dashboard');
+          },
+        },
+        {
+          text: language === 'ur' ? 'تبدیلیاں ضائع کریں' : 'Discard Changes',
+          style: 'destructive',
+          icon: 'trash-outline',
+          onPress: () => {
+            setActiveTab('dashboard');
+          },
+        },
+        {
+          text: language === 'ur' ? 'ترمیم جاری رکھیں' : 'Keep Editing',
+          style: 'cancel',
+        },
+      ],
+    });
+  };
+
+  // Handle back button press with dirty check
+  const handleBackPress = () => {
+    if (isFormDirty) {
+      promptUnsavedChanges();
+    } else {
+      setActiveTab('dashboard');
+    }
+  };
+
+  // Intercept hardware back button on Android
+  useEffect(() => {
+    const onHardwareBack = () => {
+      if (isCameraOpen) {
+        setIsCameraOpen(false);
+        return true;
+      }
+      if (isCurrencyPickerOpen) {
+        setIsCurrencyPickerOpen(false);
+        return true;
+      }
+      if (showImportBox) {
+        setShowImportBox(false);
+        return true;
+      }
+      if (isFormDirty) {
+        promptUnsavedChanges();
+      } else {
+        setActiveTab('dashboard');
+      }
+      return true;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+    return () => sub.remove();
+  }, [isCameraOpen, isCurrencyPickerOpen, showImportBox, isFormDirty, setActiveTab]);
+
   // ── Handlers ────────────────────────────────────────────────────────────────
   const pickImage = async () => {
     try {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert(t('warningAlert'), 'Gallery permission required.');
+          showAlert({
+            type: 'warning',
+            title: t('warningAlert'),
+            message: 'Gallery permission is required to select photos.',
+          });
           return;
         }
       }
@@ -241,7 +560,7 @@ export const SettingsScreen: React.FC = () => {
       setProfileImage(persistentUri);
       await updateSettings({ profileImage: persistentUri });
 
-      // Upload directly to 5 TB Google Drive if connected
+      // Upload directly to Google Drive if connected
       const auth = await googleDriveService.getSavedAuth();
       if (auth) {
         googleDriveService
@@ -259,93 +578,131 @@ export const SettingsScreen: React.FC = () => {
     }
   };
 
-  /** Writes every settings field to storage. Silent by design: the screen
-   *  auto-saves, so there is no Save button anywhere anymore. */
-  const persistSettings = async () => {
-    await updateSettings({
-      profileImage: profileImage.trim() || undefined,
-      shopName: shopName.trim(),
-      shopNameUrdu: shopNameUrdu.trim(),
-      ownerName: ownerName.trim(),
-      businessType: businessType.trim(),
-      phone: phone.trim(),
-      alternatePhone: alternatePhone.trim(),
-      email: email.trim(),
-      address: address.trim(),
-      city: city.trim(),
-      taxNumber: taxNumber.trim(),
-      paymentDetails: paymentDetails.trim(),
-      businessHours: businessHours.trim(),
-      footerNote: footerNote.trim(),
-      footerNoteUrdu: footerNoteUrdu.trim(),
-      lowStockThreshold: parseInt(lowStockThreshold, 10) || 5,
-    });
-  };
-
-  const handleAutoSave = async () => {
+  const handleSave = async () => {
+    setIsSaving(true);
     try {
-      await persistSettings();
-    } catch (e) {
-      console.warn('[Settings] Auto-save failed:', e);
+      await updateSettings({
+        profileImage: profileImage.trim() || undefined,
+        shopName: shopName.trim(),
+        shopNameUrdu: shopNameUrdu.trim(),
+        ownerName: ownerName.trim(),
+        businessType: businessType.trim(),
+        phone: phone.trim(),
+        alternatePhone: alternatePhone.trim(),
+        email: email.trim(),
+        address: address.trim(),
+        city: city.trim(),
+        taxNumber: taxNumber.trim(),
+        paymentDetails: paymentDetails.trim(),
+        businessHours: businessHours.trim(),
+        footerNote: footerNote.trim(),
+        footerNoteUrdu: footerNoteUrdu.trim(),
+        lowStockThreshold: parseInt(lowStockThreshold, 10) || 5,
+      });
+      showAlert({
+        type: 'success',
+        title: t('success'),
+        message: t('settingsSaved'),
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
-
-  const handleExport = () => {
+  const handleExport = async () => {
     const jsonStr = exportDataJSON();
+    const fileName = `shopkeeper_backup_${new Date().toISOString().slice(0, 10)}.json`;
     if (Platform.OS === 'web') {
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `dukandar_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
     } else {
-      Alert.alert('Backup', 'Backup prepared successfully.');
+      try {
+        const path = `${FileSystem.cacheDirectory}${fileName}`;
+        await FileSystem.writeAsStringAsync(path, jsonStr, { encoding: FileSystem.EncodingType.UTF8 });
+        await Sharing.shareAsync(path, { mimeType: 'application/json', dialogTitle: 'Save Backup File' });
+        showAlert({
+          type: 'success',
+          title: 'Backup Ready',
+          message: 'Store backup JSON has been generated successfully.',
+        });
+      } catch {
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: 'Could not export backup file.',
+        });
+      }
     }
   };
 
-  const handleImport = async () => {
-    if (!importJsonText.trim()) return;
-    const success = await importDataJSON(importJsonText);
-    if (success) {
+  const handleImportFromFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: Platform.OS === 'web' ? 'application/json' : '*/*',
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      let jsonStr: string;
       if (Platform.OS === 'web') {
-        window.alert('Data restored!');
+        const res = await fetch(asset.uri);
+        jsonStr = await res.text();
       } else {
-        Alert.alert(t('success'), 'Data restored!');
+        jsonStr = await FileSystem.readAsStringAsync(asset.uri, { encoding: FileSystem.EncodingType.UTF8 });
       }
-      setImportJsonText('');
-      setShowImportBox(false);
-    } else {
-      if (Platform.OS === 'web') {
-        window.alert('Invalid backup JSON.');
+      const success = await importDataJSON(jsonStr);
+      if (success) {
+        showAlert({
+          type: 'success',
+          title: t('success'),
+          message: language === 'ur' ? 'ڈیٹا بحال ہو گیا!' : 'Store data restored successfully!',
+        });
+        setShowImportBox(false);
       } else {
-        Alert.alert(t('error'), 'Invalid backup JSON.');
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: language === 'ur' ? 'فائل درست نہیں ہے۔' : 'Invalid backup file. Please select a valid shopkeeper backup.',
+        });
       }
+    } catch {
+      showAlert({
+        type: 'error',
+        title: t('error'),
+        message: 'Could not read the selected file.',
+      });
     }
   };
+
 
   const handleReset = () => {
     const confirmMsg = t('resetConfirm');
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMsg)) {
-        clearStoreData();
-        window.alert(language === 'ur' ? 'ڈیٹا صاف ہو گیا!' : 'Store data cleared!');
-      }
-    } else {
-      Alert.alert(t('warningAlert'), confirmMsg, [
-        { text: t('cancel'), style: 'cancel' },
+    showAlert({
+      type: 'danger',
+      title: t('warningAlert'),
+      message: confirmMsg,
+      buttons: [
         {
           text: t('confirm'),
           style: 'destructive',
+          icon: 'trash-outline',
           onPress: async () => {
             await clearStoreData();
-            Alert.alert(t('success'), language === 'ur' ? 'ڈیٹا صاف ہو گیا!' : 'Store data cleared!');
+            showAlert({
+              type: 'success',
+              title: t('success'),
+              message: language === 'ur' ? 'ڈیٹا صاف ہو گیا!' : 'Store data cleared!',
+            });
           },
         },
-      ]);
-    }
+        { text: t('cancel'), style: 'cancel' },
+      ],
+    });
   };
 
   const handleGoogleSignIn = async () => {
@@ -353,18 +710,17 @@ export const SettingsScreen: React.FC = () => {
       setGoogleLoading(true);
       const res = await signInWithGoogle();
       if (!res.success) {
-        if (Platform.OS === 'web') {
-          window.alert(res.error || 'Failed to sign in with Google');
-        } else {
-          Alert.alert(t('error'), res.error || 'Failed to sign in with Google');
-        }
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: res.error || 'Failed to sign in with Google',
+        });
       } else {
-        const msg = 'Google account connected! Cloud sync is now active.';
-        if (Platform.OS === 'web') {
-          window.alert(msg);
-        } else {
-          Alert.alert(t('success'), msg);
-        }
+        showAlert({
+          type: 'success',
+          title: t('success'),
+          message: 'Google account connected! Cloud sync is now active.',
+        });
       }
     } finally {
       setGoogleLoading(false);
@@ -372,92 +728,83 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleLogout = () => {
-    const confirmAction = async () => {
-      await logout();
-      const msg = 'Signed out. Your local records are safe.';
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(t('success'), msg);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (window.confirm('Sign out from Google? Your local store data will remain safe.')) {
-        confirmAction();
-      }
-    } else {
-      Alert.alert(t('confirm'), 'Sign out from Google? Your local store data will remain safe.', [
+    showAlert({
+      type: 'warning',
+      title: t('confirm'),
+      message: 'Sign out from Google? Your local store data will remain safe.',
+      buttons: [
+        {
+          text: t('signOut'),
+          style: 'destructive',
+          icon: 'log-out-outline',
+          onPress: async () => {
+            try {
+              setIsLoggingOut(true);
+              await logout();
+            } catch (err: any) {
+              showAlert({
+                type: 'error',
+                title: t('error'),
+                message: err?.message || 'Failed to sign out',
+              });
+            } finally {
+              setIsLoggingOut(false);
+            }
+          },
+        },
         { text: t('cancel'), style: 'cancel' },
-        { text: t('signOut'), style: 'destructive', onPress: confirmAction },
-      ]);
-    }
+      ],
+    });
   };
 
   const handleDeleteAccount = () => {
     const confirmMsg = t('deleteAccountConfirm');
-
-    const executeDeletion = async () => {
-      try {
-        setIsDeletingAccount(true);
-        const res = await deleteAccount();
-        if (!res.success) {
-          const errMsg = res.error || 'Failed to delete account';
-          if (Platform.OS === 'web') {
-            window.alert(errMsg);
-          } else {
-            Alert.alert(t('error'), errMsg);
-          }
-        } else {
-          const successMsg = t('deleteAccountSuccess');
-          if (Platform.OS === 'web') {
-            window.alert(successMsg);
-          } else {
-            Alert.alert(t('success'), successMsg);
-          }
-        }
-      } catch (err: any) {
-        const errMsg = err?.message || 'Failed to delete account';
-        if (Platform.OS === 'web') {
-          window.alert(errMsg);
-        } else {
-          Alert.alert(t('error'), errMsg);
-        }
-      } finally {
-        setIsDeletingAccount(false);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMsg)) {
-        executeDeletion();
-      }
-    } else {
-      Alert.alert(
-        t('warningAlert'),
-        confirmMsg,
-        [
-          { text: t('cancel'), style: 'cancel' },
-          {
-            text: t('deleteAccount'),
-            style: 'destructive',
-            onPress: executeDeletion,
+    showAlert({
+      type: 'danger',
+      title: t('warningAlert'),
+      message: confirmMsg,
+      buttons: [
+        {
+          text: t('deleteAccount'),
+          style: 'destructive',
+          icon: 'trash-outline',
+          onPress: async () => {
+            try {
+              setIsDeletingAccount(true);
+              const res = await deleteAccount();
+              if (!res.success) {
+                showAlert({
+                  type: 'error',
+                  title: t('error'),
+                  message: res.error || 'Failed to delete account',
+                });
+              }
+            } catch (err: any) {
+              showAlert({
+                type: 'error',
+                title: t('error'),
+                message: err?.message || 'Failed to delete account',
+              });
+            } finally {
+              setIsDeletingAccount(false);
+            }
           },
-        ]
-      );
-    }
+        },
+        { text: t('cancel'), style: 'cancel' },
+      ],
+    });
   };
-
 
   const handleSyncNow = async () => {
     const res = await syncNow();
     const isSuccess = res ? res.success : true;
-    const msg = isSuccess ? 'All store data synced to Firebase!' : `Sync encountered an error: ${res?.error || 'Failed'}`;
-    if (Platform.OS === 'web') {
-      window.alert(msg);
-    } else {
-      Alert.alert(isSuccess ? t('success') : t('error'), msg);
-    }
+    showAlert({
+      type: isSuccess ? 'success' : 'error',
+      title: isSuccess ? t('success') : t('error'),
+      message: isSuccess
+        ? 'All store data synced to Firebase!'
+        : `Sync encountered an error: ${res?.error || 'Failed'}`,
+    });
   };
 
   const handleConnectDrive = async () => {
@@ -466,21 +813,19 @@ export const SettingsScreen: React.FC = () => {
       const res = await googleDriveService.connect();
       if (res.success && res.user) {
         setDriveAuth(res.user);
-        const msg = language === 'ur'
-          ? 'گوگل ڈرائیو کامیابی سے منسلک ہو گئی!'
-          : 'Google Drive connected successfully!';
-        if (Platform.OS === 'web') {
-          window.alert(msg);
-        } else {
-          Alert.alert(t('success'), msg);
-        }
+        showAlert({
+          type: 'success',
+          title: t('success'),
+          message: language === 'ur'
+            ? 'گوگل ڈرائیو کامیابی سے منسلک ہو گئی!'
+            : 'Google Drive connected successfully!',
+        });
       } else {
-        const err = res.error || 'Failed to connect Google Drive';
-        if (Platform.OS === 'web') {
-          window.alert(err);
-        } else {
-          Alert.alert(t('error'), err);
-        }
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: res.error || 'Failed to connect Google Drive',
+        });
       }
     } catch (e: any) {
       console.error('[SettingsScreen] Drive connect error:', e);
@@ -493,21 +838,27 @@ export const SettingsScreen: React.FC = () => {
     const confirmMsg = language === 'ur'
       ? 'کیا آپ گوگل ڈرائیو منقطع کرنا چاہتے ہیں؟'
       : 'Disconnect Google Drive? Your existing files will remain safe.';
-    const doDisconnect = async () => {
-      await googleDriveService.disconnect();
-      setDriveAuth(null);
-    };
-
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMsg)) {
-        await doDisconnect();
-      }
-    } else {
-      Alert.alert(t('confirm'), confirmMsg, [
+    showAlert({
+      type: 'warning',
+      title: t('confirm'),
+      message: confirmMsg,
+      buttons: [
+        {
+          text: t('yes'),
+          style: 'destructive',
+          onPress: async () => {
+            await googleDriveService.disconnect();
+            setDriveAuth(null);
+            showAlert({
+              type: 'info',
+              title: 'Disconnected',
+              message: 'Google Drive has been disconnected.',
+            });
+          },
+        },
         { text: t('no'), style: 'cancel' },
-        { text: t('yes'), onPress: doDisconnect, style: 'destructive' },
-      ]);
-    }
+      ],
+    });
   };
 
   const handleBackupToDrive = async () => {
@@ -521,41 +872,44 @@ export const SettingsScreen: React.FC = () => {
       const jsonStr = exportDataJSON();
       const res = await googleDriveService.uploadStoreBackup(jsonStr);
       setDriveBackupSuccess(res.name);
-      const msg = language === 'ur'
-        ? `بیک اپ محفوظ ہو گیا: ${res.name}`
-        : `Store backed up to Google Drive: ${res.name}`;
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(t('success'), msg);
-      }
+      showAlert({
+        type: 'success',
+        title: t('success'),
+        message: language === 'ur'
+          ? `بیک اپ محفوظ ہو گیا: ${res.name}`
+          : `Store backed up to Google Drive: ${res.name}`,
+      });
     } catch (e: any) {
       console.error('[SettingsScreen] Drive backup error:', e);
       const err = e?.message || 'Failed to backup to Google Drive.';
       if (err.includes('Google Drive API has not been used') || err.includes('disabled')) {
-        if (Platform.OS === 'web') {
-          window.open(
-            'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513',
-            '_blank'
-          );
-          window.alert(
-            'We opened the Google Cloud Console in a new tab for you!\n\n' +
-            '1. Click the blue "ENABLE" button on that page.\n' +
-            '2. Wait 1 minute.\n' +
-            '3. Come back and retry your backup.'
-          );
-        } else {
-          Alert.alert(
-            'Google Drive Setup Required',
-            'Please visit:\nhttps://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513\n\nand click "ENABLE".'
-          );
-        }
+        const consoleUrl = 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513';
+        showAlert({
+          type: 'warning',
+          title: 'Google Drive Setup Required',
+          message: 'Google Drive API must be enabled. Click below to open Google Cloud Console, enable it, and retry after 1 minute.',
+          buttons: [
+            {
+              text: 'Open Google Console',
+              style: 'primary',
+              icon: 'open-outline',
+              onPress: () => {
+                if (Platform.OS === 'web') {
+                  window.open(consoleUrl, '_blank');
+                } else {
+                  Linking.openURL(consoleUrl).catch(() => {});
+                }
+              },
+            },
+            { text: t('cancel'), style: 'cancel' },
+          ],
+        });
       } else {
-        if (Platform.OS === 'web') {
-          window.alert(err);
-        } else {
-          Alert.alert(t('error'), err);
-        }
+        showAlert({
+          type: 'error',
+          title: t('error'),
+          message: err,
+        });
       }
     } finally {
       setDriveBackupLoading(false);
@@ -587,37 +941,50 @@ export const SettingsScreen: React.FC = () => {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => setActiveTab('dashboard')}
-          style={({ pressed }) => [
-            styles.backBtn,
-            { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
-          ]}
-          hitSlop={8}
-          accessibilityLabel="Back to Dashboard"
-        >
-          <Ionicons name="arrow-back" size={20} color={theme.text} />
-        </Pressable>
+      {/* ── Top Emerald Canopy (Seamless continuation from ShopHeader) ── */}
+      <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
+        <View style={styles.heroInner}>
+          <View style={styles.header}>
+            <Pressable
+              onPress={handleBackPress}
+              style={({ pressed }) => [
+                styles.backBtn,
+                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+              ]}
+              hitSlop={8}
+              accessibilityLabel="Back to Dashboard"
+            >
+              <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+            </Pressable>
 
-        <Text
-          style={[styles.headerTitle, { color: theme.text }]}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {t('settingsTitle')}
-        </Text>
+            <Text
+              style={styles.headerTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {t('settingsTitle')}
+            </Text>
 
-
+            {/* Spacer to keep title centred */}
+            <View style={styles.headerSpacer} />
+          </View>
+        </View>
       </View>
+
+      <ScrollView
+        ref={scrollViewRef}
+        style={[styles.container, { backgroundColor: theme.background }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 120 : 80 },
+        ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
 
       {/* ── Google Cloud Quick Status Banner ─────────────────────────────── */}
       <Pressable
@@ -647,7 +1014,7 @@ export const SettingsScreen: React.FC = () => {
             </Text>
             <Text style={[styles.cloudTopSub, { color: user ? '#16A34A' : theme.textMuted }]} numberOfLines={1}>
               {user
-                ? (syncStatus === 'syncing' ? 'Syncing with cloud...' : 'Connected & Backed Up to Firebase')
+                ? (syncStatus === 'syncing' ? 'Syncing with cloud...' : syncStatus === 'synced' ? 'Connected & Backed Up to Firebase' : 'Connected to Firebase (Pending Sync)')
                 : (language === 'ur' ? 'ڈیٹا محفوظ کرنے کیلئے گوگل سے لاگ ان کریں' : 'Tap to connect & sync your store records')}
             </Text>
           </View>
@@ -657,40 +1024,60 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </Pressable>
 
-      {/* ── Segment Switcher ───────────────────────────────────────────────── */}
-      <View style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-        {(['profile', 'settings'] as const).map((seg) => (
-          <Pressable
-            key={seg}
-            onPress={() => setActiveSegment(seg)}
+      {/* ── Segment Switcher ─────────────────────────────────────────────── */}
+      <View
+        style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}
+        onLayout={(e: LayoutChangeEvent) => setSegContainerWidth(e.nativeEvent.layout.width)}
+      >
+        {/* Animated sliding pill */}
+        {segContainerWidth > 0 && (
+          <Animated.View
+            pointerEvents="none"
             style={[
-              styles.segBtn,
-              activeSegment === seg && [styles.segBtnActive, { backgroundColor: theme.surface, ...Shadows.sm }],
+              styles.segPill,
+              {
+                backgroundColor: theme.primary,
+                width: (segContainerWidth - 10) / 2,
+                transform: [{
+                  translateX: segAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, (segContainerWidth - 10) / 2],
+                  }),
+                }],
+              },
             ]}
-          >
-            <Ionicons
-              name={seg === 'profile' ? 'person' : 'settings'}
-              size={15}
-              color={activeSegment === seg ? theme.primary : theme.textMuted}
-            />
-            <Text
-              style={[
-                styles.segBtnText,
-                { color: activeSegment === seg ? theme.primary : theme.textMuted },
-                activeSegment === seg && { fontWeight: '700' },
-              ]}
+          />
+        )}
+        {([
+          { key: 'profile', icon: 'storefront' as const, label: t('profileTab'), activeAt: 0 },
+          { key: 'settings', icon: 'options' as const, label: t('preferencesTab'), activeAt: 1 },
+        ] as const).map((seg) => {
+          const isActive = activeSegment === seg.key;
+          return (
+            <Pressable
+              key={seg.key}
+              onPress={() => handleSegmentPress(seg.key)}
+              style={styles.segBtn}
             >
-              {seg === 'profile' ? t('profileTab') : t('preferencesTab')}
-            </Text>
-          </Pressable>
-        ))}
+              <Ionicons name={seg.icon} size={15} color={isActive ? '#FFFFFF' : theme.textMuted} />
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
+                style={[
+                  styles.segBtnText,
+                  { color: isActive ? '#FFFFFF' : theme.textMuted },
+                  language === 'ur' && { fontFamily: Typography.urduFontFamily },
+                ]}
+              >
+                {seg.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* ════════════════════════ PROFILE TAB ════════════════════════════════ */}
-      <Text style={[styles.autoSaveHint, { color: theme.textMuted }]}>
-        {language === 'ur' ? '✓ تبدیلیاں خودکار طور پر محفوظ ہو جاتی ہیں' : '✓ Changes save automatically — no Save button needed'}
-      </Text>
-
       {activeSegment === 'profile' && (
         <>
           {/* Avatar Card */}
@@ -703,14 +1090,22 @@ export const SettingsScreen: React.FC = () => {
                     uri={profileImage}
                     style={[styles.avatar, { borderColor: theme.primary }]}
                     fallbackIcon={
-                      <View style={[styles.avatarFallback, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
-                        <Ionicons name="storefront" size={34} color={theme.primary} />
+                      <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+                        <Image
+                          source={require('@/../assets/images/mainLogoImage.png')}
+                          style={styles.avatarLogoImg}
+                          resizeMode="contain"
+                        />
                       </View>
                     }
                   />
                 ) : (
-                  <View style={[styles.avatarFallback, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
-                    <Ionicons name="storefront" size={34} color={theme.primary} />
+                  <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+                    <Image
+                      source={require('@/../assets/images/mainLogoImage.png')}
+                      style={styles.avatarLogoImg}
+                      resizeMode="contain"
+                    />
                   </View>
                 )}
                 <View style={[styles.cameraBadge, { backgroundColor: theme.primary }]}>
@@ -808,61 +1203,113 @@ export const SettingsScreen: React.FC = () => {
           </View>
 
           {/* Store Info */}
-          <Section title={t('identitySection')} theme={theme}>
-            <RowItem icon="storefront-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('ownerNameLabel')} theme={theme}>
-              <InlineField value={ownerName} onChangeText={setOwnerName} onBlur={handleAutoSave} onSubmitEditing={handleAutoSave} placeholder={user?.displayName || "e.g. Shop Owner"} theme={theme} />
-            </RowItem>
-            <RowItem icon="business-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('shopNameLabel')} theme={theme}>
-              <InlineField value={shopName} onChangeText={setShopName} onBlur={handleAutoSave} onSubmitEditing={handleAutoSave} placeholder={user?.displayName ? `${user.displayName}'s Store` : "e.g. My Store"} theme={theme} />
-            </RowItem>
-            <RowItem icon="text-outline" iconColor={theme.primary} iconBg={theme.primaryLight} label={t('shopNameUrduLabel')} theme={theme} last>
-              <InlineField value={shopNameUrdu} onChangeText={setShopNameUrdu} onBlur={handleAutoSave} onSubmitEditing={handleAutoSave} placeholder={user?.displayName ? `${user.displayName} اسٹور` : "مثلاً: میری دکان"} theme={theme} />
-            </RowItem>
-          </Section>
+          <View style={styles.sectionWrap}>
+            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('identitySection').toUpperCase()}</Text>
+            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <StackedField
+                icon="storefront-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                label={t('ownerNameLabel')}
+                value={ownerName} onChangeText={setOwnerName}
+                placeholder={user?.displayName || 'e.g. Shop Owner'}
+                theme={theme}
+              />
+              <StackedField
+                icon="business-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                label={t('shopNameLabel')}
+                value={shopName} onChangeText={setShopName}
+                placeholder={user?.displayName ? `${user.displayName}'s Store` : 'e.g. My Store'}
+                theme={theme}
+              />
+              <StackedField
+                icon="text-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                label={t('shopNameUrduLabel')}
+                value={shopNameUrdu} onChangeText={setShopNameUrdu}
+                placeholder={user?.displayName ? `${user.displayName} اسٹور` : 'مثلاً: میری دکان'}
+                theme={theme}
+                last
+              />
+            </View>
+          </View>
 
           {/* Contact */}
-          <Section title={t('contactSection')} theme={theme}>
-            <RowItem icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('phoneLabel')} theme={theme}>
-              <InlineField value={phone} onChangeText={setPhone} placeholder="0300-1234567" keyboardType="phone-pad" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <Pressable onPress={() => setShowMoreDetails((v) => !v)} style={styles.moreToggle}>
-              <Text style={[styles.moreToggleText, { color: theme.primary }]}>
-                {language === 'ur' ? 'مزید تفصیلات (اختیاری)' : 'More shop details (optional)'}
-              </Text>
-              <Ionicons name={showMoreDetails ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
-            </Pressable>
-            {showMoreDetails && (
+          <View style={styles.sectionWrap}>
+            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('contactSection').toUpperCase()}</Text>
+            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <StackedField
+                icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('phoneLabel')}
+                value={phone} onChangeText={setPhone}
+                placeholder="0300-1234567" keyboardType="phone-pad"
+                theme={theme}
+              />
+              <StackedField
+                icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('altPhoneLabel')}
+                value={alternatePhone} onChangeText={setAlternatePhone}
+                placeholder="0321-9876543" keyboardType="phone-pad"
+                theme={theme}
+              />
+              <StackedField
+                icon="mail-outline" iconColor="#7C3AED" iconBg="#EDE9FE"
+                label={t('emailLabel')}
+                value={email} onChangeText={setEmail}
+                placeholder="store@gmail.com" keyboardType="email-address"
+                theme={theme}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
+              />
+              <StackedField
+                icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                label={t('cityLabel')}
+                value={city} onChangeText={setCity}
+                placeholder="e.g. Lahore"
+                theme={theme}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
+              />
+              <StackedField
+                icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                label={t('addressLabel')}
+                value={address} onChangeText={setAddress}
+                placeholder="Shop #14, Main Market"
+                multiline
+                theme={theme}
+                last
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
+              />
+            </View>
+          </View>
+
+
+          {/* ── Save Profile Button ── */}
+          <Pressable
+            onPress={handleSave}
+            disabled={isSaving}
+            style={({ pressed }) => [
+              styles.fullSaveBtn,
+              { backgroundColor: theme.primary },
+              (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+            ]}
+          >
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
               <>
-            <RowItem icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('altPhoneLabel')} theme={theme}>
-              <InlineField value={alternatePhone} onChangeText={setAlternatePhone} placeholder="0321-9876543" keyboardType="phone-pad" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <RowItem icon="mail-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('emailLabel')} theme={theme}>
-              <InlineField value={email} onChangeText={setEmail} placeholder="store@gmail.com" keyboardType="email-address" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <RowItem icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('cityLabel')} theme={theme}>
-              <InlineField value={city} onChangeText={setCity} placeholder="e.g. Lahore" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <RowItem icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('addressLabel')} theme={theme} last>
-              <InlineField value={address} onChangeText={setAddress} placeholder="Shop #14, Market" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
+                <Ionicons name="checkmark-circle" size={22} color="#fff" />
+                <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
               </>
             )}
-          </Section>
-
-          {/* Payment & Tax — optional details, hidden until "More shop details" is opened */}
-          {showMoreDetails && (
-          <Section title={t('paymentSection')} theme={theme}>
-            <RowItem icon="wallet-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('paymentDetailsLabel')} theme={theme}>
-              <InlineField value={paymentDetails} onChangeText={setPaymentDetails} placeholder="EasyPaisa: 0300-…" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <RowItem icon="document-text-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('taxNumberLabel')} theme={theme}>
-              <InlineField value={taxNumber} onChangeText={setTaxNumber} placeholder="NTN-XXXXXXX-X" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <RowItem icon="time-outline" iconColor="#059669" iconBg="#D1FAE5" label={t('businessHoursLabel')} theme={theme} last>
-              <InlineField value={businessHours} onChangeText={setBusinessHours} placeholder="08:00 AM – 11:30 PM" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-          </Section>
-          )}
+          </Pressable>
         </>
       )}
 
@@ -870,88 +1317,142 @@ export const SettingsScreen: React.FC = () => {
       {activeSegment === 'settings' && (
         <>
           {/* Appearance */}
-          <Section title="Appearance" theme={theme}>
+          <Section title={t('appearanceSection')} theme={theme}>
             {/* Language */}
-            <RowItem icon="language-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('languageLabel')} sublabel="English / اردو" theme={theme}>
-              <View style={styles.langToggle}>
-                {(['en', 'ur'] as const).map((lang) => (
-                  <Pressable
-                    key={lang}
-                    onPress={() => setLanguage(lang)}
-                    style={[
-                      styles.langChip,
-                      {
-                        backgroundColor: language === lang ? theme.primary : theme.surfaceSubtle,
-                        borderColor: language === lang ? theme.primary : theme.border,
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.langChipText, { color: language === lang ? '#fff' : theme.textSecondary }]}>
-                      {lang === 'en' ? 'EN' : 'اردو'}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+            <RowItem icon="language-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('languageLabel')} theme={theme}>
+              <LangToggle value={language} onChange={setLanguage} theme={theme} />
             </RowItem>
 
             {/* Dark Mode */}
-            <RowItem icon="moon-outline" iconColor="#6366F1" iconBg="#E0E7FF" label={t('darkModeLabel')} sublabel={settings.darkMode ? 'Dark' : 'Light'} theme={theme} last>
-              <Switch
-                value={settings.darkMode}
-                onValueChange={(val) => updateSettings({ darkMode: val })}
-                trackColor={{ false: theme.border, true: theme.primary }}
-                thumbColor="#fff"
+            <RowItem icon="moon-outline" iconColor="#6366F1" iconBg="#E0E7FF" label={t('darkModeLabel')} theme={theme} last>
+              <DarkToggle value={settings.darkMode} onChange={(val) => updateSettings({ darkMode: val })} theme={theme} />
+            </RowItem>
+          </Section>
+
+          {/* WhatsApp Udhaar Reminders */}
+          <Section title={t('whatsappReminderSection')} theme={theme}>
+            <RowItem
+              icon="logo-whatsapp"
+              iconColor="#25D366"
+              iconBg="#DCFCE7"
+              label={t('whatsappReminderLangLabel')}
+              sublabel={t('whatsappReminderLangSublabel')}
+              theme={theme}
+              last={false}
+            >
+              <LangToggle
+                value={settings.whatsappReminderLanguage || 'en'}
+                onChange={(l) => updateSettings({ whatsappReminderLanguage: l })}
+                theme={theme}
               />
             </RowItem>
-          </Section>
 
-          {/* Advanced — powerful options most keepers never need, one tap away */}
-          <Pressable onPress={() => setShowAdvanced((v) => !v)} style={[styles.moreToggle, { justifyContent: 'space-between', paddingHorizontal: 4 }]}>
-            <Text style={[styles.moreToggleText, { color: theme.text, fontSize: 14 }]}>
-              {language === 'ur' ? '⚙ ایڈوانسڈ سیٹنگز' : '⚙ Advanced Settings'}
-            </Text>
-            <Ionicons name={showAdvanced ? 'chevron-up' : 'chevron-down'} size={18} color={theme.textMuted} />
-          </Pressable>
-          {showAdvanced && (
-            <>
-          {/* Billing */}
-          <Section title={t('billingSection')} theme={theme}>
-            <RowItem
-              icon="cash-outline"
-              iconColor="#059669"
-              iconBg="#D1FAE5"
-              label={t('currencyLabel')}
-              sublabel={
-                selectedCurrency
-                  ? language === 'ur' ? selectedCurrency.nameUrdu : selectedCurrency.name
-                  : undefined
-              }
-              onPress={() => setIsCurrencyPickerOpen(true)}
-              theme={theme}
-            >
-              <View style={styles.currencyValueRow}>
-                <Text style={[styles.currencyValueText, { color: theme.text }]} numberOfLines={1}>
-                  {selectedCurrency
-                    ? `${selectedCurrency.flag} ${selectedCurrency.code} · ${settings.currencySymbol}`
-                    : settings.currencySymbol}
+            {/* Live Message Preview Card */}
+            <View style={[styles.waPreviewContainer, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+              <View style={styles.waPreviewHeader}>
+                <Ionicons name="chatbubble-ellipses-outline" size={15} color="#25D366" />
+                <Text style={[styles.waPreviewTitle, { color: theme.textSecondary }]}>
+                  {t('whatsappReminderPreview')}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
               </View>
-            </RowItem>
-            <RowItem icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7" label={t('lowStockThresholdLabel')} theme={theme}>
-              <InlineField value={lowStockThreshold} onChangeText={setLowStockThreshold} keyboardType="numeric" placeholder="5" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <RowItem icon="receipt-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('billFooterLabel')} theme={theme}>
-              <InlineField value={footerNote} onChangeText={setFooterNote} placeholder="Thank you!" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
-            <RowItem icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE" label={t('billFooterUrduLabel')} theme={theme} last>
-              <InlineField value={footerNoteUrdu} onChangeText={setFooterNoteUrdu} placeholder="شکریہ" onBlur={handleAutoSave} theme={theme} />
-            </RowItem>
+              <Text
+                style={[
+                  styles.waPreviewBody,
+                  {
+                    color: theme.text,
+                    fontFamily: (settings.whatsappReminderLanguage === 'ur') ? Typography.urduFontFamily : undefined,
+                    textAlign: (settings.whatsappReminderLanguage === 'ur') ? 'right' : 'left',
+                  },
+                ]}
+              >
+                {(settings.whatsappReminderLanguage === 'ur')
+                  ? `السلام علیکم احمد صاحب!\nامید ہے آپ بخیریت ہوں گے۔\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${settings.shopNameUrdu || settings.shopName}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${settings.currencySymbol} 2,500* ہے۔\n\nبرائے مہربانی سہولت کے مطابق تشریف لا کر رقم ادا فرما دیں۔\n\nشکریہ و جزاک اللہ!\n*${settings.shopName}*\n📞 ${settings.phone || '0300-1234567'}`
+                  : `Dear Ahmed,\n\nHope you are doing well.\n\nThis is a gentle reminder from *${settings.shopName}* regarding your pending balance:\n👉 *${settings.currencySymbol} 2,500*\n\nKindly arrange for the payment at your earliest convenience.\n\nThank you!\n*${settings.shopName}*\n📞 ${settings.phone || '0300-1234567'}`}
+              </Text>
+            </View>
           </Section>
-            </>
-          )}
 
-          {/* Save Preferences */}
+          {/* Billing */}
+          <View style={styles.sectionWrap}>
+            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('billingSection').toUpperCase()}</Text>
+            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              {/* Currency — keep as RowItem (opens picker, not a text input) */}
+              <RowItem
+                icon="cash-outline"
+                iconColor="#059669"
+                iconBg="#D1FAE5"
+                label={t('currencyLabel')}
+                sublabel={
+                  selectedCurrency
+                    ? language === 'ur' ? selectedCurrency.nameUrdu : selectedCurrency.name
+                    : undefined
+                }
+                onPress={() => setIsCurrencyPickerOpen(true)}
+                theme={theme}
+              >
+                <View style={styles.currencyValueRow}>
+                  <Text style={[styles.currencyValueText, { color: theme.text }]} numberOfLines={1}>
+                    {selectedCurrency
+                      ? `${selectedCurrency.flag} ${selectedCurrency.code} · ${settings.currencySymbol}`
+                      : settings.currencySymbol}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+                </View>
+              </RowItem>
+              <StackedField
+                icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                label={t('lowStockThresholdLabel')}
+                value={lowStockThreshold} onChangeText={setLowStockThreshold}
+                keyboardType="numeric" placeholder="5"
+                theme={theme}
+              />
+              <StackedField
+                icon="receipt-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('billFooterLabel')}
+                value={footerNote} onChangeText={setFooterNote}
+                placeholder="Thank you for shopping!"
+                theme={theme}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
+              />
+              <StackedField
+                icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                label={t('billFooterUrduLabel')}
+                value={footerNoteUrdu} onChangeText={setFooterNoteUrdu}
+                placeholder="خریداری کا شکریہ!"
+                theme={theme}
+                last
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 150);
+                }}
+              />
+            </View>
+          </View>
+
+          {/* ── Save Settings Button ── */}
+          <Pressable
+            onPress={handleSave}
+            disabled={isSaving}
+            style={({ pressed }) => [
+              styles.fullSaveBtn,
+              { backgroundColor: theme.primary },
+              (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+            ]}
+          >
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Ionicons name="checkmark-circle" size={22} color="#fff" />
+                <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
+              </>
+            )}
+          </Pressable>
 
           {/* Google Cloud Backup & Account Section */}
           <Section title={t('googleAccount')} theme={theme}>
@@ -1079,17 +1580,23 @@ export const SettingsScreen: React.FC = () => {
                     </Text>
                   </Pressable>
 
+                  {/* Sign Out */}
                   <Pressable
                     onPress={handleLogout}
+                    disabled={isLoggingOut || isDeletingAccount}
                     style={({ pressed }) => [
                       styles.signOutActionBtn,
                       { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, borderWidth: 1 },
-                      pressed && { opacity: 0.8 },
+                      (pressed || isLoggingOut) && { opacity: 0.8 },
                     ]}
                   >
-                    <Ionicons name="log-out-outline" size={15} color={theme.text} />
+                    {isLoggingOut ? (
+                      <ActivityIndicator size="small" color={theme.text} />
+                    ) : (
+                      <Ionicons name="log-out-outline" size={15} color={theme.text} />
+                    )}
                     <Text style={[styles.signOutActionBtnText, { color: theme.text }]}>
-                      {t('signOut')}
+                      {isLoggingOut ? t('signingOut') : t('signOut')}
                     </Text>
                   </Pressable>
                 </View>
@@ -1097,7 +1604,7 @@ export const SettingsScreen: React.FC = () => {
                 {/* Account & Data Deletion */}
                 <Pressable
                   onPress={handleDeleteAccount}
-                  disabled={isDeletingAccount}
+                  disabled={isLoggingOut || isDeletingAccount}
                   style={({ pressed }) => [
                     styles.deleteAccountBtn,
                     { backgroundColor: theme.dangerLight, borderColor: '#FCA5A5', borderWidth: 1 },
@@ -1118,7 +1625,7 @@ export const SettingsScreen: React.FC = () => {
             )}
           </Section>
 
-          {/* Google Drive (5 TB Storage) Section */}
+          {/* Google Drive Backup Section */}
           <Section title={t('googleDriveTitle')} theme={theme}>
             <View style={styles.driveCard}>
               <View style={styles.driveHeaderRow}>
@@ -1227,8 +1734,6 @@ export const SettingsScreen: React.FC = () => {
             </View>
           </Section>
 
-          {showAdvanced && (
-            <>
           {/* Data Management */}
           <Section title={t('dataManagement')} theme={theme}>
             <RowItem
@@ -1236,7 +1741,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#059669"
               iconBg="#D1FAE5"
               label={t('backupBtn')}
-              sublabel="Export all data as JSON"
+              sublabel={t('backupSublabel')}
               onPress={handleExport}
               theme={theme}
             />
@@ -1245,7 +1750,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#0284C7"
               iconBg="#E0F2FE"
               label={t('restoreBtn')}
-              sublabel="Import from JSON backup"
+              sublabel={t('restoreSublabel')}
               onPress={() => setShowImportBox(!showImportBox)}
               theme={theme}
             />
@@ -1254,50 +1759,37 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#DC2626"
               iconBg="#FEE2E2"
               label={t('resetSampleBtn')}
-              sublabel={language === 'ur' ? 'تمام اشیاء، بل اور کھاتہ صاف کریں' : 'Wipe products, bills & khata'}
+              sublabel={t('resetSublabel')}
               onPress={handleReset}
               theme={theme}
               last
             />
           </Section>
-            </>
-          )}
 
           {/* Import Box */}
           {showImportBox && (
             <View style={[styles.importBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <Text style={[styles.importHint, { color: theme.textSecondary }]}>
-                Paste your backup JSON below to restore:
-              </Text>
-              <Pressable
-                onPress={() => setImportJsonText(buildImportTemplateJSON())}
-                style={[styles.importTemplateBtn, { borderColor: theme.primary }]}
-              >
-                <Ionicons name="document-text-outline" size={15} color={theme.primary} />
-                <Text style={[styles.importTemplateText, { color: theme.primary }]}>
-                  Fill sample template (products only)
+              <View style={styles.importBoxHeader}>
+                <Ionicons name="document-text-outline" size={20} color={theme.primary} />
+                <Text style={[styles.importBoxDesc, { color: theme.textMuted }]}>
+                  {language === 'ur'
+                    ? 'پہلے سے محفوظ شدہ بیک اپ فائل (.json) منتخب کر کے اپنا ڈیٹا بحال کریں۔'
+                    : 'Select a previously saved backup file (.json) to restore your products, sales, and ledger records.'}
                 </Text>
-              </Pressable>
-              <TextInput
-                value={importJsonText}
-                onChangeText={setImportJsonText}
-                placeholder={'{"products": [...], ...}'}
-                placeholderTextColor={theme.textMuted}
-                multiline
-                style={[
-                  styles.importInput,
-                  {
-                    color: theme.text,
-                    backgroundColor: theme.surfaceSubtle,
-                    borderColor: theme.border,
-                  },
-                ]}
-              />
+              </View>
+
               <Pressable
-                onPress={handleImport}
-                style={[styles.importApplyBtn, { backgroundColor: theme.primary }]}
+                onPress={handleImportFromFile}
+                style={({ pressed }) => [
+                  styles.importFileBtn,
+                  { backgroundColor: theme.primary },
+                  pressed && { opacity: 0.85 },
+                ]}
               >
-                <Text style={styles.importApplyText}>Apply Restore</Text>
+                <Ionicons name="folder-open-outline" size={18} color="#fff" />
+                <Text style={styles.importFileBtnText}>
+                  {t('chooseBackupFile')}
+                </Text>
               </Pressable>
             </View>
           )}
@@ -1308,7 +1800,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#2563EB"
               iconBg="#DBEAFE"
               label={t('privacyPolicy')}
-              sublabel="View official privacy disclosures"
+              sublabel={t('privacyPolicySublabel')}
               onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}
               theme={theme}
             />
@@ -1317,7 +1809,7 @@ export const SettingsScreen: React.FC = () => {
               iconColor="#0D9488"
               iconBg="#CCFBF1"
               label={t('termsOfService')}
-              sublabel="View terms of service"
+              sublabel={t('termsOfServiceSublabel')}
               onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}
               theme={theme}
             />
@@ -1325,8 +1817,8 @@ export const SettingsScreen: React.FC = () => {
               icon="trash-bin-outline"
               iconColor="#DC2626"
               iconBg="#FEE2E2"
-              label="Account & Data Deletion Portal"
-              sublabel="Online data erasure request"
+              label={t('accountDeletionTitle')}
+              sublabel={t('accountDeletionSublabel')}
               onPress={() => openLegalUrl(LEGAL_CONFIG.accountDeletionUrl)}
               theme={theme}
             />
@@ -1334,7 +1826,7 @@ export const SettingsScreen: React.FC = () => {
               icon="information-circle-outline"
               iconColor="#64748B"
               iconBg="#F1F5F9"
-              label="App Version"
+              label={t('appVersionLabel')}
               sublabel={`v${LEGAL_CONFIG.appVersion} (${LEGAL_CONFIG.packageName})`}
               theme={theme}
               last
@@ -1360,20 +1852,41 @@ export const SettingsScreen: React.FC = () => {
         onCapture={(uri) => { handleLogoSelected(uri); setIsCameraOpen(false); }}
         title={t('takePhoto')}
       />
-    </ScrollView>
+
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: Spacing.lg, paddingBottom: 80 },
+  heroCanopy: {
+    width: '100%',
+    paddingTop: 6,
+    paddingBottom: 10,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    borderWidth: 0,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
+  },
+  heroInner: {
+    maxWidth: 720,
+    marginHorizontal: 'auto',
+    width: '100%',
+    paddingHorizontal: Spacing.lg,
+  },
+  content: { paddingHorizontal: Spacing.lg, paddingTop: 12, paddingBottom: 80 },
 
   // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
     gap: Spacing.sm,
   },
   backBtn: {
@@ -1382,13 +1895,17 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: 'rgba(255, 255, 255, 0.28)',
     borderWidth: 1,
   },
   headerTitle: {
     flex: 1,
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.3,
+    textAlign: 'center',
   },
   saveBtn: {
     flexDirection: 'row',
@@ -1405,45 +1922,43 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  // Spacer matching backBtn width to keep title centred
+  headerSpacer: {
+    width: 38,
+  },
+
   // Segment
-  autoSaveHint: {
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: Spacing.sm,
-  },
-  moreToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-  },
-  moreToggleText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
   segmentWrap: {
     flexDirection: 'row',
     borderRadius: BorderRadius.full,
-    padding: 4,
+    padding: 5,
     borderWidth: 1,
     marginBottom: Spacing.lg,
-    gap: 4,
+    position: 'relative',
+  },
+  segPill: {
+    position: 'absolute',
+    top: 5,
+    left: 5,
+    bottom: 5,
+    borderRadius: BorderRadius.full,
+    ...Shadows.sm,
   },
   segBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
+    gap: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
     borderRadius: BorderRadius.full,
+    zIndex: 1,
   },
-  segBtnActive: {},
   segBtnText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: -0.1,
   },
 
   // Avatar Card
@@ -1478,6 +1993,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
+    overflow: 'hidden',
+  },
+  avatarLogoImg: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
   },
   avatarInitials: {
     fontSize: 26,
@@ -1601,28 +2122,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Language chips
-  langToggle: { flexDirection: 'row', gap: 6 },
-  langChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
-  },
-  langChipText: { fontSize: 12, fontWeight: '700' },
-
-  // Save button
+// Save button — single prominent CTA at bottom of each tab
   fullSaveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 15,
-    borderRadius: BorderRadius.full,
+    gap: 10,
+    paddingVertical: 16,
+    borderRadius: BorderRadius.xl,
     marginBottom: Spacing.lg,
     ...Shadows.lg,
   },
-  fullSaveBtnText: { color: '#fff', fontSize: 15, fontWeight: '800' },
+  fullSaveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.2 },
 
   // Import box
   importBox: {
@@ -1633,33 +2144,30 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     ...Shadows.sm,
   },
-  importHint: { fontSize: 13, fontWeight: '500' },
-  importTemplateBtn: {
+  importBoxHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  importBoxDesc: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  importFileBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  importTemplateText: { fontSize: 13, fontWeight: '700' },
-  importInput: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    minHeight: 100,
-    fontSize: 13,
-    fontFamily: Platform.OS === 'web' ? 'monospace' : undefined,
-    textAlignVertical: 'top',
-  },
-  importApplyBtn: {
+    gap: 8,
     paddingVertical: 13,
     borderRadius: BorderRadius.full,
-    alignItems: 'center',
     ...Shadows.sm,
   },
-  importApplyText: { color: '#fff', fontWeight: '800', fontSize: 13 },
+  importFileBtnText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
 
   // Google Auth & Cloud Backup styles
   googleAuthCard: {
@@ -1841,7 +2349,7 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
   },
 
-  // 5 TB Google Drive Styles
+  // Google Drive Styles
   driveCard: {
     padding: Spacing.lg,
     gap: Spacing.md,
@@ -1971,5 +2479,116 @@ const styles = StyleSheet.create({
   driveDisconnectText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+
+  /* Unsaved Changes Modal */
+  unsavedOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  unsavedBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  unsavedCard: {
+    width: '100%',
+    maxWidth: 420,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    borderWidth: 1,
+    ...Shadows.lg,
+  },
+  unsavedIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
+  unsavedTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  unsavedDesc: {
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.sm,
+  },
+  unsavedActions: {
+    width: '100%',
+    gap: 10,
+  },
+  unsavedBtnPrimary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    paddingVertical: 12,
+    borderRadius: BorderRadius.lg,
+    ...Shadows.sm,
+  },
+  unsavedBtnPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  unsavedBtnSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    paddingVertical: 11,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  unsavedBtnSecondaryText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+  },
+  unsavedBtnCancel: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    marginTop: 2,
+  },
+  unsavedBtnCancelText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  /* WhatsApp Reminder Preview */
+  waPreviewContainer: {
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  waPreviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  waPreviewTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+  waPreviewBody: {
+    fontSize: 12,
+    lineHeight: 19,
+    opacity: 0.9,
   },
 });
