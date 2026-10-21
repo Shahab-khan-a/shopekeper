@@ -263,8 +263,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 420,
       "icon": "🫘",
       "nameUrdu": "مونگ کی دال",
-      "image": "assets/catalog-images/moong-dal-f56d68.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1612869538502-b5baa439abd7?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Chandan Chaurasia",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/yellow-and-brown-beans-on-brown-wooden-table-J5KMugvdP44",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Chana Dal 1kg",
@@ -272,8 +278,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 380,
       "icon": "🫘",
       "nameUrdu": "چنے کی دال",
-      "image": "assets/catalog-images/chana-dal-892913.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1780478238047-13e4e6c07cba?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mrs Chimpanzeee",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/yellow-split-peas-and-chickpeas-side-by-side-2nEDE_zt7rg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Whole Black Gram (Kala Chana) 1kg",
@@ -308,8 +320,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 450,
       "icon": "🫘",
       "nameUrdu": "ارہر کی دال",
-      "image": "assets/catalog-images/arhar-tur-dal-e7f3a5.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1612869538502-b5baa439abd7?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Chandan Chaurasia",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/yellow-and-brown-beans-on-brown-wooden-table-J5KMugvdP44",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Mix Dal (Panchrangi) 1kg",
@@ -317,8 +335,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 420,
       "icon": "🫘",
       "nameUrdu": "مکس دال",
-      "image": "assets/catalog-images/mix-dal-d23b22.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1763368403529-0b8d9108cf9c?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bowls-of-assorted-dried-beans-and-legumes-okSEa77XTS4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Whole Masoor (Sabut) 1kg",
@@ -404,8 +428,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1450,
       "icon": "🫒",
       "nameUrdu": "زیتون کا تیل",
-      "image": "assets/catalog-images/olive-oil-b35a8b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Roberta Sorge",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-glass-cruet-bottle-uOBApnN_K7w",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Desi Ghee 1kg",
@@ -699,8 +729,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1150,
       "icon": "🍊",
       "nameUrdu": "ٹینگ",
-      "image": "assets/catalog-images/tang-orange-3fddeb.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "ABHISHEK HAJARE",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-juice-in-clear-drinking-glass-kkrXVKK-jhg",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/tea-beverages-272673.webp"
@@ -1434,8 +1470,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 450,
       "icon": "🧀",
-      "image": "assets/catalog-images/dairy-staples-a7a6cc.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1627935722051-395636b0d8a5?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Andra C Taylor Jr",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/sliced-cheese-on-brown-wooden-chopping-board-_L5MGd0w1FQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cream 200ml",
@@ -5168,8 +5210,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1050,
       "icon": "🥩",
       "nameUrdu": "ہڈی والا گوشت",
-      "image": "assets/catalog-images/beef-bone-6ec85a.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1448907503123-67254d59ca4f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jez Timms",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-and-green-leaf-plant-on-brown-surface-DVRXFIH42d0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Beef Mince 1kg",
@@ -5237,8 +5285,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 2200,
       "icon": "🥩",
       "nameUrdu": "بکرے کا گوشت",
-      "image": "assets/catalog-images/mutton-boneless-b08f78.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1600180786608-28d06391d25c?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Usman Yousaf",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-on-blue-ceramic-bowl-eOktYr3tAMo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Mutton with Bone 1kg",
@@ -5314,16 +5368,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 750,
       "icon": "🐟",
       "nameUrdu": "رہو مچھلی",
-      "image": "assets/catalog-images/rahu-fish-89f3fd.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1683405503746-0fcbc47daaa7?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kier in Sight Archives",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-fish-that-is-laying-on-a-white-surface-jX229RhM-T0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Salmon Fillet 500g",
       "unit": "packet",
       "price": 1450,
       "icon": "🐟",
-      "image": "assets/catalog-images/fish-seafood-819e11.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1499125562588-29fb8a56b5d5?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Caroline Attwood",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/raw-fish-meat-on-brown-chopping-board-kC9KUtSiflw",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Pomfret (Paplet) 1kg",
@@ -5331,8 +5397,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1650,
       "icon": "🐟",
       "nameUrdu": "پاپلیٹ",
-      "image": "assets/catalog-images/pomfret-0da21b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1764813824645-e5dc9e49d8cb?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "krzhck",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-school-of-silver-fish-on-ice-a3se6O3mUMU",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Prawns 500g",
@@ -5340,16 +5412,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1250,
       "icon": "🦐",
       "nameUrdu": "جھینگے",
-      "image": "assets/catalog-images/prawns-500g-89b2cd.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1504309250229-4f08315f3b5c?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Etienne Girardet",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-shrimp-that-are-laying-on-the-ground-WTPMcV1NZuY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Fish Fingers 500g",
       "unit": "packet",
       "price": 850,
       "icon": "🐟",
-      "image": "assets/catalog-images/fish-seafood-819e11.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1678969406337-1869bb0c0dc4?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Haseeb Modi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-white-plate-topped-with-french-fries-and-other-foods-9fUCAqck4Zs",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Dried Fish (Sookhi Machli) 250g",
@@ -5357,8 +5441,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 650,
       "icon": "🐟",
       "nameUrdu": "سوکھی مچھلی",
-      "image": "assets/catalog-images/fish-seafood-819e11.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1572420963886-7850f1af053e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Zeshalyn Capindo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-fishes-YSpHVL_Zs-w",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Sole Fish 1kg",
@@ -5379,7 +5469,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/fish-seafood-819e11.webp"
+    "image": "assets/catalog-images/fish-seafood-819e11.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1499125562588-29fb8a56b5d5?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Caroline Attwood",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/raw-fish-meat-on-brown-chopping-board-kC9KUtSiflw",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Mince, Organs & Eggs",
@@ -15588,16 +15685,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 9500,
       "icon": "🌀",
       "nameUrdu": "پنکھا",
-      "image": "assets/catalog-images/ceiling-fan-ac-108ed3.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1609519479841-5fd3b2884e17?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kalyanaraman S",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-5-blade-ceiling-fan-Ww9nZ1MGQLY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Inverter Ceiling Fan 56 inch",
       "unit": "piece",
       "price": 13500,
       "icon": "🌀",
-      "image": "assets/catalog-images/inverter-ceiling-fan-8373bf.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1609519479841-5fd3b2884e17?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kalyanaraman S",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-5-blade-ceiling-fan-Ww9nZ1MGQLY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Ceiling Fan Remote Control Kit",
@@ -22059,8 +22168,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 300000,
       "icon": "⛓️",
       "nameUrdu": "چین",
-      "image": "assets/catalog-images/gold-jewelry-803cb1.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1611107683227-e9060eccd846?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Syed F Hashemi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/gold-chain-necklace-on-white-surface-aldDZePniqg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Gold Bangles Pair",
@@ -22102,11 +22217,24 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 120000,
       "icon": "✨",
-      "image": "assets/catalog-images/gold-tops-5c8836.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1761479271790-c7327d1bc5b3?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jay Openiano",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/two-gold-stud-earrings-with-embossed-designs-f0CSyUi4PgA",
+       "source": "Unsplash"
+      }
      }
     ],
-    "image": "assets/catalog-images/gold-jewelry-803cb1.webp"
+    "image": "assets/catalog-images/gold-jewelry-803cb1.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1611107683227-e9060eccd846?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Syed F Hashemi",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/gold-chain-necklace-on-white-surface-aldDZePniqg",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Silver Jewelry",
@@ -22125,16 +22253,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 25000,
       "icon": "⛓️",
-      "image": "assets/catalog-images/silver-chain-6be5a1.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1617071380442-97e4d5a711e6?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Gabriel Dalton",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-chain-link-necklace-on-white-textile-YbLLE8N16h8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Silver Bangles Pair",
       "unit": "piece",
       "price": 35000,
       "icon": "🔶",
-      "image": "assets/catalog-images/silver-bangles-c95d7b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1639065643006-e217c4fee12e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Michael Myers",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-diamond-bracelet-on-a-black-background-10eeEq7OxSI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Silver Earrings Pair",
@@ -22157,8 +22297,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 18000,
       "icon": "⌚",
-      "image": "assets/catalog-images/silver-bracelet-v2-192458.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1676291055501-286c48bb186f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ian Talmacs",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-silver-bracelet-with-hearts-and-two-red-stones-mkqraXkMPSE",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Silver Anklet Pair (Payal)",
@@ -22230,16 +22376,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 450,
       "icon": "💍",
-      "image": "assets/catalog-images/artificial-ring-v2-c28a05.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1598560917807-1bae44bd2be8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Sabrianna",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/gold-ring-on-white-surface-NhrcL_C0sFA",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Bridal Set Artificial",
       "unit": "piece",
       "price": 8000,
       "icon": "👰",
-      "image": "assets/catalog-images/bridal-artificial-v2-894aa6.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1722410180687-b05b50922362?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "PRAHANT STUDIO",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-necklace-and-earring-on-display-on-a-mannequin-vbsN7MUXyT4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Tikka Jhumar Set",
@@ -22400,8 +22558,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 800,
       "icon": "🔧",
-      "image": "assets/catalog-images/watch-glass-v2-32de36.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1788125856710-1ae984195874?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Vanishing Point Images",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/watchmaker-repairing-mechanical-watch-movement-WcQnhQo1yqw",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Gold Polish Service",
