@@ -4572,14 +4572,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "کیلے",
       "image": "assets/catalog-images/bananas-1-dozen-8261fc.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1768672991601-e72e8005142c?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Ilona Frey",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-ripe-yellow-bananas-clustered-together-CMLNsyI89UM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Apples (Shimla) 1kg",
@@ -4589,14 +4589,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "سیب",
       "image": "assets/catalog-images/apples-92446c.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Matheus Cenali",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/bunch-of-red-apples-wXuzS9xR49M",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Oranges (Kinnow) 1 Dozen",
@@ -4606,14 +4606,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "کنو",
       "image": "assets/catalog-images/oranges-1-dozen-v2-c65cf1.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1582226954923-96634f0c50b6?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "E L",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-fruits-on-black-textile-DsZtxEVQRaM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Malta Oranges 1 Dozen",
@@ -4623,14 +4623,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "مالٹا",
       "image": "assets/catalog-images/fruits-a36ef4.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Jen Gunter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/oranges-in-a-large-pile-A4BBdJQu2co",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww",
       "imageSource": "unsplash"
      },
      {
@@ -4641,14 +4640,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "آم",
       "image": "assets/catalog-images/mangoes-041ab4.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1787174314310-af23aecc8493?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "John Cameron",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/mangoes-with-smooth-yellow-skins-x2Pq4Qhowow",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Mangoes (Anwar Ratol) 1kg",
@@ -4658,14 +4657,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "آم",
       "image": "assets/catalog-images/mangoes-041ab4.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1787174314310-af23aecc8493?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "John Cameron",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/mangoes-with-smooth-yellow-skins-x2Pq4Qhowow",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Guava (Amrood) 1kg",
@@ -4675,14 +4674,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "امرود",
       "image": "assets/catalog-images/guava-a09345.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1693399991519-bef70bed19a2?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Yuliia Martsynkevych",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-green-and-red-fruit-sitting-on-top-of-each-other-74Jt5kp0R9s",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Grapes (Green) 1kg",
@@ -4692,14 +4691,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "انگور",
       "image": "assets/catalog-images/grapes-af9d7c.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1632576883732-f131be0be48a?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Bernd Dittrich",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-green-grapes-l6sBLZr9mkQ",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Grapes (Black) 1kg",
@@ -4709,14 +4708,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "کالے انگور",
       "image": "assets/catalog-images/grapes-af9d7c.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1632576883732-f131be0be48a?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Bernd Dittrich",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-green-grapes-l6sBLZr9mkQ",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Papaya 1kg",
@@ -4726,14 +4725,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "پپیتا",
       "image": "assets/catalog-images/papaya-6098d1.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Bon Vivant",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/sliced-papaya-on-green-banana-leaf-Ooj1c6fhdFM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Watermelon 1kg",
@@ -4760,14 +4759,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "خربوزہ",
       "image": "assets/catalog-images/melon-bc9134.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1636619299895-ecbb6c9f027f?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Alexandra Smielova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-group-of-melons-with-one-cut-in-half-wf7jJIbMC-A",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Pomegranate (Anar) 1kg",
@@ -4777,14 +4776,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "انار",
       "image": "assets/catalog-images/pomegranate-50c5e7.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1541344999736-83eca272f6fc?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Jonas Renner",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pomegranate-fruits-LOdAL10JejI",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Pears (Nashpati) 1kg",
@@ -4794,14 +4793,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "ناشپاتی",
       "image": "assets/catalog-images/pears-1be777.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1788512337872-7390113a5318?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Zoshua Colah",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/ripe-pears-in-bright-sunlight-znr18rfIHoc",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Peaches (Aaru) 1kg",
@@ -4811,14 +4810,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "آڑو",
       "image": "assets/catalog-images/peaches-5c1ec6.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1779738192898-f7ca5f08f15e?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Jason Leung",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-large-pile-of-fresh-ripe-peaches-D2yXUewNiJ0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Plums (Aloo Bukhara) 1kg",
@@ -4828,14 +4827,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "آلو بخارا",
       "image": "assets/catalog-images/plums-c2b758.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1763256931625-ce439f5c2470?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Ali Sarvari",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-ripe-blue-plums-DMyal4QoYqo",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Cherries 500g",
@@ -4845,14 +4844,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "چیری",
       "image": "assets/catalog-images/cherries-500g-974604.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1520236060906-9c5ed525b025?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Joanna Kosinska",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/red-cherry-fruits-_xN7UbcZ33I",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Strawberries 500g",
@@ -4861,14 +4860,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🍓",
       "image": "assets/catalog-images/fruits-a36ef4.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1587393855524-087f83d95bc9?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Sviatoslav Huzii",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/fresh-red-strawberries-in-pile-I497Uc8xWXQ",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww",
       "imageSource": "unsplash"
      },
      {
@@ -4879,14 +4877,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "عجوہ کھجور",
       "image": "assets/catalog-images/dates-500g-17095d.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1784043437426-3261c7f2c3de?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "engin akyurt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-dried-dates-at-a-market-S5xCObZtTZk",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Coconut (Whole) 1pc",
@@ -4896,14 +4894,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "ناریل",
       "image": "assets/catalog-images/coconut-540e00.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1777732786332-3e78390f76aa?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Saravanan Narayanan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-brown-coconuts-with-husks-ha4CPWwTXMs",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Pineapple 1pc",
@@ -4913,14 +4911,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "انناس",
       "image": "assets/catalog-images/pineapple-7855cc.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1589820296156-2454bb8a6ad1?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Stephany Williams",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pineapple-fruit-on-yellow-surface-yx3-a7ualMM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Falsa 500g",
@@ -4942,11 +4940,11 @@ export const MASTER_CATALOG: CatalogShopType[] = [
      }
     ],
     "image": "assets/catalog-images/fruits-a36ef4.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Allec Gomes",
-     "profileUrl": "https://unsplash.com/@allecgomes",
-     "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+     "name": "Matheus Cenali",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/bunch-of-red-apples-wXuzS9xR49M",
      "source": "Unsplash"
     }
    },
@@ -4959,8 +4957,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 40,
       "icon": "🌿",
       "nameUrdu": "کری پتا",
-      "image": "assets/catalog-images/curry-leaves-bunch-a216cd.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1789194050232-0fe02232777b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Sujana Rahman",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-green-curry-leaf-sprig-TH85y3J3PRk",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Dried Mint 100g",
@@ -4986,11 +4990,24 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 280,
       "icon": "🟤",
       "nameUrdu": "املی",
-      "image": "assets/catalog-images/herbs-extras-c99b6b.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1549333393-8934f7640b72?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lauren Bow",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/selective-focus-photography-of-two-tamarind-fruits-Uqasm4-paGQ",
+       "source": "Unsplash"
+      }
      }
     ],
-    "image": "assets/catalog-images/herbs-extras-c99b6b.webp"
+    "image": "assets/catalog-images/herbs-extras-c99b6b.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1549333393-8934f7640b72?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Lauren Bow",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/selective-focus-photography-of-two-tamarind-fruits-Uqasm4-paGQ",
+     "source": "Unsplash"
+    }
    }
   ]
  },
@@ -19914,8 +19931,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 900,
       "icon": "👡",
-      "image": "assets/catalog-images/velvet-slipper-ladies-85a3c1.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1777979926381-46ffc1395cf8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Farhan Chohan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/embellished-flat-sandals-on-a-white-rug-b5DoQuZx0vY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cork Slipper",
@@ -19944,8 +19967,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2500,
       "icon": "👟",
-      "image": "assets/catalog-images/running-joggers-3e3de0.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Irene Kredenets",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pair-of-white-and-orange-athletic-shoes-on-white-box-dwKiHoqqxk8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Football Studs",
@@ -20020,8 +20049,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2200,
       "icon": "👟",
-      "image": "assets/catalog-images/walking-shoes-v2-eeb012.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1637437757614-6491c8e915b5?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "mostafa mahmoudi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-running-shoes-on-a-white-background-W_uDEmTq0po",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/joggers-sports-shoes-814b58.webp"
