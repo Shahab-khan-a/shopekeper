@@ -21175,7 +21175,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "🛞",
-      "image": "assets/catalog-images/fix-bike-tube-481598.webp",
+      "image": "assets/catalog-images/fix-bike-tube-1728c5.webp",
       "imageLevel": "item",
       "credit": {
        "name": "Fanny Schertzer",
@@ -21189,7 +21189,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 700,
       "icon": "🛞",
-      "image": "assets/catalog-images/fix-bike-tube-481598.webp",
+      "image": "assets/catalog-images/fix-bike-tube-1728c5.webp",
       "imageLevel": "item",
       "credit": {
        "name": "Fanny Schertzer",
@@ -21866,7 +21866,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 1800,
       "icon": "⚗️",
-      "image": "assets/catalog-images/fix-zinc-sulphate-f68a7f.webp",
+      "image": "assets/catalog-images/fix-zinc-sulphate-6fb2af.webp",
       "imageLevel": "item",
       "credit": {
        "name": "Valle de Aves</",
@@ -22286,7 +22286,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 800,
       "icon": "🧹",
-      "image": "assets/catalog-images/fix-garden-rake-e44cf5.webp",
+      "image": "assets/catalog-images/fix-garden-rake-1dae37.webp",
       "imageLevel": "item",
       "credit": {
        "name": "Pearson S",
