@@ -437,8 +437,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 150,
       "icon": "🫗",
       "nameUrdu": "کھانے کا تیل",
-      "image": "assets/catalog-images/cooking-oil-pouch-fdccf8.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1552592074-ea7a91b851b3?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "jonathan ocampo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/oil-dispenser-bottle-iCgfwfqgdzo",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/ghee-cooking-oils-938100.webp"
@@ -1369,8 +1375,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 220,
       "icon": "🥛",
       "nameUrdu": "دودھ",
-      "image": "assets/catalog-images/milk-e89b2c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1639151082235-406d8eb262b9?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mary Skrynnikova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-milk-next-to-a-glass-of-milk-c6TKtsi8C1k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Milk 1 Litre (Milkpak)",
@@ -1378,8 +1390,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 230,
       "icon": "🥛",
       "nameUrdu": "دودھ",
-      "image": "assets/catalog-images/milk-e89b2c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1639151082235-406d8eb262b9?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mary Skrynnikova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-milk-next-to-a-glass-of-milk-c6TKtsi8C1k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Yogurt Cup 500g",
@@ -1387,8 +1405,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 180,
       "icon": "🍶",
       "nameUrdu": "دہی",
-      "image": "assets/catalog-images/dairy-staples-a7a6cc.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1571212515416-fef01fc43637?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "micheile henderson",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bowl-of-yogurt-with-a-spoon-in-it-NFHeBysjCTI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Butter 200g (Nurpur)",
@@ -1396,8 +1420,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 380,
       "icon": "🧈",
       "nameUrdu": "مکھن",
-      "image": "assets/catalog-images/butter-200g-0e9dae.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1719148162837-63d2f256231f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Marine Le Gac",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-piece-of-butter-sitting-on-top-of-a-white-plate-4X7eA9zN8mg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cheese Slices 10ct",
@@ -1413,8 +1443,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 220,
       "icon": "🥛",
       "nameUrdu": "ملائی",
-      "image": "assets/catalog-images/cream-df7721.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1786695144564-d1cd05367032?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Le Tia",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/whipped-cream-in-pink-bowl--IT3JFWGKeM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Eggs 1 Dozen",
@@ -1435,7 +1471,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/dairy-staples-a7a6cc.webp"
+    "image": "assets/catalog-images/dairy-staples-a7a6cc.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1571212515416-fef01fc43637?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "micheile henderson",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-bowl-of-yogurt-with-a-spoon-in-it-NFHeBysjCTI",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Personal Care",
@@ -12176,8 +12219,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 900,
       "icon": "🛏️",
-      "image": "assets/catalog-images/pillow-d9c182.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1638127815875-d8c930a8d467?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ran Berkovich",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-two-pillows-on-a-bed--lBmZL2UfJc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Almari 3-Door",
@@ -12185,8 +12234,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 35000,
       "icon": "🗄️",
       "nameUrdu": "الماری",
-      "image": "assets/catalog-images/beds-bedroom-2f88c4.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1558997519-83ea9252edf8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Rumman Amin",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-wooden-2-door-cabinet-3fFBoEHee28",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Dressing Table with Mirror",
@@ -12221,7 +12276,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/beds-bedroom-2f88c4.webp"
+    "image": "assets/catalog-images/beds-bedroom-2f88c4.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1558997519-83ea9252edf8?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Rumman Amin",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/brown-wooden-2-door-cabinet-3fFBoEHee28",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Seating",
@@ -12231,8 +12293,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 55000,
       "icon": "🛋️",
-      "image": "assets/catalog-images/sofa-5-seater-v2-428d1a.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Phillip Goldsberry",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/green-fabric-sofa-fZuleEfeA1Q",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Sofa Set 7-Seater",
@@ -12287,16 +12355,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2200,
       "icon": "🛋️",
-      "image": "assets/catalog-images/bean-bag-58f554.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1701854957177-99ec55ad574e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Bayo Adegunloye",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bean-bag-chair-in-a-corner-of-a-room-TA2iZZ8o6go",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cushion Set of 5",
       "unit": "packet",
       "price": 1200,
       "icon": "🛋️",
-      "image": "assets/catalog-images/cushion-5-d739f7.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1553114552-c4ece3a33c93?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Sven Brandsma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-assorted-color-throw-pillows-on-black-sofa-GWFFvub7Y1U",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Sofa Cover Set",
@@ -12325,8 +12405,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 8000,
       "icon": "🪑",
-      "image": "assets/catalog-images/coffee-table-ad4aa9.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1581428982868-e410dd047a90?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lui Peng",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-wooden-table-beside-white-couch-8NxTrV6i4WQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Study Table",
@@ -12357,24 +12443,42 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 4500,
       "icon": "🪑",
-      "image": "assets/catalog-images/folding-table-v2-6b8240.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1578272768789-5641cd8caaa1?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mikaela Rae",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-cup-on-white-table-cSUMlSRfmiU",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "TV Stand",
       "unit": "piece",
       "price": 11000,
       "icon": "📺",
-      "image": "assets/catalog-images/tv-stand-4e18b3.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1542487354-feaf93476caa?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Andres Jasso",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/gray-flat-screen-tv-on-white-tv-stand-jfxY9uoMRwM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Computer Table",
       "unit": "piece",
       "price": 8500,
       "icon": "💻",
-      "image": "assets/catalog-images/computer-table-2702a6.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1764588029885-d115de3bda1e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Martin Katler",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/computer-setup-with-monitor-keyboard-and-mouse-dUJWL1s6B8Q",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Ironing Board",
@@ -12403,8 +12507,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 1800,
       "icon": "🪟",
-      "image": "assets/catalog-images/curtain-6439bc.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1759328257280-28bdb3050be3?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Hiram Huang",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/sunlight-streams-through-sheer-curtains-in-a-hotel-room-NIbUk7ATSuw",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Curtain Rod Set",
@@ -12419,16 +12529,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2500,
       "icon": "🪟",
-      "image": "assets/catalog-images/window-blinds-v2-34376b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1527030126234-095ace44080f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Wade Lambert",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/close-view-of-white-window-blinds-LRr2VIwWgC0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Carpet 8x10 ft",
       "unit": "piece",
       "price": 12000,
       "icon": "🧶",
-      "image": "assets/catalog-images/carpet-8x-6b5ee9.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1660394585016-508f949df960?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "SAJAD FI",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/red-persian-rug-with-diamond-pattern-DrZQZnEtYTM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Prayer Mat",
@@ -12458,8 +12580,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 3200,
       "icon": "🧶",
-      "image": "assets/catalog-images/floor-rug-44db64.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1660394585016-508f949df960?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "SAJAD FI",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/red-persian-rug-with-diamond-pattern-DrZQZnEtYTM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Table Runner",
@@ -12520,8 +12648,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 600,
       "icon": "🖼️",
-      "image": "assets/catalog-images/photo-frame-3-cd924d.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1576266394503-4999348b5447?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mojtaba Ravanbakhsh",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/photo-frame-lot-XsQGsVS6h-8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Artificial Plant",
@@ -16847,8 +16981,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 7800,
       "icon": "🪚",
-      "image": "assets/catalog-images/jigsaw-machine-3c9af8.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1610890753500-96a56a672120?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Finn Mund",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/coca-cola-bottle-on-brown-wooden-table-BJzPjzWxc3E",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Heat Gun",
@@ -17191,14 +17331,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "رنگ",
       "image": "assets/catalog-images/plastic-emulsion-v2-c60e75.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Sven Brandsma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Plastic Emulsion 15L Bucket",
@@ -17207,14 +17347,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🪣",
       "image": "assets/catalog-images/paints-a3ed19.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Sven Brandsma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
       "imageSource": "unsplash"
      },
      {
@@ -17241,14 +17380,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎨",
       "image": "assets/catalog-images/enamel-paint-f45fb8.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Sven Brandsma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Weather Shield 4L",
@@ -17257,14 +17396,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🏠",
       "image": "assets/catalog-images/weather-shield-ea9962.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Sven Brandsma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Distemper 20kg Bag",
@@ -17307,14 +17446,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎨",
       "image": "assets/catalog-images/wall-primer-1cb17a.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Sven Brandsma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Wall Primer 4L",
@@ -17323,14 +17462,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎨",
       "image": "assets/catalog-images/wall-primer-1cb17a.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Sven Brandsma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Wood Varnish 1L",
@@ -17388,14 +17527,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🖌️",
       "image": "assets/catalog-images/paints-a3ed19.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1652829069862-87874e119527?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Callum Hill",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-paint-roller-on-a-paint-roller-jo4CWjIw4Wc",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
       "imageSource": "unsplash"
      },
      {
@@ -17405,14 +17543,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🖌️",
       "image": "assets/catalog-images/paint-brush-1707fe.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1777566865793-525ad69ad83e?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Smithsonian",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-collection-of-assorted-paintbrushes-on-a-black-background-doi92UOW-5c",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Paint Brush 4 inch",
@@ -17421,14 +17559,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🖌️",
       "image": "assets/catalog-images/paint-brush-1707fe.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1777566865793-525ad69ad83e?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Smithsonian",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-collection-of-assorted-paintbrushes-on-a-black-background-doi92UOW-5c",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Spray Paint Can 400ml",
@@ -17437,14 +17575,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎨",
       "image": "assets/catalog-images/spray-paint-can-31c649.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1760694030733-f2edb6e8481b?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Marija Zaric",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-spray-paint-can-on-a-wooden-surface-outdoors-table-cFUuK03snkk",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Paint Tray 9 inch",
@@ -17453,14 +17591,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🖌️",
       "image": "assets/catalog-images/paint-tray-4edcc3.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1652829069862-87874e119527?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+       "name": "Callum Hill",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-paint-roller-on-a-paint-roller-jo4CWjIw4Wc",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Putty Knife 3 inch",
@@ -17480,11 +17618,11 @@ export const MASTER_CATALOG: CatalogShopType[] = [
      }
     ],
     "image": "assets/catalog-images/paints-a3ed19.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1585676737728-432f58d5fdba?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Art Institute of Chicago",
-     "profileUrl": "https://unsplash.com/@artchicago",
-     "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
+     "name": "Sven Brandsma",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/blue-and-white-can-on-white-table-kerFMg52cUA",
      "source": "Unsplash"
     }
    },
@@ -17721,16 +17859,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 850,
       "icon": "🚿",
-      "image": "assets/catalog-images/pvc-pipe-3a9bd9.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1729169927271-7826d8aae360?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ries Bosch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-pipes-sitting-next-to-each-other-B0jijv2X-U8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "PVC Pipe 3/4 inch 10ft",
       "unit": "piece",
       "price": 650,
       "icon": "🚿",
-      "image": "assets/catalog-images/pvc-pipe-3-4a2b72.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1729169927271-7826d8aae360?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ries Bosch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-pipes-sitting-next-to-each-other-B0jijv2X-U8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "PVC Elbow 1 inch",
@@ -17761,8 +17911,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1250,
       "icon": "🚰",
-      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1603786996183-308332c02fd9?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Nadia Clabassi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brass-faucet-on-white-ceramic-sink-BmtKI0J7ZtM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Angle Cock Valve",
@@ -17793,8 +17949,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1450,
       "icon": "🚿",
-      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1729169927271-7826d8aae360?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ries Bosch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-pipes-sitting-next-to-each-other-B0jijv2X-U8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "PPR Elbow 1 inch",
@@ -17809,11 +17971,24 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 950,
       "icon": "🚿",
-      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1697652973421-0d688f661d89?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Caleb Wright",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-shower-head-in-a-bathroom-LwN3p1vkVG4",
+       "source": "Unsplash"
+      }
      }
     ],
-    "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp"
+    "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1697652973421-0d688f661d89?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Caleb Wright",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-shower-head-in-a-bathroom-LwN3p1vkVG4",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Ladders & Access",
