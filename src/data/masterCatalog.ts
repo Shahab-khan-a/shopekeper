@@ -9813,14 +9813,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧴",
       "image": "assets/catalog-images/face-wash-tube-946335.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1653919198052-546d44e2458e?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Sanju Pandita",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-tube-of-coffee-face-wash-sitting-on-a-counter-Sg0szdvF8-Q",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Moisturizing Cream Jar 100ml",
@@ -9829,14 +9829,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🫙",
       "image": "assets/catalog-images/skin-care-fe37e3.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1737100917895-eee7006cdbbb?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Maria Kovalets",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-jar-of-cream-with-mint-leaves-on-a-white-table-Y89Qfa_H7-o",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
       "imageSource": "unsplash"
      },
      {
@@ -9846,14 +9845,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🫙",
       "image": "assets/catalog-images/fairness-cream-jar-6b9863.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1764694071508-e4b1efcd39bc?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Pavlo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/jar-of-luxurious-white-face-cream-with-silver-lid-7Cbs1ZJaPb0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Sunscreen Lotion SPF 50",
@@ -9862,14 +9861,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "☀️",
       "image": "assets/catalog-images/skin-care-fe37e3.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1698906821407-c1b6be1bbd56?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Lal MAHAMMAD",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-tube-of-lakme-sun-expert-sunscreen-5zt2Jp5QesY",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
       "imageSource": "unsplash"
      },
      {
@@ -9879,14 +9877,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🌹",
       "image": "assets/catalog-images/rose-water-bottle-0768ae.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1599847935464-fde3827639c2?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Kalos Skincare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/six-white-labeled-bottles-on-white-surface-lwOmVsTuLdg",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Facial Cleanser Bottle 150ml",
@@ -9895,14 +9893,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧴",
       "image": "assets/catalog-images/skin-care-fe37e3.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1745141063798-7fa04698ea80?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Ela De Pure",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-gel-facial-cleanser-ppk8KD_CS-w",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
       "imageSource": "unsplash"
      },
      {
@@ -9912,14 +9909,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧴",
       "image": "assets/catalog-images/skin-toner-bottle-9576fd.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1770717984650-21665d4362b9?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Giulia Perera",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-a-bottle-of-centella-brightening-toner-DMfebdkc1Hk",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Night Cream Jar 50ml",
@@ -9928,14 +9925,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🌙",
       "image": "assets/catalog-images/night-cream-jar-324fe5.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1786171128252-716f3915293d?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "mansi yadav",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/night-cream-jar-and-box-lHjr4nmDiQM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Under-Eye Cream Tube 15ml",
@@ -9944,14 +9941,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "👁️",
       "image": "assets/catalog-images/under-eye-cream-tube-3704b7.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1714980716123-4b6a640795a9?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Care mon",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-tube-of-eye-cream-on-a-white-background-kQyyyzVZ2E0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Face Scrub Tube 100ml",
@@ -9977,14 +9974,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎭",
       "image": "assets/catalog-images/sheet-mask-v2-6827fe.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1741824806438-12e5776c942e?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Ela De Pure",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/anti-aging-face-masks-packaged-and-ready-for-sale-xX1TXb1NGcc",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Aloe Vera Gel Tube 150ml",
@@ -9993,14 +9990,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🌿",
       "image": "assets/catalog-images/skin-care-fe37e3.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1743620660597-bb66a0316734?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Brian Kungu",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/aloe-vera-gel-jar-sits-on-a-black-table-NbfHdQVM8Z0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
       "imageSource": "unsplash"
      },
      {
@@ -10008,16 +10004,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 550,
       "icon": "🧴",
-      "image": "assets/catalog-images/body-lotion-bottle-215406.webp",
+      "image": "assets/catalog-images/fix-body-lotion-bottle-d4f271.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+       "name": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:SarahMalik32&amp;action=",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AWarm_Vanilla_Sugar_shower_gel_and_lotion.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Petroleum Jelly Jar 100ml",
@@ -10026,14 +10020,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🫙",
       "image": "assets/catalog-images/skin-care-fe37e3.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1626092807032-cb4f047c49f8?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Towfiqu barbhuiya",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/person-holding-blue-and-white-plastic-container-R7Z7bOhCFDU",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
       "imageSource": "unsplash"
      },
      {
@@ -10043,14 +10036,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🫙",
       "image": "assets/catalog-images/cold-cream-jar-v2-1bd886.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1629732047847-50219e9c5aef?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Poko Skincare",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-gray-round-plastic-container-QTGB4D8kDoc",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Lip Balm Stick",
@@ -10059,14 +10052,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💋",
       "image": "assets/catalog-images/lip-balm-stick-131b2b.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1638404431939-3943201c8a86?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Alexandra Tran",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-lip-bales-sitting-on-top-of-a-marble-counter-XTQzTMd5npk",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Face Serum Bottle 30ml",
@@ -10075,14 +10068,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💧",
       "image": "assets/catalog-images/face-serum-v2-fb90b9.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1781344116880-029945a42b75?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+       "name": "Avtar Singh",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/amber-glass-dropper-bottle-with-blank-label-on-concrete-block-MkuwnDkT1s0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Anti-Acne Gel Tube 20g",
@@ -10103,11 +10096,11 @@ export const MASTER_CATALOG: CatalogShopType[] = [
      }
     ],
     "image": "assets/catalog-images/skin-care-fe37e3.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1743620660597-bb66a0316734?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Fleur Kaan",
-     "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-     "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
+     "name": "Brian Kungu",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/aloe-vera-gel-jar-sits-on-a-black-table-NbfHdQVM8Z0",
      "source": "Unsplash"
     }
    },
@@ -10726,8 +10719,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 200,
       "icon": "🧴",
-      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1671493235081-5842463637cd?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Denise Chan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-essential-oil-sitting-on-a-cloth-JpnqiMBf7zQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Mehndi Stencil Stickers Pack",
@@ -10742,8 +10741,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 200,
       "icon": "🌿",
-      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1781377012601-93162be3a433?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Marijan K.",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/green-powder-in-a-wooden-bowl-UWkmbnk0G6A",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Sindoor Box",
@@ -10777,8 +10782,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 180,
       "icon": "👁️",
       "nameUrdu": "سرمہ",
-      "image": "assets/catalog-images/surma-stick-11a6c8.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1668255446079-b15fd061735d?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ben Iwara",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-hat-0i6igxIF2g8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Kohl Pencil",
@@ -10797,7 +10808,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "category"
      }
     ],
-    "image": "assets/catalog-images/mehndi-traditional-a77da0.webp"
+    "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1671493235081-5842463637cd?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Denise Chan",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-bottle-of-essential-oil-sitting-on-a-cloth-JpnqiMBf7zQ",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Fragrances & Salon",
@@ -11750,8 +11768,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 450,
       "icon": "🧹",
-      "image": "assets/catalog-images/cleaning-utility-a276a6.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1689127903369-aef916b0c40d?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Nellie Adamyan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-yellow-mop-and-a-yellow-bucket-against-a-pink-wall-qcmH5i-oTVc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Plastic Bucket 15 Litre",
@@ -11814,19 +11838,38 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 250,
       "icon": "🧴",
-      "image": "assets/catalog-images/glass-cleaner-spray-256aa5.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1632243575963-3143700087ed?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lucas van Oort",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-spray-bottle-on-a-table-with-a-blurry-background-MHrmbMQ8DJ8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Washing Line Rope 20m",
       "unit": "piece",
       "price": 180,
       "icon": "🪢",
-      "image": "assets/catalog-images/cleaning-utility-a276a6.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1782908199925-15d46fd1d9d4?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Liosha Shyp",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clothes-hanging-on-a-clothesline-against-a-bright-blue-sky-BNIdkggOFvQ",
+       "source": "Unsplash"
+      }
      }
     ],
-    "image": "assets/catalog-images/cleaning-utility-a276a6.webp"
+    "image": "assets/catalog-images/cleaning-utility-a276a6.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1782908199925-15d46fd1d9d4?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Liosha Shyp",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/clothes-hanging-on-a-clothesline-against-a-bright-blue-sky-BNIdkggOFvQ",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Glass & Serving",
@@ -11909,8 +11952,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 120,
       "icon": "🧊",
-      "image": "assets/catalog-images/ice-cube-tray-e2a983.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1627808814694-f2a18f68ed60?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "RYNA studio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pink-and-white-ice-cubes-cqGNnCRbYs8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Glass Dessert Cups Set of 6",
@@ -12254,8 +12303,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 350,
       "icon": "🚪",
-      "image": "assets/catalog-images/door-mat-28929b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1672403391906-810131b660eb?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "K Adams",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-black-door-mat-sitting-on-the-side-of-a-door-bahNs99wYng",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Floor Rug",
@@ -12804,14 +12859,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧴",
       "image": "assets/catalog-images/baby-lotion-bc427e.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1750085036915-6e21c6981586?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Jaye Haych",
+       "name": "Zoshua Colah",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "photoUrl": "https://unsplash.com/photos/johnsons-baby-oil-and-lotion-are-displayed-8XtQp4UVB34",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Baby Shampoo 200ml",
@@ -12928,11 +12983,11 @@ export const MASTER_CATALOG: CatalogShopType[] = [
      }
     ],
     "image": "assets/catalog-images/baby-essentials-7b6496.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1750085036915-6e21c6981586?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Jaye Haych",
+     "name": "Zoshua Colah",
      "profileUrl": "",
-     "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+     "photoUrl": "https://unsplash.com/photos/johnsons-baby-oil-and-lotion-are-displayed-8XtQp4UVB34",
      "source": "Unsplash"
     }
    },
@@ -13225,8 +13280,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 300,
       "icon": "💧",
-      "image": "assets/catalog-images/bird-water-feeder-01657d.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1598280860721-14d1fd80a8af?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mark Timberlake",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/yellow-and-black-bird-on-brown-and-white-bird-feeder-YXJG6duQfwY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Pet Food Bowl",
@@ -13303,16 +13364,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 280,
       "icon": "🧴",
-      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1584969692915-882ae5013447?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "omid armin",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/person-holding-white-and-blue-plastic-bottle-IDV4BtRIxlY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Livestock Wound Ointment",
       "unit": "piece",
       "price": 220,
       "icon": "🧴",
-      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1624023889166-3bfd2474604e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Nenyasha Manzvera",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/nivea-creme-on-green-surface-ST67qUAB9n8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cattle Calcium Supplement 1kg",
@@ -13343,8 +13416,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 550,
       "icon": "🐔",
-      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1569466593977-94ee7ed02ec9?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Arisa Chattasa",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/flock-of-hen-mJ7ghTbKXYo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Heat Lamp Bulb 250W",
@@ -13363,7 +13442,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/veterinary-basics-f47b8c.webp"
+    "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1569466593977-94ee7ed02ec9?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Arisa Chattasa",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/flock-of-hen-mJ7ghTbKXYo",
+     "source": "Unsplash"
+    }
    }
   ]
  },
@@ -13435,8 +13521,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 220,
       "icon": "🖍️",
-      "image": "assets/catalog-images/highlighter-4-4c369c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1642440441537-97a32d0444ce?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jonas Von Werne",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-different-colored-batteries-sitting-next-to-each-other-SpfiUSE0xJc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Marker Set of 6",
@@ -13743,8 +13835,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "box",
       "price": 550,
       "icon": "🎨",
-      "image": "assets/catalog-images/poster-colors-12-v2-526d53.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1781545385260-9f321f8d3f78?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Spring Mai",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/colorful-paint-jars-and-art-supplies-on-a-wooden-table-f189MoE9Y0Y",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Paint Brushes Set of 6",
@@ -13908,16 +14006,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1800,
       "icon": "🎒",
-      "image": "assets/catalog-images/school-bag-product-v2-4a2fdc.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1726726192148-af52008ff663?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "The Design Lady",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-yellow-backpack-sitting-on-top-of-a-table-C7eQtdkINpc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Lunch Box",
       "unit": "piece",
       "price": 550,
       "icon": "🍱",
-      "image": "assets/catalog-images/lunch-f1e8a2.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1784979472083-dd3c4c109345?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Peter Heymans",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-lunchbox-filled-with-a-sandwich-cucumbers-radishes-and-tomatoes-eZRNJ0eUqtc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "School Water Bottle",
@@ -13948,8 +14058,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 60,
       "icon": "📏",
-      "image": "assets/catalog-images/ruler-eada47.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1502043150060-b01aa3030556?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Christian Kaindl",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-wooden-ruler-xnUQO2DwXOo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Scale Set of 3",
@@ -13964,8 +14080,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 350,
       "icon": "📋",
-      "image": "assets/catalog-images/exam-board-v2-6358e0.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1743385779431-45d26d9775b1?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kelly Sikkema",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clipboard-pencil-and-pen-on-a-wooden-surface-zQCDJZLS-Ms",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Uniform Belt",
@@ -14020,8 +14142,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "📖",
-      "image": "assets/catalog-images/english-urdu-dictionary-c6ea2e.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1451226428352-cf66bf8a0317?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Romain Vignes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/focus-dictionary-index-page-ywqa9IZB-dU",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "English Grammar Book",
@@ -15592,24 +15720,42 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "⚡",
-      "image": "assets/catalog-images/mcb-single-pole-0ebab2.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1576446470246-499c738d1c8e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mark Kats",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-circuit-breakers-oj1zW_PNI4k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "MCB 16A Single Pole",
       "unit": "piece",
       "price": 680,
       "icon": "⚡",
-      "image": "assets/catalog-images/mcb-single-pole-0ebab2.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1576446470246-499c738d1c8e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mark Kats",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-circuit-breakers-oj1zW_PNI4k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "MCB 32A Single Pole",
       "unit": "piece",
       "price": 720,
       "icon": "⚡",
-      "image": "assets/catalog-images/mcb-single-pole-0ebab2.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1576446470246-499c738d1c8e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mark Kats",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-circuit-breakers-oj1zW_PNI4k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "MCB 63A Double Pole",
@@ -15766,11 +15912,24 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 380,
       "icon": "🕯️",
-      "image": "assets/catalog-images/bulbs-lights-2b7e2f.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1765148687603-661834433aae?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Shahraiz Tabassam",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-lit-candle-shaped-light-bulb-in-darkness-RDco8MTpZbQ",
+       "source": "Unsplash"
+      }
      }
     ],
-    "image": "assets/catalog-images/bulbs-lights-2b7e2f.webp"
+    "image": "assets/catalog-images/bulbs-lights-2b7e2f.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1765148687603-661834433aae?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Shahraiz Tabassam",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-lit-candle-shaped-light-bulb-in-darkness-RDco8MTpZbQ",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Fans & Motors",
@@ -18897,8 +19056,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 250,
       "icon": "🕌",
       "nameUrdu": "ٹوپی",
-      "image": "assets/catalog-images/prayer-cap-v2-68d703.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1782237319321-bac65528d4a5?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "MOHD FADZILLAH SULAIMAN",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/many-traditional-embroidered-skullcaps-displayed-in-black-and-white-3druzBrgR6k",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp"
@@ -18911,8 +19076,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 600,
       "icon": "👶",
-      "image": "assets/catalog-images/baby-suit-0-ee91e4.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1766918780914-5df4a5a98c44?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "jackson kondili",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/baby-clothes-hanging-on-a-rack-5juo633uIEc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Baby Romper",
@@ -18935,8 +19106,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1100,
       "icon": "👧",
-      "image": "assets/catalog-images/kids-frock-b6cc8e.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-kids-frock-a3353e.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Cinderella",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3ADress%2C_girl%27s_%28AM_1996.207.9-1%29.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Kids Jeans",
@@ -18959,8 +19136,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1100,
       "icon": "🧥",
-      "image": "assets/catalog-images/kids-hoodie-9a379c.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-kids-hoodie-94139e.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Evan0512",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AKids_character_clothing_in_Colma_Target_store.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Kids Sweater",
@@ -19262,16 +19445,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 2500,
       "icon": "🩴",
       "nameUrdu": "چپل",
-      "image": "assets/catalog-images/peshawari-chappal-6f2b42.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1563357732-94f6a5df8e4a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "LumenSoft Technologies",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/flat-sandal-lot-sKFiQmGh7v4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Peshawari Chappal Premium",
       "unit": "piece",
       "price": 4500,
       "icon": "🩴",
-      "image": "assets/catalog-images/peshawari-chappal-6f2b42.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1563357732-94f6a5df8e4a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "LumenSoft Technologies",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/flat-sandal-lot-sKFiQmGh7v4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Kohati Chappal",
@@ -19348,16 +19543,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1800,
       "icon": "👠",
-      "image": "assets/catalog-images/ladies-heel-sandal-a8e16f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1789110519533-a8b183a458ce?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "engin akyurt",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/gold-high-heel-sandals-6U0O5Vtqw0s",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Ladies Flat Sandal",
       "unit": "piece",
       "price": 1200,
       "icon": "👡",
-      "image": "assets/catalog-images/ladies-flat-sandal-v2-d1fc7d.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1777979925976-723230e37453?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Farhan Chohan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-embellished-flat-sandals-on-a-marble-surface-jnTaH9K2S7U",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Gents Leather Sandal",
@@ -19466,8 +19673,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1400,
       "icon": "👟",
-      "image": "assets/catalog-images/kids-sports-shoes-v2-d0ab76.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1764155161021-bab07b550c01?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mohammed Rasel",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-blue-slip-on-shoes-with-white-pattern-q1-J0hhX-G0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Gym Trainers",
@@ -19520,8 +19733,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2200,
       "icon": "👠",
-      "image": "assets/catalog-images/ladies-pumps-99ca93.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Emily Pottiger",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-textured-high-heeled-pumps-Zx76sbAndc0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Ladies Khussa",
@@ -19979,8 +20198,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 3000,
       "icon": "🛞",
-      "image": "assets/catalog-images/bike-tyre-v2-097273.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-bike-tyre-197409.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Robert",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AMotorcycle_tyre_stack.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Bike Tyre 2.75-17",
@@ -20003,16 +20228,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "🛞",
-      "image": "assets/catalog-images/bike-tube-ba5304.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-bike-tube-1728c5.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Fanny Schertzer",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AChanging_an_inner_tube_-_Adjusting_the_tire.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Bike Tube 18 inch",
       "unit": "piece",
       "price": 700,
       "icon": "🛞",
-      "image": "assets/catalog-images/bike-tube-ba5304.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-bike-tube-1728c5.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Fanny Schertzer",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AChanging_an_inner_tube_-_Adjusting_the_tire.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Puncture Repair Kit",
@@ -20164,8 +20401,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "🧴",
-      "image": "assets/catalog-images/engine-flush-897435.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-engine-flush-bb759b.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:A7N8X&amp;action=edit&am",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AEngine_tune-up.jpg",
+       "source": "Wikimedia Commons"
+      }
      }
     ],
     "image": "assets/catalog-images/oils-lubricants-7f1041.webp"
@@ -20402,8 +20645,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1200,
       "icon": "🏍️",
-      "image": "assets/catalog-images/bike-cover-f5b12b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1773414052632-c805d4304fce?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Pegah Moghadas",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/motorcycle-covered-with-a-silver-tarp-outdoors-y71LmwokXf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Car Cover",
@@ -20504,8 +20753,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 350,
       "icon": "⛽",
-      "image": "assets/catalog-images/fuel-filter-9c1c84.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-fuel-filter-09c5b1.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Mj-bird",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AOil_filter_and_Fuel_filter_of_UD_Trucks%2C.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Car Air Filter",
@@ -20589,8 +20844,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 4500,
       "icon": "🌾",
-      "image": "assets/catalog-images/urea-bag-367bc8.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1710223221719-6251cb1b5c5b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kenneth Berrios Alvarez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-white-balls-jvFgC2F4gf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "SOP Bag 50kg",
@@ -20605,8 +20866,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 9500,
       "icon": "🌾",
-      "image": "assets/catalog-images/npk-15-15-15-c4c495.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-npk-bag-942069.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:DBlaine83&amp;action=edi",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3ANPK_Fertilizer.png",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "SSP Bag 50kg",
@@ -20629,8 +20896,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 1800,
       "icon": "⚗️",
-      "image": "assets/catalog-images/zinc-sulphate-v2-e1b09e.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-zinc-sulphate-f68a7f.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Valle de Aves</",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3ALitopon.png",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Boron 3kg",
@@ -20653,8 +20926,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 900,
       "icon": "🧪",
-      "image": "assets/catalog-images/humic-acid-v2-849ccc.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-humic-acid-6c4b87.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Alexignat&amp;action=edi",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AHumic_acid.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Epsom Salt 25kg",
@@ -20707,8 +20986,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 5500,
       "icon": "☁️",
-      "image": "assets/catalog-images/cotton-seed-c3dc9f.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-cotton-seed-14b354.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "<a href=\"//commons.wikimedia.org/wiki/User:Thamizhpparithi_Maari\" title=\"User:Th",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AA_bag_of_cotton_seeds.JPG",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Mustard Seed 5kg",
@@ -20739,8 +21024,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 7000,
       "icon": "🥔",
-      "image": "assets/catalog-images/potato-seed-e8eca6.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-potato-seed-d8b23b.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Gaurav Dhwaj Khadka",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3ASeed_Potatoes.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Bajra Fodder Seed 10kg",
@@ -20936,8 +21227,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2500,
       "icon": "🦺",
-      "image": "assets/catalog-images/protective-spray-suit-f39e28.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-protective-spray-suit-4f79a6.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Wikimedia Commons contributor",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AUSMC-070619-M-7747B-008.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Measuring Cylinder 1L",
@@ -20967,8 +21264,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 900,
       "icon": "⛏️",
-      "image": "assets/catalog-images/hoe-v2-c283f9.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-hoe-f5bead.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Moheen",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AHoe_-_%E0%A6%A8%E0%A6%BF%E0%A6%A1%E0%A6%BC%E0%A6%BE%E0%A6%A8%E0%A6%BF_-_DSC00544.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Sickle (Daranti)",
@@ -20976,8 +21279,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 450,
       "icon": "🌾",
       "nameUrdu": "درانتی",
-      "image": "assets/catalog-images/sickle-v2-8c5350.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-sickle-72a7d0.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "<a href=\"//commons.wikimedia.org/wiki/User:%E0%A4%9C%E0%A5%8D%E0%A4%9E%E0%A4%BE%",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AIndian_sickle.png",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Axe (Kulhara)",
@@ -20993,16 +21302,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1100,
       "icon": "⛏️",
-      "image": "assets/catalog-images/shovel-9c8a40.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-shovel-1386d4.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:SvenPek&amp;action=edit&",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3ASkovl.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Garden Rake",
       "unit": "piece",
       "price": 800,
       "icon": "🧹",
-      "image": "assets/catalog-images/garden-rake-v2-df71d1.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-garden-rake-e44cf5.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Pearson S",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3ARake_-_Tool_3_%28PSF%29.png",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Wheelbarrow",
@@ -21033,8 +21354,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "kg",
       "price": 600,
       "icon": "🪢",
-      "image": "assets/catalog-images/nylon-rope-8a6239.webp",
-      "imageLevel": "item"
+      "image": "assets/catalog-images/fix-nylon-rope-57e273.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Angelsharum",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3ANylon_Rope.JPG",
+       "source": "Wikimedia Commons"
+      }
      }
     ],
     "image": "assets/catalog-images/farm-tools-d39e92.webp"
@@ -21255,8 +21582,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1200,
       "icon": "🔶",
-      "image": "assets/catalog-images/artificial-bangles-e3018b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1612945578381-6481cdd73b0a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Hush Naidoo Jade Photography",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/gold-and-red-floral-textile-lwjBhbslaF4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Artificial Earrings",
@@ -21271,8 +21604,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2500,
       "icon": "📿",
-      "image": "assets/catalog-images/artificial-necklace-v2-9fb503.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1589128777073-263566ae5e4d?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Sabrianna",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-heart-pendant-necklace-on-white-background-u1Hv_erOQH0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Artificial Ring",
@@ -21375,8 +21714,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 6000,
       "icon": "⌚",
-      "image": "assets/catalog-images/couple-watch-71785d.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1568010213205-81f253b9a040?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jorg Helberg",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/two-round-silver-colored-watches-with-blue-and-grey-band-QXW7ankytdw",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Wall Clock",
@@ -21415,8 +21760,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1200,
       "icon": "⌚",
-      "image": "assets/catalog-images/kids-watch-185e09.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1706536650926-c10c8a527e72?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Bagzhan Sadvakassov",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-toy-watch-sitting-on-top-of-a-plastic-stand-w2PdZwSY8Uo",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/watches-clocks-1d18a6.webp"
@@ -21577,16 +21928,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1800,
       "icon": "⚽",
-      "image": "assets/catalog-images/football-size-5-e3a66e.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1769356636430-e04718f78ee8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Noa GENOUD",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-classic-soccer-ball-rests-on-green-grass-dHZAiGK0KYg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Football Size 4",
       "unit": "piece",
       "price": 1500,
       "icon": "⚽",
-      "image": "assets/catalog-images/football-size-4-4ba6ec.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1769356636430-e04718f78ee8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Noa GENOUD",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-classic-soccer-ball-rests-on-green-grass-dHZAiGK0KYg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Futsal Ball",
@@ -21703,8 +22066,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 500,
       "icon": "🏓",
-      "image": "assets/catalog-images/tt-balls-6-7f0ebd.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1676827613262-5fba25cee5fd?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Inkiipow",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/two-ping-pong-paddles-and-an-orange-ball-on-a-blue-table-JwxatcF2Oec",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/badminton-racket-sports-512c12.webp"
@@ -21964,8 +22333,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2200,
       "icon": "🏀",
-      "image": "assets/catalog-images/basketball-c71a18.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1627627256672-027a4613d028?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kylie Osullivan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-and-black-basketball-ball-BfaBLVCBTI8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Hockey Stick",
