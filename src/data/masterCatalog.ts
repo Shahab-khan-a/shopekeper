@@ -3500,8 +3500,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 210,
       "icon": "🥛",
       "nameUrdu": "دودھ",
-      "image": "assets/catalog-images/fresh-milk-46310d.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1639151082235-406d8eb262b9?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mary Skrynnikova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-milk-next-to-a-glass-of-milk-c6TKtsi8C1k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Fresh Milk Half Litre",
@@ -3531,7 +3537,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/fresh-milk-46310d.webp"
+    "image": "assets/catalog-images/fresh-milk-46310d.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1639151082235-406d8eb262b9?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Mary Skrynnikova",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-bottle-of-milk-next-to-a-glass-of-milk-c6TKtsi8C1k",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Yogurt & Curd",
@@ -3569,8 +3582,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 340,
       "icon": "🍶",
       "nameUrdu": "میٹھا دہی",
-      "image": "assets/catalog-images/sweet-yogurt-2bf5dd.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1571212515416-fef01fc43637?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "micheile henderson",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bowl-of-yogurt-with-a-spoon-in-it-NFHeBysjCTI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Greek Yogurt 400g",
@@ -3629,8 +3648,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 850,
       "icon": "🧈",
       "nameUrdu": "سفید مکھن",
-      "image": "assets/catalog-images/white-butter-500g-643496.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1719148162837-63d2f256231f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Marine Le Gac",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-piece-of-butter-sitting-on-top-of-a-white-plate-4X7eA9zN8mg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Salted Butter 250g",
@@ -3665,8 +3690,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 550,
       "icon": "🥛",
       "nameUrdu": "ملائی",
-      "image": "assets/catalog-images/cream-500g-35e752.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1786695144564-d1cd05367032?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Le Tia",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/whipped-cream-in-pink-bowl--IT3JFWGKeM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Whipped Cream 250ml",
@@ -3774,8 +3805,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 450,
       "icon": "🍚",
       "nameUrdu": "کھیر",
-      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1777613112969-d7511ddfbe15?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Adil Murshed",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bowl-of-creamy-rice-pudding-with-marigold-garland-9Gm-wNAaWzg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Gulab Jamun Tin 1kg",
@@ -3783,8 +3820,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1150,
       "icon": "🍩",
       "nameUrdu": "گلاب جامن",
-      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1695568180070-8b5acead5cf4?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Gaurav Kumar",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-doughnuts-sitting-on-top-of-a-white-plate-bm1dJYcGJLw",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Barfi Mix 500g",
@@ -3792,8 +3835,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 550,
       "icon": "🍬",
       "nameUrdu": "برفی",
-      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1782033032439-a2c656ca2f59?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Bonala Yellender",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-display-case-filled-with-various-delicious-pastries-and-sweets-wMPs7gJCNdc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Custard Powder 250g",
@@ -3805,7 +3854,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "category"
      }
     ],
-    "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp"
+    "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1777613112969-d7511ddfbe15?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Adil Murshed",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-bowl-of-creamy-rice-pudding-with-marigold-garland-9Gm-wNAaWzg",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Eggs",
@@ -3834,8 +3890,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 550,
       "icon": "🦆",
       "nameUrdu": "بطخ کے انڈے",
-      "image": "assets/catalog-images/duck-eggs-half-dozen-663147.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1583219691003-11f9a428e212?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ines Iachelini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-egg-on-blue-egg-tray-721Bop6PA6g",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Boiled Eggs (Ready, 4pc)",
@@ -11720,16 +11782,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "🫓",
-      "image": "assets/catalog-images/cooking-tools-b08c65.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1780907084884-ded9fddbb474?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "AJOY DAS",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/fresh-flatbread-cooking-on-a-dark-griddle-Ju0XPJLxPw0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Wooden Spoon Set of 4",
       "unit": "packet",
       "price": 250,
       "icon": "🥄",
-      "image": "assets/catalog-images/wooden-spoon-4-eeea7b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1580151820172-ae6491498c54?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Louis Hansel",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-wooden-spoon-on-gray-textile-sth3hzzt7Pk",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Silicone Spatula Set of 3",
@@ -11789,7 +11863,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/cooking-tools-b08c65.webp"
+    "image": "assets/catalog-images/cooking-tools-b08c65.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1780907084884-ded9fddbb474?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "AJOY DAS",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/fresh-flatbread-cooking-on-a-dark-griddle-Ju0XPJLxPw0",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Cleaning & Utility",
@@ -15550,32 +15631,56 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 9500,
       "icon": "🧵",
       "nameUrdu": "تار",
-      "image": "assets/catalog-images/copper-wire-3-29-v2-377a72.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1707409464255-e78eb873298a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Guille B",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-coil-of-copper-wire-on-a-table-TqueZSSAloY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Copper Wire 7/29 90m Roll",
       "unit": "piece",
       "price": 14500,
       "icon": "🧵",
-      "image": "assets/catalog-images/copper-wire-7-29-v2-d9456f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1707409464255-e78eb873298a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Guille B",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-coil-of-copper-wire-on-a-table-TqueZSSAloY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Copper Wire 7/36 90m Roll",
       "unit": "piece",
       "price": 18500,
       "icon": "🧵",
-      "image": "assets/catalog-images/copper-wire-7-36-f597c4.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1707409464255-e78eb873298a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Guille B",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-coil-of-copper-wire-on-a-table-TqueZSSAloY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Flexible Wire 2 Core 90m Roll",
       "unit": "piece",
       "price": 6800,
       "icon": "🧵",
-      "image": "assets/catalog-images/flexible-wire-2-core-v2-3acbe6.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1687038520693-e528c10e450a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kier in Sight Archives",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-black-wires-are-stacked-together-EYAfw1ujabI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Flexible Wire 3 Core 90m Roll",
@@ -15660,40 +15765,70 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 420,
       "icon": "🔲",
-      "image": "assets/catalog-images/switch-plate-2-gang-v2-021dcc.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1788160834728-60b5cd8db787?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lunyon",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-light-switch-with-black-toggles-adjonsWxt6w",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Switch Plate 4 Gang",
       "unit": "piece",
       "price": 680,
       "icon": "🔲",
-      "image": "assets/catalog-images/switch-plate-4-gang-2729ea.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1788160834728-60b5cd8db787?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lunyon",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-light-switch-with-black-toggles-adjonsWxt6w",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Switch Plate 6 Gang",
       "unit": "piece",
       "price": 950,
       "icon": "🔲",
-      "image": "assets/catalog-images/switch-plate-6-gang-6560e6.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1788160834728-60b5cd8db787?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lunyon",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-light-switch-with-black-toggles-adjonsWxt6w",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Switch Plate 8 Gang",
       "unit": "piece",
       "price": 1250,
       "icon": "🔲",
-      "image": "assets/catalog-images/switch-plate-8-gang-cc1cba.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1788160834728-60b5cd8db787?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lunyon",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-light-switch-with-black-toggles-adjonsWxt6w",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Switch Plate 12 Gang",
       "unit": "piece",
       "price": 1850,
       "icon": "🔲",
-      "image": "assets/catalog-images/switch-plate-12-gang-5ed582.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1788160834728-60b5cd8db787?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lunyon",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-light-switch-with-black-toggles-adjonsWxt6w",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Fan Dimmer Regulator",
@@ -15837,8 +15972,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2450,
       "icon": "📋",
-      "image": "assets/catalog-images/distribution-board-8-way-d5a642.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Markus Spiske",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/electrical-switch-box-with-circuit-breakers-kK7uPfb2YWU",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Distribution Board 12 Way",
@@ -15923,8 +16064,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 750,
       "icon": "🔆",
-      "image": "assets/catalog-images/led-panel-light-round-ed808b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1531749086006-778f081e9fd8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Florian Meissner",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/two-round-white-plates-on-floor-Nb7meWvvcGo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "LED Flood Light 50W",
@@ -15991,24 +16138,42 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 13800,
       "icon": "🌀",
-      "image": "assets/catalog-images/inverter-fan-a0a2e5.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1609519479841-5fd3b2884e17?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kalyanaraman S",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-5-blade-ceiling-fan-Ww9nZ1MGQLY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Exhaust Fan 8 inch Plastic",
       "unit": "piece",
       "price": 2200,
       "icon": "💨",
-      "image": "assets/catalog-images/exhaust-fan-plastic-147c52.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1652699160837-6471c565b440?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "nazanin mohammadi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-round-window-with-a-fan-in-the-middle-of-it-E-bQQNMbI6k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Exhaust Fan 12 inch Metal",
       "unit": "piece",
       "price": 4200,
       "icon": "💨",
-      "image": "assets/catalog-images/exhaust-fan-metal-651617.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1652699160837-6471c565b440?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "nazanin mohammadi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-round-window-with-a-fan-in-the-middle-of-it-E-bQQNMbI6k",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Bracket Fan 18 inch",
@@ -19655,8 +19820,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 600,
       "icon": "🩴",
-      "image": "assets/catalog-images/kids-chappal-v2-ac0e8f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1563357732-94f6a5df8e4a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "LumenSoft Technologies",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/flat-sandal-lot-sKFiQmGh7v4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Medicated Chappal",
@@ -19713,8 +19884,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 400,
       "icon": "🩴",
-      "image": "assets/catalog-images/flip-flops-565272.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1692536631218-ce4264088abe?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Nando Martins",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-white-slippers-sitting-on-top-of-a-lush-green-field-Q2FWiTgJruA",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Wedge Heel Sandal",
@@ -19775,8 +19952,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2800,
       "icon": "⚽",
-      "image": "assets/catalog-images/football-studs-41772c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1768696082282-df2812a4f7d8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "otabek xatipov",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-soccer-cleats-with-white-and-blue-accents-rx3Fpnl6sw4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Badminton Shoes",
@@ -19882,24 +20065,42 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1800,
       "icon": "👡",
       "nameUrdu": "کھسہ",
-      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1777980157996-6f689bb393ab?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Farhan Chohan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/embroidered-red-velvet-juttis-on-a-white-fluffy-surface-Nk6_V77BwwY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Bridal Khussa",
       "unit": "piece",
       "price": 3500,
       "icon": "👡",
-      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1777980157996-6f689bb393ab?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Farhan Chohan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/embroidered-red-velvet-juttis-on-a-white-fluffy-surface-Nk6_V77BwwY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Boys School Shoes",
       "unit": "piece",
       "price": 1400,
       "icon": "👞",
-      "image": "assets/catalog-images/boys-school-shoes-product-v2-b2df5f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1653868249857-c95d5a3f6109?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Amr Taha",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-black-shoes-on-a-white-background-lJk1GCJMo3E",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Girls School Shoes",
@@ -19930,11 +20131,24 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1100,
       "icon": "🩴",
-      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1563357732-94f6a5df8e4a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "LumenSoft Technologies",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/flat-sandal-lot-sKFiQmGh7v4",
+       "source": "Unsplash"
+      }
      }
     ],
-    "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp"
+    "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1563357732-94f6a5df8e4a?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "LumenSoft Technologies",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/flat-sandal-lot-sKFiQmGh7v4",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Socks & Shoe Care",
