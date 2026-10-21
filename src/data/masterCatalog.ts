@@ -2250,14 +2250,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🍝",
       "image": "assets/catalog-images/spaghetti-500g-54447f.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1792242776385-ef56e36256a2?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Robert Dolega",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/spaghetti-strands-against-black-background-9mrAIytSOI0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Macaroni 500g",
@@ -2265,14 +2265,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 360,
       "icon": "🍝",
       "nameUrdu": "میکرونی",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1590060846796-0418842f3908?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Ayush Sharma",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/yellow-rubber-balloons-in-close-up-photography-b1dxNswO_C4",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Maggi 2-Min Noodles (12 pack)",
@@ -2280,14 +2280,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 720,
       "icon": "🍜",
       "nameUrdu": "نوڈلز",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1591874879354-bf0a6e982c60?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Jeff Siepman",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-red-noodle-cup-3ZLDdR7x52w",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Knorr Chicken Noodles (Pack)",
@@ -2295,14 +2295,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 120,
       "icon": "🍜",
       "nameUrdu": "نوڈلز",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1591874879354-bf0a6e982c60?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Jeff Siepman",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-red-noodle-cup-3ZLDdR7x52w",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Chicken Soup Mix (Shan)",
@@ -2312,14 +2312,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "سوپ",
       "image": "assets/catalog-images/chicken-soup-mix-d6f3ce.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1788141554554-206bd5510910?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Charles Chen",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/chicken-and-shiitake-mushroom-soup-_354IkobM0o",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Canned Tuna 170g",
@@ -2342,14 +2342,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 550,
       "icon": "🍄",
       "nameUrdu": "مشروم",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1564508080589-f719e2cde765?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "OSPAN ALI",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-mushrooms-in-bottles-imWSoX1qoG0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Sweet Corn Can 400g",
@@ -2357,14 +2357,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 480,
       "icon": "🌽",
       "nameUrdu": "مکئی",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1760361571822-1984e9a5887d?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Mustafa akın",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-ears-of-fresh-corn-on-a-wooden-surface-PIhPkdnYpf0",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Baked Beans 400g",
@@ -2405,14 +2405,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "ناریل کا دودھ",
       "image": "assets/catalog-images/coconut-milk-ea2abb.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1588413335367-e49d32c5b50b?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Tijana Drndarski",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-pillar-candle-on-brown-wooden-coaster-eDj-bODzFx8",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Canned Chickpeas 400g",
@@ -2420,14 +2420,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 380,
       "icon": "🫘",
       "nameUrdu": "چنے",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1644432757699-bb5a01e8fb0e?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
+       "name": "Karyna Panchenko",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bowl-filled-with-chickpeas-sitting-on-top-of-a-table-5352eOUYay4",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "imageSource": "unsplash"
      }
     ],
     "imageUrl": "https://images.unsplash.com/photo-1779119867390-c64f66cd02b8?q=80&w=800&auto=format&fit=crop",
@@ -2925,8 +2925,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 750,
       "icon": "🥛",
       "nameUrdu": "ذائقہ دار دودھ",
-      "image": "assets/catalog-images/flavoured-milk-f0d4b2.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1760812990908-70aff19fc16e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Harendra Rathnajeewa",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-bottles-of-flavored-milk-drinks-with-red-caps-oJ-RaDeF30g",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Chocolate Milk 1 Litre",
@@ -6964,8 +6970,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 60,
       "icon": "🫓",
       "nameUrdu": "پوری",
-      "image": "assets/catalog-images/puri-dfa478.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1605719161691-5d9771fc144f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Syed Hussaini",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/fried-egg-on-white-ceramic-plate-r6Y01QzcVdY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Suji Halwa Plate",
@@ -6982,8 +6994,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 80,
       "icon": "🍳",
       "nameUrdu": "انڈا ہاف فرائی",
-      "image": "assets/catalog-images/anda-077a10.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1691480184494-d9f822edd4d1?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "personalgraphic.com",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-fried-egg-on-a-white-plate-8oNpesw9idE",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Anda (Omelette)",
@@ -7033,16 +7051,22 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 300,
       "icon": "🍲",
       "nameUrdu": "نہاری",
-      "image": "assets/catalog-images/breakfast-f2265d.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1708782344071-c5382e27ef3e?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Rimsha Noor",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bowl-of-soup-on-a-wooden-table-YAfJ0LC-uNE",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/breakfast-f2265d.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1779119867390-c64f66cd02b8?q=80&w=800&auto=format&fit=crop",
+    "imageUrl": "https://images.unsplash.com/photo-1708782344071-c5382e27ef3e?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "tommao wang",
+     "name": "Rimsha Noor",
      "profileUrl": "",
-     "photoUrl": "https://unsplash.com/photos/white-beans-in-tomato-sauce-served-in-a-white-bowl-IcSyeAnOj6k",
+     "photoUrl": "https://unsplash.com/photos/a-bowl-of-soup-on-a-wooden-table-YAfJ0LC-uNE",
      "source": "Unsplash"
     }
    },
@@ -13077,16 +13101,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "box",
       "price": 1500,
       "icon": "🧱",
-      "image": "assets/catalog-images/building-blocks-100-v2-6786d9.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Xavi Cabrera",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/yellow-red-blue-and-green-lego-blocks-kn-UmDZQDjM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Brick Construction Box",
       "unit": "box",
       "price": 2200,
       "icon": "🧱",
-      "image": "assets/catalog-images/brick-construction-7c1aee.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Xavi Cabrera",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/yellow-red-blue-and-green-lego-blocks-kn-UmDZQDjM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Jigsaw Puzzle 500 Pieces",
@@ -13109,24 +13145,42 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 500,
       "icon": "🔢",
-      "image": "assets/catalog-images/number-counting-toy-v2-f1b681.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1548690596-f1722c190938?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Crissy Jarvis",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/multicolored-abacus-cHhbULJbPwM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Shape Sorter Cube",
       "unit": "piece",
       "price": 650,
       "icon": "🔷",
-      "image": "assets/catalog-images/shape-sorter-cube-129822.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1774464593838-85b320eb7453?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Angie Dutton",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/wooden-shape-sorter-toy-with-colorful-blocks-E1shiIGT8Oo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Magnetic Tiles Set",
       "unit": "box",
       "price": 1800,
       "icon": "🧲",
-      "image": "assets/catalog-images/magnetic-tiles-a7ac25.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1765403256661-c60b291c38ba?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Sebastian Schuster",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pile-of-colorful-geometric-building-blocks-0pjlh3xzDRo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Stacking Rings Toy",
@@ -13163,8 +13217,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 4500,
       "icon": "🚲",
-      "image": "assets/catalog-images/kids-tricycle-v2-248383.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1459992900655-b635a8a7a89c?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Rodolfo Mari",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/red-radio-flyer-trike-on-brown-dried-leaves-2sNnC0zDOBQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Kids Bicycle 16 inch",
@@ -13309,14 +13369,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🍼",
       "image": "assets/catalog-images/baby-feeding-bottle-edd165.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?q=80&w=800&auto=format&fit=crop",
       "credit": {
        "name": "Jaye Haych",
        "profileUrl": "",
        "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Baby Lotion 200ml",
@@ -13341,14 +13401,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧴",
       "image": "assets/catalog-images/baby-shampoo-7f1b47.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1750085894110-b2e2f11d5e8b?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Jaye Haych",
+       "name": "Zoshua Colah",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "photoUrl": "https://unsplash.com/photos/johnsons-baby-shampoo-bottles-are-on-display-YTB_nXkyu6M",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Baby Soap Bar",
@@ -13357,14 +13417,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧼",
       "image": "assets/catalog-images/baby-soap-bar-1e341d.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1546552768-9e3a94b38a59?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Jaye Haych",
+       "name": "Heather Ford",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "photoUrl": "https://unsplash.com/photos/assorted-bar-soaps-FbrDS0jY_Hw",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Baby Hooded Towel",
@@ -13373,14 +13433,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧣",
       "image": "assets/catalog-images/baby-essentials-7b6496.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1763089359160-3c55707c5808?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Jaye Haych",
+       "name": "wang binghua",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "photoUrl": "https://unsplash.com/photos/child-hides-face-under-hooded-towel-on-striped-bed-0ofmwrblJxc",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -13390,14 +13449,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🛌",
       "image": "assets/catalog-images/baby-blanket-v2-c429e0.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1675273534704-5cd901ca6f94?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Jaye Haych",
+       "name": "Ashlee Marie",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "photoUrl": "https://unsplash.com/photos/a-blue-and-white-crocheted-blanket-with-a-circular-design-DweYOm78-so",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Baby Carrier",
@@ -13438,14 +13497,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🔔",
       "image": "assets/catalog-images/baby-rattle-4-f71bcd.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1725297951080-47e72ef3f788?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Jaye Haych",
+       "name": "Eric Prouzet",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-toys-that-are-in-a-box-5PkMxH1wh24",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      }
     ],
     "image": "assets/catalog-images/baby-essentials-7b6496.webp",
@@ -16250,8 +16309,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2400,
       "icon": "🧵",
-      "image": "assets/catalog-images/service-drop-wire-2-e0fe4c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1687038520693-e528c10e450a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kier in Sight Archives",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-black-wires-are-stacked-together-EYAfw1ujabI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cable Tie 100-pack",
@@ -18445,8 +18510,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2200,
       "icon": "⬜",
-      "image": "assets/catalog-images/white-cement-bag-4e677c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1773394089934-3e29f2a3d6a9?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Khanh Do",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-cement-bags-in-sunlight-0p70_HczZek",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Sulphate Resistant Cement 50kg",
@@ -22181,8 +22252,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2200,
       "icon": "🧵",
-      "image": "assets/catalog-images/spray-hose-a42f7b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1687038520693-e528c10e450a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kier in Sight Archives",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-black-wires-are-stacked-together-EYAfw1ujabI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Petrol Mist Blower",
@@ -22316,8 +22393,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 8500,
       "icon": "🚿",
-      "image": "assets/catalog-images/water-pipe-b3513a.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1729169927271-7826d8aae360?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ries Bosch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-pipes-sitting-next-to-each-other-B0jijv2X-U8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Nylon Rope 1kg",
@@ -22360,8 +22443,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 9500,
       "icon": "💧",
-      "image": "assets/catalog-images/soil-irrigation-698550.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1687038520693-e528c10e450a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kier in Sight Archives",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-black-wires-are-stacked-together-EYAfw1ujabI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Sprinkler Head",
@@ -22376,8 +22465,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1400,
       "icon": "🚿",
-      "image": "assets/catalog-images/pvc-pipe-3a9bd9.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1729169927271-7826d8aae360?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Ries Bosch",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pile-of-pipes-sitting-next-to-each-other-B0jijv2X-U8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Foot Valve 2 inch",
@@ -22388,7 +22483,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/soil-irrigation-698550.webp"
+    "image": "assets/catalog-images/soil-irrigation-698550.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1687038520693-e528c10e450a?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Kier in Sight Archives",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-bunch-of-black-wires-are-stacked-together-EYAfw1ujabI",
+     "source": "Unsplash"
+    }
    }
   ]
  },
