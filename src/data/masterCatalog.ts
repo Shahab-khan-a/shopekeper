@@ -13195,12 +13195,12 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 900,
       "icon": "⚽",
-      "imageUrl": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop",
+      "imageUrl": "https://images.unsplash.com/photo-1769356636430-e04718f78ee8?q=80&w=800&auto=format&fit=crop",
       "imageSource": "unsplash",
       "credit": {
-       "name": "Peter Glaser",
+       "name": "Noa GENOUD",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/white-and-black-soccer-ball-on-green-grass-field-TJXGVduOGf5",
+       "photoUrl": "https://unsplash.com/photos/a-classic-soccer-ball-rests-on-green-grass-dHZAiGK0KYg",
        "source": "Unsplash"
       }
      },
