@@ -11910,8 +11910,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 600,
       "icon": "🥛",
-      "image": "assets/catalog-images/drinking-glass-6-ce3042.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1554140426-5e830b73a5e8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Janosch Lino",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-clear-drinking-glass-on-table-7b1W1mcwekw",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Glass Water Jug",
@@ -11943,8 +11949,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "dozen",
       "price": 800,
       "icon": "🥛",
-      "image": "assets/catalog-images/drinking-glasses-dozen-v2-86d2a7.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1554140426-5e830b73a5e8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Janosch Lino",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-clear-drinking-glass-on-table-7b1W1mcwekw",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Glass Fruit Bowl",
@@ -17658,8 +17670,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1380,
       "icon": "🏗️",
       "nameUrdu": "سیمنٹ",
-      "image": "assets/catalog-images/lucky-cement-bag-fc4e38.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1773394089934-3e29f2a3d6a9?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Khanh Do",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/stacks-of-cement-bags-in-sunlight-0p70_HczZek",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "DG Cement Bag 50kg",
@@ -17800,56 +17818,98 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 248,
       "icon": "🔩",
       "nameUrdu": "سریا",
-      "image": "assets/catalog-images/steel-bar-098f83.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1623428454598-1bfe414bac03?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mads Eneqvist",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-metal-rods-RxLjmG5M4NQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Steel Bar 8mm (Sarya)",
       "unit": "kg",
       "price": 250,
       "icon": "🔩",
-      "image": "assets/catalog-images/steel-bar-098f83.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1623428454598-1bfe414bac03?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mads Eneqvist",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-metal-rods-RxLjmG5M4NQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Steel Bar 10mm (Sarya)",
       "unit": "kg",
       "price": 255,
       "icon": "🔩",
-      "image": "assets/catalog-images/steel-bar-098f83.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1623428454598-1bfe414bac03?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mads Eneqvist",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-metal-rods-RxLjmG5M4NQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Steel Bar 12mm (Sarya)",
       "unit": "kg",
       "price": 260,
       "icon": "🔩",
-      "image": "assets/catalog-images/steel-bar-098f83.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1623428454598-1bfe414bac03?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mads Eneqvist",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-metal-rods-RxLjmG5M4NQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Steel Bar 16mm (Sarya)",
       "unit": "kg",
       "price": 262,
       "icon": "🔩",
-      "image": "assets/catalog-images/steel-bar-098f83.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1623428454598-1bfe414bac03?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mads Eneqvist",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-metal-rods-RxLjmG5M4NQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Steel Bar 20mm (Sarya)",
       "unit": "kg",
       "price": 265,
       "icon": "🔩",
-      "image": "assets/catalog-images/steel-bar-098f83.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1623428454598-1bfe414bac03?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mads Eneqvist",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-metal-rods-RxLjmG5M4NQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Binding Wire 1kg Coil",
       "unit": "kg",
       "price": 320,
       "icon": "🧵",
-      "image": "assets/catalog-images/binding-wire-coil-9eb499.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1518994255497-c5f17690567f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Daniel Fazio",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/gray-wire-lot-m9LlUwkPvT8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "MS Angle 1.5 inch 20ft",
@@ -19012,32 +19072,56 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 350,
       "icon": "🎽",
       "nameUrdu": "بنیان",
-      "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1737094547812-1499f4b700a0?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Maria Kovalets",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-gray-tank-top-on-a-white-background-LNaDxLn61z4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Gents Brief 3-pack",
       "unit": "packet",
       "price": 600,
       "icon": "🩲",
-      "image": "assets/catalog-images/gents-brief-3-9558a7.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1640765937555-6f413ed1d936?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Cosmin Ursea",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-pair-of-underwear-on-a-white-surface-SGZmzGx0dG0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Ladies Bra",
       "unit": "piece",
       "price": 450,
       "icon": "👙",
-      "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1694290340663-65804773ce7a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Malta Gordos",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bra-on-a-table-VwyUF2xdBh0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Ladies Panty 3-pack",
       "unit": "packet",
       "price": 500,
       "icon": "🩲",
-      "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1568441556126-f36ae0900180?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Fahad Waseem",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/assorted-colored-bra-panties-and-sport-bra-AdjyrNhFVPI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cotton Socks Pair",
@@ -19097,7 +19181,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       }
      }
     ],
-    "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp"
+    "image": "assets/catalog-images/undergarments-hosiery-v2-2a51cc.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1568441556126-f36ae0900180?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Fahad Waseem",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/assorted-colored-bra-panties-and-sport-bra-AdjyrNhFVPI",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Kids Wear",
@@ -19159,8 +19250,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 500,
       "icon": "👕",
-      "image": "assets/catalog-images/kids-t-shirt-c60d75.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mediamodifier",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-crew-neck-t-shirt-VoXqvbLAPjM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Kids Hoodie",
@@ -19197,8 +19294,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 300,
       "icon": "🧢",
-      "image": "assets/catalog-images/baby-cap-v2-ac0126.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1565058528605-670489ab6f6c?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Diane Helentjaris",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pink-knit-cap-a6FTTn_TZFo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "School Uniform Shirt",
@@ -20127,8 +20230,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1800,
       "icon": "💡",
-      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1651954884976-3549be5452bf?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Roberto Vincenzo Minasi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-motorcycle-_eP4HHsWBVQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Headlight Bulb 12V",
@@ -20143,8 +20252,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 600,
       "icon": "🔴",
-      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1725745096249-f6e7c160c4be?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Piotr AMS",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-the-tail-light-of-a-car-HwCb7NxD8Xo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Indicator Set 4pc",
@@ -20159,8 +20274,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 700,
       "icon": "🪞",
-      "image": "assets/catalog-images/side-mirror-6fba0c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1735303936540-d62bc740b7b6?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Lera Ginzburg",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-mirror-on-a-motorcycle-_EGZAroQjWU",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Fuel Tank Cap",
@@ -20219,7 +20340,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "category"
      }
     ],
-    "image": "assets/catalog-images/bike-body-electrical-721986.webp"
+    "image": "assets/catalog-images/bike-body-electrical-721986.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1725745096249-f6e7c160c4be?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Piotr AMS",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-close-up-of-the-tail-light-of-a-car-HwCb7NxD8Xo",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Tyres & Tubes",
@@ -20476,14 +20604,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🚗",
       "image": "assets/catalog-images/wiper-blade-95151a.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1508786250378-b165238d6e8b?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Theo",
+       "name": "Thibault Valjevac",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photography-of-black-vehicle-wiper-2m6GjKScw20",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Wiper Blade 18 inch",
@@ -20492,14 +20620,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🚗",
       "image": "assets/catalog-images/wiper-blade-95151a.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1508786250378-b165238d6e8b?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Theo",
+       "name": "Thibault Valjevac",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "photoUrl": "https://unsplash.com/photos/shallow-focus-photography-of-black-vehicle-wiper-2m6GjKScw20",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Car Horn Pair",
@@ -20749,8 +20877,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1200,
       "icon": "🧤",
-      "image": "assets/catalog-images/riding-gloves-a778c0.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1679224636670-3c77124fcdf6?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Aaron Lefler",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-gloves-sitting-on-top-of-a-keyboard-emQMyXVpYns",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Knee Guards Pair",
