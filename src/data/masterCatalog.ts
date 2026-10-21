@@ -3008,8 +3008,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 380,
       "icon": "🍊",
       "nameUrdu": "سنگترے کا رس",
-      "image": "assets/catalog-images/orange-juice-245c8f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "ABHISHEK HAJARE",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-juice-in-clear-drinking-glass-kkrXVKK-jhg",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/packaged-dairy-beverages-b82a2b.webp"
@@ -7870,8 +7876,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 350,
       "icon": "🍊",
       "nameUrdu": "تازہ سنگترے کا رس",
-      "image": "assets/catalog-images/orange-juice-245c8f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "ABHISHEK HAJARE",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-juice-in-clear-drinking-glass-kkrXVKK-jhg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Mango Shake",
@@ -8474,14 +8486,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8491,14 +8502,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8508,14 +8518,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8525,14 +8534,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8542,14 +8550,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8559,14 +8566,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🍶",
       "image": "assets/catalog-images/dextromethorphan-cough-syrup-18c4c4.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1635166304271-04931640a450?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Towfiqu barbhuiya",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-liquid-sitting-on-top-of-a-table-1bZak-jXe7I",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Ambroxol Cough Syrup 120ml",
@@ -8575,14 +8582,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🍶",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1635166304271-04931640a450?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Towfiqu barbhuiya",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/a-bottle-of-liquid-sitting-on-top-of-a-table-1bZak-jXe7I",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8592,14 +8598,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🍯",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1770114047001-9953e9269285?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "atelierbyvineeth",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/vintage-zubes-cough-lozenges-tin-with-womans-portrait-PiE-Hvejbl8",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8626,14 +8631,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🫙",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1737099970628-68bf5a292517?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Maria Kovalets",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/a-blue-jar-of-cream-next-to-a-green-leaf-kUWKf35RcpA",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8660,14 +8664,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "👁️",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1750125625145-7be950011e4c?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Soulride Photography",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-eye-drops-ready-to-administer-Gz5mxa6jE2c",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8711,14 +8714,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🍬",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -8728,22 +8730,22 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/vitamin-c-zinc-10b595.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      }
     ],
     "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1635166304271-04931640a450?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Heather Barnes",
+     "name": "Towfiqu barbhuiya",
      "profileUrl": "",
-     "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+     "photoUrl": "https://unsplash.com/photos/a-bottle-of-liquid-sitting-on-top-of-a-table-1bZak-jXe7I",
      "source": "Unsplash"
     }
    },
@@ -9555,14 +9557,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -9572,14 +9573,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -9589,14 +9589,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -9606,14 +9605,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -9623,14 +9621,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -9640,14 +9637,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💊",
       "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1762328494465-274a63177884?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Zulfugar Karimov",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/hand-holding-blister-packs-of-white-pills-dWUCuIEKjeg",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -9657,14 +9653,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🩺",
       "image": "assets/catalog-images/blood-pressure-monitor-60ee1f.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?q=80&w=800&auto=format&fit=crop",
       "credit": {
        "name": "Mockup Graphics",
        "profileUrl": "",
        "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Digital Glucometer",
@@ -9673,14 +9669,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🩸",
       "image": "assets/catalog-images/digital-glucometer-bd6b37.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1714642596931-2293df25c4a3?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Jane Korsak",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/blood-glucose-meter-with-test-strips-BlgBBf_b_94",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Blood Glucose Test Strips Box of 50",
@@ -9689,14 +9685,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🩸",
       "image": "assets/catalog-images/blood-glucose-test-strips-3901a1.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1714642596931-2293df25c4a3?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Jane Korsak",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/blood-glucose-meter-with-test-strips-BlgBBf_b_94",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Insulin Syringes Box of 10",
@@ -9705,14 +9701,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💉",
       "image": "assets/catalog-images/insulin-syringes-v2-5b59ef.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1635091217983-9c1ac31651a3?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "NEXT Distro",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/a-package-of-bd-insulating-syringes-on-a-white-background-2YrAlcExTO8",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Alcohol Swabs Box of 100",
@@ -9721,14 +9717,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🩹",
       "image": "assets/catalog-images/alcohol-swabs-100-9e0be2.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1635091237750-6ba40359e972?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "NEXT Distro",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/a-pair-of-scissors-sitting-on-top-of-a-box-1WXKq0Q-DUg",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Nebulizer Machine",
@@ -9737,14 +9733,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "💨",
       "image": "assets/catalog-images/nebulizer-machine-v2-8a385e.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1645273474732-8fd9c63a148f?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Sincerely Media",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/a-ventilator-and-oxygen-inhaler-on-a-bed-8wWvAarL_Vw",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Digital Pulse Oximeter",
@@ -9753,14 +9749,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🩺",
       "image": "assets/catalog-images/digital-pulse-oximeter-b4e51a.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1626851528990-fee2c2e6fadb?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Mufid Majnun",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/person-holding-white-and-blue-plastic-container-gfQvLt6f6RM",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Hot Water Bag 2 Litre",
@@ -9769,14 +9765,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "♨️",
       "image": "assets/catalog-images/hot-water-bag-8218a3.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1773747608435-0fa80d11a32f?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Yuliia Pakhomova",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/a-knitted-hot-water-bottle-with-a-green-stopper-4XlKcKpmjwU",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Surgical Gloves Box of 100",
@@ -9785,14 +9781,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧤",
       "image": "assets/catalog-images/surgical-gloves-100-e6d301.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1616524617587-2ddb5ccf87cc?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Wim van 't Einde",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/blue-gloves-on-white-surface-tCUaAk0pMBM",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Face Masks Box of 50",
@@ -9801,22 +9797,22 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "😷",
       "image": "assets/catalog-images/face-masks-50-2a693d.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1584634731339-252c581abfc5?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Mockup Graphics",
+       "name": "Mika Baumeister",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+       "photoUrl": "https://unsplash.com/photos/green-and-white-striped-textile-uz_T7h8ds04",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      }
     ],
     "image": "assets/catalog-images/chronic-care-devices-a5f70e.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1635091237750-6ba40359e972?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Mockup Graphics",
+     "name": "NEXT Distro",
      "profileUrl": "",
-     "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg",
+     "photoUrl": "https://unsplash.com/photos/a-pair-of-scissors-sitting-on-top-of-a-box-1WXKq0Q-DUg",
      "source": "Unsplash"
     }
    },
@@ -13488,8 +13484,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1400,
       "icon": "🌾",
-      "image": "assets/catalog-images/wheat-bran-31f735.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1561767782-d8e3aa77ef77?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Utsman Media",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-pile-of-brown-rice-tyVcPQfncrg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Rice Polish 20kg",
@@ -13558,8 +13560,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 3500,
       "icon": "🐶",
-      "image": "assets/catalog-images/pet-food-f4f2dc.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1764249453850-faace6e57444?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Rafael Rodrigues",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/close-up-of-dry-dog-food-kibble-TrmYHYdxhFQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Dog Food 1kg Pack",
@@ -13598,8 +13606,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 450,
       "icon": "🦜",
-      "image": "assets/catalog-images/pet-food-f4f2dc.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1758612153921-9525532663d6?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Just Jus",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-view-of-mixed-birdseed-with-sunflower-seeds-1_o_MPGuNY0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Fish Flakes Jar",
@@ -13634,7 +13648,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/pet-food-f4f2dc.webp"
+    "image": "assets/catalog-images/pet-food-f4f2dc.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1758612153921-9525532663d6?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Just Jus",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-close-up-view-of-mixed-birdseed-with-sunflower-seeds-1_o_MPGuNY0",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Bird & Small Animal Supplies",
@@ -13644,8 +13665,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2500,
       "icon": "🐦",
-      "image": "assets/catalog-images/bird-cage-v2-c44541.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1546840125-ba012c71366f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Deleece Cook",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-birdcage-Vct2D4rZfmc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Bird Water Feeder",
@@ -14378,12 +14405,12 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1800,
       "icon": "🎒",
-      "imageUrl": "https://images.unsplash.com/photo-1726726192148-af52008ff663?q=80&w=800&auto=format&fit=crop",
+      "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800&auto=format&fit=crop",
       "imageSource": "unsplash",
       "credit": {
-       "name": "The Design Lady",
+       "name": "Josiah Gardner",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/a-yellow-backpack-sitting-on-top-of-a-table-C7eQtdkINpc",
+       "photoUrl": "https://unsplash.com/photos/brown-leather-backpack-on-gray-surface-HD6Jx6P7uRc",
        "source": "Unsplash"
       }
      },
