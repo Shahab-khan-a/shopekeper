@@ -3890,8 +3890,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 750,
       "icon": "🧀",
       "nameUrdu": "پنیر",
-      "image": "assets/catalog-images/paneer-500g-b1ca75.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1632200729570-1043effd1b77?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Aleksey Melkomukov",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-piece-of-cake-sitting-on-top-of-a-wooden-cutting-board-OxUaBR0ORb0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Masala Paneer 500g",
@@ -4863,14 +4869,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "nameUrdu": "تربوز",
       "image": "assets/catalog-images/watermelon-9aa80c.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
+       "name": "Art Rachen",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/watermelon-fruit-on-white-table-izi5AnlbRIA",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww"
+      "imageSource": "unsplash"
      },
      {
       "name": "Melon (Kharbooza) 1kg",
@@ -8744,14 +8750,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "👃",
       "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1610021684483-b06bf8ed5a41?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Heather Barnes",
+       "name": "Diana Polekhina",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
+       "photoUrl": "https://unsplash.com/photos/white-and-brown-bottle-beside-white-tissue-box-REYb3IaZjj4",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -12008,8 +12013,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1100,
       "icon": "🍳",
-      "image": "assets/catalog-images/non-stick-frying-pan-b20d65.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1592156328697-079f6ee0cfa5?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Cooker King",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-frying-pan-on-white-surface-Mv3JygH8eXQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Non-Stick Cooking Pot",
@@ -12060,16 +12071,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 400,
       "icon": "🥄",
-      "image": "assets/catalog-images/cooking-tools-b08c65.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1547483370-bdd86d60c667?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jenny Pace",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/pink-blue-and-white-plastic-ladles-in-stainless-container-9nDtvoNPii8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Kitchen Knife Set of 5",
       "unit": "box",
       "price": 800,
       "icon": "🔪",
-      "image": "assets/catalog-images/kitchen-knife-5-1aa233.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1609467334293-030ac6448fd8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Danilo Rios",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-and-brown-handled-kitchen-knives-z9AormQ0e90",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Chopping Board",
@@ -12176,16 +12199,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 150,
       "icon": "🧽",
-      "image": "assets/catalog-images/scrub-pads-6-v2-d95920.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1585657878885-5ef68df08c0d?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Artem Makarov",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-bread-on-white-table-tDjF-oujPtQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Dish Sponges Pack of 4",
       "unit": "packet",
       "price": 100,
       "icon": "🧽",
-      "image": "assets/catalog-images/dish-sponges-4-fd8c9c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1707857594916-d8ee9d468f25?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Viktor Zhulin",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/three-sponges-stacked-on-top-of-each-other-1vaqMTDtJRA",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Toilet Brush",
@@ -12310,8 +12345,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 750,
       "icon": "🫙",
-      "image": "assets/catalog-images/glass-storage-jar-3-3d8ab5.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1622428051717-dcd8412959de?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kier in Sight Archives",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/empty-glass-jar-with-black-lid-b29z0iltxk4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Serving Platter",
@@ -12340,8 +12381,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 650,
       "icon": "🍨",
-      "image": "assets/catalog-images/glass-dessert-cups-6-0d875d.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1567691334394-c0d00a7716db?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Fumiaki Hayashi",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/red-strawberries-inside-clear-drinking-glass-Mc4zVTBTMjY",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/glass-serving-v2-c782a6.webp"
@@ -12573,8 +12620,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 2800,
       "icon": "🛋️",
-      "image": "assets/catalog-images/sofa-cover-e9f1c2.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1721618879032-39948d5ebf63?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "SlipcoverKAS",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-woman-standing-in-a-living-room-next-to-a-couch-Q9W7c1c18nU",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/seating-b12082.webp"
@@ -15016,14 +15069,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🏍️",
       "image": "assets/catalog-images/phone-accessories-7e4585.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1761721576781-baaf47945242?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Viktor Khilchuk",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/smartphone-mounted-on-bicycle-handlebars-recording-video-Pm1II-WS3aI",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
       "imageSource": "unsplash"
      },
      {
@@ -15033,14 +15085,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🖥️",
       "image": "assets/catalog-images/phone-accessories-7e4585.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1553556135-009e5858adce?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Michael Soledad",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-smartphone-near-white-imac-D12XjlsIoEM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
       "imageSource": "unsplash"
      },
      {
@@ -18539,16 +18590,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 26,
       "icon": "🧱",
       "nameUrdu": "اینٹ",
-      "image": "assets/catalog-images/first-class-bricks-adbf3e.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1559322575-2f4e66131d55?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Matt W Newman",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-brick-lot-TYiD9PaAHos",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Second Class Bricks",
       "unit": "piece",
       "price": 18,
       "icon": "🧱",
-      "image": "assets/catalog-images/second-class-bricks-eaf440.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1559322575-2f4e66131d55?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Matt W Newman",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-brick-lot-TYiD9PaAHos",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Over-burnt Bricks",
@@ -20555,8 +20618,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1100,
       "icon": "🩴",
-      "image": "assets/catalog-images/cork-slipper-v2-b6270a.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1603487742131-4160ec999306?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jakob Owens",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-and-gray-slide-sandals-WzncgWs3RJ4",
+       "source": "Unsplash"
+      }
      }
     ],
     "image": "assets/catalog-images/sandals-slippers-793990.webp"
@@ -20679,16 +20748,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 3500,
       "icon": "👞",
-      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1614253429340-98120bd6d753?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Noah Smith",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-leather-shoes-on-brown-floor-tiles-wh2udxkVPWA",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Gents Loafers",
       "unit": "piece",
       "price": 2800,
       "icon": "👞",
-      "image": "assets/catalog-images/formal-school-shoes-v2-895ce7.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1616406432452-07bc5938759d?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Noah Smith",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-leather-loafers-on-blue-textile-LkuH3Txi_gs",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Ladies Pumps",
@@ -21359,8 +21440,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "litre",
       "price": 900,
       "icon": "🛢️",
-      "image": "assets/catalog-images/gear-oil-590e74.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1613214293055-5678e2f6d7de?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Benjamin Brunner",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-and-white-plastic-bottle-9ZTpCjmwL2M",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Brake Oil 500ml",
@@ -21625,14 +21712,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "✨",
       "image": "assets/catalog-images/car-polish-9f72fe.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1678383407712-1f7d90a4ccf5?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Theo",
+       "name": "Tyler",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "photoUrl": "https://unsplash.com/photos/a-man-is-painting-a-green-sports-car-nB6I1YpHOBQ",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Reverse Camera Kit",
