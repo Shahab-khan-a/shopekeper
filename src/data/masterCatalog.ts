@@ -630,53 +630,49 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 1150,
       "icon": "🍵",
       "nameUrdu": "چائے",
-      "image": "assets/catalog-images/tea-beverages-272673.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "ABHISHEK HAJARE",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-juice-in-clear-drinking-glass-kkrXVKK-jhg",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Tapal Danedar Tea 190g",
       "unit": "packet",
       "price": 480,
       "icon": "🍵",
-      "nameUrdu": "چائے",
-      "image": "assets/catalog-images/tea-beverages-272673.webp",
-      "imageLevel": "category"
+      "nameUrdu": "چائے"
      },
      {
       "name": "Lipton Yellow Label 475g",
       "unit": "packet",
       "price": 1180,
       "icon": "🍵",
-      "nameUrdu": "چائے",
-      "image": "assets/catalog-images/tea-beverages-272673.webp",
-      "imageLevel": "category"
+      "nameUrdu": "چائے"
      },
      {
       "name": "Supreme Tea 475g",
       "unit": "packet",
       "price": 1080,
       "icon": "🍵",
-      "nameUrdu": "چائے",
-      "image": "assets/catalog-images/tea-beverages-272673.webp",
-      "imageLevel": "category"
+      "nameUrdu": "چائے"
      },
      {
       "name": "Vital Tea 450g",
       "unit": "packet",
       "price": 1050,
       "icon": "🍵",
-      "nameUrdu": "چائے",
-      "image": "assets/catalog-images/tea-beverages-272673.webp",
-      "imageLevel": "category"
+      "nameUrdu": "چائے"
      },
      {
       "name": "Tetley Tea Bags 100ct",
       "unit": "box",
       "price": 950,
       "icon": "🍵",
-      "nameUrdu": "چائے",
-      "image": "assets/catalog-images/tea-beverages-272673.webp",
-      "imageLevel": "category"
+      "nameUrdu": "چائے"
      },
      {
       "name": "Green Tea (Kahwa) 250g",
@@ -701,9 +697,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 1050,
       "icon": "🥛",
-      "nameUrdu": "دودھ",
-      "image": "assets/catalog-images/tea-beverages-272673.webp",
-      "imageLevel": "category"
+      "nameUrdu": "دودھ"
      },
      {
       "name": "Rooh Afza 800ml",
@@ -739,7 +733,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       }
      }
     ],
-    "image": "assets/catalog-images/tea-beverages-272673.webp"
+    "imageUrl": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "ABHISHEK HAJARE",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/orange-juice-in-clear-drinking-glass-kkrXVKK-jhg",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Spices & Masalas",
@@ -2385,17 +2385,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 320,
       "icon": "🍅",
-      "nameUrdu": "ٹماٹر پیسٹ",
-      "image": "assets/catalog-images/tomato-paste-400g-1a11e1.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1777621285403-dfd034d65e64?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Fabian Kleiser",
-       "profileUrl": "https://unsplash.com/@fabiankleiser",
-       "photoUrl": "https://unsplash.com/photos/vintage-canned-goods-displayed-on-wooden-shelves-AXBtbNQOAZw",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/AXBtbNQOAZw/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8cGFzdGElMjBub29kbGVzJTIwY2FubmVkJTIwZm9vZCUyMHNoZWxmfGVufDF8fHx8MTc5MjI1NTQ4OXww"
+      "nameUrdu": "ٹماٹر پیسٹ"
      },
      {
       "name": "Coconut Milk 400ml",
@@ -2807,18 +2797,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Cerelac Wheat 400g",
       "unit": "box",
       "price": 1350,
-      "icon": "👶",
-      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
-      "imageLevel": "category"
+      "icon": "👶"
      },
      {
       "name": "Baby Milk Formula 400g",
       "unit": "box",
       "price": 2450,
       "icon": "🍼",
-      "nameUrdu": "بچوں کا دودھ",
-      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
-      "imageLevel": "category"
+      "nameUrdu": "بچوں کا دودھ"
      },
      {
       "name": "Pampers Active Baby (Pack)",
@@ -2884,9 +2870,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Diaper Rash Cream",
       "unit": "piece",
       "price": 750,
-      "icon": "🧴",
-      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
-      "imageLevel": "category"
+      "icon": "🧴"
      },
      {
       "name": "Feeding Bottle 250ml",
@@ -2902,9 +2886,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 550,
       "icon": "🍪",
-      "nameUrdu": "بچوں کے رس",
-      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
-      "imageLevel": "category"
+      "nameUrdu": "بچوں کے رس"
      }
     ],
     "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
@@ -2989,9 +2971,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Pakola 1.5 Litre",
       "unit": "piece",
       "price": 240,
-      "icon": "🥤",
-      "image": "assets/catalog-images/pakola-aaa2b2.webp",
-      "imageLevel": "item"
+      "icon": "🥤"
      },
      {
       "name": "Mineral Water 1.5 Litre",
@@ -3653,9 +3633,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "litre",
       "price": 350,
       "icon": "🐪",
-      "nameUrdu": "اونٹ کا دودھ",
-      "image": "assets/catalog-images/camel-milk-d8ae09.webp",
-      "imageLevel": "item"
+      "nameUrdu": "اونٹ کا دودھ"
      }
     ],
     "image": "assets/catalog-images/fresh-milk-46310d.webp",
@@ -3904,27 +3882,21 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 850,
       "icon": "🧀",
-      "nameUrdu": "مصالحہ پنیر",
-      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
-      "imageLevel": "category"
+      "nameUrdu": "مصالحہ پنیر"
      },
      {
       "name": "Rabri 500g",
       "unit": "piece",
       "price": 850,
       "icon": "🍮",
-      "nameUrdu": "ربڑی",
-      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
-      "imageLevel": "category"
+      "nameUrdu": "ربڑی"
      },
      {
       "name": "Rasmalai 500g (4pc)",
       "unit": "piece",
       "price": 750,
       "icon": "🍮",
-      "nameUrdu": "رس ملائی",
-      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
-      "imageLevel": "category"
+      "nameUrdu": "رس ملائی"
      },
      {
       "name": "Kheer Mix 500g",
@@ -3976,9 +3948,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 320,
       "icon": "🍮",
-      "nameUrdu": "کسٹرڈ",
-      "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
-      "imageLevel": "category"
+      "nameUrdu": "کسٹرڈ"
      }
     ],
     "image": "assets/catalog-images/paneer-desserts-v2-7575fa.webp",
@@ -4552,9 +4522,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "kg",
       "price": 150,
       "icon": "🥒",
-      "nameUrdu": "ٹینڈا",
-      "image": "assets/catalog-images/tinda-f34879.webp",
-      "imageLevel": "item"
+      "nameUrdu": "ٹینڈا"
      },
      {
       "name": "Pumpkin (Kadu) 1kg",
@@ -4646,9 +4614,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 60,
       "icon": "🌿",
-      "nameUrdu": "میتھی",
-      "image": "assets/catalog-images/methi-1-bunch-824ab7.webp",
-      "imageLevel": "item"
+      "nameUrdu": "میتھی"
      },
      {
       "name": "Chaulai (Amaranth) 1 Bunch",
@@ -5052,18 +5018,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 320,
       "icon": "🫐",
-      "nameUrdu": "فالسہ",
-      "image": "assets/catalog-images/fruits-a36ef4.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Allec Gomes",
-       "profileUrl": "https://unsplash.com/@allecgomes",
-       "photoUrl": "https://unsplash.com/photos/red-strawberry-fruit-with-white-background-xnRg3xDcNnE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/xnRg3xDcNnE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8RnJ1aXRzfGVufDF8fHx8MTc5MjI1NTUyN3ww",
-      "imageSource": "unsplash"
+      "nameUrdu": "فالسہ"
      }
     ],
     "image": "assets/catalog-images/fruits-a36ef4.webp",
@@ -5098,18 +5053,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 180,
       "icon": "🌱",
-      "nameUrdu": "خشک پودینہ",
-      "image": "assets/catalog-images/herbs-extras-c99b6b.webp",
-      "imageLevel": "category"
+      "nameUrdu": "خشک پودینہ"
      },
      {
       "name": "Dried Fenugreek (Kasoori Methi) 100g",
       "unit": "packet",
       "price": 220,
       "icon": "🌿",
-      "nameUrdu": "قصوری میتھی",
-      "image": "assets/catalog-images/herbs-extras-c99b6b.webp",
-      "imageLevel": "category"
+      "nameUrdu": "قصوری میتھی"
      },
      {
       "name": "Tamarind (Imli) 500g",
@@ -5193,17 +5144,21 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 320,
       "icon": "🍗",
       "nameUrdu": "چکن کلیجی",
-      "image": "assets/catalog-images/chicken-a9514f.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1448907503123-67254d59ca4f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jez Timms",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/raw-meat-and-green-leaf-plant-on-brown-surface-DVRXFIH42d0",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Chicken Gizzard 500g",
       "unit": "piece",
       "price": 280,
       "icon": "🍗",
-      "nameUrdu": "چکن پوٹا",
-      "image": "assets/catalog-images/chicken-a9514f.webp",
-      "imageLevel": "category"
+      "nameUrdu": "چکن پوٹا"
      },
      {
       "name": "Chicken Neck/Back Mix 1kg",
@@ -5232,7 +5187,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/chicken-a9514f.webp"
+    "imageUrl": "https://images.unsplash.com/photo-1448907503123-67254d59ca4f?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Jez Timms",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/raw-meat-and-green-leaf-plant-on-brown-surface-DVRXFIH42d0",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Beef",
@@ -5266,9 +5227,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "kg",
       "price": 1350,
       "icon": "🍖",
-      "nameUrdu": "قیمہ",
-      "image": "assets/catalog-images/beef-mince-b98cf1.webp",
-      "imageLevel": "item"
+      "nameUrdu": "قیمہ"
      },
      {
       "name": "Beef Ribs 1kg",
@@ -5302,9 +5261,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 750,
       "icon": "👅",
-      "nameUrdu": "زبان",
-      "image": "assets/catalog-images/beef-tongue-d15c1b.webp",
-      "imageLevel": "item"
+      "nameUrdu": "زبان"
      },
      {
       "name": "Beef Paya (Trotters) 1kg",
@@ -5341,18 +5298,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "kg",
       "price": 1950,
       "icon": "🥩",
-      "nameUrdu": "ہڈی والا مٹن",
-      "image": "assets/catalog-images/mutton-bone-1d1285.webp",
-      "imageLevel": "item"
+      "nameUrdu": "ہڈی والا مٹن"
      },
      {
       "name": "Mutton Mince 1kg",
       "unit": "kg",
       "price": 2350,
       "icon": "🍖",
-      "nameUrdu": "مٹن قیمہ",
-      "image": "assets/catalog-images/mutton-mince-d4d564.webp",
-      "imageLevel": "item"
+      "nameUrdu": "مٹن قیمہ"
      },
      {
       "name": "Mutton Chops 1kg",
@@ -7047,9 +7000,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 350,
       "icon": "🍲",
-      "nameUrdu": "سری پائے",
-      "image": "assets/catalog-images/breakfast-f2265d.webp",
-      "imageLevel": "category"
+      "nameUrdu": "سری پائے"
      },
      {
       "name": "Nihari Plate",
@@ -8714,18 +8665,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Menthol Inhaler Stick",
       "unit": "piece",
       "price": 90,
-      "icon": "👃",
-      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Heather Barnes",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "",
-      "imageSource": "unsplash"
+      "icon": "👃"
      },
      {
       "name": "Vapor Rub Jar 50g",
@@ -8779,35 +8719,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Saline Nasal Drops Bottle 15ml",
       "unit": "piece",
       "price": 130,
-      "icon": "👃",
-      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Heather Barnes",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "",
-      "imageSource": "unsplash"
+      "icon": "👃"
      },
      {
       "name": "Steam Inhaler Cup",
       "unit": "piece",
       "price": 250,
-      "icon": "♨️",
-      "image": "assets/catalog-images/cold-cough-allergy-f57f4e.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1555211652-5c6222f971bc?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Heather Barnes",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/honey-in-glass-on-tabel-CNDiESvWfrk",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "",
-      "imageSource": "unsplash"
+      "icon": "♨️"
      },
      {
       "name": "Throat Soothing Tablets Strip of 20",
@@ -10302,18 +10220,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Face Scrub Tube 100ml",
       "unit": "piece",
       "price": 380,
-      "icon": "🧴",
-      "image": "assets/catalog-images/skin-care-fe37e3.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
-      "imageSource": "unsplash"
+      "icon": "🧴"
      },
      {
       "name": "Sheet Mask",
@@ -10429,18 +10336,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Anti-Acne Gel Tube 20g",
       "unit": "piece",
       "price": 420,
-      "icon": "🧴",
-      "image": "assets/catalog-images/skin-care-fe37e3.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1581182800629-7d90925ad072?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Fleur Kaan",
-       "profileUrl": "https://unsplash.com/@fleuraimeekaan",
-       "photoUrl": "https://unsplash.com/photos/woman-in-white-tank-top-w4Dj3MshHQ0",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/w4Dj3MshHQ0/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8U2tpbiUyMENhcmV8ZW58MXx8fHwxNzkyMjU1NTM4fDA",
-      "imageSource": "unsplash"
+      "icon": "🧴"
      }
     ],
     "image": "assets/catalog-images/skin-care-fe37e3.webp",
@@ -11050,17 +10946,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 120,
       "icon": "🤲",
-      "nameUrdu": "مہندی",
-      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
-      "imageLevel": "category"
+      "nameUrdu": "مہندی"
      },
      {
       "name": "Black Mehndi Packet",
       "unit": "packet",
       "price": 150,
-      "icon": "🤲",
-      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
-      "imageLevel": "category"
+      "icon": "🤲"
      },
      {
       "name": "Mehndi Oil Bottle 60ml",
@@ -11080,9 +10972,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Mehndi Stencil Stickers Pack",
       "unit": "packet",
       "price": 180,
-      "icon": "✨",
-      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
-      "imageLevel": "category"
+      "icon": "✨"
      },
      {
       "name": "Hair Henna Powder Packet 200g",
@@ -11111,18 +11001,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 80,
       "icon": "🔴",
-      "nameUrdu": "بندی",
-      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
-      "imageLevel": "category"
+      "nameUrdu": "بندی"
      },
      {
       "name": "Alta Bottle 15ml",
       "unit": "piece",
       "price": 150,
       "icon": "💅",
-      "nameUrdu": "آلتا",
-      "image": "assets/catalog-images/alta-bottle-0c0f1a.webp",
-      "imageLevel": "item"
+      "nameUrdu": "آلتا"
      },
      {
       "name": "Surma Stick",
@@ -11151,9 +11037,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Mehndi Design Book",
       "unit": "piece",
       "price": 300,
-      "icon": "📖",
-      "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
-      "imageLevel": "category"
+      "icon": "📖"
      }
     ],
     "image": "assets/catalog-images/mehndi-traditional-a77da0.webp",
@@ -11942,9 +11826,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Melamine Bowl",
       "unit": "piece",
       "price": 150,
-      "icon": "🥣",
-      "image": "assets/catalog-images/melamine-bowl-e6fe42.webp",
-      "imageLevel": "item"
+      "icon": "🥣"
      },
      {
       "name": "Melamine Cup Set of 6",
@@ -11958,9 +11840,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Melamine Serving Tray",
       "unit": "piece",
       "price": 300,
-      "icon": "🍽️",
-      "image": "assets/catalog-images/melamine-serving-v2-2a65fc.webp",
-      "imageLevel": "item"
+      "icon": "🍽️"
      },
      {
       "name": "Melamine Soup Set",
@@ -12226,9 +12106,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Toilet Brush",
       "unit": "piece",
       "price": 150,
-      "icon": "🧹",
-      "image": "assets/catalog-images/toilet-brush-2aaf62.webp",
-      "imageLevel": "item"
+      "icon": "🧹"
      },
      {
       "name": "Glass Cleaner Spray 500ml",
@@ -13402,18 +13280,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Baby Milk Powder Tin 400g",
       "unit": "piece",
       "price": 1800,
-      "icon": "🍼",
-      "image": "assets/catalog-images/baby-essentials-7b6496.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Jaye Haych",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "",
-      "imageSource": "unsplash"
+      "icon": "🍼"
      },
      {
       "name": "Baby Feeding Bottle 250ml",
@@ -13515,33 +13382,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Baby Carrier",
       "unit": "piece",
       "price": 2200,
-      "icon": "👶",
-      "image": "assets/catalog-images/baby-carrier-fb5bbc.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Jaye Haych",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
-       "source": "Unsplash"
-      },
-      "downloadLocation": ""
+      "icon": "👶"
      },
      {
       "name": "Teether Set of 3",
       "unit": "packet",
       "price": 350,
-      "icon": "🍼",
-      "image": "assets/catalog-images/teether-3-b4283d.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1623707430616-d9f956bcac2b?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Jaye Haych",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/clear-plastic-feeding-bottle-on-red-table-vaozLvtSHok",
-       "source": "Unsplash"
-      },
-      "downloadLocation": ""
+      "icon": "🍼"
      },
      {
       "name": "Baby Rattle Set of 4",
@@ -13715,9 +13562,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Fish Meal 5kg",
       "unit": "piece",
       "price": 2200,
-      "icon": "🐟",
-      "image": "assets/catalog-images/fish-meal-4d1e62.webp",
-      "imageLevel": "item"
+      "icon": "🐟"
      },
      {
       "name": "Bone Meal 5kg",
@@ -13731,9 +13576,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Mineral Mixture 1kg",
       "unit": "piece",
       "price": 450,
-      "icon": "🧂",
-      "image": "assets/catalog-images/mineral-mixture-4cc7e5.webp",
-      "imageLevel": "item"
+      "icon": "🧂"
      },
      {
       "name": "Vitamin Premix Packet",
@@ -13747,17 +13590,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Mustard Cake 20kg",
       "unit": "piece",
       "price": 2400,
-      "icon": "🌾",
-      "image": "assets/catalog-images/mustard-cake-2aeb4e.webp",
-      "imageLevel": "item"
+      "icon": "🌾"
      },
      {
       "name": "Sunflower Meal 10kg",
       "unit": "piece",
       "price": 900,
-      "icon": "🌻",
-      "image": "assets/catalog-images/sunflower-meal-39c89f.webp",
-      "imageLevel": "item"
+      "icon": "🌻"
      }
     ],
     "image": "assets/catalog-images/poultry-feed-966b4e.webp"
@@ -13829,9 +13668,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Fish Flakes Jar",
       "unit": "piece",
       "price": 400,
-      "icon": "🐟",
-      "image": "assets/catalog-images/pet-food-f4f2dc.webp",
-      "imageLevel": "category"
+      "icon": "🐟"
      },
      {
       "name": "Fish Pellets Pack",
@@ -13964,9 +13801,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Flea Powder Bottle 100g",
       "unit": "piece",
       "price": 350,
-      "icon": "🧴",
-      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
-      "imageLevel": "category"
+      "icon": "🧴"
      },
      {
       "name": "Antiseptic Spray for Animals 100ml",
@@ -14000,17 +13835,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Cattle Calcium Supplement 1kg",
       "unit": "packet",
       "price": 500,
-      "icon": "🐄",
-      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
-      "imageLevel": "category"
+      "icon": "🐄"
      },
      {
       "name": "Poultry Electrolyte Powder",
       "unit": "packet",
       "price": 300,
-      "icon": "🐔",
-      "image": "assets/catalog-images/veterinary-basics-f47b8c.webp",
-      "imageLevel": "category"
+      "icon": "🐔"
      },
      {
       "name": "Poultry Drinker 5 Litre",
@@ -14574,9 +14405,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Paper Punch",
       "unit": "piece",
       "price": 450,
-      "icon": "🕳️",
-      "image": "assets/catalog-images/paper-punch-9261f9.webp",
-      "imageLevel": "item"
+      "icon": "🕳️"
      },
      {
       "name": "Calculator 12-Digit",
@@ -14854,8 +14683,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 550,
       "icon": "📖",
-      "image": "assets/catalog-images/books-printing-f6fea0.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1451226428352-cf66bf8a0317?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Romain Vignes",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/focus-dictionary-index-page-ywqa9IZB-dU",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Photocopy (per page)",
@@ -14869,28 +14704,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Printout (per page)",
       "unit": "piece",
       "price": 10,
-      "icon": "🖨️",
-      "image": "assets/catalog-images/printout-20c933.webp",
-      "imageLevel": "item"
+      "icon": "🖨️"
      },
      {
       "name": "Spiral Binding",
       "unit": "piece",
       "price": 150,
-      "icon": "📎",
-      "image": "assets/catalog-images/spiral-binding-2903d1.webp",
-      "imageLevel": "item"
+      "icon": "📎"
      },
      {
       "name": "Lamination (per sheet)",
       "unit": "piece",
       "price": 60,
-      "icon": "📄",
-      "image": "assets/catalog-images/lamination-388584.webp",
-      "imageLevel": "item"
+      "icon": "📄"
      }
     ],
-    "image": "assets/catalog-images/books-printing-f6fea0.webp"
+    "imageUrl": "https://images.unsplash.com/photo-1451226428352-cf66bf8a0317?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Romain Vignes",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/focus-dictionary-index-page-ywqa9IZB-dU",
+     "source": "Unsplash"
+    }
    }
   ]
  },
@@ -14905,18 +14740,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Tempered Glass Protector 11D",
       "unit": "piece",
       "price": 150,
-      "icon": "🛡️",
-      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
-      "imageSource": "unsplash"
+      "icon": "🛡️"
      },
      {
       "name": "Transparent Silicone Back Cover",
@@ -14970,17 +14794,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Metal Ring Holder Stand",
       "unit": "piece",
       "price": 250,
-      "icon": "💍",
-      "image": "assets/catalog-images/metal-ring-holder-stand-3e7467.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "icon": "💍"
      },
      {
       "name": "Pop Socket Grip",
@@ -15098,85 +14912,31 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "PUBG Finger Sleeves Pair",
       "unit": "piece",
       "price": 250,
-      "icon": "🎮",
-      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
-      "imageSource": "unsplash"
+      "icon": "🎮"
      },
      {
       "name": "Mobile Game Trigger Pair",
       "unit": "piece",
       "price": 650,
-      "icon": "🎯",
-      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
-      "imageSource": "unsplash"
+      "icon": "🎯"
      },
      {
       "name": "Phone Cooling Fan Attachment",
       "unit": "piece",
       "price": 1450,
-      "icon": "❄️",
-      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
-      "imageSource": "unsplash"
+      "icon": "❄️"
      },
      {
       "name": "USB OTG Adapter Type-C",
       "unit": "piece",
       "price": 250,
-      "icon": "🔌",
-      "image": "assets/catalog-images/usb-otg-adapter-type-576245.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "icon": "🔌"
      },
      {
       "name": "SIM Ejector Pin 5-pack",
       "unit": "packet",
       "price": 100,
-      "icon": "📌",
-      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
-      "imageSource": "unsplash"
+      "icon": "📌"
      },
      {
       "name": "Mobile Camera Lens Kit 3-in-1",
@@ -15198,18 +14958,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Charging Port Dust Plugs 10-pack",
       "unit": "packet",
       "price": 150,
-      "icon": "🔌",
-      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
-      "imageSource": "unsplash"
+      "icon": "🔌"
      },
      {
       "name": "Earphone Carry Case",
@@ -15247,34 +14996,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "OTG Card Reader",
       "unit": "piece",
       "price": 550,
-      "icon": "💾",
-      "image": "assets/catalog-images/otg-card-reader-c7408a.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "icon": "💾"
      },
      {
       "name": "Phone Camera Protector Ring",
       "unit": "piece",
       "price": 200,
-      "icon": "📷",
-      "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
-      "imageSource": "unsplash"
+      "icon": "📷"
      },
      {
       "name": "Magnetic Car Mount Vent Clip",
@@ -16102,9 +15830,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Fan Capacitor 2.5uF",
       "unit": "piece",
       "price": 180,
-      "icon": "⚡",
-      "image": "assets/catalog-images/fans-cooling-102a39.webp",
-      "imageLevel": "category"
+      "icon": "⚡"
      },
      {
       "name": "Solar DC Fan 12 inch",
@@ -16373,9 +16099,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Cable Tie 100-pack",
       "unit": "packet",
       "price": 250,
-      "icon": "🔗",
-      "image": "assets/catalog-images/cable-tie-100-v2-21d79f.webp",
-      "imageLevel": "item"
+      "icon": "🔗"
      }
     ],
     "image": "assets/catalog-images/wires-cables-8eba2e.webp"
@@ -16724,9 +16448,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Sensor Night Lamp",
       "unit": "piece",
       "price": 550,
-      "icon": "🌙",
-      "image": "assets/catalog-images/sensor-night-lamp-7a54c3.webp",
-      "imageLevel": "item"
+      "icon": "🌙"
      },
      {
       "name": "Chandelier Bulb Candle Type",
@@ -16827,19 +16549,29 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1350,
       "icon": "🎛️",
-      "image": "assets/catalog-images/fans-motors-bb800d.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1609519479841-5fd3b2884e17?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kalyanaraman S",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-5-blade-ceiling-fan-Ww9nZ1MGQLY",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Motor Capacitor 4uF",
       "unit": "piece",
       "price": 220,
-      "icon": "⚡",
-      "image": "assets/catalog-images/fans-motors-bb800d.webp",
-      "imageLevel": "category"
+      "icon": "⚡"
      }
     ],
-    "image": "assets/catalog-images/fans-motors-bb800d.webp"
+    "imageUrl": "https://images.unsplash.com/photo-1609519479841-5fd3b2884e17?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Kalyanaraman S",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/white-5-blade-ceiling-fan-Ww9nZ1MGQLY",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "UPS, Inverter & Solar",
@@ -17522,9 +17254,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Caulking Gun",
       "unit": "piece",
       "price": 850,
-      "icon": "🔫",
-      "image": "assets/catalog-images/caulking-gun-d0651e.webp",
-      "imageLevel": "item"
+      "icon": "🔫"
      }
     ],
     "image": "assets/catalog-images/power-tools-b88461.webp"
@@ -17889,35 +17619,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Distemper 20kg Bag",
       "unit": "piece",
       "price": 2800,
-      "icon": "🎨",
-      "image": "assets/catalog-images/paints-a3ed19.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
-      "imageSource": "unsplash"
+      "icon": "🎨"
      },
      {
       "name": "Wall Putty 20kg Bag",
       "unit": "piece",
       "price": 1650,
-      "icon": "🧱",
-      "image": "assets/catalog-images/paints-a3ed19.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww",
-      "imageSource": "unsplash"
+      "icon": "🧱"
      },
      {
       "name": "Wall Primer 1L",
@@ -17955,33 +17663,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Wood Varnish 1L",
       "unit": "litre",
       "price": 1250,
-      "icon": "🪵",
-      "image": "assets/catalog-images/wood-varnish-7a5cf1.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "icon": "🪵"
      },
      {
       "name": "Paint Thinner 1L",
       "unit": "litre",
       "price": 550,
-      "icon": "🧴",
-      "image": "assets/catalog-images/paint-thinner-b95faa.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "icon": "🧴"
      },
      {
       "name": "Turpentine Oil 1L",
@@ -18084,17 +17772,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Putty Knife 3 inch",
       "unit": "piece",
       "price": 250,
-      "icon": "🔪",
-      "image": "assets/catalog-images/putty-knife-b2f52b.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1688588426729-dc4f7bdb8fbe?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Art Institute of Chicago",
-       "profileUrl": "https://unsplash.com/@artchicago",
-       "photoUrl": "https://unsplash.com/photos/a-painting-of-a-body-of-water-surrounded-by-trees-AckZaYtIq3I",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "https://api.unsplash.com/photos/AckZaYtIq3I/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGFpbnRzfGVufDF8fHx8MTc5MjI1NTUzN3ww"
+      "icon": "🔪"
      }
     ],
     "image": "assets/catalog-images/paints-a3ed19.webp",
@@ -18382,9 +18060,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "PVC Solvent Cement 100g",
       "unit": "gram",
       "price": 220,
-      "icon": "🧴",
-      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
-      "imageLevel": "category"
+      "icon": "🧴"
      },
      {
       "name": "Brass Bib Tap",
@@ -18404,25 +18080,19 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Angle Cock Valve",
       "unit": "piece",
       "price": 850,
-      "icon": "🚰",
-      "image": "assets/catalog-images/angle-cock-v2-f9ee04.webp",
-      "imageLevel": "item"
+      "icon": "🚰"
      },
      {
       "name": "Muslim Shower Set",
       "unit": "piece",
       "price": 1450,
-      "icon": "🚿",
-      "image": "assets/catalog-images/muslim-shower-dfdec8.webp",
-      "imageLevel": "item"
+      "icon": "🚿"
      },
      {
       "name": "Basin Waste Coupling",
       "unit": "piece",
       "price": 550,
-      "icon": "🚰",
-      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
-      "imageLevel": "category"
+      "icon": "🚰"
      },
      {
       "name": "PPR Pipe 1 inch 12ft",
@@ -18442,9 +18112,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "PPR Elbow 1 inch",
       "unit": "piece",
       "price": 120,
-      "icon": "🔧",
-      "image": "assets/catalog-images/sanitary-plumbing-fa9668.webp",
-      "imageLevel": "category"
+      "icon": "🔧"
      },
      {
       "name": "Shower Head ABS",
@@ -18771,8 +18439,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2400,
       "icon": "📐",
-      "image": "assets/catalog-images/ms-angle-9cf620.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1623428454598-1bfe414bac03?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Mads Eneqvist",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-metal-rods-RxLjmG5M4NQ",
+       "source": "Unsplash"
+      }
      }
     ]
    },
@@ -19999,17 +19673,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Winter Thermal Upper",
       "unit": "piece",
       "price": 650,
-      "icon": "🥶",
-      "image": "assets/catalog-images/winter-thermal-upper-364898.webp",
-      "imageLevel": "item"
+      "icon": "🥶"
      },
      {
       "name": "Winter Thermal Lower",
       "unit": "piece",
       "price": 650,
-      "icon": "🥶",
-      "image": "assets/catalog-images/winter-thermal-lower-v2-045a72.webp",
-      "imageLevel": "item"
+      "icon": "🥶"
      },
      {
       "name": "Cotton Handkerchief",
@@ -20075,8 +19745,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 900,
       "icon": "👦",
-      "image": "assets/catalog-images/kids-shalwar-kameez-f8bc40.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1766918780914-5df4a5a98c44?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "jackson kondili",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/baby-clothes-hanging-on-a-rack-5juo633uIEc",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Kids Frock",
@@ -20096,9 +19772,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Kids Jeans",
       "unit": "piece",
       "price": 1200,
-      "icon": "👖",
-      "image": "assets/catalog-images/kids-jeans-b0ea4f.webp",
-      "imageLevel": "item"
+      "icon": "👖"
      },
      {
       "name": "Kids T-Shirt",
@@ -20162,20 +19836,22 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "School Uniform Shirt",
       "unit": "piece",
       "price": 700,
-      "icon": "👔",
-      "image": "assets/catalog-images/school-uniform-shirt-product-v2-eaaaaa.webp",
-      "imageLevel": "item"
+      "icon": "👔"
      },
      {
       "name": "School Uniform Pant",
       "unit": "piece",
       "price": 900,
-      "icon": "👖",
-      "image": "assets/catalog-images/kids-wear-f55100.webp",
-      "imageLevel": "category"
+      "icon": "👖"
      }
     ],
-    "image": "assets/catalog-images/kids-wear-f55100.webp"
+    "imageUrl": "https://images.unsplash.com/photo-1766918780914-5df4a5a98c44?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "jackson kondili",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/baby-clothes-hanging-on-a-rack-5juo633uIEc",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Winter Wear",
@@ -21205,9 +20881,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Indicator Set 4pc",
       "unit": "packet",
       "price": 800,
-      "icon": "🟠",
-      "image": "assets/catalog-images/indicator-330d9b.webp",
-      "imageLevel": "item"
+      "icon": "🟠"
      },
      {
       "name": "Side Mirror Pair",
@@ -21243,17 +20917,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Horn 12V",
       "unit": "piece",
       "price": 500,
-      "icon": "📯",
-      "image": "assets/catalog-images/horn-5cf73e.webp",
-      "imageLevel": "item"
+      "icon": "📯"
      },
      {
       "name": "Bike Battery 12V 5Ah",
       "unit": "piece",
       "price": 4500,
-      "icon": "🔋",
-      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
-      "imageLevel": "category"
+      "icon": "🔋"
      },
      {
       "name": "Speedometer Cable",
@@ -21275,9 +20945,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Bike Hazard Flasher",
       "unit": "piece",
       "price": 600,
-      "icon": "⚠️",
-      "image": "assets/catalog-images/bike-body-electrical-721986.webp",
-      "imageLevel": "category"
+      "icon": "⚠️"
      }
     ],
     "image": "assets/catalog-images/bike-body-electrical-721986.webp",
@@ -21362,9 +21030,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Foot Air Pump",
       "unit": "piece",
       "price": 1500,
-      "icon": "💨",
-      "image": "assets/catalog-images/foot-air-pump-48448c.webp",
-      "imageLevel": "item"
+      "icon": "💨"
      },
      {
       "name": "Valve Caps 4-pack",
@@ -21431,9 +21097,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Havoline Engine Oil 1L",
       "unit": "litre",
       "price": 1000,
-      "icon": "🛢️",
-      "image": "assets/catalog-images/havoline-engine-oil-d71d66.webp",
-      "imageLevel": "item"
+      "icon": "🛢️"
      },
      {
       "name": "Gear Oil 1L",
@@ -21453,17 +21117,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Brake Oil 500ml",
       "unit": "piece",
       "price": 550,
-      "icon": "🧴",
-      "image": "assets/catalog-images/brake-oil-b632e0.webp",
-      "imageLevel": "item"
+      "icon": "🧴"
      },
      {
       "name": "Grease Tin 500g",
       "unit": "piece",
       "price": 650,
-      "icon": "🧴",
-      "image": "assets/catalog-images/grease-tin-500g-60be6a.webp",
-      "imageLevel": "item"
+      "icon": "🧴"
      },
      {
       "name": "Chain Lube Spray",
@@ -21596,34 +21256,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Headlight Bulb H4",
       "unit": "piece",
       "price": 800,
-      "icon": "💡",
-      "image": "assets/catalog-images/headlight-bulb-h4-4a1c21.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Theo",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
-       "source": "Unsplash"
-      },
-      "downloadLocation": ""
+      "icon": "💡"
      },
      {
       "name": "LED Headlight H4 Pair",
       "unit": "piece",
       "price": 3500,
-      "icon": "💡",
-      "image": "assets/catalog-images/car-basics-c7936a.webp",
-      "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Theo",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
-       "source": "Unsplash"
-      },
-      "downloadLocation": "",
-      "imageSource": "unsplash"
+      "icon": "💡"
      },
      {
       "name": "Car Air Freshener",
@@ -21661,33 +21300,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Car Seat Covers Set",
       "unit": "piece",
       "price": 4500,
-      "icon": "💺",
-      "image": "assets/catalog-images/car-seat-covers-9c6849.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Theo",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
-       "source": "Unsplash"
-      },
-      "downloadLocation": ""
+      "icon": "💺"
      },
      {
       "name": "Car Shampoo 1L",
       "unit": "litre",
       "price": 600,
-      "icon": "🧴",
-      "image": "assets/catalog-images/car-shampoo-15f24c.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Theo",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
-       "source": "Unsplash"
-      },
-      "downloadLocation": ""
+      "icon": "🧴"
      },
      {
       "name": "Microfiber Cloth 3-pack",
@@ -21725,17 +21344,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Reverse Camera Kit",
       "unit": "piece",
       "price": 4500,
-      "icon": "📷",
-      "image": "assets/catalog-images/reverse-camera-kit-88805c.webp",
-      "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
-      "credit": {
-       "name": "Theo",
-       "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
-       "source": "Unsplash"
-      },
-      "downloadLocation": ""
+      "icon": "📷"
      }
     ],
     "image": "assets/catalog-images/car-basics-c7936a.webp",
@@ -21790,9 +21399,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Disc Lock with Alarm",
       "unit": "piece",
       "price": 1800,
-      "icon": "🔒",
-      "image": "assets/catalog-images/disc-lock-alarm-2832e2.webp",
-      "imageLevel": "item"
+      "icon": "🔒"
      },
      {
       "name": "Tool Kit 46pc",
@@ -21836,17 +21443,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Knee Guards Pair",
       "unit": "piece",
       "price": 1500,
-      "icon": "🦵",
-      "image": "assets/catalog-images/knee-guards-v2-c9ece1.webp",
-      "imageLevel": "item"
+      "icon": "🦵"
      },
      {
       "name": "LED Fog Lamps Pair",
       "unit": "piece",
       "price": 2200,
-      "icon": "💡",
-      "image": "assets/catalog-images/led-fog-lamps-c26adc.webp",
-      "imageLevel": "item"
+      "icon": "💡"
      }
     ],
     "image": "assets/catalog-images/accessories-riding-gear-d10ea3.webp"
@@ -21859,8 +21462,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 450,
       "icon": "🫧",
-      "image": "assets/catalog-images/filters-service-406ae5.webp",
-      "imageLevel": "category"
+      "image": "assets/catalog-images/fix-fuel-filter-09c5b1.webp",
+      "imageLevel": "item",
+      "credit": {
+       "name": "Mj-bird",
+       "profileUrl": "",
+       "photoUrl": "https://commons.wikimedia.org/wiki/File%3AOil_filter_and_Fuel_filter_of_UD_Trucks%2C.jpg",
+       "source": "Wikimedia Commons"
+      }
      },
      {
       "name": "Oil Filter Car",
@@ -21888,9 +21497,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Car Air Filter",
       "unit": "piece",
       "price": 900,
-      "icon": "🫧",
-      "image": "assets/catalog-images/car-air-filter-e1db0a.webp",
-      "imageLevel": "item"
+      "icon": "🫧"
      },
      {
       "name": "Cabin Filter",
@@ -21918,36 +21525,34 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Rear Brake Shoes 70cc",
       "unit": "piece",
       "price": 700,
-      "icon": "🛑",
-      "image": "assets/catalog-images/filters-service-406ae5.webp",
-      "imageLevel": "category"
+      "icon": "🛑"
      },
      {
       "name": "70cc Service Kit (Oil+Plug+Filter)",
       "unit": "piece",
       "price": 1800,
-      "icon": "🧰",
-      "image": "assets/catalog-images/filters-service-406ae5.webp",
-      "imageLevel": "category"
+      "icon": "🧰"
      },
      {
       "name": "Dashboard Shiner",
       "unit": "piece",
       "price": 650,
-      "icon": "✨",
-      "image": "assets/catalog-images/filters-service-406ae5.webp",
-      "imageLevel": "category"
+      "icon": "✨"
      },
      {
       "name": "Tyre Shiner Spray",
       "unit": "piece",
       "price": 550,
-      "icon": "✨",
-      "image": "assets/catalog-images/filters-service-406ae5.webp",
-      "imageLevel": "category"
+      "icon": "✨"
      }
     ],
-    "image": "assets/catalog-images/filters-service-406ae5.webp"
+    "image": "assets/catalog-images/fix-fuel-filter-09c5b1.webp",
+    "credit": {
+     "name": "Mj-bird",
+     "profileUrl": "",
+     "photoUrl": "https://commons.wikimedia.org/wiki/File%3AOil_filter_and_Fuel_filter_of_UD_Trucks%2C.jpg",
+     "source": "Wikimedia Commons"
+    }
    }
   ]
  },
@@ -21964,8 +21569,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 14500,
       "icon": "🌾",
       "nameUrdu": "کھاد",
-      "image": "assets/catalog-images/dap-bag-1c0f12.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1710223221719-6251cb1b5c5b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kenneth Berrios Alvarez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-white-balls-jvFgC2F4gf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Urea Bag 50kg",
@@ -21986,8 +21597,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 12000,
       "icon": "🌾",
-      "image": "assets/catalog-images/sop-bag-v2-10dcdf.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1710223221719-6251cb1b5c5b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kenneth Berrios Alvarez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-white-balls-jvFgC2F4gf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "NPK 15-15-15 Bag 50kg",
@@ -22008,16 +21625,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 6500,
       "icon": "🌾",
-      "image": "assets/catalog-images/ssp-bag-5bca91.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1710223221719-6251cb1b5c5b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kenneth Berrios Alvarez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-white-balls-jvFgC2F4gf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "CAN Bag 50kg",
       "unit": "piece",
       "price": 5200,
       "icon": "🌾",
-      "image": "assets/catalog-images/can-bag-7a39e0.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1710223221719-6251cb1b5c5b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kenneth Berrios Alvarez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-white-balls-jvFgC2F4gf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Zinc Sulphate 5kg",
@@ -22046,8 +21675,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1200,
       "icon": "⬜",
-      "image": "assets/catalog-images/gypsum-bag-3a7cd6.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1710223221719-6251cb1b5c5b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kenneth Berrios Alvarez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-white-balls-jvFgC2F4gf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Humic Acid 1kg",
@@ -22068,8 +21703,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 3500,
       "icon": "🧂",
-      "image": "assets/catalog-images/epsom-salt-c51c65.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1710223221719-6251cb1b5c5b?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Kenneth Berrios Alvarez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-white-balls-jvFgC2F4gf8",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Organic Compost 40kg",
@@ -22204,9 +21845,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "litre",
       "price": 2800,
       "icon": "🧪",
-      "nameUrdu": "اسپرے",
-      "image": "assets/catalog-images/bifenthrin-v2-b67f0c.webp",
-      "imageLevel": "item"
+      "nameUrdu": "اسپرے"
      },
      {
       "name": "Lambda Cyhalothrin 500ml",
@@ -22220,9 +21859,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Imidacloprid 500ml",
       "unit": "piece",
       "price": 1600,
-      "icon": "🧪",
-      "image": "assets/catalog-images/imidacloprid-5a8e12.webp",
-      "imageLevel": "item"
+      "icon": "🧪"
      },
      {
       "name": "Glyphosate 1L",
@@ -22236,9 +21873,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Atrazine 1kg",
       "unit": "packet",
       "price": 1800,
-      "icon": "🧪",
-      "image": "assets/catalog-images/atrazine-0df789.webp",
-      "imageLevel": "item"
+      "icon": "🧪"
      },
      {
       "name": "Mancozeb 400g",
@@ -22268,17 +21903,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Chlorpyrifos 1L",
       "unit": "litre",
       "price": 2400,
-      "icon": "🧪",
-      "image": "assets/catalog-images/chlorpyrifos-f86794.webp",
-      "imageLevel": "item"
+      "icon": "🧪"
      },
      {
       "name": "Pendimethalin 1L",
       "unit": "litre",
       "price": 2600,
-      "icon": "🧪",
-      "image": "assets/catalog-images/pendimethalin-v2-348a2b.webp",
-      "imageLevel": "item"
+      "icon": "🧪"
      },
      {
       "name": "2,4-D Amine 1L",
@@ -22292,9 +21923,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Sulphur 1kg",
       "unit": "packet",
       "price": 700,
-      "icon": "🧪",
-      "image": "assets/catalog-images/sulphur-e67c5e.webp",
-      "imageLevel": "item"
+      "icon": "🧪"
      }
     ],
     "image": "assets/catalog-images/pesticides-sprays-ed7f90.webp"
@@ -22427,9 +22056,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1500,
       "icon": "🪓",
-      "nameUrdu": "کلہاڑا",
-      "image": "assets/catalog-images/axe-ed4dd6.webp",
-      "imageLevel": "item"
+      "nameUrdu": "کلہاڑا"
      },
      {
       "name": "Shovel (Belcha)",
@@ -22521,9 +22148,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Soil Moisture Meter",
       "unit": "piece",
       "price": 1500,
-      "icon": "💧",
-      "image": "assets/catalog-images/soil-moisture-meter-78e2e9.webp",
-      "imageLevel": "item"
+      "icon": "💧"
      },
      {
       "name": "Drip Lateral 16mm 100m",
@@ -22565,9 +22190,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Foot Valve 2 inch",
       "unit": "piece",
       "price": 1200,
-      "icon": "🔩",
-      "image": "assets/catalog-images/foot-valve-product-v2-d400ec.webp",
-      "imageLevel": "item"
+      "icon": "🔩"
      }
     ],
     "image": "assets/catalog-images/soil-irrigation-698550.webp",
@@ -22644,9 +22267,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 45000,
       "icon": "👃",
-      "nameUrdu": "نتھلی",
-      "image": "assets/catalog-images/gold-nose-pin-0e5727.webp",
-      "imageLevel": "item"
+      "nameUrdu": "نتھلی"
      },
      {
       "name": "Gold Bracelet",
@@ -23015,17 +22636,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Gold Polish Service",
       "unit": "piece",
       "price": 1500,
-      "icon": "✨",
-      "image": "assets/catalog-images/gold-polish-service-4a53dc.webp",
-      "imageLevel": "item"
+      "icon": "✨"
      },
      {
       "name": "Ring Resizing Service",
       "unit": "piece",
       "price": 1000,
-      "icon": "💍",
-      "image": "assets/catalog-images/ring-resizing-service-f4b799.webp",
-      "imageLevel": "item"
+      "icon": "💍"
      }
     ],
     "image": "assets/catalog-images/repair-services-4f8536.webp"
@@ -23135,9 +22752,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Abdominal Guard",
       "unit": "piece",
       "price": 600,
-      "icon": "🛡️",
-      "image": "assets/catalog-images/abdominal-guard-81c590.webp",
-      "imageLevel": "item"
+      "icon": "🛡️"
      },
      {
       "name": "Wheelie Kit Bag",
@@ -23157,9 +22772,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Grip Cone 3-pack",
       "unit": "packet",
       "price": 350,
-      "icon": "🏏",
-      "image": "assets/catalog-images/grip-cone-3-130b2c.webp",
-      "imageLevel": "item"
+      "icon": "🏏"
      }
     ],
     "image": "assets/catalog-images/cricket-a90edc.webp",
@@ -23230,9 +22843,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Football Pump",
       "unit": "piece",
       "price": 600,
-      "icon": "💨",
-      "image": "assets/catalog-images/football-pump-44592d.webp",
-      "imageLevel": "item"
+      "icon": "💨"
      },
      {
       "name": "Referee Whistle",
@@ -23282,9 +22893,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Badminton Net",
       "unit": "piece",
       "price": 2200,
-      "icon": "🥅",
-      "image": "assets/catalog-images/badminton-net-608ae9.webp",
-      "imageLevel": "item"
+      "icon": "🥅"
      },
      {
       "name": "Tennis Racket",
@@ -23312,9 +22921,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "name": "Squash Racket",
       "unit": "piece",
       "price": 3800,
-      "icon": "🎾",
-      "image": "assets/catalog-images/squash-racket-0a1244.webp",
-      "imageLevel": "item"
+      "icon": "🎾"
      },
      {
       "name": "Table Tennis Bats Pair",
@@ -23843,8 +23450,15 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "🚬",
-      "image": "assets/catalog-images/gold-leaf-20-f4e943.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
      },
      {
       "name": "Marlboro Pack 20",
@@ -23867,32 +23481,60 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 550,
       "icon": "🚬",
-      "image": "assets/catalog-images/capstan-20-daae1c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
      },
      {
       "name": "Morven Gold Pack 20",
       "unit": "piece",
       "price": 600,
       "icon": "🚬",
-      "image": "assets/catalog-images/morven-gold-20-fbe02e.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
      },
      {
       "name": "K2 Pack 20",
       "unit": "piece",
       "price": 500,
       "icon": "🚬",
-      "image": "assets/catalog-images/k-20-f8a08e.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
      },
      {
       "name": "Red & White Pack 20",
       "unit": "piece",
       "price": 520,
       "icon": "🚬",
-      "image": "assets/catalog-images/red-white-20-764a14.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1733743366591-398701d23feb?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Praswin Prakashan",
+       "profileUrl": "https://unsplash.com/@praswinprakashan",
+       "photoUrl": "https://unsplash.com/photos/a-bunch-of-fruit-hanging-from-a-palm-tree-XSlZ5HVsOIQ",
+       "source": "Unsplash"
+      },
+      "downloadLocation": "https://api.unsplash.com/photos/XSlZ5HVsOIQ/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8YmV0ZWwlMjBudXQlMjBhcmVjYSUyMG51dHxlbnwxfHx8fDE3OTIyNTU0OTB8MA"
      }
     ]
    },
