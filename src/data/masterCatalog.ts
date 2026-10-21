@@ -14640,14 +14640,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "📱",
       "image": "assets/catalog-images/transparent-silicone-v2-474313.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1771142061210-95e97225641e?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Lee Peterson",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/clear-phone-case-with-magnetic-charging-circle-v38zp8oXaEg",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Printed Designer Back Cover",
@@ -14656,14 +14656,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎨",
       "image": "assets/catalog-images/printed-designer-back-cover-eb9e60.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1760164142066-1ac379c057f5?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Katya Azimova",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/phone-case-decorated-with-tarot-card-and-stickers-7bUF0Wf27dY",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Leather Flip Pouch Cover",
@@ -14672,14 +14672,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "👝",
       "image": "assets/catalog-images/phone-accessories-7e4585.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1764855310912-15dee3625bf2?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Barnaby Woodrow",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/brown-leather-phone-case-on-wooden-desk-3dfeQYCw-oM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
       "imageSource": "unsplash"
      },
      {
@@ -14705,14 +14704,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🔘",
       "image": "assets/catalog-images/pop-socket-grip-bdc332.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1621208586877-be0c9bc8a7c5?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Logan Gutierrez",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/silver-iphone-6-on-white-sony-device-2c7udssDpMI",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Neck Strap Lanyard",
@@ -14721,14 +14720,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎗️",
       "image": "assets/catalog-images/neck-strap-lanyard-076d2e.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1769142726489-6f40b1c575c5?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "kasa deru",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/two-lanyards-with-united-tractors-logo-on-white-background-NnMGkEv-Q1Q",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Bluetooth Selfie Stick",
@@ -14737,14 +14736,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🤳",
       "image": "assets/catalog-images/phone-accessories-7e4585.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1572660570550-8ee8aa7faec7?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Casey Chae",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/turned-on-iphone-pceODL0msP8",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
       "imageSource": "unsplash"
      },
      {
@@ -14754,14 +14752,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎥",
       "image": "assets/catalog-images/flexible-mobile-tripod-dfbb7b.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1578654686426-d27ccbd940cb?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Shashank Hudkar",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/smartphone-on-octopus-tripod-facing-sea-ELjn1imcAIg",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Car Dashboard Mobile Holder",
@@ -14770,14 +14768,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🚗",
       "image": "assets/catalog-images/car-dashboard-mobile-holder-222087.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1717007873182-7cc5d673cbff?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Phil Hearing",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-cell-phone-mounted-to-the-dashboard-of-a-car-C6lzeXzv1ak",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Bike Handle Mobile Holder",
@@ -14904,14 +14902,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "📷",
       "image": "assets/catalog-images/mobile-camera-lens-kit-c75e83.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1491956716939-48348be220b1?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Aaron Burden",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-android-smartphone-capturing-blue-flower--ebVuVUFc18",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Charging Port Dust Plugs 10-pack",
@@ -14937,14 +14935,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🎧",
       "image": "assets/catalog-images/earphone-carry-case-v2-f9ffe8.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1650549879653-9ca55cd1d015?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "JESUS ECA",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-person-holding-a-black-case-with-red-lines-on-it-OIIFoysUacM",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA"
+      "imageSource": "unsplash"
      },
      {
       "name": "Smart Watch Silicone Strap",
@@ -14953,14 +14951,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "⌚",
       "image": "assets/catalog-images/phone-accessories-7e4585.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1660844817855-3ecc7ef21f12?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "pratik prasad",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-watch-with-a-black-face-FPEBZJLD8Rs",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
       "imageSource": "unsplash"
      },
      {
@@ -15003,23 +15000,22 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧲",
       "image": "assets/catalog-images/phone-accessories-7e4585.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1698314440055-5aa837af0a7f?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Vadim Sherbakov",
-       "profileUrl": "https://unsplash.com/@madebyvadim",
-       "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+       "name": "Rohan Krishnan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-steering-wheel-of-a-car-QYQ9d8ZGELg",
        "source": "Unsplash"
       },
-      "downloadLocation": "https://api.unsplash.com/photos/tCICLJ5ktBE/download?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA",
       "imageSource": "unsplash"
      }
     ],
     "image": "assets/catalog-images/phone-accessories-7e4585.webp",
-    "imageUrl": "https://images.unsplash.com/3/www.madebyvadim.com.jpg?ixid=M3wxMTA1NDUyfDB8MXxzZWFyY2h8MXx8UGhvbmUlMjBBY2Nlc3Nvcmllc3xlbnwxfHx8fDE3OTIyNTU1MjZ8MA&ixlib=rb-4.1.0&w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1572660570550-8ee8aa7faec7?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Vadim Sherbakov",
-     "profileUrl": "https://unsplash.com/@madebyvadim",
-     "photoUrl": "https://unsplash.com/photos/black-corded-headphones-near-eyeglasses-tCICLJ5ktBE",
+     "name": "Casey Chae",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/turned-on-iphone-pceODL0msP8",
      "source": "Unsplash"
     }
    },
@@ -15590,16 +15586,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 72000,
       "icon": "📺",
-      "image": "assets/catalog-images/led-tv-4k-99de4f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1461151304267-38535e780c79?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jens Kreuter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/flat-screen-tv-ngMtsE5r9eI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "LED TV 55 inch 4K",
       "unit": "piece",
       "price": 115000,
       "icon": "📺",
-      "image": "assets/catalog-images/led-tv-4k-99de4f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1461151304267-38535e780c79?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jens Kreuter",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/flat-screen-tv-ngMtsE5r9eI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "TV Wall Mount Bracket 32-55",
@@ -15638,32 +15646,56 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 650,
       "icon": "📡",
-      "image": "assets/catalog-images/lnb-single-e75d6c.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1748002094696-f6d2214824f2?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Rasta Gubaz",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-satellite-dish-is-mounted-on-a-wall--NWGWmcEwi4",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "HDMI Cable 1.5m",
       "unit": "piece",
       "price": 450,
       "icon": "🔗",
-      "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1756576357688-c637013d3483?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Andrey Matveev",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-usb-cable-on-a-bright-yellow-background-mwuFNpcHskI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "HDMI Cable 5m",
       "unit": "piece",
       "price": 950,
       "icon": "🔗",
-      "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1756576357688-c637013d3483?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Andrey Matveev",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/black-usb-cable-on-a-bright-yellow-background-mwuFNpcHskI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "TV Trolley Stand",
       "unit": "piece",
       "price": 5500,
       "icon": "📺",
-      "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1697457643599-77b5d074121f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "JALG TV Stand",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-flat-screen-tv-sitting-on-top-of-a-wooden-stand-ipF8WKs3iZI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Satellite Finder Meter",
@@ -15674,7 +15706,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp"
+    "image": "assets/catalog-images/tvs-home-entertainment-23cc6e.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1697457643599-77b5d074121f?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "JALG TV Stand",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-flat-screen-tv-sitting-on-top-of-a-wooden-stand-ipF8WKs3iZI",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Fans & Cooling",
@@ -15729,16 +15768,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 3800,
       "icon": "🌀",
-      "image": "assets/catalog-images/table-fan-b68d28.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1665298455913-dd43714f5ad1?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Zesan H.",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-round-black-object-with-a-round-top-RNQA0_f1ASI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Rechargeable Table Fan 12 inch",
       "unit": "piece",
       "price": 5200,
       "icon": "🔋",
-      "image": "assets/catalog-images/fans-cooling-102a39.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1665298455913-dd43714f5ad1?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Zesan H.",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-round-black-object-with-a-round-top-RNQA0_f1ASI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Exhaust Fan 10 inch",
@@ -15777,8 +15828,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 6500,
       "icon": "☀️",
-      "image": "assets/catalog-images/solar-dc-fan-47f571.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1564510182791-29645da7fac4?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Call Me Fred",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/gray-and-white-mini-fan-on-white-surface-6KZcjJoaqNI",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Wall Fan 16 inch",
@@ -15789,7 +15846,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "item"
      }
     ],
-    "image": "assets/catalog-images/fans-cooling-102a39.webp"
+    "image": "assets/catalog-images/fans-cooling-102a39.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1665298455913-dd43714f5ad1?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Zesan H.",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/a-round-black-object-with-a-round-top-RNQA0_f1ASI",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Batteries & Small Appliances",
@@ -15815,16 +15879,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 280,
       "icon": "🔋",
-      "image": "assets/catalog-images/battery-d67c92.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1550496923-a0e3ef948e3a?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Brett Jordan",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/orange-9v-duracell-battery-NIDPm-ltVbA",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "CR2032 Button Cell 5-pack",
       "unit": "packet",
       "price": 250,
       "icon": "🔋",
-      "image": "assets/catalog-images/cr2032-button-cell-5-3bcef5.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1640545232337-5cb2c7b24ca8?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Андрей Сизов",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-group-of-three-batteries-sitting-on-top-of-a-table-IUzs7uWOZ_Y",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "AA Rechargeable Battery 4-pack",
@@ -15871,8 +15947,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1950,
       "icon": "👔",
-      "image": "assets/catalog-images/dry-iron-a6fb20.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1489274495757-95c7c837b101?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Filip Mroz",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/white-and-teal-steam-clothes-iron-plugged-on-ironing-board-gma1zfS3_6E",
+       "source": "Unsplash"
+      }
      }
     ]
    }
