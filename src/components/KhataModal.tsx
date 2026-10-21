@@ -115,6 +115,8 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
                 onChangeText={setAmount}
                 editable={!isSettled}
                 autoFocus={!isSettled}
+                returnKeyType="done"
+                onSubmitEditing={handleRecordPayment}
               />
             </View>
 
@@ -165,6 +167,8 @@ export const KhataModal: React.FC<KhataModalProps> = ({ customer, visible, onClo
                 value={note}
                 onChangeText={setNote}
                 editable={!isSettled}
+                returnKeyType="done"
+                onSubmitEditing={handleRecordPayment}
               />
             </View>
           </View>

@@ -1,7 +1,5 @@
 import { ProductCard } from '@/components/ProductCard';
 import { ProductDetailsDrawer } from '@/components/ProductDetailsDrawer';
-import { CatalogImportModal } from '@/components/CatalogImportModal';
-import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
 import { ProductImage } from '@/components/ProductImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FilterChip } from '@/components/ui/FilterChip';
@@ -10,11 +8,13 @@ import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
+import { ShopStoreLoader } from '@/components/ShopStoreLoader';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,16 +22,24 @@ import {
 } from 'react-native';
 
 import { PRODUCTS_FILTER_CATEGORIES } from '@/constants/categories';
+import { CatalogImportModal } from '@/components/CatalogImportModal';
+import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
 
 const CATEGORIES: (ProductCategory | 'LowStock')[] = PRODUCTS_FILTER_CATEGORIES;
 
 export const ProductsScreen: React.FC = () => {
   const {
     products,
+    isProductsLoading,
+    isLoaded,
+    refreshProducts,
     deleteProduct,
     setEditingProduct,
     setIsAddProductOpen,
     settings,
+    totalInventoryInvestment,
+    totalInventoryRetailValue,
+    totalExpectedStockProfit,
     t,
     language,
     lowStockProducts,
@@ -44,11 +52,28 @@ export const ProductsScreen: React.FC = () => {
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock'>('All');
+  const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock' | 'OutOfStock'>('All');
   const viewMode = productsViewMode;
   const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [isTypePickerOpen, setIsTypePickerOpen] = useState(false);
+
+  // If products are not loaded or empty on mount, trigger fresh fetch
+  useEffect(() => {
+    if (products.length === 0 && !isProductsLoading && isLoaded) {
+      refreshProducts();
+    }
+  }, [products.length, isProductsLoading, isLoaded, refreshProducts]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshProducts();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const setViewModePersist = (mode: 'grid' | 'list') => {
     setProductsViewMode(mode);
@@ -69,7 +94,11 @@ export const ProductsScreen: React.FC = () => {
       if (!matchSearch) return false;
       if (selectedFilter === 'All') return true;
       if (selectedFilter === 'LowStock') {
-        return p.stock <= (settings.lowStockThreshold || 5);
+        const threshold = p.lowStockThreshold ?? settings.lowStockThreshold ?? 5;
+        return p.stock > 0 && p.stock <= threshold;
+      }
+      if (selectedFilter === 'OutOfStock') {
+        return p.stock <= 0;
       }
       return p.category === selectedFilter;
     });
@@ -85,6 +114,10 @@ export const ProductsScreen: React.FC = () => {
     return counts;
   }, [products]);
 
+  const profitPct =
+    totalInventoryInvestment > 0
+      ? ((totalExpectedStockProfit / totalInventoryInvestment) * 100).toFixed(1)
+      : '0.0';
 
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.4)';
   const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
@@ -147,15 +180,21 @@ export const ProductsScreen: React.FC = () => {
             </Pressable>
           </View>
 
-          {/* ── 3 Inventory Summary Pillars (Items, Low Stock, Out of Stock) ── */}
+          {/* ── 3 Visual Inventory Action Pillars (All Items, Low Stock, Out of Stock) ── */}
           <View style={styles.compactMetricBar}>
             {/* 1. Total Catalog Items */}
-            <View style={styles.compactMetricItem}>
+            <Pressable
+              onPress={() => setSelectedFilter('All')}
+              style={({ pressed }) => [
+                styles.compactMetricItem,
+                selectedFilter === 'All' && styles.compactMetricItemActive,
+                pressed && { opacity: 0.8 },
+              ]}>
               <Text style={styles.compactMetricTitle} numberOfLines={1}>
-                {language === 'ur' ? 'کل اشیاء' : 'Items'}
+                {language === 'ur' ? 'تمام سامان' : 'All Items'}
               </Text>
               <View style={styles.metricValRow}>
-                <Ionicons name="cube" size={11} color="#A7F3D0" />
+                <Ionicons name="cube" size={12} color="#A7F3D0" />
                 <Text
                   style={styles.compactMetricBold}
                   numberOfLines={1}
@@ -165,53 +204,65 @@ export const ProductsScreen: React.FC = () => {
                 </Text>
               </View>
               <Text style={styles.compactMetricSub} numberOfLines={1}>
-                {language === 'ur' ? 'سامان' : 'in store'}
+                {language === 'ur' ? 'کل اشیاء' : 'in store'}
               </Text>
-            </View>
+            </Pressable>
 
             <View style={styles.compactMetricDivider} />
 
-            {/* 2. Low Stock — the count he acts on */}
-            <View style={styles.compactMetricItem}>
-              <Text style={styles.compactMetricTitle} numberOfLines={1}>
+            {/* 2. Low Stock (Reorder Alert) */}
+            <Pressable
+              onPress={() => setSelectedFilter('LowStock')}
+              style={({ pressed }) => [
+                styles.compactMetricItem,
+                selectedFilter === 'LowStock' && styles.compactMetricItemActive,
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Text style={[styles.compactMetricTitle, { color: '#FDE68A' }]} numberOfLines={1}>
                 {language === 'ur' ? 'کم اسٹاک' : 'Low Stock'}
               </Text>
               <View style={styles.metricValRow}>
-                <Ionicons name="warning" size={11} color="#FDE68A" />
+                <Ionicons name="alert-circle" size={12} color="#FDE68A" />
                 <Text
-                  style={styles.compactMetricBold}
+                  style={[styles.compactMetricBold, { color: '#FDE68A' }]}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   minimumFontScale={0.7}>
                   {lowStockProducts.length}
                 </Text>
               </View>
-              <Text style={styles.compactMetricSub} numberOfLines={1}>
-                {language === 'ur' ? 'جلد منگوائیں' : 'reorder soon'}
+              <Text style={[styles.compactMetricSub, { color: '#FDE68A' }]} numberOfLines={1}>
+                {language === 'ur' ? 'آرڈر کریں' : 'reorder'}
               </Text>
-            </View>
+            </Pressable>
 
             <View style={styles.compactMetricDivider} />
 
-            {/* 3. Out of Stock */}
-            <View style={styles.compactMetricItem}>
-              <Text style={styles.compactMetricTitle} numberOfLines={1}>
+            {/* 3. Out of Stock (Urgent Sold Out) */}
+            <Pressable
+              onPress={() => setSelectedFilter('OutOfStock')}
+              style={({ pressed }) => [
+                styles.compactMetricItem,
+                selectedFilter === 'OutOfStock' && styles.compactMetricItemActive,
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Text style={[styles.compactMetricTitle, { color: '#FCA5A5' }]} numberOfLines={1}>
                 {language === 'ur' ? 'ختم شدہ' : 'Out of Stock'}
               </Text>
               <View style={styles.metricValRow}>
-                <Ionicons name="close-circle" size={11} color="#FCA5A5" />
+                <Ionicons name="close-circle" size={12} color="#FCA5A5" />
                 <Text
-                  style={styles.compactMetricBold}
+                  style={[styles.compactMetricBold, { color: '#FCA5A5' }]}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   minimumFontScale={0.7}>
                   {outOfStockProducts.length}
                 </Text>
               </View>
-              <Text style={styles.compactMetricSub} numberOfLines={1}>
-                {language === 'ur' ? 'اسٹاک ختم' : 'sold out'}
+              <Text style={[styles.compactMetricSub, { color: '#FCA5A5' }]} numberOfLines={1}>
+                {language === 'ur' ? 'دستیاب نہیں' : 'sold out'}
               </Text>
-            </View>
+            </Pressable>
           </View>
 
           {/* Horizontal Category Filters with Frosted Glass Chips */}
@@ -318,7 +369,9 @@ export const ProductsScreen: React.FC = () => {
         </View>
 
         {/* Products Display */}
-        {filteredProducts.length === 0 ? (
+        {isProductsLoading || isRefreshing || (!isLoaded && products.length === 0) ? (
+          <ShopStoreLoader viewMode={viewMode} />
+        ) : filteredProducts.length === 0 ? (
           <EmptyState
             icon="search-outline"
             title={language === 'ur' ? 'کوئی پروڈکٹ نہیں ملا' : 'No products found'}
@@ -341,7 +394,15 @@ export const ProductsScreen: React.FC = () => {
           <ScrollView
             style={styles.productsScroll}
             contentContainerStyle={styles.productsList}
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                colors={[theme.primary]}
+                tintColor={theme.primary}
+              />
+            }>
             {filteredProducts.map((product) => {
               const isOut = product.stock <= 0;
               const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
@@ -503,7 +564,15 @@ export const ProductsScreen: React.FC = () => {
           <ScrollView
             style={styles.productsScroll}
             contentContainerStyle={styles.productsGrid}
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                colors={[theme.primary]}
+                tintColor={theme.primary}
+              />
+            }>
             {filteredProducts.map((product) => (
               <View key={product.id} style={styles.cardContainer}>
                 <ProductCard
@@ -617,6 +686,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 1,
     gap: 1,
+    borderRadius: 8,
+  },
+  compactMetricItemActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
   },
   compactMetricTitle: {
     color: 'rgba(255, 255, 255, 0.82)',

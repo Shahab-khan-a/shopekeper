@@ -220,6 +220,8 @@ export const SupplierModal: React.FC<SupplierModalProps> = ({
                     value={amount}
                     onChangeText={setAmount}
                     autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSubmit}
                   />
                 </View>
 
@@ -278,6 +280,8 @@ export const SupplierModal: React.FC<SupplierModalProps> = ({
                     value={amount}
                     onChangeText={setAmount}
                     autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSubmit}
                   />
                 </View>
 

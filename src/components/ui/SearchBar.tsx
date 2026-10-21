@@ -9,13 +9,19 @@ interface SearchBarProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   height?: number;
+  onSubmitEditing?: () => void;
+  returnKeyType?: 'search' | 'done' | 'go' | 'next';
+  autoFocus?: boolean;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChangeText,
   placeholder = 'Search...',
-  height = 50,
+  height = 46,
+  onSubmitEditing,
+  returnKeyType = 'search',
+  autoFocus = false,
 }) => {
   const { settings } = useShop();
   const [focused, setFocused] = useState(false);
@@ -48,6 +54,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         onChangeText={onChangeText}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        onSubmitEditing={onSubmitEditing}
+        returnKeyType={returnKeyType}
+        autoFocus={autoFocus}
       />
       {value.length > 0 && (
         <Pressable
@@ -72,7 +81,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '500',
   },
 });

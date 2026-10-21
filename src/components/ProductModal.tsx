@@ -59,6 +59,20 @@ const PRESET_IMAGES = [
 
 const STOCK_SHORTCUTS = [10, 25, 50, 100];
 
+const getDefaultCategoryForShopType = (shopType?: string): ProductCategory => {
+  if (!shopType) return 'Kiryana';
+  const lower = shopType.toLowerCase();
+  if (lower.includes('dairy') || lower.includes('milk')) return 'Dairy';
+  if (lower.includes('bakery') || lower.includes('sweet')) return 'Bakery';
+  if (lower.includes('tea') || lower.includes('beverage') || lower.includes('drink') || lower.includes('dhaba')) return 'Beverages';
+  if (lower.includes('snack') || lower.includes('cafe') || lower.includes('fast food') || lower.includes('tobacco') || lower.includes('paan')) return 'Snacks';
+  if (lower.includes('cosmetic') || lower.includes('beauty') || lower.includes('pharmacy')) return 'Personal Care';
+  if (lower.includes('spice') || lower.includes('masala')) return 'Spices';
+  if (lower.includes('supermarket') || lower.includes('grocery') || lower.includes('fruit') || lower.includes('vegetable') || lower.includes('grain')) return 'Grocery';
+  if (lower.includes('general') || lower.includes('kiryana') || lower.includes('store')) return 'Kiryana';
+  return 'Others';
+};
+
 export const ProductModal: React.FC<ProductModalProps> = ({
   visible,
   onClose,
@@ -72,7 +86,9 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [price, setPrice] = useState('');
   const [costPrice, setCostPrice] = useState('');
   const [stock, setStock] = useState('10');
-  const [category, setCategory] = useState<ProductCategory>('Kiryana');
+  const [category, setCategory] = useState<ProductCategory>(() =>
+    getDefaultCategoryForShopType(settings.catalogShopType)
+  );
   const [unit, setUnit] = useState<ProductUnit>('piece');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -91,6 +107,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [stapleCategoryFilter, setStapleCategoryFilter] = useState<string>('All');
   const scrollViewRef = useRef<ScrollView>(null);
   const priceInputRef = useRef<TextInput>(null);
+  const stockInputRef = useRef<TextInput>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
@@ -177,7 +194,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setPrice('');
     setCostPrice('');
     setStock('10');
-    setCategory('Kiryana');
+    setCategory(getDefaultCategoryForShopType(settings.catalogShopType));
     setUnit('piece');
     setIsCategoryOpen(false);
     setIsUnitOpen(false);
@@ -706,6 +723,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       onChangeText={setName}
                       onFocus={() => setFocusedField('name')}
                       onBlur={() => setFocusedField(null)}
+                      returnKeyType="next"
+                      onSubmitEditing={() => {
+                        priceInputRef.current?.focus();
+                        setFocusedField('price');
+                      }}
                     />
                   </View>
 
@@ -742,6 +764,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         onChangeText={setPrice}
                         onFocus={() => setFocusedField('price')}
                         onBlur={() => setFocusedField(null)}
+                        returnKeyType="next"
+                        onSubmitEditing={() => {
+                          stockInputRef.current?.focus();
+                          setFocusedField('stock');
+                        }}
                       />
                     </View>
                   </View>
@@ -758,6 +785,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </View>
                     <View style={styles.stockInputRow}>
                       <TextInput
+                        ref={stockInputRef}
                         style={[
                           styles.inputBox,
                           styles.stockInputBox,
@@ -774,6 +802,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         onChangeText={setStock}
                         onFocus={() => setFocusedField('stock')}
                         onBlur={() => setFocusedField(null)}
+                        returnKeyType="done"
+                        onSubmitEditing={handleSubmit}
                       />
                       <View style={styles.stockPresetsWrap}>
                         {STOCK_SHORTCUTS.map((amt) => {

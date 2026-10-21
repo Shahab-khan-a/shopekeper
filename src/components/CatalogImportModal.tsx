@@ -136,7 +136,7 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
       name: item.name,
       nameUrdu: item.nameUrdu,
       price: item.price,
-      stock: 0,
+      stock: 20, // Starter shelf stock so imported items can be sold immediately
       category: mapCatalogCategory(categoryName, shopType.shopType),
       unit: item.unit,
       image: resolveCatalogImageUri(item),

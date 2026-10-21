@@ -5,8 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Linking,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,9 +16,12 @@ import { CustomerModal, CustomerModalMode } from '@/components/CustomerModal';
 import { SupplierCard } from '@/components/SupplierCard';
 import { SupplierModal, SupplierModalMode } from '@/components/SupplierModal';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { TourBeacon } from '@/components/TourBeacon';
+import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { openWhatsAppWithMessage } from '@/utils/whatsapp';
 
 type KhataFilter = 'all' | 'pending' | 'overdue' | 'settled';
 
@@ -61,8 +62,23 @@ export const KhataScreen: React.FC = () => {
     showAlert,
     addCustomer,
     addCustomerCredit,
+    tourStep,
+    setTourStep,
+    endHandsOnTour,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+
+  // Hands-On Tour Step 6: Auto-seed Aslam Bhai if Khata is empty so shopkeeper can see the 1-tap WhatsApp action
+  useEffect(() => {
+    if (tourStep === 6 && khata.length === 0) {
+      addCustomer({
+        name: 'Aslam Bhai',
+        nameUrdu: 'اسلم بھائی',
+        phone: '03001234567',
+        totalDebt: 450,
+      }).catch(console.error);
+    }
+  }, [tourStep, khata.length, addCustomer]);
 
   // Segment Tab: Customers vs Suppliers
   const [activeLedgerTab, setActiveLedgerTab] = useState<'customers' | 'suppliers'>('customers');
@@ -257,14 +273,7 @@ export const KhataScreen: React.FC = () => {
   };
 
   const openWhatsApp = (phone: string, message: string) => {
-    const encoded = encodeURIComponent(message);
-    const clean = phone.replace(/[^0-9]/g, '');
-    const url = clean
-      ? `https://wa.me/${clean.startsWith('92') ? clean : '92' + clean.replace(/^0/, '')}?text=${encoded}`
-      : `https://wa.me/?text=${encoded}`;
-    Linking.openURL(url).catch(() => {
-      if (Platform.OS === 'web') window.open(url, '_blank');
-    });
+    openWhatsAppWithMessage(phone, message);
   };
 
   const handleNotifyAllOverdue = () => {
@@ -758,26 +767,38 @@ export const KhataScreen: React.FC = () => {
             ) : (
               <ScrollView
                 style={styles.customersScroll}
-                contentContainerStyle={styles.customersList}
+                contentContainerStyle={[
+                  styles.customersList,
+                  tourStep === 6 && { paddingBottom: 220 },
+                ]}
                 showsVerticalScrollIndicator={false}>
-                {filteredCustomers.map((customer) => (
-                  <CustomerKhataCard
-                    key={customer.id}
-                    customer={customer}
-                    isExpanded={expandedCustId === customer.id}
-                    onToggleExpand={() =>
-                      setExpandedCustId((prev) =>
-                        prev === customer.id ? null : customer.id
-                      )
-                    }
-                    onRecordPayment={handleRecordPayment}
-                    onAddCredit={handleOpenAddCredit}
-                    overdueDays={
-                      isOverdueCustomer(customer)
-                        ? daysSince(getLastActivityDate(customer))
-                        : 0
-                    }
-                  />
+                {filteredCustomers.map((customer, idx) => (
+                  <View key={customer.id} style={{ position: 'relative' }}>
+                    {tourStep === 6 && idx === 0 && (
+                      <TourBeacon
+                        textUrdu="1-ٹیپ واٹس ایپ بل کا بٹن دیکھیں"
+                        textEn="1-Tap WhatsApp Bill Reminder"
+                        position="top"
+                        onSkip={endHandsOnTour}
+                      />
+                    )}
+                    <CustomerKhataCard
+                      customer={customer}
+                      isExpanded={expandedCustId === customer.id}
+                      onToggleExpand={() =>
+                        setExpandedCustId((prev) =>
+                          prev === customer.id ? null : customer.id
+                        )
+                      }
+                      onRecordPayment={handleRecordPayment}
+                      onAddCredit={handleOpenAddCredit}
+                      overdueDays={
+                        isOverdueCustomer(customer)
+                          ? daysSince(getLastActivityDate(customer))
+                          : 0
+                      }
+                    />
+                  </View>
                 ))}
               </ScrollView>
             )}
@@ -935,6 +956,24 @@ export const KhataScreen: React.FC = () => {
         onSavePurchase={handleSavePurchase}
         onSavePayment={handleSavePayment}
       />
+
+      {/* Hands-On Tour Step 6: Advance to Cash Drawer & Profit */}
+      {tourStep === 6 && (
+        <FloatingTourPrompt
+          bottom={10}
+          badgeUrdu="مرحلہ 2 مکمل ✓"
+          badgeEn="Step 2 Complete ✓"
+          messageUrdu="گاہکوں کا ادھار اور 1-کلک واٹس ایپ یاددہانی۔ اب گلہ اور منافع دیکھیں۔"
+          messageEn="Customer ledger with 1-click WhatsApp bills. Next, see cash in drawer."
+          buttonUrdu="گلہ اور منافع دیکھیں ➔"
+          buttonEn="Next: See Cash in Drawer ➔"
+          onPressButton={() => {
+            setActiveTab('dashboard');
+            setTourStep(7);
+          }}
+          onSkip={endHandsOnTour}
+        />
+      )}
     </View>
   );
 };

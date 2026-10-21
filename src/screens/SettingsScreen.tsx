@@ -1,5 +1,7 @@
 import { CameraModal } from '@/components/CameraModal';
 import { CurrencyPickerModal } from '@/components/CurrencyPickerModal';
+import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
+import { MASTER_CATALOG } from '@/data/masterCatalog';
 import { ProductImage } from '@/components/ProductImage';
 import { findCurrency } from '@/constants/currencies';
 import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
@@ -320,6 +322,8 @@ export const SettingsScreen: React.FC = () => {
     deleteAccount,
     syncNow,
     setIsAuthModalOpen,
+    setIsOnboardingOpen,
+    startHandsOnTour,
     showAlert,
   } = useShop();
 
@@ -345,6 +349,7 @@ export const SettingsScreen: React.FC = () => {
   };
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
+  const [isShopTypePickerOpen, setIsShopTypePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -497,6 +502,10 @@ export const SettingsScreen: React.FC = () => {
         setIsCurrencyPickerOpen(false);
         return true;
       }
+      if (isShopTypePickerOpen) {
+        setIsShopTypePickerOpen(false);
+        return true;
+      }
       if (showImportBox) {
         setShowImportBox(false);
         return true;
@@ -510,7 +519,7 @@ export const SettingsScreen: React.FC = () => {
     };
     const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
     return () => sub.remove();
-  }, [isCameraOpen, isCurrencyPickerOpen, showImportBox, isFormDirty, setActiveTab]);
+  }, [isCameraOpen, isCurrencyPickerOpen, isShopTypePickerOpen, showImportBox, isFormDirty, setActiveTab]);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const pickImage = async () => {
@@ -1384,6 +1393,38 @@ export const SettingsScreen: React.FC = () => {
             </View>
           </Section>
 
+          {/* Product Catalog — shop type drives what loads in the Products tab */}
+          <Section title={language === 'ur' ? 'پروڈکٹ کیٹلاگ' : 'Product Catalog'} theme={theme}>
+            <RowItem
+              icon="storefront-outline"
+              iconColor="#0D9488"
+              iconBg="#CCFBF1"
+              label={language === 'ur' ? 'دکان کی قسم' : 'Shop Type'}
+              sublabel={
+                settings.catalogShopType ||
+                (language === 'ur' ? 'منتخب نہیں — منتخب کرنے کے لیے دبائیں' : 'Not selected — tap to choose')
+              }
+              theme={theme}
+              onPress={() => setIsShopTypePickerOpen(true)}
+            />
+            <RowItem
+              icon="library-outline"
+              iconColor="#7C3AED"
+              iconBg="#EDE9FE"
+              label={language === 'ur' ? 'کیٹلاگ اشیاء' : 'Catalog Items'}
+              sublabel={
+                settings.catalogShopType
+                  ? `${MASTER_CATALOG.find((s) => s.shopType === settings.catalogShopType)?.categories.reduce((n, c) => n + c.items.length, 0) ?? 0} ${language === 'ur' ? 'اشیاء پروڈکٹس ٹیب میں دستیاب ہیں' : 'items available in Products tab'}`
+                  : language === 'ur'
+                    ? 'قسم منتخب کریں تاکہ اس کی اشیاء لوڈ ہوں'
+                    : 'Pick a shop type to load its items'
+              }
+              theme={theme}
+              last
+              onPress={() => setIsShopTypePickerOpen(true)}
+            />
+          </Section>
+
           {/* Advanced toggle — billing + data tools live behind it */}
           <Pressable onPress={() => setShowAdvanced((v) => !v)} style={styles.moreToggle}>
             <Text style={[styles.moreToggleText, { color: theme.primary }]}>
@@ -1826,6 +1867,15 @@ export const SettingsScreen: React.FC = () => {
           {/* About & Legal Section */}
           <Section title={t('aboutLegal')} theme={theme}>
             <RowItem
+              icon="school-outline"
+              iconColor="#059669"
+              iconBg="#D1FAE5"
+              label={language === 'ur' ? 'ایپ کا تعارف اور گائیڈ' : 'App Tour & Interactive Guide'}
+              sublabel={language === 'ur' ? 'کاؤنٹر، کھاتہ اور گلہ کی پریکٹس دوبارہ کریں' : 'Replay interactive practice session anytime'}
+              onPress={startHandsOnTour}
+              theme={theme}
+            />
+            <RowItem
               icon="shield-checkmark-outline"
               iconColor="#2563EB"
               iconBg="#DBEAFE"
@@ -1881,6 +1931,12 @@ export const SettingsScreen: React.FC = () => {
         onClose={() => setIsCameraOpen(false)}
         onCapture={(uri) => { handleLogoSelected(uri); setIsCameraOpen(false); }}
         title={t('takePhoto')}
+      />
+
+      {/* Shop Type Picker Modal */}
+      <ShopTypePickerModal
+        visible={isShopTypePickerOpen}
+        onClose={() => setIsShopTypePickerOpen(false)}
       />
 
       </ScrollView>

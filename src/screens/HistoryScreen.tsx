@@ -16,6 +16,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatCompactPrice } from '@/utils/formatters';
+import { openWhatsAppReceipt, openWhatsAppWithMessage } from '@/utils/whatsapp';
 
 type HistoryFilter = 'all' | 'today' | 'week' | 'month' | 'custom';
 type PaymentFilter = 'all' | PaymentMethod;
@@ -180,41 +181,8 @@ export const HistoryScreen: React.FC = () => {
     });
   };
 
-  const buildWhatsAppReceipt = (sale: Sale) => {
-    const itemsList = sale.items
-      .map(
-        (it) =>
-          `• ${it.product.name} × ${it.quantity} = ${settings.currencySymbol}${it.total}`
-      )
-      .join('\n');
-    return `
-🧾 *${settings.shopName}*
-📄 Bill #${sale.billNumber}
-📅 ${new Date(sale.date).toLocaleString()}
-👤 ${sale.customerName || t('walkInCustomer')}
----------------------------------
-${itemsList}
----------------------------------
-*${t('grandTotal')}: ${settings.currencySymbol}${sale.grandTotal.toLocaleString()}*
-${t('paymentMethod')}: ${sale.paymentMethod}
-    `.trim();
-  };
-
   const shareWhatsApp = (sale: Sale) => {
-    const encoded = encodeURIComponent(buildWhatsAppReceipt(sale));
-    const cleanPhone = sale.customerPhone?.replace(/[^0-9]/g, '') || '';
-    let url = `https://api.whatsapp.com/send?text=${encoded}`;
-    if (cleanPhone) {
-      const formatted = cleanPhone.startsWith('92')
-        ? cleanPhone
-        : cleanPhone.startsWith('0')
-          ? '92' + cleanPhone.slice(1)
-          : cleanPhone;
-      url = `https://api.whatsapp.com/send?phone=${formatted}&text=${encoded}`;
-    }
-    Linking.openURL(url).catch(() => {
-      if (Platform.OS === 'web') window.open(url, '_blank');
-    });
+    openWhatsAppReceipt(sale, settings, language);
   };
 
   const sendUdhaarReminder = (sale: Sale) => {
@@ -231,15 +199,7 @@ ${t('paymentMethod')}: ${sale.paymentMethod}
         ? `السلام علیکم ${name} صاحب!\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopHeader}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${amount}* ہے۔\n\nبل #${sale.billNumber}\n\nشکریہ!\n*${settings.shopName}*`
         : `Dear ${name},\n\nGentle reminder from *${shopHeader}* regarding your pending balance:\n👉 *${amount}*\n\nBill #${sale.billNumber}\n\nThank you!\n*${settings.shopName}*`;
 
-    const encoded = encodeURIComponent(message);
-    const cleanPhone = (sale.customerPhone || customer?.phone || '').replace(/[^0-9]/g, '');
-    const url = cleanPhone
-      ? `https://wa.me/${cleanPhone.startsWith('92') ? cleanPhone : '92' + cleanPhone.replace(/^0/, '')}?text=${encoded}`
-      : `https://wa.me/?text=${encoded}`;
-
-    Linking.openURL(url).catch(() => {
-      if (Platform.OS === 'web') window.open(url, '_blank');
-    });
+    openWhatsAppWithMessage(sale.customerPhone || customer?.phone, message);
   };
 
   const showMoreActions = (sale: Sale) => {

@@ -191,6 +191,8 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
                   value={amount}
                   onChangeText={setAmount}
                   autoFocus={true}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSaveCashOut}
                 />
               </View>
             </View>
@@ -271,6 +273,8 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
                 placeholderTextColor={theme.textMuted}
                 value={note}
                 onChangeText={setNote}
+                returnKeyType="done"
+                onSubmitEditing={handleSaveCashOut}
               />
             </View>
 

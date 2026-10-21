@@ -10,6 +10,7 @@ import { ProductModal } from '@/components/ProductModal';
 import { ReceiptModal } from '@/components/ReceiptModal';
 import { AuthModal } from '@/components/AuthModal';
 import { EditShopModal } from '@/components/EditShopModal';
+import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { LoginScreen } from '@/screens/LoginScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { SaleScreen } from '@/screens/SaleScreen';
@@ -36,6 +37,11 @@ export default function App() {
     setIsAuthModalOpen,
     isEditShopOpen,
     setIsEditShopOpen,
+    isOnboardingOpen,
+    setIsOnboardingOpen,
+    tourStep,
+    setTourStep,
+    endHandsOnTour,
     user,
     authLoading,
     isLoaded,
@@ -46,66 +52,6 @@ export default function App() {
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
-
-  // Global Android Hardware Back Button Stack Management
-  useEffect(() => {
-    if (Platform.OS !== 'android') return;
-
-    const onHardwareBack = () => {
-      // 1. Dismiss topmost Alert dialog if active
-      if (alertConfig) {
-        hideAlert();
-        return true;
-      }
-      // 2. Dismiss Receipt modal if active
-      if (activeReceipt) {
-        setActiveReceipt(null);
-        return true;
-      }
-      // 3. Dismiss Product Add/Edit modal if active
-      if (isAddProductOpen) {
-        setIsAddProductOpen(false);
-        setEditingProduct(null);
-        return true;
-      }
-      // 4. Dismiss Auth modal if active
-      if (isAuthModalOpen) {
-        setIsAuthModalOpen(false);
-        return true;
-      }
-      // 5. Dismiss Edit Shop profile modal if active
-      if (isEditShopOpen) {
-        setIsEditShopOpen(false);
-        return true;
-      }
-      // 6. Navigation Stack: If in Sale, Products, History, or Khata, back navigates to Dashboard
-      // (SettingsScreen has its own dedicated handler to prompt if store form is dirty)
-      if (activeTab !== 'dashboard' && activeTab !== 'settings') {
-        setActiveTab('dashboard');
-        return true;
-      }
-
-      // If already on Dashboard with no modals open, allow default Android back action (exit)
-      return false;
-    };
-
-    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
-    return () => sub.remove();
-  }, [
-    alertConfig,
-    activeReceipt,
-    isAddProductOpen,
-    isAuthModalOpen,
-    isEditShopOpen,
-    activeTab,
-    hideAlert,
-    setActiveReceipt,
-    setIsAddProductOpen,
-    setEditingProduct,
-    setIsAuthModalOpen,
-    setIsEditShopOpen,
-    setActiveTab,
-  ]);
 
   // First-run catalog setup: after sign-in or Continue as Guest, the keeper
   // picks a shop type and loads its ready-made items (or skips). Remembered
@@ -154,6 +100,75 @@ export default function App() {
       setActiveTab('sale');
     }
   };
+
+  // Global Android Hardware Back Button Stack Management
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    if (isCatalogStepCompleted === false) return; // CatalogSetupScreen handles its own back navigation
+
+    const onHardwareBack = () => {
+      // 1. Dismiss topmost Alert dialog if active
+      if (alertConfig) {
+        hideAlert();
+        return true;
+      }
+      // 2. Dismiss Receipt modal if active
+      if (activeReceipt) {
+        setActiveReceipt(null);
+        return true;
+      }
+      // 3. Dismiss Product Add/Edit modal if active
+      if (isAddProductOpen) {
+        setIsAddProductOpen(false);
+        setEditingProduct(null);
+        return true;
+      }
+      // 4. Dismiss Auth modal if active
+      if (isAuthModalOpen) {
+        setIsAuthModalOpen(false);
+        return true;
+      }
+      // 5. Dismiss Edit Shop profile modal if active
+      if (isEditShopOpen) {
+        setIsEditShopOpen(false);
+        return true;
+      }
+      // 6. Dismiss Onboarding modal if active
+      if (isOnboardingOpen) {
+        setIsOnboardingOpen(false);
+        return true;
+      }
+      // 7. Navigation Stack: If in Sale, Products, History, or Khata, back navigates to Dashboard
+      // (SettingsScreen has its own dedicated handler to prompt if store form is dirty)
+      if (activeTab !== 'dashboard' && activeTab !== 'settings') {
+        setActiveTab('dashboard');
+        return true;
+      }
+
+      // If already on Dashboard with no modals open, allow default Android back action (exit)
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+    return () => sub.remove();
+  }, [
+    alertConfig,
+    activeReceipt,
+    isAddProductOpen,
+    isAuthModalOpen,
+    isEditShopOpen,
+    isOnboardingOpen,
+    activeTab,
+    isCatalogStepCompleted,
+    hideAlert,
+    setActiveReceipt,
+    setIsAddProductOpen,
+    setEditingProduct,
+    setIsAuthModalOpen,
+    setIsEditShopOpen,
+    setIsOnboardingOpen,
+    setActiveTab,
+  ]);
 
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -316,6 +331,24 @@ export default function App() {
             visible={isEditShopOpen}
             onClose={() => setIsEditShopOpen(false)}
           />
+
+          {/* Hands-On Tour Step 5: Floating prompt over receipt to visit Khata */}
+          {tourStep === 5 && (
+            <FloatingTourPrompt
+              badgeUrdu="پہلی سیل مکمل ✓"
+              badgeEn="Step 1 Complete ✓"
+              messageUrdu="زبردست! آپ کی پہلی سیل 3 سیکنڈ میں بن گئی۔ اب کسٹمر کھاتہ دیکھیں۔"
+              messageEn="Great job! First sale made in 3 seconds. Now discover customer Khata."
+              buttonUrdu="گاہک کھاتہ دیکھیں ➔"
+              buttonEn="Open Customer Khata ➔"
+              onPressButton={() => {
+                setActiveReceipt(null);
+                setActiveTab('khata');
+                setTourStep(6);
+              }}
+              onSkip={endHandsOnTour}
+            />
+          )}
         </View>
       </SafeAreaView>
     );
