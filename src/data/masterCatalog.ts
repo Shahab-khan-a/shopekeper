@@ -14405,12 +14405,12 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1800,
       "icon": "🎒",
-      "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800&auto=format&fit=crop",
+      "imageUrl": "https://images.unsplash.com/photo-1726726192148-af52008ff663?q=80&w=800&auto=format&fit=crop",
       "imageSource": "unsplash",
       "credit": {
-       "name": "Josiah Gardner",
+       "name": "The Design Lady",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/brown-leather-backpack-on-gray-surface-HD6Jx6P7uRc",
+       "photoUrl": "https://unsplash.com/photos/a-yellow-backpack-sitting-on-top-of-a-table-C7eQtdkINpc",
        "source": "Unsplash"
       }
      },
