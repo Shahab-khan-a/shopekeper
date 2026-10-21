@@ -422,8 +422,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 540,
       "icon": "🫗",
       "nameUrdu": "کھانے کا تیل",
-      "image": "assets/catalog-images/fortified-cooking-oil-93c97b.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1552592074-ea7a91b851b3?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "jonathan ocampo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/oil-dispenser-bottle-iCgfwfqgdzo",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cooking Oil 250ml Pouch",
@@ -2728,16 +2734,28 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 1650,
       "icon": "👶",
-      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1584839404042-8bc21d240e91?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Nathan Dumlao",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/blue-and-white-plastic-pack-KeiQeZJLmus",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Baby Wipes 80ct",
       "unit": "packet",
       "price": 550,
       "icon": "🧻",
-      "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
-      "imageLevel": "category"
+      "imageUrl": "https://images.unsplash.com/photo-1706524077391-12206f155e94?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Jake Bravo",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-package-of-softacre-baby-wipes-sitting-on-top-of-a-white-stand-pms1zJmqxgQ",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Baby Shampoo 200ml",
@@ -2792,7 +2810,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "imageLevel": "category"
      }
     ],
-    "image": "assets/catalog-images/baby-care-food-ab4d57.webp"
+    "image": "assets/catalog-images/baby-care-food-ab4d57.webp",
+    "imageUrl": "https://images.unsplash.com/photo-1584839404042-8bc21d240e91?q=80&w=800&auto=format&fit=crop",
+    "credit": {
+     "name": "Nathan Dumlao",
+     "profileUrl": "",
+     "photoUrl": "https://unsplash.com/photos/blue-and-white-plastic-pack-KeiQeZJLmus",
+     "source": "Unsplash"
+    }
    },
    {
     "name": "Packaged Dairy & Beverages",
@@ -7634,8 +7659,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 450,
       "icon": "🥭",
-      "image": "assets/catalog-images/mango-shake-870d0f.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1778449270554-3e5b17cfebc6?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Shoeib Abolhassani",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-refreshing-mango-smoothie-with-mint-and-pineapple-garnish-4T-TAAKc0jk",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Banana Shake",
@@ -20303,8 +20334,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "price": 950,
       "icon": "🛢️",
       "nameUrdu": "موبل آئل",
-      "image": "assets/catalog-images/engine-oil-50-v2-58ca90.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1635437536607-b8572f443763?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Rinald Rolle",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-couple-of-bottles-of-motor-oil-sitting-on-the-ground-IwPT9tPchsA",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Engine Oil 10W-30 1L",
@@ -20423,14 +20460,13 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🔋",
       "image": "assets/catalog-images/car-basics-c7936a.webp",
       "imageLevel": "category",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1676337167629-d896b3ed5724?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Theo",
+       "name": "Newpowa",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-battery-on-a-table-R8eViQysY6U",
        "source": "Unsplash"
       },
-      "downloadLocation": "",
       "imageSource": "unsplash"
      },
      {
@@ -20522,14 +20558,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🌸",
       "image": "assets/catalog-images/car-air-freshener-72c233.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1768983298275-942312c9b446?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Theo",
+       "name": "zeliang xiao",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "photoUrl": "https://unsplash.com/photos/a-pyramid-shaped-car-air-freshener-with-liquid-inside-492ILSNVD-E",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Car Floor Mats Set",
@@ -20538,14 +20574,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🚗",
       "image": "assets/catalog-images/car-floor-mats-ea4df8.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1761846786526-706cf7015afb?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Theo",
+       "name": "Obi",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "photoUrl": "https://unsplash.com/photos/ford-bronco-emblem-on-car-floor-mat-xNRbX3qFxY",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Car Seat Covers Set",
@@ -20586,14 +20622,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "icon": "🧽",
       "image": "assets/catalog-images/microfiber-cloth-3-8980bd.webp",
       "imageLevel": "item",
-      "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+      "imageUrl": "https://images.unsplash.com/photo-1761934658112-80095148fe87?q=80&w=800&auto=format&fit=crop",
       "credit": {
-       "name": "Theo",
+       "name": "GoGoNano",
        "profileUrl": "",
-       "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+       "photoUrl": "https://unsplash.com/photos/a-fluffy-gray-microfiber-cloth-on-a-red-surface-_5kMK55CK9M",
        "source": "Unsplash"
       },
-      "downloadLocation": ""
+      "imageSource": "unsplash"
      },
      {
       "name": "Car Polish 500ml",
@@ -20629,11 +20665,11 @@ export const MASTER_CATALOG: CatalogShopType[] = [
      }
     ],
     "image": "assets/catalog-images/car-basics-c7936a.webp",
-    "imageUrl": "https://images.unsplash.com/photo-1613984183177-5afc9f80716a?w=600&q=80&fm=webp&fit=max",
+    "imageUrl": "https://images.unsplash.com/photo-1768983298275-942312c9b446?q=80&w=800&auto=format&fit=crop",
     "credit": {
-     "name": "Theo",
+     "name": "zeliang xiao",
      "profileUrl": "",
-     "photoUrl": "https://unsplash.com/photos/black-car-steering-wheel-during-daytime-5W0AASCOViM",
+     "photoUrl": "https://unsplash.com/photos/a-pyramid-shaped-car-air-freshener-with-liquid-inside-492ILSNVD-E",
      "source": "Unsplash"
     }
    },
@@ -20659,8 +20695,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 2800,
       "icon": "🚗",
-      "image": "assets/catalog-images/car-cover-b9f5fb.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1596165494776-c27e37f666fe?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Freddy G",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/red-ferrari-car-on-gray-concrete-pavement-TgSXG-YHpNM",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Cable Lock",
@@ -20783,8 +20825,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 1800,
       "icon": "🛑",
-      "image": "assets/catalog-images/front-brake-pads-v2-9a3582.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1760317890314-e964ffd7e6a6?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Erik Mclean",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/close-up-of-a-cars-brake-rotor-and-caliper-vS2shmNei2E",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Rear Brake Shoes 70cc",
@@ -20896,7 +20944,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "packet",
       "price": 1800,
       "icon": "⚗️",
-      "image": "assets/catalog-images/fix-zinc-sulphate-f68a7f.webp",
+      "image": "assets/catalog-images/fix-zinc-sulphate-6fb2af.webp",
       "imageLevel": "item",
       "credit": {
        "name": "Valle de Aves</",
@@ -21316,7 +21364,7 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 800,
       "icon": "🧹",
-      "image": "assets/catalog-images/fix-garden-rake-e44cf5.webp",
+      "image": "assets/catalog-images/fix-garden-rake-1dae37.webp",
       "imageLevel": "item",
       "credit": {
        "name": "Pearson S",
@@ -21596,8 +21644,14 @@ export const MASTER_CATALOG: CatalogShopType[] = [
       "unit": "piece",
       "price": 600,
       "icon": "👂",
-      "image": "assets/catalog-images/artificial-earrings-086e76.webp",
-      "imageLevel": "item"
+      "imageUrl": "https://images.unsplash.com/photo-1651160670627-2896ddf7822f?q=80&w=800&auto=format&fit=crop",
+      "imageSource": "unsplash",
+      "credit": {
+       "name": "Subham Hait",
+       "profileUrl": "",
+       "photoUrl": "https://unsplash.com/photos/a-gold-and-black-necklace-fVeujn3i5ZE",
+       "source": "Unsplash"
+      }
      },
      {
       "name": "Artificial Necklace Set",
