@@ -5,8 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Linking,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,6 +21,7 @@ import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { openWhatsAppWithMessage } from '@/utils/whatsapp';
 
 type KhataFilter = 'all' | 'pending' | 'overdue' | 'settled';
 
@@ -274,14 +273,7 @@ export const KhataScreen: React.FC = () => {
   };
 
   const openWhatsApp = (phone: string, message: string) => {
-    const encoded = encodeURIComponent(message);
-    const clean = phone.replace(/[^0-9]/g, '');
-    const url = clean
-      ? `https://wa.me/${clean.startsWith('92') ? clean : '92' + clean.replace(/^0/, '')}?text=${encoded}`
-      : `https://wa.me/?text=${encoded}`;
-    Linking.openURL(url).catch(() => {
-      if (Platform.OS === 'web') window.open(url, '_blank');
-    });
+    openWhatsAppWithMessage(phone, message);
   };
 
   const handleNotifyAllOverdue = () => {

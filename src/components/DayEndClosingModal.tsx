@@ -18,6 +18,7 @@ import * as Print from 'expo-print';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { DailyClosingRecord, DenominationCounts, Sale } from '@/types';
+import { buildBarkatStatusText, openWhatsAppWithMessage } from '@/utils/whatsapp';
 
 export const DAILY_CLOSING_STORAGE_KEY = '@shopkeeper_daily_closings';
 
@@ -219,6 +220,20 @@ ${closingNotes ? `\n📝 نوٹ: ${closingNotes}` : ''}
         Alert.alert(t('error'), 'Could not open WhatsApp.');
       });
     }
+  };
+
+  // Viral UX (VU-02): Share daily closing Barkat Story to WhatsApp Status
+  const handleShareBarkatStatus = () => {
+    const isUrdu = language === 'ur';
+    const text = buildBarkatStatusText({
+      shopName: dynamicShopName,
+      shopNameUrdu: dynamicShopUrdu,
+      totalCustomers: todaySales.length,
+      totalSales: todaySalesTotal,
+      currencySymbol: settings.currencySymbol,
+      isUrdu,
+    });
+    openWhatsAppWithMessage(undefined, text);
   };
 
   // Generate Thermal / Standard Closing Report Slip for Printing
@@ -867,6 +882,22 @@ ${closingNotes ? `\n📝 نوٹ: ${closingNotes}` : ''}
 
                 {/* Action Buttons: WhatsApp + Print + Save Closing */}
                 <View style={styles.finalActionsWrap}>
+                  {/* Viral UX (VU-02): Share Barkat Story to WhatsApp Status */}
+                  <Pressable
+                    onPress={handleShareBarkatStatus}
+                    style={({ pressed }) => [
+                      styles.actionFullBtn,
+                      { backgroundColor: '#065F46', borderWidth: 1.5, borderColor: '#F59E0B' },
+                      pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                    ]}>
+                    <Ionicons name="sparkles" size={19} color="#FBBF24" />
+                    <Text style={[styles.actionBtnTextWhite, { fontWeight: '700' }]}>
+                      {language === 'ur'
+                        ? '✨ واٹس ایپ اسٹیٹس پر آج کی برکت شیئر کریں'
+                        : "✨ Share Today's Barkat Story on WhatsApp"}
+                    </Text>
+                  </Pressable>
+
                   {/* Button 1: WhatsApp Daily Closing Report */}
                   <Pressable
                     onPress={handleShareWhatsApp}
@@ -877,7 +908,7 @@ ${closingNotes ? `\n📝 نوٹ: ${closingNotes}` : ''}
                     ]}>
                     <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
                     <Text style={styles.actionBtnTextWhite}>
-                      {language === 'ur' ? 'واٹس ایپ روزنامچہ بھیجیں' : 'Send WhatsApp Report to Owner'}
+                      {language === 'ur' ? 'مالک کو واٹس ایپ روزنامچہ بھیجیں' : 'Send WhatsApp Report to Owner'}
                     </Text>
                   </Pressable>
 

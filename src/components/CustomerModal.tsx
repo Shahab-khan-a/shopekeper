@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -58,6 +58,9 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [initialBalance, setInitialBalance] = useState('');
+
+  const phoneInputRef = useRef<TextInput>(null);
+  const balanceInputRef = useRef<TextInput>(null);
 
   // Add Credit Form states
   const [creditAmount, setCreditAmount] = useState('');
@@ -168,6 +171,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                       value={name}
                       onChangeText={setName}
                       autoFocus
+                      returnKeyType="next"
+                      onSubmitEditing={() => phoneInputRef.current?.focus()}
                     />
                   </View>
                 </View>
@@ -205,12 +210,15 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                     ]}>
                     <Ionicons name="logo-whatsapp" size={18} color="#25D366" style={styles.inputIcon} />
                     <TextInput
+                      ref={phoneInputRef}
                       style={[styles.input, { color: theme.text }]}
                       placeholder="03001234567"
                       placeholderTextColor={theme.textMuted}
                       value={phone}
                       onChangeText={setPhone}
                       keyboardType="phone-pad"
+                      returnKeyType="next"
+                      onSubmitEditing={() => balanceInputRef.current?.focus()}
                     />
                   </View>
                 </View>
@@ -255,12 +263,15 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                     ]}>
                     <Text style={[styles.currencyPrefix, { color: theme.primary }]}>{currencySymbol}</Text>
                     <TextInput
+                      ref={balanceInputRef}
                       style={[styles.input, { color: theme.text, fontWeight: '700', fontSize: 16 }]}
                       placeholder="0"
                       placeholderTextColor={theme.textMuted}
                       value={initialBalance}
                       onChangeText={setInitialBalance}
                       keyboardType="numeric"
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit}
                     />
                   </View>
                   <Text style={[styles.helpText, { color: theme.textMuted, textAlign: isUrdu ? 'right' : 'left' }]}>
@@ -317,6 +328,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                       onChangeText={setCreditAmount}
                       keyboardType="numeric"
                       autoFocus
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit}
                     />
                   </View>
                 </View>
@@ -338,6 +351,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                       placeholderTextColor={theme.textMuted}
                       value={creditNote}
                       onChangeText={setCreditNote}
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit}
                     />
                   </View>
                 </View>

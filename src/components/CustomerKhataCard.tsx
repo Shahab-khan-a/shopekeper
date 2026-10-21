@@ -1,6 +1,7 @@
 import { Colors, Shadows, Typography } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { CustomerKhata } from '@/types';
+import { openWhatsAppWithMessage } from '@/utils/whatsapp';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
@@ -105,15 +106,7 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
         ? `السلام علیکم ${customerDisplayName} صاحب!\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopHeader}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${formattedAmount}* ہے۔${breakdownUr}\n\nبرائے مہربانی سہولت کے مطابق ادائیگی فرما دیں۔ شکریہ!\n*${settings.shopName}*\n📞 ${settings.phone}`
         : `Dear ${customerDisplayName},\n\nGentle reminder from *${shopHeader}* regarding your pending balance:\n👉 *${formattedAmount}*${breakdownEn}\n\nPlease settle at your convenience. Thank you!\n*${settings.shopName}*\n📞 ${settings.phone}`;
 
-    const encoded = encodeURIComponent(message);
-    const cleanPhone = customer.phone ? customer.phone.replace(/[^0-9]/g, '') : '';
-    const url = cleanPhone
-      ? `https://wa.me/${cleanPhone.startsWith('92') ? cleanPhone : '92' + cleanPhone.replace(/^0/, '')}?text=${encoded}`
-      : `https://wa.me/?text=${encoded}`;
-
-    Linking.openURL(url).catch(() => {
-      if (Platform.OS === 'web') window.open(url, '_blank');
-    });
+    openWhatsAppWithMessage(customer.phone, message);
   };
 
   const handlePhoneCall = () => {

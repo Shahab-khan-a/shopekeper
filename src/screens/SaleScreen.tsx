@@ -10,6 +10,8 @@ import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { CartItem, CustomerKhata, PaymentMethod, Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
+import { openWhatsAppReceipt, openWhatsAppWithMessage, buildBohaniShareText } from '@/utils/whatsapp';
+import { announceBoltaGalla } from '@/utils/soundbox';
 import { TourBeacon } from '@/components/TourBeacon';
 import { ShopStoreLoader } from '@/components/ShopStoreLoader';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,12 +68,14 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     setActiveReceipt,
     setIsAddProductOpen,
     showAlert,
+    hideAlert,
     saleViewMode,
     setSaleViewMode,
     tourStep,
     setTourStep,
     loadStapleProducts,
     endHandsOnTour,
+    user,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
@@ -167,10 +171,77 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Algorithmic Intimacy (AI-01) & Soundbox (VU-03) state
+  const [soundboxEnabled, setSoundboxEnabled] = useState<boolean>(true);
+  const [daypartFilteredOnly, setDaypartFilteredOnly] = useState<boolean>(false);
 
+  // VU-01: Detect if first sale of today (Pehli Bohani)
+  const isFirstSaleOfDay = useMemo(() => {
+    const today = new Date().toDateString();
+    return sales.filter((s) => new Date(s.date).toDateString() === today && !s.refundedAt).length === 0;
+  }, [sales]);
+
+  // AI-01: Temporal Dayparting Front Shelf Configuration
+  interface DaypartConfig {
+    id: 'morning' | 'midday' | 'evening' | 'night';
+    labelUr: string;
+    labelEn: string;
+    subLabelUr: string;
+    subLabelEn: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    keywords: string[];
+  }
+
+  const currentDaypart = useMemo<DaypartConfig>(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      return {
+        id: 'morning',
+        labelUr: 'صبح کا سامان',
+        labelEn: 'Morning Rush',
+        subLabelUr: 'ناشتہ، دودھ و ڈبل روٹی',
+        subLabelEn: 'Breakfast, Milk & Bread',
+        icon: 'sunny',
+        keywords: ['milk', 'دودھ', 'egg', 'انڈے', 'bread', 'روٹی', 'rusk', 'رسک', 'tea', 'چائے', 'chai', 'yogurt', 'دہی', 'butter', 'مکھن', 'jam', 'جام', 'bun', 'بَن'],
+      };
+    }
+    if (hour >= 12 && hour < 17) {
+      return {
+        id: 'midday',
+        labelUr: 'دوپہر کا راشن',
+        labelEn: 'Midday Cooking',
+        subLabelUr: 'کھانا پکانا، آٹا، گھی و دال',
+        subLabelEn: 'Cooking, Flour, Ghee & Daal',
+        icon: 'restaurant',
+        keywords: ['atta', 'آٹا', 'rice', 'چاول', 'chawal', 'oil', 'تیل', 'ghee', 'گھی', 'daal', 'دال', 'dal', 'masala', 'مصالحہ', 'spice', 'salt', 'نمک', 'sugar', 'چینی', 'flour', 'بیسن'],
+      };
+    }
+    if (hour >= 17 && hour < 24) {
+      return {
+        id: 'evening',
+        labelUr: 'شام کے اسنیکس',
+        labelEn: 'Evening Rush',
+        subLabelUr: 'کولڈ ڈرنکس، چپس و بسکٹ',
+        subLabelEn: 'Cold Drinks, Snacks & Biscuits',
+        icon: 'cafe',
+        keywords: ['biscuit', 'بسکٹ', 'chips', 'چپس', 'lays', 'nimko', 'نمکو', 'juice', 'جوس', 'coke', 'pepsi', 'drink', 'مشروب', 'cold drink', 'snack', 'chocolate', 'sooper', 'kurkure', 'tea', 'چائے'],
+      };
+    }
+    return {
+      id: 'night',
+      labelUr: 'رات کے لوازمات',
+      labelEn: 'Night Essentials',
+      subLabelUr: 'مشروبات، چائے و بسکٹ',
+      subLabelEn: 'Drinks, Tea & Biscuits',
+      icon: 'moon',
+      keywords: ['drink', 'مشروب', 'pan', 'پان', 'water', 'پانی', 'snack', 'biscuit', 'بسکٹ', 'tea', 'چائے'],
+    };
+  }, []);
+
+  // Filter & Daypart-sorted products
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return products.filter((p) => {
+    const baseList = products.filter((p) => {
       const matchSearch =
         !query ||
         p.name.toLowerCase().includes(query) ||
@@ -179,7 +250,138 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
       return matchSearch && matchCat;
     });
-  }, [products, searchQuery, selectedCategory]);
+
+    const isDaypartMatch = (p: Product) => {
+      const targetStr = `${p.name} ${p.nameUrdu || ''} ${p.category || ''}`.toLowerCase();
+      return currentDaypart.keywords.some((kw) => targetStr.includes(kw.toLowerCase()));
+    };
+
+    if (daypartFilteredOnly && selectedCategory === 'All' && !query) {
+      const matchedOnly = baseList.filter(isDaypartMatch);
+      return matchedOnly.length > 0 ? matchedOnly : baseList;
+    }
+
+    if (selectedCategory === 'All' && !query) {
+      // Prioritize temporal dayparting rush items at top of shelf
+      return [...baseList].sort((a, b) => {
+        const aMatch = isDaypartMatch(a) ? 1 : 0;
+        const bMatch = isDaypartMatch(b) ? 1 : 0;
+        if (aMatch !== bMatch) return bMatch - aMatch;
+        return 0;
+      });
+    }
+
+    return baseList;
+  }, [products, searchQuery, selectedCategory, currentDaypart, daypartFilteredOnly]);
+
+  // AI-02: Associative Basket Companion Intelligence ("Bhai ke sath aur kya?")
+  const COMPANION_RULES = useMemo(() => [
+    {
+      triggers: ['bread', 'ڈبل روٹی', 'روٹی', 'bun', 'بَن', 'rusk', 'رسک'],
+      companionKeywords: ['egg', 'انڈے', 'milk', 'دودھ', 'butter', 'مکھن', 'jam', 'جام'],
+    },
+    {
+      triggers: ['tea', 'chai', 'چائے', 'tapal', 'lipton', 'vital', 'tarang'],
+      companionKeywords: ['milk', 'دودھ', 'sugar', 'چینی', 'cheeni', 'rusk', 'رسک', 'biscuit', 'بسکٹ'],
+    },
+    {
+      triggers: ['atta', 'آٹا', 'rice', 'چاول', 'chawal', 'flour'],
+      companionKeywords: ['oil', 'تیل', 'ghee', 'گھی', 'dalda', 'sufi', 'daal', 'دال', 'dal', 'salt', 'نمک'],
+    },
+    {
+      triggers: ['chips', 'چپس', 'lays', 'kurkure', 'nimko', 'نمکو', 'biscuit', 'بسکٹ'],
+      companionKeywords: ['coke', 'pepsi', 'drink', 'مشروب', 'juice', 'جوس', 'dew', '7up', 'sting'],
+    },
+    {
+      triggers: ['soap', 'صابن', 'surf', 'detergent', 'سرف', 'ariel', 'bonus'],
+      companionKeywords: ['bleach', 'بلیچ', 'harpic', 'ہارپک', 'dishwash', 'برتن'],
+    },
+  ], []);
+
+  const companionSuggestions = useMemo(() => {
+    if (cart.length === 0) return [];
+    const cartProductNames = cart.map((c) => `${c.product.name} ${c.product.nameUrdu || ''}`.toLowerCase());
+
+    const neededKeywords = new Set<string>();
+    COMPANION_RULES.forEach((rule) => {
+      const hasTrigger = rule.triggers.some((tr) => cartProductNames.some((cName) => cName.includes(tr)));
+      if (hasTrigger) {
+        rule.companionKeywords.forEach((kw) => neededKeywords.add(kw));
+      }
+    });
+
+    if (neededKeywords.size === 0) return [];
+
+    const cartIds = new Set(cart.map((c) => c.product.id));
+    const suggestions: Product[] = [];
+
+    for (const p of products) {
+      if (cartIds.has(p.id) || p.stock === 0) continue;
+      const pText = `${p.name} ${p.nameUrdu || ''}`.toLowerCase();
+      const matches = Array.from(neededKeywords).some((kw) => pText.includes(kw));
+      if (matches) {
+        suggestions.push(p);
+        if (suggestions.length >= 4) break;
+      }
+    }
+
+    return suggestions;
+  }, [cart, products, COMPANION_RULES]);
+
+  // AI-03: Khata Customer Routine Basket Memory ("Chacha Ji ka Maamool")
+  const customerUsualBasket = useMemo(() => {
+    if (!selectedKhataCustomer) return null;
+    const cSales = sales.filter(
+      (s) =>
+        (s.customerId && s.customerId === selectedKhataCustomer.id) ||
+        (selectedKhataCustomer.phone && s.customerPhone === selectedKhataCustomer.phone) ||
+        (s.customerName && s.customerName.toLowerCase() === selectedKhataCustomer.name.toLowerCase())
+    );
+    if (cSales.length === 0) return null;
+
+    const itemMap = new Map<string, { product: Product; count: number; avgQty: number }>();
+    cSales.forEach((s) => {
+      s.items.forEach((it) => {
+        const currentProd = products.find((p) => p.id === it.product.id) || it.product;
+        const existing = itemMap.get(it.product.id);
+        if (existing) {
+          existing.count += 1;
+          existing.avgQty = Math.max(1, Math.round((existing.avgQty + it.quantity) / 2));
+        } else {
+          itemMap.set(it.product.id, { product: currentProd, count: 1, avgQty: it.quantity });
+        }
+      });
+    });
+
+    const sorted = Array.from(itemMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    return sorted.length > 0 ? sorted : null;
+  }, [selectedKhataCustomer, sales, products]);
+
+  const handleAddUsualBasket = () => {
+    if (!customerUsualBasket || customerUsualBasket.length === 0) return;
+    const newCart = [...cart];
+    customerUsualBasket.forEach((entry) => {
+      const idx = newCart.findIndex((c) => c.product.id === entry.product.id);
+      if (idx >= 0) {
+        newCart[idx] = {
+          ...newCart[idx],
+          quantity: newCart[idx].quantity + entry.avgQty,
+          total: (newCart[idx].quantity + entry.avgQty) * newCart[idx].unitPrice,
+        };
+      } else {
+        newCart.push({
+          product: entry.product,
+          quantity: entry.avgQty,
+          unitPrice: entry.product.price,
+          total: entry.product.price * entry.avgQty,
+        });
+      }
+    });
+    setCart(newCart);
+  };
 
   // Cart totals
   const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.total, 0), [cart]);
@@ -209,6 +411,41 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         isExact: true,
       },
     ];
+
+    // AI-04: Smart Pakistani Clean-Note Change Optimizer
+    // e.g. Bill Rs. 520 -> Customer pays 1,020 -> returns crisp Rs. 500 note!
+    // e.g. Bill Rs. 120 -> Customer pays 220 -> returns crisp Rs. 100 note!
+    if (grandTotal > 50) {
+      const rem100 = grandTotal % 100;
+      if (rem100 > 0) {
+        if (grandTotal >= 500 && grandTotal < 1000) {
+          const smartTender = 1000 + rem100;
+          const cleanChange = smartTender - grandTotal;
+          opts.push({
+            label: `${settings.currencySymbol}${smartTender.toLocaleString()}`,
+            subLabel:
+              language === 'ur'
+                ? `صاف ${cleanChange} نوٹ واپسی`
+                : `Clean ${cleanChange} Note`,
+            amount: smartTender,
+          });
+        } else if (grandTotal >= 100 && grandTotal < 500) {
+          const nextHundreds = Math.ceil(grandTotal / 100) * 100;
+          const smartTender = nextHundreds + rem100;
+          const cleanChange = smartTender - grandTotal;
+          if (cleanChange === 100) {
+            opts.push({
+              label: `${settings.currencySymbol}${smartTender.toLocaleString()}`,
+              subLabel:
+                language === 'ur'
+                  ? `صاف 100 نوٹ واپسی`
+                  : `Clean 100 Note`,
+              amount: smartTender,
+            });
+          }
+        }
+      }
+    }
 
     const standardNotes = [500, 1000, 5000];
     standardNotes.forEach((note) => {
@@ -286,52 +523,109 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     if (tourStep === 1) {
       setTourStep(2);
     }
+
+    const doAdd = () => {
+      const existingIndex = cart.findIndex((item) => item.product.id === product.id);
+
+      if (existingIndex >= 0) {
+        const existingItem = cart[existingIndex];
+        const newQty = existingItem.quantity + delta;
+
+        if (product.stock > 0 && newQty > product.stock) {
+          showAlert({
+            type: 'warning',
+            title: t('warningAlert'),
+            message: `${t('stockExceededWarn')} (Available: ${product.stock} ${product.unit})`,
+          });
+          return;
+        }
+
+        if (newQty <= 0) {
+          removeFromCart(product.id);
+          return;
+        }
+
+        const updated = [...cart];
+        updated[existingIndex] = {
+          ...existingItem,
+          quantity: newQty,
+          total: newQty * existingItem.unitPrice,
+        };
+        setCart(updated);
+      } else {
+        setCart([
+          ...cart,
+          {
+            product,
+            quantity: 1,
+            unitPrice: product.price,
+            total: product.price,
+          },
+        ]);
+      }
+
+      // Micro-Friction Eraser (MF-01): Clear search query so counter person is immediately ready for next item
+      if (searchQuery.trim().length > 0) {
+        setSearchQuery('');
+      }
+    };
+
     if (product.stock <= 0) {
       showAlert({
         type: 'warning',
         title: t('warningAlert'),
-        message: t('outOfStockWarn'),
+        message:
+          language === 'ur'
+            ? 'اس آئٹم کا اسٹاک 0 ہے۔ کیا آپ اسے بل میں شامل کرنا چاہتے ہیں؟'
+            : 'This item shows 0 in stock. Add it to the bill anyway?',
+        buttons: [
+          { text: language === 'ur' ? 'منسوخ' : 'Cancel', style: 'cancel' },
+          {
+            text: language === 'ur' ? 'شامل کریں' : 'Add Anyway',
+            style: 'default',
+            onPress: () => {
+              hideAlert();
+              doAdd();
+            },
+          },
+        ],
       });
       return;
     }
 
-    const existingIndex = cart.findIndex((item) => item.product.id === product.id);
+    doAdd();
+  };
 
-    if (existingIndex >= 0) {
-      const existingItem = cart[existingIndex];
-      const newQty = existingItem.quantity + delta;
+  // Micro-Friction Eraser (MF-02): Instant Barcode Scanner & Enter Key Auto-Add
+  const handleSearchSubmit = () => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return;
 
-      if (newQty > product.stock) {
-        showAlert({
-          type: 'warning',
-          title: t('warningAlert'),
-          message: `${t('stockExceededWarn')} (Available: ${product.stock} ${product.unit})`,
-        });
-        return;
-      }
+    // 1. Check exact barcode match first
+    const exactBarcodeMatch = products.find(
+      (p) => p.barcode && p.barcode.toLowerCase() === q
+    );
+    if (exactBarcodeMatch) {
+      addToCart(exactBarcodeMatch);
+      setSearchQuery('');
+      return;
+    }
 
-      if (newQty <= 0) {
-        removeFromCart(product.id);
-        return;
-      }
+    // 2. Check exact name match
+    const exactNameMatch = products.find(
+      (p) => p.name.toLowerCase() === q || (p.nameUrdu && p.nameUrdu.toLowerCase() === q)
+    );
+    if (exactNameMatch) {
+      addToCart(exactNameMatch);
+      setSearchQuery('');
+      return;
+    }
 
-      const updated = [...cart];
-      updated[existingIndex] = {
-        ...existingItem,
-        quantity: newQty,
-        total: newQty * existingItem.unitPrice,
-      };
-      setCart(updated);
-    } else {
-      setCart([
-        ...cart,
-        {
-          product,
-          quantity: 1,
-          unitPrice: product.price,
-          total: product.price,
-        },
-      ]);
+    // 3. If filtered list has exactly 1 item, auto-add it!
+    if (filteredProducts.length === 1) {
+      addToCart(filteredProducts[0]);
+      setSearchQuery('');
+      return;
     }
   };
 
@@ -945,9 +1239,31 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         return;
       }
 
-      // W1-3: Store the completed sale for manual receipt viewing
-      setLastCompletedSale(result.sale);
+      // VU-01: Detect Pehli Bohani (day's first sale)
+      const wasBohani = isFirstSaleOfDay;
+      const completedSaleObj = result.sale ? { ...result.sale, isBohani: wasBohani } : null;
+
+      // W1-3: Store the completed sale for manual receipt viewing & Bohani celebration
+      setLastCompletedSale(completedSaleObj);
       setShowSuccessToast(true);
+
+      // VU-03: "Bolta Galla" Urdu/English Voice & Audio Box Confirmation
+      if (soundboxEnabled) {
+        const pNames: Record<string, string> = {
+          easypaisa: 'EasyPaisa',
+          jazzcash: 'JazzCash',
+          raast: 'Raast',
+          bank: 'Bank Transfer',
+          other: 'Online',
+        };
+        announceBoltaGalla({
+          amount: grandTotal,
+          method: paymentMethod,
+          providerName: pNames[onlineProvider] || 'Online',
+          customerName: selectedKhataCustomer?.name || customerName.trim(),
+          language: language === 'ur' ? 'ur' : 'en',
+        });
+      }
 
       // Advance hands-on tour to Step 5 (Receipt & Khata)
       if (tourStep === 4 && result.sale) {
@@ -955,11 +1271,11 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         setTourStep(5);
       }
 
-      // Auto-dismiss toast after 8 seconds
+      // Auto-dismiss toast (14s if auspicious Bohani celebration so shopkeeper can share on status)
       if (toastTimer.current) clearTimeout(toastTimer.current);
       toastTimer.current = setTimeout(() => {
         setShowSuccessToast(false);
-      }, 8000);
+      }, wasBohani ? 14000 : 8000);
 
       // Clear cart and close drawer
       clearCart();
@@ -1107,9 +1423,22 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       style={[styles.smallStepBtn, { backgroundColor: theme.card, borderColor: theme.border }]}>
                       <Ionicons name="remove" size={16} color={theme.text} />
                     </Pressable>
-                    <Text style={[styles.smallStepQty, { color: theme.text }]}>
-                      {item.quantity}
-                    </Text>
+                    <Pressable
+                      onPress={() => openLooseWeightModal(item.product, item.quantity)}
+                      accessibilityLabel={`Change quantity for ${item.product.name}`}
+                      accessibilityRole="button"
+                      style={({ pressed }) => [
+                        styles.smallStepQtyBox,
+                        {
+                          backgroundColor: settings.darkMode ? theme.card : '#FFFFFF',
+                          borderColor: settings.darkMode ? 'rgba(255,255,255,0.18)' : '#CBD5E1',
+                        },
+                        pressed && { opacity: 0.7 },
+                      ]}>
+                      <Text style={[styles.smallStepQty, { color: theme.text }]}>
+                        {item.quantity}
+                      </Text>
+                    </Pressable>
                     <Pressable
                       onPress={() => updateQuantity(item.product.id, 1)}
                       accessibilityLabel={`Increase quantity of ${item.product.name}`}
@@ -1138,6 +1467,50 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 </Text>
               </View>
             )}
+          </View>
+        )}
+
+        {/* AI-02: Associative Basket Companion Intelligence ("Bhai ke sath aur kya?") */}
+        {cart.length > 0 && companionSuggestions.length > 0 && (
+          <View
+            style={[
+              styles.companionPanel,
+              {
+                backgroundColor: settings.darkMode ? 'rgba(99, 102, 241, 0.12)' : '#EEF2FF',
+                borderColor: settings.darkMode ? 'rgba(99, 102, 241, 0.4)' : '#C7D2FE',
+              },
+            ]}>
+            <View style={styles.companionHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Ionicons name="sparkles" size={14} color="#6366F1" />
+                <Text style={[styles.companionTitle, { color: settings.darkMode ? '#A5B4FC' : '#3730A3' }]}>
+                  {language === 'ur' ? 'بھائی کے ساتھ اور کیا؟ (اکثر ساتھ خریدی جانے والی اشیاء)' : 'Frequently Bought Together'}
+                </Text>
+              </View>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.companionChipsRow}>
+              {companionSuggestions.map((prod) => (
+                <Pressable
+                  key={prod.id}
+                  onPress={() => addToCart(prod, 1)}
+                  style={({ pressed }) => [
+                    styles.companionChip,
+                    {
+                      backgroundColor: settings.darkMode ? '#1E293B' : '#FFFFFF',
+                      borderColor: settings.darkMode ? 'rgba(255, 255, 255, 0.12)' : '#E2E8F0',
+                    },
+                    pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
+                  ]}>
+                  <Ionicons name="add-circle" size={14} color="#6366F1" />
+                  <Text style={[styles.companionChipText, { color: theme.text }]}>
+                    {getProductName(prod)}
+                  </Text>
+                  <Text style={[styles.companionChipPrice, { color: '#6366F1' }]}>
+                    {settings.currencySymbol}{prod.price}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
         )}
 
@@ -1615,6 +1988,59 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                     </Text>
                   </View>
                 </View>
+
+                {/* AI-03: Khata Customer Routine Basket Memory ("Chacha Ji ka Maamool") */}
+                {customerUsualBasket && customerUsualBasket.length > 0 && (
+                  <View
+                    style={[
+                      styles.usualBasketBox,
+                      {
+                        backgroundColor: settings.darkMode ? 'rgba(5, 150, 105, 0.15)' : '#ECFDF5',
+                        borderColor: settings.darkMode ? '#059669' : '#A7F3D0',
+                      },
+                    ]}>
+                    <View style={styles.usualBasketHeader}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                        <Ionicons name="sparkles" size={14} color="#059669" />
+                        <Text style={[styles.usualBasketTitle, { color: settings.darkMode ? '#34D399' : '#065F46' }]}>
+                          {language === 'ur'
+                            ? `معمول کا سودا (${selectedKhataCustomer.name})`
+                            : `Routine Basket (${selectedKhataCustomer.name})`}
+                        </Text>
+                      </View>
+                      <Pressable
+                        onPress={handleAddUsualBasket}
+                        hitSlop={6}
+                        style={({ pressed }) => [
+                          styles.addUsualBtn,
+                          pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
+                        ]}>
+                        <Ionicons name="flash" size={12} color="#FFFFFF" />
+                        <Text style={styles.addUsualBtnText}>
+                          {language === 'ur' ? 'بل میں شامل کریں' : 'Add to Bill'}
+                        </Text>
+                      </Pressable>
+                    </View>
+
+                    <View style={styles.usualItemsChipRow}>
+                      {customerUsualBasket.map((it) => (
+                        <View
+                          key={it.product.id}
+                          style={[
+                            styles.usualItemChip,
+                            {
+                              backgroundColor: settings.darkMode ? '#1E293B' : '#FFFFFF',
+                              borderColor: theme.border,
+                            },
+                          ]}>
+                          <Text style={[styles.usualItemChipText, { color: theme.text }]}>
+                            {getProductName(it.product)} ×{it.avgQty}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
               </View>
             ) : isAddingNewCustomer ? (
               /* CASE 2: Adding a NEW customer */
@@ -1870,6 +2296,34 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 }}
               />
               <View style={styles.discShortcuts}>
+                {subtotal > 10 && subtotal % 10 !== 0 && (
+                  <Pressable
+                    onPress={() => {
+                      setDiscountType('fixed');
+                      setDiscount((subtotal % 10).toString());
+                    }}
+                    style={({ pressed }) => [
+                      styles.discShortcutBtn,
+                      {
+                        backgroundColor: discount === (subtotal % 10).toString() && discountType === 'fixed' ? '#10B981' : '#DCFCE7',
+                        borderColor: '#86EFAC',
+                        borderWidth: 1,
+                        paddingHorizontal: 8,
+                      },
+                      pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.discShortcutText,
+                        {
+                          color: discount === (subtotal % 10).toString() && discountType === 'fixed' ? '#FFFFFF' : '#15803D',
+                          fontWeight: '800',
+                        },
+                      ]}>
+                      ✂️ -{subtotal % 10}
+                    </Text>
+                  </Pressable>
+                )}
                 {DISCOUNT_SHORTCUTS.map((amt) => {
                   const isSelected = discount === amt.toString();
                   return (
@@ -2126,6 +2580,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         onChangeText={setSearchQuery}
                         placeholder={language === 'ur' ? 'نام یا بارکوڈ...' : 'Search name or barcode...'}
                         height={40}
+                        onSubmitEditing={handleSearchSubmit}
+                        returnKeyType="done"
                       />
                     </View>
 
@@ -2160,6 +2616,25 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 </View>
 
                 <View style={styles.topBarActions}>
+                  {/* VU-03: Bolta Galla Voice Box Mute / Unmute Button */}
+                  <Pressable
+                    onPress={() => setSoundboxEnabled(!soundboxEnabled)}
+                    accessibilityLabel={soundboxEnabled ? "Mute Bolta Galla" : "Enable Bolta Galla"}
+                    style={({ pressed }) => [
+                      styles.iconSquareBtn,
+                      {
+                        backgroundColor: soundboxEnabled ? 'rgba(16, 185, 129, 0.28)' : 'rgba(255, 255, 255, 0.16)',
+                        borderColor: soundboxEnabled ? '#34D399' : 'rgba(255, 255, 255, 0.28)',
+                      },
+                      pressed && { opacity: 0.8 },
+                    ]}>
+                    <Ionicons
+                      name={soundboxEnabled ? 'volume-high' : 'volume-mute'}
+                      size={18}
+                      color={soundboxEnabled ? '#6EE7B7' : '#E2E8F0'}
+                    />
+                  </Pressable>
+
                   {/* Parked Carts Button */}
                   {heldCarts.length > 0 && (
                     <Pressable
@@ -2198,7 +2673,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 </View>
               </View>
 
-
               {/* Category Filter Pills — frosted glass */}
               <ScrollView
                 horizontal
@@ -2219,6 +2693,61 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   />
                 ))}
               </ScrollView>
+
+              {/* AI-01: Temporal Dayparting Front Shelf Smart Pill */}
+              {selectedCategory === 'All' && !searchQuery.trim() && (
+                <View style={styles.daypartBannerWrap}>
+                  <Pressable
+                    onPress={() => setDaypartFilteredOnly(!daypartFilteredOnly)}
+                    style={({ pressed }) => [
+                      styles.daypartBannerPill,
+                      {
+                        backgroundColor: daypartFilteredOnly
+                          ? 'rgba(255, 255, 255, 0.95)'
+                          : 'rgba(255, 255, 255, 0.18)',
+                        borderColor: 'rgba(255, 255, 255, 0.35)',
+                      },
+                      pressed && { opacity: 0.8 },
+                    ]}>
+                    <Ionicons
+                      name={currentDaypart.icon}
+                      size={14}
+                      color={daypartFilteredOnly ? '#064E3B' : '#FDE68A'}
+                    />
+                    <Text
+                      style={[
+                        styles.daypartBannerTitle,
+                        { color: daypartFilteredOnly ? '#064E3B' : '#FFFFFF' },
+                      ]}>
+                      {language === 'ur' ? currentDaypart.labelUr : currentDaypart.labelEn}:{' '}
+                      <Text
+                        style={{
+                          fontWeight: '500',
+                          color: daypartFilteredOnly ? '#047857' : '#FDE68A',
+                        }}>
+                        {language === 'ur' ? currentDaypart.subLabelUr : currentDaypart.subLabelEn}
+                      </Text>
+                    </Text>
+                    <View
+                      style={[
+                        styles.daypartActiveBadge,
+                        {
+                          backgroundColor: daypartFilteredOnly ? '#064E3B' : 'rgba(255, 255, 255, 0.25)',
+                        },
+                      ]}>
+                      <Text
+                        style={[
+                          styles.daypartActiveBadgeText,
+                          { color: '#FFFFFF' },
+                        ]}>
+                        {daypartFilteredOnly
+                          ? (language === 'ur' ? 'صرف یہ دکھائیں ✓' : 'Showing Only ✓')
+                          : (language === 'ur' ? 'فرنٹ شیلف' : 'Front Shelf')}
+                      </Text>
+                    </View>
+                  </Pressable>
+                </View>
+              )}
             </View>
           </View>
 
@@ -2317,7 +2846,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 return (
                   <Pressable
                     key={product.id}
-                    disabled={isOut}
                     onPress={() => !inCartItem && addToCart(product)}
                     style={({ pressed }) => [
                       styles.listRow,
@@ -2410,18 +2938,22 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                               hitSlop={{ top: 6, bottom: 6, left: 6, right: 2 }}>
                               <Ionicons name="remove" size={16} color={theme.text} />
                             </Pressable>
-                            <View
-                              style={[
+                            <Pressable
+                              onPress={() => openLooseWeightModal(product, inCartItem.quantity)}
+                              accessibilityLabel={`Change quantity for ${product.name}`}
+                              accessibilityRole="button"
+                              style={({ pressed }) => [
                                 styles.listStepQtyBox,
                                 {
                                   backgroundColor: settings.darkMode ? theme.card : '#FFFFFF',
                                   borderColor: settings.darkMode ? 'rgba(255,255,255,0.18)' : '#CBD5E1',
                                 },
+                                pressed && { opacity: 0.6 },
                               ]}>
                               <Text style={[styles.listStepQtyText, { color: theme.text }]}>
                                 {inCartItem.quantity}
                               </Text>
-                            </View>
+                            </Pressable>
                             <Pressable
                               onPress={() => addToCart(product, 1)}
                               style={({ pressed }) => [
@@ -2439,7 +2971,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                           </View>
                         ) : (
                           <Pressable
-                            disabled={isOut}
                             onPress={() => addToCart(product)}
                             style={({ pressed }) => [
                               styles.listAddBtn,
@@ -2447,7 +2978,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                                 backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
                                 borderColor: isOut ? theme.border : theme.primary,
                               },
-                              pressed && !isOut && { opacity: 0.8 },
+                              pressed && { opacity: 0.8 },
                             ]}>
                             <Ionicons
                               name="add-circle"
@@ -2473,7 +3004,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 return (
                   <Pressable
                     key={product.id}
-                    disabled={isOut}
                     onPress={() => !inCartItem && addToCart(product)}
                     style={({ pressed }) => [
                       styles.gridCard,
@@ -2484,7 +3014,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         borderWidth: isTargetSugar ? 2.5 : inCartItem ? 1.5 : 1,
                         opacity: isOut ? 0.6 : 1,
                       },
-                      pressed && !isOut && !inCartItem && { transform: [{ scale: 0.98 }] },
+                      pressed && !inCartItem && { transform: [{ scale: 0.98 }] },
                     ]}>
                     <View
                       style={[
@@ -2591,7 +3121,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                           {(product.unit === 'kg' || product.unit === 'gram' || product.unit === 'litre') && (
                             <Pressable
-                              disabled={isOut}
                               onPress={() => openLooseWeightModal(product, 1)}
                               style={[
                                 styles.cardScaleQuickBtn,
@@ -2608,7 +3137,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                             </Pressable>
                           )}
                           <Pressable
-                            disabled={isOut}
                             onPress={() => addToCart(product)}
                             style={[
                               styles.cardAddBtn,
@@ -2644,6 +3172,50 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   borderColor: settings.darkMode ? 'rgba(255, 255, 255, 0.14)' : '#E2E8F0',
                 },
               ]}>
+              {/* AI-02: Associative Basket Companion Row (Mobile Dock) */}
+              {companionSuggestions.length > 0 && (
+                <View
+                  style={[
+                    styles.dockCompanionWrap,
+                    {
+                      borderBottomColor: settings.darkMode ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
+                    },
+                  ]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingTop: 4 }}>
+                    <Ionicons name="sparkles" size={12} color="#6366F1" />
+                    <Text style={{ fontSize: 10.5, fontWeight: '700', color: settings.darkMode ? '#A5B4FC' : '#4F46E5' }}>
+                      {language === 'ur' ? 'بھائی کے ساتھ اور کیا؟' : 'Frequently Bought Together:'}
+                    </Text>
+                  </View>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 5, gap: 6 }}>
+                    {companionSuggestions.map((prod) => (
+                      <Pressable
+                        key={prod.id}
+                        onPress={() => addToCart(prod, 1)}
+                        style={({ pressed }) => [
+                          styles.dockCompanionChip,
+                          {
+                            backgroundColor: settings.darkMode ? 'rgba(99, 102, 241, 0.18)' : '#EEF2FF',
+                            borderColor: settings.darkMode ? '#6366F1' : '#C7D2FE',
+                          },
+                          pressed && { opacity: 0.75, transform: [{ scale: 0.96 }] },
+                        ]}>
+                        <Ionicons name="add" size={13} color="#6366F1" />
+                        <Text style={[styles.dockCompanionText, { color: settings.darkMode ? '#E0E7FF' : '#312E81' }]}>
+                          {getProductName(prod)}
+                        </Text>
+                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#6366F1' }}>
+                          +{settings.currencySymbol}{prod.price}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
               {/* Row 1: High-Contrast, Prominent POS Order Action Buttons */}
               <View style={styles.dockActionsRow}>
                 {/* Hold Order Button (Distinct Warm Amber) */}
@@ -2888,6 +3460,121 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         onClose={() => setIsQuickItemOpen(false)}
         onAddItem={handleAddQuickItem}
       />
+
+      {/* ── Micro-Friction Eraser (MF-04): Post-Sale Success & Instant WhatsApp Banner ── */}
+      {showSuccessToast && lastCompletedSale && (
+        <View
+          style={[
+            styles.postSaleToast,
+            lastCompletedSale.isBohani
+              ? {
+                  backgroundColor: '#064E3B',
+                  borderColor: '#F59E0B',
+                  borderWidth: 2,
+                  paddingVertical: 12,
+                }
+              : { backgroundColor: '#064E3B', borderColor: '#10B981' },
+          ]}>
+          <View style={styles.postSaleToastLeft}>
+            <View
+              style={[
+                styles.postSaleCheckCircle,
+                lastCompletedSale.isBohani && { backgroundColor: '#F59E0B' },
+              ]}>
+              <Ionicons
+                name={lastCompletedSale.isBohani ? 'sparkles' : 'checkmark'}
+                size={16}
+                color={lastCompletedSale.isBohani ? '#064E3B' : '#FFFFFF'}
+              />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text
+                style={[
+                  styles.postSaleToastTitle,
+                  lastCompletedSale.isBohani && { color: '#FDE68A', fontWeight: '800' },
+                ]}
+                numberOfLines={1}>
+                {lastCompletedSale.isBohani
+                  ? (language === 'ur' ? '🎉 مبارک ہو! پہلی بوہنی مکمل ہوئی' : '🎉 Pehli Bohani Mubarak!')
+                  : (language === 'ur' ? 'بل مکمل ہو گیا!' : 'Sale Completed!')}
+              </Text>
+              <Text style={styles.postSaleToastSub} numberOfLines={1}>
+                {lastCompletedSale.isBohani
+                  ? (language === 'ur' ? 'یا اللہ رزق میں برکت و وسعت عطا فرما (آمین)' : 'May Allah bless your trade with abundance & barakah')
+                  : `${lastCompletedSale.billNumber ? `#${lastCompletedSale.billNumber} • ` : ''}${settings.currencySymbol}${lastCompletedSale.grandTotal.toLocaleString()}${lastCompletedSale.customerName ? ` • ${lastCompletedSale.customerName}` : ''}`}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.postSaleToastActions}>
+            {/* VU-01: WhatsApp Status Share Button for Pehli Bohani */}
+            {lastCompletedSale.isBohani && (
+              <Pressable
+                onPress={() => {
+                  const bohaniText = buildBohaniShareText({
+                    shopName: settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : 'My Store'),
+                    shopNameUrdu: settings.shopNameUrdu,
+                    amount: lastCompletedSale.grandTotal,
+                    currencySymbol: settings.currencySymbol,
+                    isUrdu: language === 'ur',
+                  });
+                  openWhatsAppWithMessage(undefined, bohaniText);
+                }}
+                style={({ pressed }) => [
+                  styles.toastActionBtn,
+                  { backgroundColor: '#F59E0B' },
+                  pressed && { opacity: 0.8 },
+                ]}>
+                <Ionicons name="sparkles" size={13} color="#064E3B" />
+                <Text style={[styles.toastActionBtnText, { color: '#064E3B', fontWeight: '800' }]}>
+                  {language === 'ur' ? 'بوہنی اسٹیٹس' : 'Status'}
+                </Text>
+              </Pressable>
+            )}
+
+            {/* View Receipt Button */}
+            <Pressable
+              onPress={() => {
+                setActiveReceipt(lastCompletedSale);
+                setShowSuccessToast(false);
+              }}
+              style={({ pressed }) => [
+                styles.toastActionBtn,
+                { backgroundColor: 'rgba(255, 255, 255, 0.2)' },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Ionicons name="receipt-outline" size={13} color="#FFFFFF" />
+              <Text style={styles.toastActionBtnText}>
+                {language === 'ur' ? 'رسید' : 'Receipt'}
+              </Text>
+            </Pressable>
+
+            {/* Direct WhatsApp Share Button */}
+            <Pressable
+              onPress={() => {
+                openWhatsAppReceipt(lastCompletedSale, settings, language);
+              }}
+              style={({ pressed }) => [
+                styles.toastActionBtn,
+                { backgroundColor: '#25D366' },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Ionicons name="logo-whatsapp" size={13} color="#FFFFFF" />
+              <Text style={[styles.toastActionBtnText, { color: '#FFFFFF' }]}>
+                {language === 'ur' ? 'واٹس ایپ' : 'WhatsApp'}
+              </Text>
+            </Pressable>
+
+            {/* Dismiss Button */}
+            <Pressable
+              onPress={() => setShowSuccessToast(false)}
+              hitSlop={8}
+              style={{ padding: 4 }}>
+              <Ionicons name="close" size={18} color="rgba(255, 255, 255, 0.7)" />
+            </Pressable>
+          </View>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -3508,6 +4195,15 @@ const styles = StyleSheet.create({
     minWidth: 32,
     minHeight: 32,
     borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  smallStepQtyBox: {
+    minWidth: 36,
+    height: 32,
+    paddingHorizontal: 6,
+    borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -4336,5 +5032,202 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#DC2626',
     marginTop: 1,
+  },
+  postSaleToast: {
+    position: 'absolute',
+    bottom: 24,
+    left: 16,
+    right: 16,
+    borderRadius: 16,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1.5,
+    zIndex: 9999,
+    ...Shadows.lg,
+  },
+  postSaleToastLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 8,
+  },
+  postSaleCheckCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#059669',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  postSaleToastTitle: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+  postSaleToastSub: {
+    color: '#D1FAE5',
+    fontSize: 11.5,
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  postSaleToastActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  toastActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  toastActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+
+  // AI-01: Temporal Dayparting Front Shelf
+  daypartBannerWrap: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: 5,
+    paddingBottom: 2,
+  },
+  daypartBannerPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  daypartBannerTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  daypartActiveBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  daypartActiveBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+
+  // AI-02: Associative Basket Companion Intelligence
+  companionPanel: {
+    marginHorizontal: Spacing.md,
+    marginTop: 6,
+    marginBottom: 8,
+    padding: 10,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  companionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  companionTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  companionChipsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 2,
+  },
+  companionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  companionChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  companionChipPrice: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  dockCompanionWrap: {
+    borderBottomWidth: 1,
+    paddingBottom: 2,
+  },
+  dockCompanionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  dockCompanionText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  // AI-03: Khata Customer Routine Basket
+  usualBasketBox: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  usualBasketHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  usualBasketTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  addUsualBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#059669',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  addUsualBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  usualItemsChipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  usualItemChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  usualItemChipText: {
+    fontSize: 11,
+    fontWeight: '600',
   },
 });

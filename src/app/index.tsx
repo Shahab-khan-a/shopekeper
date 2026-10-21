@@ -18,6 +18,7 @@ import { ProductsScreen } from '@/screens/ProductsScreen';
 import { HistoryScreen } from '@/screens/HistoryScreen';
 import { KhataScreen } from '@/screens/KhataScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
+import { CatalogSetupScreen } from '@/screens/CatalogSetupScreen';
 import { Colors, BorderRadius, Shadows } from '@/constants/theme';
 import { AlertModal } from '@/components/ui';
 
@@ -52,9 +53,58 @@ export default function App() {
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
+  // First-run catalog setup: after sign-in or Continue as Guest, the keeper
+  // picks a shop type and loads its ready-made items (or skips). Remembered
+  // per identity so it is asked exactly once.
+  const [isCatalogStepCompleted, setIsCatalogStepCompleted] = useState<boolean | null>(null);
+  const catalogFlagKey = user
+    ? `@shopkeeper_catalog_onboarded_${user.uid}`
+    : isGuestMode
+      ? '@shopkeeper_catalog_onboarded_guest'
+      : null;
+
+  useEffect(() => {
+    if (!catalogFlagKey) {
+      setIsCatalogStepCompleted(null);
+      return;
+    }
+    // A shop that already chose a catalog type never needs the setup step.
+    if (settings.catalogShopType) {
+      setIsCatalogStepCompleted(true);
+      return;
+    }
+    let cancelled = false;
+    AsyncStorage.getItem(catalogFlagKey)
+      .then((val) => {
+        if (!cancelled) setIsCatalogStepCompleted(val === 'true');
+      })
+      .catch(() => {
+        if (!cancelled) setIsCatalogStepCompleted(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [catalogFlagKey, settings.catalogShopType]);
+
+  const handleFinishCatalogOnboarding = async (loadedCount: number) => {
+    if (catalogFlagKey) {
+      try {
+        await AsyncStorage.setItem(catalogFlagKey, 'true');
+      } catch (e) {
+        console.warn('[App] Error storing catalog onboarding flag:', e);
+      }
+    }
+    setIsCatalogStepCompleted(true);
+    // Stocked the shelves? Land him on New Sale so his first success is a bill.
+    if (loadedCount > 0) {
+      setActiveTab('sale');
+    }
+  };
+
   // Global Android Hardware Back Button Stack Management
   useEffect(() => {
     if (Platform.OS !== 'android') return;
+    if (isCatalogStepCompleted === false) return; // CatalogSetupScreen handles its own back navigation
 
     const onHardwareBack = () => {
       // 1. Dismiss topmost Alert dialog if active
@@ -109,6 +159,7 @@ export default function App() {
     isEditShopOpen,
     isOnboardingOpen,
     activeTab,
+    isCatalogStepCompleted,
     hideAlert,
     setActiveReceipt,
     setIsAddProductOpen,
@@ -195,6 +246,42 @@ export default function App() {
             backgroundColor={theme.surface}
           />
           <LoginScreen onContinueAsGuest={continueAsGuest} />
+        </SafeAreaView>
+      );
+    }
+
+    // 2.5 First-Run Catalog Setup (new keepers only, asked once)
+    if (isCatalogStepCompleted === null) {
+      return (
+        <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
+          <StatusBar
+            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={theme.surface}
+          />
+          <View style={styles.loadingLogoOuter}>
+            <Image
+              source={require('@/../assets/images/mainLogoImage.png')}
+              style={styles.loadingLogoImg}
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
+          <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
+          <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
+            Setting up your store...
+          </Text>
+        </SafeAreaView>
+      );
+    }
+
+    if (!isCatalogStepCompleted) {
+      return (
+        <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
+          <StatusBar
+            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={theme.surface}
+          />
+          <CatalogSetupScreen onDone={handleFinishCatalogOnboarding} />
         </SafeAreaView>
       );
     }

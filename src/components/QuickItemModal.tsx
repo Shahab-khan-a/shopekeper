@@ -34,6 +34,15 @@ interface QuickItemModalProps {
 
 const PRICE_PRESETS = [50, 100, 150, 200, 300, 500];
 
+const UNBARCODED_STAPLES = [
+  { emoji: '🥚', nameEn: 'Fresh Eggs', nameUrdu: 'انڈے', defaultPrice: 30 },
+  { emoji: '🥛', nameEn: 'Loose Milk / Curd', nameUrdu: 'کھلا دودھ / دہی', defaultPrice: 100 },
+  { emoji: '🧊', nameEn: 'Ice Block', nameUrdu: 'برف', defaultPrice: 50 },
+  { emoji: '🛍️', nameEn: 'Shopping Bag', nameUrdu: 'شاپر', defaultPrice: 10 },
+  { emoji: '🍞', nameEn: 'Roti / Naan', nameUrdu: 'روٹی / نان', defaultPrice: 25 },
+  { emoji: '🍬', nameEn: 'Candy / Toffees', nameUrdu: 'ٹافیاں', defaultPrice: 10 },
+];
+
 export const QuickItemModal: React.FC<QuickItemModalProps> = ({
   visible,
   onClose,
@@ -164,6 +173,57 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
             style={styles.scrollArea}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled">
+            {/* 1-Tap Unbarcoded Staples Bar */}
+            <View style={styles.staplesBarWrap}>
+              <Text style={[styles.staplesBarLabel, { color: theme.textSecondary }]}>
+                {language === 'ur' ? 'عام کھلی اشیاء (1-ٹَیپ):' : 'Popular Unbarcoded Staples (1-Tap):'}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.staplesScrollContent}>
+                {UNBARCODED_STAPLES.map((staple) => {
+                  const isSelected =
+                    name === staple.nameEn ||
+                    name === staple.nameUrdu ||
+                    nameUrdu === staple.nameUrdu;
+                  return (
+                    <Pressable
+                      key={staple.nameEn}
+                      onPress={() => {
+                        setName(language === 'ur' ? staple.nameUrdu : staple.nameEn);
+                        setNameUrdu(staple.nameUrdu);
+                        if (!price) {
+                          setPrice(staple.defaultPrice.toString());
+                        }
+                        setIsDropdownOpen(false);
+                        setError('');
+                      }}
+                      style={({ pressed }) => [
+                        styles.stapleChip,
+                        {
+                          backgroundColor: isSelected ? theme.primaryLight : theme.surfaceSubtle,
+                          borderColor: isSelected ? theme.primary : theme.border,
+                        },
+                        pressed && { opacity: 0.75, transform: [{ scale: 0.96 }] },
+                      ]}>
+                      <Text style={styles.stapleEmoji}>{staple.emoji}</Text>
+                      <Text
+                        style={[
+                          styles.stapleChipText,
+                          {
+                            color: isSelected ? theme.primaryDark : theme.text,
+                            fontWeight: isSelected ? '800' : '600',
+                          },
+                        ]}>
+                        {language === 'ur' ? staple.nameUrdu : staple.nameEn}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
             {/* Searchable Input for Custom Item Name */}
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}>
@@ -397,6 +457,8 @@ export const QuickItemModal: React.FC<QuickItemModalProps> = ({
                   }}
                   onFocus={() => setFocusedField('price')}
                   onBlur={() => setFocusedField(null)}
+                  returnKeyType="done"
+                  onSubmitEditing={handleAdd}
                 />
               </View>
 
@@ -800,5 +862,34 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
     letterSpacing: 0.3,
+  },
+  staplesBarWrap: {
+    gap: 6,
+    marginBottom: 4,
+  },
+  staplesBarLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  staplesScrollContent: {
+    gap: 8,
+    paddingVertical: 2,
+  },
+  stapleChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  stapleEmoji: {
+    fontSize: 14,
+  },
+  stapleChipText: {
+    fontSize: 12,
   },
 });

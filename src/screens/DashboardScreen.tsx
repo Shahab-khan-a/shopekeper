@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { SaleScreen } from '@/screens/SaleScreen';
+import { buildBarkatStatusText, openWhatsAppWithMessage } from '@/utils/whatsapp';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -69,6 +70,7 @@ export const DashboardScreen: React.FC = () => {
   const [showDayEnd, setShowDayEnd] = useState(false);
   const [isCashOutModalOpen, setIsCashOutModalOpen] = useState(false);
   const [todayCashOutTotal, setTodayCashOutTotal] = useState(0);
+  const [showDetailedReports, setShowDetailedReports] = useState(false);
 
   const todayStart = useMemo(() => {
     const d = new Date();
@@ -382,125 +384,53 @@ export const DashboardScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <View style={styles.eveningPromptCta}>
-              <Text style={styles.eveningPromptCtaText}>
-                {language === 'ur' ? 'حساب کریں ↵' : 'Tally →'}
-              </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              {todaySales.length > 0 && (
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    const text = buildBarkatStatusText({
+                      shopName: settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : 'My Store'),
+                      shopNameUrdu: settings.shopNameUrdu,
+                      totalCustomers: todaySales.length,
+                      totalSales: todaySalesTotal,
+                      currencySymbol: settings.currencySymbol,
+                      isUrdu: language === 'ur',
+                    });
+                    openWhatsAppWithMessage(undefined, text);
+                  }}
+                  hitSlop={6}
+                  style={({ pressed }) => [
+                    {
+                      backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                      borderWidth: 1,
+                      borderColor: '#F59E0B',
+                      paddingHorizontal: 10,
+                      paddingVertical: 7,
+                      borderRadius: BorderRadius.md,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}>
+                  <Ionicons name="sparkles" size={13} color="#FBBF24" />
+                  <Text style={{ color: '#FDE68A', fontSize: 11, fontWeight: '700' }}>
+                    {language === 'ur' ? 'برکت اسٹیٹس' : 'Barkat'}
+                  </Text>
+                </Pressable>
+              )}
+
+              <View style={styles.eveningPromptCta}>
+                <Text style={styles.eveningPromptCtaText}>
+                  {language === 'ur' ? 'حساب کریں ↵' : 'Tally →'}
+                </Text>
+              </View>
             </View>
           </Pressable>
         )}
 
-        {/* ── Sales Analytics & Trends Chart ── */}
-        <SalesChart sales={sales} />
-
-        {/* ── Store Investment & Lifetime Earnings Section ── */}
-        <View style={{ marginTop: Spacing.md, marginBottom: Spacing.xs }}>
-          <SectionHeader title={t('investmentSection')} />
-        </View>
-
-        <View style={styles.financeGrid}>
-          {/* Card 1: Stock Investment & Value */}
-          <Pressable
-            onPress={() => setActiveTab('products')}
-            style={({ pressed }) => [
-              styles.financeCard,
-              { backgroundColor: theme.card, borderColor: theme.border },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-            ]}>
-            <View style={styles.financeCardHeader}>
-              <View style={[styles.financeIconWrap, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="wallet-outline" size={20} color="#059669" />
-              </View>
-              <View style={[styles.financeHeaderBadge, { backgroundColor: '#D1FAE5' }]}>
-                <Ionicons name="cube-outline" size={11} color="#059669" />
-                <Text style={[styles.financeHeaderBadgeText, { color: '#059669' }]}>
-                  {totalInventoryUnits} {language === 'ur' ? 'اشیاء' : 'units'}
-                </Text>
-              </View>
-            </View>
-
-            <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-              {t('totalInvestment')}
-            </Text>
-            <Text style={[styles.financeMainAmount, { color: theme.text }]}>
-              {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
-            </Text>
-
-            <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
-
-            <View style={styles.financeSubStatsRow}>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('stockRetailValue')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                  {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
-                </Text>
-              </View>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('expectedStockProfit')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: '#059669', fontWeight: '800' }]}>
-                  +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          {/* Card 2: Total Store Earnings & Realized Profit */}
-          <Pressable
-            onPress={() => setActiveTab('history')}
-            style={({ pressed }) => [
-              styles.financeCard,
-              { backgroundColor: theme.card, borderColor: theme.border },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-            ]}>
-            <View style={styles.financeCardHeader}>
-              <View style={[styles.financeIconWrap, { backgroundColor: '#F5F3FF' }]}>
-                <Ionicons name="trending-up-outline" size={20} color="#7C3AED" />
-              </View>
-              <View style={[styles.financeHeaderBadge, { backgroundColor: '#EDE9FE' }]}>
-                <Ionicons name="checkmark-done" size={11} color="#7C3AED" />
-                <Text style={[styles.financeHeaderBadgeText, { color: '#7C3AED' }]}>
-                  {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {language === 'ur' ? 'بلز' : 'sales'}
-                </Text>
-              </View>
-            </View>
-
-            <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-              {t('totalStoreEarnings')}
-            </Text>
-            <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
-              {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
-            </Text>
-
-            <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
-
-            <View style={styles.financeSubStatsRow}>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('totalProfitEarned')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
-                  +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
-                </Text>
-              </View>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('profitMargin')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                  {totalLifetimeEarnings > 0
-                    ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
-                    : '0%'}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-        </View>
-
-        {/* ── Stock Alerts ── */}
+        {/* ── Stock Alerts (Show high priority reorder warnings) ── */}
         {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
           <View style={[styles.alertSection, { backgroundColor: theme.warningLight, borderColor: theme.warning }]}>
             <View style={styles.alertHeader}>
@@ -538,6 +468,150 @@ export const DashboardScreen: React.FC = () => {
                 </Pressable>
               ))}
             </ScrollView>
+          </View>
+        )}
+
+        {/* ── Progressive Disclosure: Reports, Sales Charts & Store Investment ── */}
+        <Pressable
+          onPress={() => setShowDetailedReports((prev) => !prev)}
+          style={({ pressed }) => [
+            styles.reportsToggleCard,
+            { backgroundColor: theme.card, borderColor: theme.border },
+            pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+          ]}>
+          <View style={styles.reportsToggleLeft}>
+            <View style={[styles.reportsToggleIconWrap, { backgroundColor: '#EEF2FF' }]}>
+              <Ionicons name="bar-chart" size={18} color="#4F46E5" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.reportsToggleTitle, { color: theme.text }]}>
+                {language === 'ur' ? 'تفصیلی رپورٹس اور دکان سرمایہ' : 'Reports, Trends & Investment'}
+              </Text>
+              <Text style={[styles.reportsToggleSub, { color: theme.textMuted }]} numberOfLines={1}>
+                {language === 'ur'
+                  ? 'سیلز گراف، اسٹاک سرمایہ اور منافع کی تفاصیل'
+                  : 'Weekly sales graph, total inventory value & lifetime profit'}
+              </Text>
+            </View>
+          </View>
+          <Ionicons
+            name={showDetailedReports ? 'chevron-up-circle' : 'chevron-down-circle'}
+            size={22}
+            color="#4F46E5"
+          />
+        </Pressable>
+
+        {showDetailedReports && (
+          <View style={styles.expandedReportsWrap}>
+            {/* Sales Analytics & Trends Chart */}
+            <SalesChart sales={sales} />
+
+            {/* Store Investment & Lifetime Earnings Section */}
+            <View style={{ marginTop: Spacing.md, marginBottom: Spacing.xs }}>
+              <SectionHeader title={t('investmentSection')} />
+            </View>
+
+            <View style={styles.financeGrid}>
+              {/* Card 1: Stock Investment & Value */}
+              <Pressable
+                onPress={() => setActiveTab('products')}
+                style={({ pressed }) => [
+                  styles.financeCard,
+                  { backgroundColor: theme.card, borderColor: theme.border },
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+                ]}>
+                <View style={styles.financeCardHeader}>
+                  <View style={[styles.financeIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                    <Ionicons name="wallet-outline" size={20} color="#059669" />
+                  </View>
+                  <View style={[styles.financeHeaderBadge, { backgroundColor: '#D1FAE5' }]}>
+                    <Ionicons name="cube-outline" size={11} color="#059669" />
+                    <Text style={[styles.financeHeaderBadgeText, { color: '#059669' }]}>
+                      {totalInventoryUnits} {language === 'ur' ? 'اشیاء' : 'units'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+                  {t('totalInvestment')}
+                </Text>
+                <Text style={[styles.financeMainAmount, { color: theme.text }]}>
+                  {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
+                </Text>
+
+                <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
+
+                <View style={styles.financeSubStatsRow}>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('stockRetailValue')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                      {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('expectedStockProfit')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: '#059669', fontWeight: '800' }]}>
+                      +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+
+              {/* Card 2: Total Store Earnings & Realized Profit */}
+              <Pressable
+                onPress={() => setActiveTab('history')}
+                style={({ pressed }) => [
+                  styles.financeCard,
+                  { backgroundColor: theme.card, borderColor: theme.border },
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+                ]}>
+                <View style={styles.financeCardHeader}>
+                  <View style={[styles.financeIconWrap, { backgroundColor: '#F5F3FF' }]}>
+                    <Ionicons name="trending-up-outline" size={20} color="#7C3AED" />
+                  </View>
+                  <View style={[styles.financeHeaderBadge, { backgroundColor: '#EDE9FE' }]}>
+                    <Ionicons name="checkmark-done" size={11} color="#7C3AED" />
+                    <Text style={[styles.financeHeaderBadgeText, { color: '#7C3AED' }]}>
+                      {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {language === 'ur' ? 'بلز' : 'sales'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+                  {t('totalStoreEarnings')}
+                </Text>
+                <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
+                  {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
+                </Text>
+
+                <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
+
+                <View style={styles.financeSubStatsRow}>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('totalProfitEarned')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
+                      +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('profitMargin')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                      {totalLifetimeEarnings > 0
+                        ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
+                        : '0%'}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+            </View>
           </View>
         )}
 
@@ -1208,5 +1282,40 @@ const styles = StyleSheet.create({
   drawerFormulaSub: {
     fontSize: 11.5,
     fontWeight: '500',
+  },
+  reportsToggleCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  reportsToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    paddingRight: 8,
+  },
+  reportsToggleIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reportsToggleTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  reportsToggleSub: {
+    fontSize: 11.5,
+    marginTop: 2,
+  },
+  expandedReportsWrap: {
+    marginBottom: Spacing.md,
   },
 });

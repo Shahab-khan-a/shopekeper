@@ -141,6 +141,7 @@ export interface ShopSettings {
   shopNameUrdu: string;
   ownerName: string;
   businessType?: string; // e.g. Kiryana, General Store, Super Market, Bakery, etc.
+  catalogShopType?: string; // Shop type chosen from the master catalog. Only this type's items load in catalog import.
   email?: string;
   phone: string;
   alternatePhone?: string;
