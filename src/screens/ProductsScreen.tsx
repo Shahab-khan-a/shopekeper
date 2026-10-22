@@ -761,11 +761,11 @@ const styles = StyleSheet.create({
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.md,
+    gap: 12,
     paddingBottom: 100,
   },
   cardContainer: {
-    width: Platform.select({ web: 'calc(50% - 6px)' as any, default: '48%' }),
+    width: Platform.select({ web: 'calc(50% - 6px)' as any, default: '48.2%' }),
   },
 
   productsList: { gap: 8, paddingBottom: 100 },

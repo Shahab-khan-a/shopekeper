@@ -21,7 +21,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onPress,
   onEdit,
 }) => {
-  const { settings, language, t } = useShop();
+  const { settings, language } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const isUr = language === 'ur';
 
@@ -50,8 +50,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <Pressable
       onPress={handleCardPress}
+      android_ripple={{
+        color: settings.darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(16, 185, 129, 0.12)',
+        borderless: false,
+      }}
       accessibilityRole="button"
-      accessibilityLabel={`${displayName}, ${settings.currencySymbol}${product.price}, ${product.stock} ${product.unit}`}
+      accessibilityLabel={`${displayName}, ${settings.currencySymbol}${product.price}, ${product.stock} ${product.unit}. Tap for details.`}
       style={({ pressed }) => [
         styles.card,
         {
@@ -59,52 +63,133 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           borderColor: isOutOfStock ? theme.danger : isLowStock ? theme.warning : softBorder,
           borderWidth: isOutOfStock || isLowStock ? 1.5 : 1,
         },
-        pressed && { opacity: 0.92, transform: [{ scale: 0.985 }] },
+        pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] },
       ]}>
-      {/* Compact Thumbnail Container */}
+      {/* Decorated Thumbnail Canopy */}
       <View style={[styles.imageContainer, { backgroundColor: theme.surfaceSubtle }]}>
         <ProductImage
           uri={product.image || product.imageUri}
           style={styles.image}
           resizeMode="cover"
           fallbackColor={theme.textMuted}
-          fallbackSize={26}
+          fallbackSize={32}
           iconName={productIconFor(product.name, product.category)}
         />
 
-        {/* Warning Badge only when stock is critical (no redundant normal stock badges over image) */}
-        {isOutOfStock ? (
-          <View style={[styles.criticalStockBadge, { backgroundColor: theme.dangerLight }]}>
-            <Ionicons name="close-circle" size={10} color={theme.danger} />
-            <Text style={[styles.criticalStockText, { color: theme.danger }]}>
-              {isUr ? 'ختم' : t('soldOut')}
+        {/* Top-Left: Category Tag or Stock Alert Pill */}
+        <View
+          style={[
+            styles.topBadgePill,
+            {
+              backgroundColor: isOutOfStock
+                ? theme.dangerLight
+                : isLowStock
+                  ? theme.warningLight
+                  : settings.darkMode
+                    ? 'rgba(15, 23, 42, 0.85)'
+                    : 'rgba(255, 255, 255, 0.94)',
+              borderColor: isOutOfStock
+                ? theme.danger
+                : isLowStock
+                  ? theme.warning
+                  : settings.darkMode
+                    ? 'rgba(255,255,255,0.12)'
+                    : 'rgba(0,0,0,0.08)',
+            },
+          ]}>
+          {isOutOfStock ? (
+            <Ionicons name="alert-circle" size={10} color={theme.danger} />
+          ) : isLowStock ? (
+            <Ionicons name="warning" size={10} color={theme.warning} />
+          ) : null}
+          <Text
+            style={[
+              styles.topBadgeText,
+              {
+                color: isOutOfStock
+                  ? theme.danger
+                  : isLowStock
+                    ? theme.warning
+                    : settings.darkMode
+                      ? '#E2E8F0'
+                      : theme.text,
+              },
+            ]}
+            numberOfLines={1}>
+            {isOutOfStock
+              ? isUr ? 'اسٹاک ختم' : 'Out'
+              : isLowStock
+                ? isUr ? 'کم اسٹاک' : 'Low'
+                : product.category}
+          </Text>
+        </View>
+
+        {/* Top-Right: Pressable "Details ↗" Affordance Indicator */}
+        <View
+          style={[
+            styles.pressIndicatorPill,
+            {
+              backgroundColor: settings.darkMode
+                ? 'rgba(15, 23, 42, 0.88)'
+                : 'rgba(255, 255, 255, 0.94)',
+              borderColor: settings.darkMode
+                ? 'rgba(16, 185, 129, 0.4)'
+                : 'rgba(16, 185, 129, 0.3)',
+            },
+          ]}>
+          <Ionicons name="information-circle" size={11} color={theme.primary} />
+          <Text style={[styles.pressIndicatorText, { color: theme.primary }]}>
+            {isUr ? 'تفصیل' : 'Details'}
+          </Text>
+          <Ionicons name="chevron-forward" size={10} color={theme.primary} />
+        </View>
+
+        {/* Bottom of Image: Unified Decorated Frosted Ribbon */}
+        <View style={styles.imageBottomRibbon}>
+          {/* Stock Status with glowing dot */}
+          <View style={styles.stockRibbonItem}>
+            <View
+              style={[
+                styles.stockDot,
+                {
+                  backgroundColor: isOutOfStock
+                    ? '#EF4444'
+                    : isLowStock
+                      ? '#F59E0B'
+                      : '#10B981',
+                },
+              ]}
+            />
+            <Text style={styles.stockRibbonText} numberOfLines={1}>
+              {isOutOfStock
+                ? isUr ? 'اسٹاک ختم' : 'Out of stock'
+                : isLowStock
+                  ? isUr ? `${product.stock} باقی` : `${product.stock} left`
+                  : `${product.stock} ${product.unit}`}
             </Text>
           </View>
-        ) : isLowStock ? (
-          <View style={[styles.criticalStockBadge, { backgroundColor: theme.warningLight }]}>
-            <Ionicons name="alert-circle" size={10} color={theme.warning} />
-            <Text style={[styles.criticalStockText, { color: theme.warning }]}>
-              {isUr ? `${product.stock} باقی` : `${product.stock} left`}
-            </Text>
-          </View>
-        ) : null}
+
+          {/* Profit Margin Tag (when profitable) */}
+          {unitProfit > 0 && profitMarginPercent > 0 ? (
+            <View style={styles.profitRibbonItem}>
+              <Text style={styles.profitRibbonText}>
+                +{profitMarginPercent}%
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
 
-      {/* Body: High Scannability, Zero Redundancy */}
+      {/* Clean, Breathable Card Body */}
       <View style={styles.contentWrap}>
-        {/* Category micro-tag */}
-        <Text style={[styles.categoryText, { color: theme.textMuted }]} numberOfLines={1}>
-          {product.category}
-        </Text>
-
         {/* Product Title */}
         <Text style={[styles.productName, { color: theme.text }]} numberOfLines={2}>
           {displayName}
         </Text>
 
-        {/* Price & Margin Row */}
+        {/* Price & Touch Affordance Row */}
         <View style={styles.priceRow}>
-          <View style={styles.priceGroup}>
+          <View style={styles.priceWithUnit}>
             <Text
               style={[styles.priceValue, { color: theme.primary }]}
               numberOfLines={1}
@@ -118,71 +203,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </Text>
           </View>
 
-          {unitProfit > 0 && profitMarginPercent > 0 ? (
-            <View
-              style={[
-                styles.profitChip,
-                {
-                  backgroundColor: settings.darkMode
-                    ? 'rgba(16, 185, 129, 0.16)'
-                    : 'rgba(167, 243, 208, 0.45)',
-                },
-              ]}>
-              <Text style={[styles.profitChipText, { color: theme.primary }]}>
-                +{profitMarginPercent}%
-              </Text>
-            </View>
-          ) : null}
-        </View>
-
-        {/* Stock Status Row: Displayed exactly ONCE, clean & informative */}
-        <View style={styles.stockRow}>
+          {/* Interactive touch cue */}
           <View
             style={[
-              styles.stockPill,
+              styles.touchCueWrap,
               {
-                backgroundColor: isOutOfStock
-                  ? theme.dangerLight
-                  : isLowStock
-                    ? theme.warningLight
-                    : settings.darkMode
-                      ? 'rgba(16, 185, 129, 0.18)'
-                      : '#D1FAE5',
+                backgroundColor: settings.darkMode
+                  ? 'rgba(255, 255, 255, 0.06)'
+                  : 'rgba(148, 163, 184, 0.15)',
               },
             ]}>
-            <Ionicons
-              name={isOutOfStock ? 'close-circle' : isLowStock ? 'warning' : 'cube-outline'}
-              size={11}
-              color={
-                isOutOfStock
-                  ? theme.danger
-                  : isLowStock
-                    ? theme.warning
-                    : settings.darkMode
-                      ? theme.success
-                      : '#047857'
-              }
-            />
-            <Text
-              style={[
-                styles.stockPillText,
-                {
-                  color: isOutOfStock
-                    ? theme.danger
-                    : isLowStock
-                      ? theme.warning
-                      : settings.darkMode
-                        ? theme.success
-                        : '#047857',
-                },
-              ]}
-              numberOfLines={1}>
-              {isOutOfStock
-                ? isUr ? 'اسٹاک ختم' : 'Out of stock'
-                : isLowStock
-                  ? isUr ? `${product.stock} باقی` : `${product.stock} left`
-                  : `${product.stock} ${product.unit}`}
-            </Text>
+            <Ionicons name="chevron-forward" size={13} color={theme.textMuted} />
           </View>
         </View>
       </View>
@@ -192,7 +223,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     overflow: 'hidden',
     ...Shadows.sm,
@@ -201,7 +232,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 84,
+    height: 110,
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
@@ -211,91 +242,129 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  criticalStockBadge: {
+  topBadgePill: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    zIndex: 2,
+    maxWidth: '50%',
+    ...Shadows.sm,
+  },
+  topBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    letterSpacing: 0.1,
+  },
+  pressIndicatorPill: {
     position: 'absolute',
     top: 6,
     right: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    gap: 2.5,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    zIndex: 2,
+    ...Shadows.sm,
+  },
+  pressIndicatorText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.1,
+  },
+  imageBottomRibbon: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(15, 23, 42, 0.74)',
+    paddingHorizontal: 8,
+    paddingVertical: 4.5,
     zIndex: 2,
   },
-  criticalStockText: {
+  stockRibbonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+    minWidth: 0,
+  },
+  stockDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  stockRibbonText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.1,
+  },
+  profitRibbonItem: {
+    backgroundColor: 'rgba(16, 185, 129, 0.28)',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+    marginLeft: 4,
+  },
+  profitRibbonText: {
+    color: '#34D399',
     fontSize: 9.5,
     fontWeight: '800',
   },
   contentWrap: {
-    paddingHorizontal: 9,
-    paddingTop: 7,
-    paddingBottom: 9,
-    gap: 3,
+    paddingHorizontal: 10,
+    paddingTop: 8,
+    paddingBottom: 8,
+    gap: 4,
     flex: 1,
-    justifyContent: 'space-between',
-  },
-  categoryText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
   },
   productName: {
     fontSize: 13.5,
     fontWeight: '800',
-    lineHeight: 17,
+    lineHeight: 18,
     letterSpacing: -0.2,
-    minHeight: 34,
+    minHeight: 36,
   },
   priceRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 3,
     marginTop: 2,
   },
-  priceGroup: {
+  priceWithUnit: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 2,
-    flexShrink: 1,
+    gap: 3,
+    flex: 1,
+    minWidth: 0,
   },
   priceValue: {
-    fontSize: 16,
+    fontSize: 16.5,
     fontWeight: '900',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   unitLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '600',
   },
-  profitChip: {
-    paddingHorizontal: 4,
-    paddingVertical: 1.5,
-    borderRadius: 3.5,
-  },
-  profitChipText: {
-    fontSize: 9,
-    fontWeight: '800',
-  },
-  stockRow: {
-    flexDirection: 'row',
+  touchCueWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     alignItems: 'center',
-    marginTop: 2,
-  },
-  stockPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3.5,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 5,
-    alignSelf: 'flex-start',
-    maxWidth: '100%',
-  },
-  stockPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
+    justifyContent: 'center',
   },
 });
