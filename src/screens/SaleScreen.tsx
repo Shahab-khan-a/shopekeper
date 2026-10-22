@@ -178,72 +178,14 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   } | null>(null);
   const heldToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Algorithmic Intimacy (AI-01) & Soundbox (VU-03) state
+  // Soundbox (VU-03) state
   const [soundboxEnabled, setSoundboxEnabled] = useState<boolean>(true);
-  const [daypartFilteredOnly, setDaypartFilteredOnly] = useState<boolean>(false);
 
   // VU-01: Detect if first sale of today (Pehli Bohani)
   const isFirstSaleOfDay = useMemo(() => {
     const today = new Date().toDateString();
     return sales.filter((s) => new Date(s.date).toDateString() === today && !s.refundedAt).length === 0;
   }, [sales]);
-
-  // AI-01: Temporal Dayparting Front Shelf Configuration
-  interface DaypartConfig {
-    id: 'morning' | 'midday' | 'evening' | 'night';
-    labelUr: string;
-    labelEn: string;
-    subLabelUr: string;
-    subLabelEn: string;
-    icon: keyof typeof Ionicons.glyphMap;
-    keywords: string[];
-  }
-
-  const currentDaypart = useMemo<DaypartConfig>(() => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
-      return {
-        id: 'morning',
-        labelUr: 'صبح کا سامان',
-        labelEn: 'Morning Rush',
-        subLabelUr: 'ناشتہ، دودھ و ڈبل روٹی',
-        subLabelEn: 'Breakfast, Milk & Bread',
-        icon: 'sunny',
-        keywords: ['milk', 'دودھ', 'egg', 'انڈے', 'bread', 'روٹی', 'rusk', 'رسک', 'tea', 'چائے', 'chai', 'yogurt', 'دہی', 'butter', 'مکھن', 'jam', 'جام', 'bun', 'بَن'],
-      };
-    }
-    if (hour >= 12 && hour < 17) {
-      return {
-        id: 'midday',
-        labelUr: 'دوپہر کا راشن',
-        labelEn: 'Midday Cooking',
-        subLabelUr: 'کھانا پکانا، آٹا، گھی و دال',
-        subLabelEn: 'Cooking, Flour, Ghee & Daal',
-        icon: 'restaurant',
-        keywords: ['atta', 'آٹا', 'rice', 'چاول', 'chawal', 'oil', 'تیل', 'ghee', 'گھی', 'daal', 'دال', 'dal', 'masala', 'مصالحہ', 'spice', 'salt', 'نمک', 'sugar', 'چینی', 'flour', 'بیسن'],
-      };
-    }
-    if (hour >= 17 && hour < 24) {
-      return {
-        id: 'evening',
-        labelUr: 'شام کے اسنیکس',
-        labelEn: 'Evening Rush',
-        subLabelUr: 'کولڈ ڈرنکس، چپس و بسکٹ',
-        subLabelEn: 'Cold Drinks, Snacks & Biscuits',
-        icon: 'cafe',
-        keywords: ['biscuit', 'بسکٹ', 'chips', 'چپس', 'lays', 'nimko', 'نمکو', 'juice', 'جوس', 'coke', 'pepsi', 'drink', 'مشروب', 'cold drink', 'snack', 'chocolate', 'sooper', 'kurkure', 'tea', 'چائے'],
-      };
-    }
-    return {
-      id: 'night',
-      labelUr: 'رات کے لوازمات',
-      labelEn: 'Night Essentials',
-      subLabelUr: 'مشروبات، چائے و بسکٹ',
-      subLabelEn: 'Drinks, Tea & Biscuits',
-      icon: 'moon',
-      keywords: ['drink', 'مشروب', 'pan', 'پان', 'water', 'پانی', 'snack', 'biscuit', 'بسکٹ', 'tea', 'چائے'],
-    };
-  }, []);
 
   // Dynamic categories stocked in this store (only show filter if 2 or more categories exist)
   const activeSaleCategories = useMemo(() => {
@@ -256,10 +198,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     return list.length > 1 ? (['All', ...list] as ProductCategory[]) : [];
   }, [products]);
 
-  // Filter & Daypart-sorted products
+  // Filter products by search query and category
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    const baseList = products.filter((p) => {
+    return products.filter((p) => {
       const matchSearch =
         !query ||
         p.name.toLowerCase().includes(query) ||
@@ -268,29 +210,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
       return matchSearch && matchCat;
     });
-
-    const isDaypartMatch = (p: Product) => {
-      const targetStr = `${p.name} ${p.nameUrdu || ''} ${p.category || ''}`.toLowerCase();
-      return currentDaypart.keywords.some((kw) => targetStr.includes(kw.toLowerCase()));
-    };
-
-    if (daypartFilteredOnly && selectedCategory === 'All' && !query) {
-      const matchedOnly = baseList.filter(isDaypartMatch);
-      return matchedOnly.length > 0 ? matchedOnly : baseList;
-    }
-
-    if (selectedCategory === 'All' && !query) {
-      // Prioritize temporal dayparting rush items at top of shelf
-      return [...baseList].sort((a, b) => {
-        const aMatch = isDaypartMatch(a) ? 1 : 0;
-        const bMatch = isDaypartMatch(b) ? 1 : 0;
-        if (aMatch !== bMatch) return bMatch - aMatch;
-        return 0;
-      });
-    }
-
-    return baseList;
-  }, [products, searchQuery, selectedCategory, currentDaypart, daypartFilteredOnly]);
+  }, [products, searchQuery, selectedCategory]);
 
   // AI-02: Associative Basket Companion Intelligence ("Bhai ke sath aur kya?")
   const COMPANION_RULES = useMemo(() => [
@@ -2710,60 +2630,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 </ScrollView>
               )}
 
-              {/* AI-01: Temporal Dayparting Front Shelf Smart Pill */}
-              {selectedCategory === 'All' && !searchQuery.trim() && (
-                <View style={styles.daypartBannerWrap}>
-                  <Pressable
-                    onPress={() => setDaypartFilteredOnly(!daypartFilteredOnly)}
-                    style={({ pressed }) => [
-                      styles.daypartBannerPill,
-                      {
-                        backgroundColor: daypartFilteredOnly
-                          ? 'rgba(255, 255, 255, 0.95)'
-                          : 'rgba(255, 255, 255, 0.18)',
-                        borderColor: 'rgba(255, 255, 255, 0.35)',
-                      },
-                      pressed && { opacity: 0.8 },
-                    ]}>
-                    <Ionicons
-                      name={currentDaypart.icon}
-                      size={14}
-                      color={daypartFilteredOnly ? '#064E3B' : '#FDE68A'}
-                    />
-                    <Text
-                      style={[
-                        styles.daypartBannerTitle,
-                        { color: daypartFilteredOnly ? '#064E3B' : '#FFFFFF' },
-                      ]}>
-                      {language === 'ur' ? currentDaypart.labelUr : currentDaypart.labelEn}:{' '}
-                      <Text
-                        style={{
-                          fontWeight: '500',
-                          color: daypartFilteredOnly ? '#047857' : '#FDE68A',
-                        }}>
-                        {language === 'ur' ? currentDaypart.subLabelUr : currentDaypart.subLabelEn}
-                      </Text>
-                    </Text>
-                    <View
-                      style={[
-                        styles.daypartActiveBadge,
-                        {
-                          backgroundColor: daypartFilteredOnly ? '#064E3B' : 'rgba(255, 255, 255, 0.25)',
-                        },
-                      ]}>
-                      <Text
-                        style={[
-                          styles.daypartActiveBadgeText,
-                          { color: '#FFFFFF' },
-                        ]}>
-                        {daypartFilteredOnly
-                          ? (language === 'ur' ? 'صرف یہ دکھائیں ✓' : 'Showing Only ✓')
-                          : (language === 'ur' ? 'فرنٹ شیلف' : 'Front Shelf')}
-                      </Text>
-                    </View>
-                  </Pressable>
-                </View>
-              )}
+
             </View>
           </View>
 
@@ -5315,36 +5182,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // AI-01: Temporal Dayparting Front Shelf
-  daypartBannerWrap: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: 5,
-    paddingBottom: 2,
-  },
-  daypartBannerPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  daypartBannerTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  daypartActiveBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  daypartActiveBadgeText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-  },
 
   // AI-02: Associative Basket Companion Intelligence
   companionPanel: {
