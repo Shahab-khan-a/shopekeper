@@ -8,8 +8,9 @@ import {
   ViewStyle,
   ImageResizeMode,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { resolveDriveImageUrl } from '@/services/googleDriveService';
+import { catalogPalette } from '@/components/CatalogIcon';
 
 interface ProductImageProps {
   uri?: string | null;
@@ -19,6 +20,8 @@ interface ProductImageProps {
   fallbackIcon?: React.ReactNode;
   fallbackSize?: number;
   fallbackColor?: string;
+  /** MaterialCommunityIcons glyph shown (on a tinted tile) when there is no photo. */
+  iconName?: string;
 }
 
 export const ProductImage: React.FC<ProductImageProps> = ({
@@ -29,6 +32,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   fallbackIcon,
   fallbackSize = 32,
   fallbackColor = '#94a3b8',
+  iconName,
 }) => {
   const [resolvedUri, setResolvedUri] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -73,6 +77,18 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   }, [uri]);
 
   if (!resolvedUri || hasError) {
+    if (!fallbackIcon && iconName) {
+      const p = catalogPalette(iconName);
+      return (
+        <View style={[styles.fallbackContainer, { backgroundColor: p.bg }, containerStyle]}>
+          <MaterialCommunityIcons
+            name={iconName as React.ComponentProps<typeof MaterialCommunityIcons>['name']}
+            size={fallbackSize + 10}
+            color={p.fg}
+          />
+        </View>
+      );
+    }
     return (
       <View style={[styles.fallbackContainer, containerStyle]}>
         {fallbackIcon || (

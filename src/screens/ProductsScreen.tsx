@@ -8,6 +8,7 @@ import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
+import { productIconFor } from '@/utils/productIcon';
 import { ShopStoreLoader } from '@/components/ShopStoreLoader';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -436,6 +437,7 @@ export const ProductsScreen: React.FC = () => {
                       resizeMode="cover"
                       fallbackColor={theme.textMuted}
                       fallbackSize={24}
+                      iconName={productIconFor(product.name, product.category)}
                     />
                   </View>
 

@@ -15,8 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { MASTER_CATALOG, CatalogShopType, CatalogItem } from '@/data/masterCatalog';
-import { ProductImage } from '@/components/ProductImage';
-import { mapCatalogCategory, resolveCatalogImageUri } from '@/components/CatalogImportModal';
+import { CatalogIcon } from '@/components/CatalogIcon';
+import { mapCatalogCategory } from '@/components/CatalogImportModal';
 
 interface CatalogSetupScreenProps {
   /**
@@ -38,7 +38,7 @@ const typeItemCount = (t: CatalogShopType) =>
  * First-run shop setup, shown right after sign-in / guest entry (before the
  * main app).
  * Step 1: the keeper picks his shop type (searchable, 26 curated retail types).
- * Step 2: he sees ready-made items with photos & prices. He can "Load All" or
+ * Step 2: he sees ready-made items with icons & prices. He can "Load All" or
  * tap "Deselect All" to "Select Few".
  * Everything is fully skippable and handles Android back navigation seamlessly.
  */
@@ -206,7 +206,6 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
             stock: 20, // Starter shelf stock so items can immediately be sold on day 1
             category: mapCatalogCategory(cat.name, chosen.shopType),
             unit: item.unit,
-            image: resolveCatalogImageUri(item),
             lowStockThreshold: settings.lowStockThreshold || 5,
           });
         }
@@ -239,8 +238,8 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>
           {step === 'type'
             ? ur
-              ? 'آپ کی دکان کس چیز کی ہے؟ قسم منتخب کریں تاکہ تمام اشیاء قیمتوں اور تصاویر کے ساتھ فوری لوڈ ہو جائیں۔'
-              : 'What type of shop do you run? Pick your type to automatically load ready-made items, photos, and prices.'
+              ? 'آپ کی دکان کس چیز کی ہے؟ قسم منتخب کریں تاکہ تمام اشیاء قیمتوں اور آئیکن کے ساتھ فوری لوڈ ہو جائیں۔'
+              : 'What type of shop do you run? Pick your type to automatically load ready-made items, icons, and prices.'
             : ur
               ? 'سب اشیاء لوڈ کریں یا صرف وہ منتخب کریں جو آپ بیچتے ہیں۔ بعد میں بھی تبدیل کر سکتے ہیں۔'
               : 'Load all items or pick just a few that you sell. You can customize them anytime later.'}
@@ -292,11 +291,11 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
                     },
                     isSel && { borderWidth: 2 },
                   ]}>
-                  <Text style={styles.typeIcon}>{item.icon}</Text>
+                  <CatalogIcon name={item.icon} size={46} />
                   <View style={styles.typeText}>
                     <Text style={[styles.typeName, { color: theme.text }]}>{item.shopType}</Text>
                     <Text style={[styles.typeSub, { color: theme.textMuted }]}>
-                      {typeItemCount(item)} {ur ? 'تیار اشیاء تصاویر کے ساتھ' : 'ready-made items with photos'}
+                      {typeItemCount(item)} {ur ? 'تیار اشیاء آئیکن کے ساتھ' : 'ready-made items with icons'}
                     </Text>
                   </View>
                   {isSel ? (
@@ -338,7 +337,7 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
           {/* Step 2 Controls & Counter */}
           <View style={[styles.selBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={styles.selLeft}>
-              <Text style={styles.selIcon}>{chosen?.icon}</Text>
+              {chosen ? <CatalogIcon name={chosen.icon} size={34} /> : null}
               <View>
                 <Text style={[styles.selText, { color: theme.text }]} numberOfLines={1}>
                   {chosen?.shopType}
@@ -474,11 +473,7 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
                     {isSel && <Ionicons name="checkmark" size={15} color="#FFFFFF" />}
                   </View>
 
-                  <ProductImage
-                    uri={meta ? resolveCatalogImageUri(meta.raw) : undefined}
-                    style={styles.thumb}
-                    containerStyle={styles.thumb}
-                  />
+                  <CatalogIcon name={meta?.raw.icon ?? 'shopping'} size={44} />
 
                   <View style={styles.itemText}>
                     <Text style={[styles.itemName, { color: theme.text }]} numberOfLines={1}>

@@ -7,7 +7,6 @@ import {
   FlatList,
   Pressable,
   StyleSheet,
-  Image as RNImage,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,8 +15,7 @@ import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { ProductCategory } from '@/types';
 import { MASTER_CATALOG, CatalogItem } from '@/data/masterCatalog';
-import { CATALOG_IMAGE_MAP } from '@/data/catalogImageMap';
-import { ProductImage } from '@/components/ProductImage';
+import { CatalogIcon } from '@/components/CatalogIcon';
 
 interface CatalogImportModalProps {
   visible: boolean;
@@ -42,38 +40,6 @@ export function mapCatalogCategory(categoryName: string, shopType: string): Prod
   if (shopType.toLowerCase().includes('kiryana')) return 'Kiryana';
   if (shopType.toLowerCase().includes('supermarket') || shopType.toLowerCase().includes('grocery')) return 'Grocery';
   return 'Others';
-}
-
-/** Best displayable URI for a catalog item: hotlinked photo first, bundled photo second. */
-export function resolveCatalogImageUri(item: CatalogItem): string | undefined {
-  // Bundled photo first: the app is offline-first, so the on-device image
-  // always shows — the hotlinked URL is only a fallback for items that
-  // have no bundled photo of their own.
-  if (item.image && CATALOG_IMAGE_MAP[item.image]) {
-    try {
-      const asset: unknown = CATALOG_IMAGE_MAP[item.image];
-      // Web bundles hand back an asset object that already carries a uri
-      // (and react-native-web has no Image.resolveAssetSource); native
-      // bundles hand back a registry number that needs resolving.
-      if (typeof asset === 'string') return asset;
-      if (asset && typeof asset === 'object' && 'uri' in asset) {
-        const uri = (asset as { uri?: unknown }).uri;
-        if (typeof uri === 'string' && uri) return uri;
-      }
-      if (typeof asset === 'number') {
-        const src = RNImage.resolveAssetSource(asset) as
-          | { uri?: string }
-          | string
-          | null;
-        const uri = typeof src === 'string' ? src : src?.uri;
-        if (uri) return uri;
-      }
-    } catch {
-      // fall through to the hotlink
-    }
-  }
-  if (item.imageUrl) return item.imageUrl;
-  return undefined;
 }
 
 /**
@@ -139,7 +105,6 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
       stock: 20, // Starter shelf stock so imported items can be sold immediately
       category: mapCatalogCategory(categoryName, shopType.shopType),
       unit: item.unit,
-      image: resolveCatalogImageUri(item),
       lowStockThreshold: settings.lowStockThreshold || 5,
     });
     setAddedNow((prev) => new Set(prev).add(item.name));
@@ -189,8 +154,8 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
             </Text>
             <Text style={[styles.emptyText, { color: theme.textMuted }]}>
               {ur
-                ? 'اپنی دکان کی قسم منتخب کریں — پھر یہاں صرف اسی قسم کی تیار اشیاء، تصاویر اور قیمتوں کے ساتھ لوڈ ہوں گی۔'
-                : 'Pick your shop type — then only that type’s ready-made items will load here, with photos and prices.'}
+                ? 'اپنی دکان کی قسم منتخب کریں — پھر یہاں صرف اسی قسم کی تیار اشیاء، آئیکن اور قیمتوں کے ساتھ لوڈ ہوں گی۔'
+                : 'Pick your shop type — then only that type’s ready-made items will load here, with icons and prices.'}
             </Text>
             {onChooseType ? (
               <Pressable
@@ -262,7 +227,7 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
                   existingNames.has(item.name.trim().toLowerCase()) || addedNow.has(item.name);
                 return (
                   <View style={[styles.itemRow, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                    <ProductImage uri={resolveCatalogImageUri(item)} style={styles.thumb} containerStyle={styles.thumb} />
+                    <CatalogIcon name={item.icon} size={48} />
                     <View style={styles.itemText}>
                       <Text style={[styles.itemName, { color: theme.text }]} numberOfLines={1}>
                         {item.name}

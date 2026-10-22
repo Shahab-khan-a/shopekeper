@@ -10,6 +10,7 @@ import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { CartItem, CustomerKhata, PaymentMethod, Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
+import { productIconFor } from '@/utils/productIcon';
 import { openWhatsAppReceipt, openWhatsAppWithMessage, buildBohaniShareText } from '@/utils/whatsapp';
 import { announceBoltaGalla } from '@/utils/soundbox';
 import { TourBeacon } from '@/components/TourBeacon';
@@ -2865,6 +2866,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                           resizeMode="cover"
                           fallbackColor={theme.textMuted}
                           fallbackSize={24}
+                          iconName={productIconFor(product.name, product.category)}
                         />
                       </View>
 
@@ -3050,6 +3052,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                           resizeMode="cover"
                           fallbackColor={theme.textMuted}
                           fallbackSize={20}
+                          iconName={productIconFor(product.name, product.category)}
                         />
                       </View>
                       <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>

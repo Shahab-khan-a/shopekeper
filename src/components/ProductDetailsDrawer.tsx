@@ -1,5 +1,6 @@
 import { CameraModal } from '@/components/CameraModal';
 import { ProductImage } from '@/components/ProductImage';
+import { productIconFor } from '@/utils/productIcon';
 import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { googleDriveService } from '@/services/googleDriveService';
@@ -297,6 +298,7 @@ export const ProductDetailsDrawer: React.FC<ProductDetailsDrawerProps> = ({
                 resizeMode="cover"
                 fallbackColor={theme.textMuted}
                 fallbackSize={48}
+                iconName={productIconFor(product.name, product.category)}
               />
 
               {/* Camera Update Button */}

@@ -5,6 +5,7 @@ import { Product } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { Colors, BorderRadius, Shadows } from '@/constants/theme';
 import { ProductImage } from '@/components/ProductImage';
+import { productIconFor } from '@/utils/productIcon';
 import { formatCompactPrice } from '@/utils/formatters';
 
 interface ProductCardProps {
@@ -90,6 +91,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           resizeMode="cover"
           fallbackColor={theme.textMuted}
           fallbackSize={32}
+          iconName={productIconFor(product.name, product.category)}
         />
 
         <View

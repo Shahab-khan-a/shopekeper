@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { MASTER_CATALOG } from '@/data/masterCatalog';
+import { CatalogIcon } from '@/components/CatalogIcon';
 
 interface ShopTypePickerModalProps {
   visible: boolean;
@@ -107,7 +108,7 @@ export const ShopTypePickerModal: React.FC<ShopTypePickerModalProps> = ({ visibl
                   { backgroundColor: theme.surface, borderColor: selected ? theme.primary : theme.border },
                   selected && { borderWidth: 2 },
                 ]}>
-                <Text style={styles.rowIcon}>{item.icon}</Text>
+                <CatalogIcon name={item.icon} size={46} />
                 <View style={styles.rowText}>
                   <Text style={[styles.rowName, { color: theme.text }]}>{item.shopType}</Text>
                   <Text style={[styles.rowSub, { color: theme.textMuted }]}>
