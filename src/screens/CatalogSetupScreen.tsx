@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,18 @@ import {
   ActivityIndicator,
   BackHandler,
   Keyboard,
+  Animated,
+  Easing,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShop } from '@/context/ShopContext';
-import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { MASTER_CATALOG, CatalogShopType, CatalogItem } from '@/data/masterCatalog';
 import { CatalogIcon } from '@/components/CatalogIcon';
 import { mapCatalogCategory } from '@/components/CatalogImportModal';
+import { Product } from '@/types';
 
 interface CatalogSetupScreenProps {
   /**
@@ -43,7 +47,7 @@ const typeItemCount = (t: CatalogShopType) =>
  * Everything is fully skippable and handles Android back navigation seamlessly.
  */
 export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }) => {
-  const { settings, updateSettings, products, addProduct, language } = useShop();
+  const { settings, updateSettings, products, addProductsBatch, language } = useShop();
   const insets = useSafeAreaInsets();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const ur = language === 'ur';
@@ -52,6 +56,37 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
   const [chosen, setChosen] = useState<CatalogShopType | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
+  const [importProgress, setImportProgress] = useState<{
+    current: number;
+    total: number;
+    itemName: string;
+  } | null>(null);
+
+  // Animated icon pulse for loading screen
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (importProgress) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 650,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 650,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      loop.start();
+      return () => loop.stop();
+    }
+  }, [importProgress, pulseAnim]);
 
   // Search queries for both steps
   const [typeSearch, setTypeSearch] = useState('');
@@ -191,30 +226,58 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
   const loadItems = async () => {
     if (!chosen || loading) return;
     setLoading(true);
-    let added = 0;
-    try {
-      const existing = new Set(products.map((p) => p.name.trim().toLowerCase()));
-      for (const cat of chosen.categories) {
-        for (const item of cat.items) {
-          if (!selected.has(item.name)) continue;
-          if (existing.has(item.name.trim().toLowerCase())) continue;
-          added++;
-          await addProduct({
-            name: item.name,
-            nameUrdu: item.nameUrdu,
-            price: item.price,
-            stock: 20, // Starter shelf stock so items can immediately be sold on day 1
-            category: mapCatalogCategory(cat.name, chosen.shopType),
-            unit: item.unit,
-            lowStockThreshold: settings.lowStockThreshold || 5,
-          });
-        }
+
+    const candidates: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>[] = [];
+    const existing = new Set(products.map((p) => p.name.trim().toLowerCase()));
+    for (const cat of chosen.categories) {
+      for (const item of cat.items) {
+        if (!selected.has(item.name)) continue;
+        if (existing.has(item.name.trim().toLowerCase())) continue;
+        candidates.push({
+          name: item.name,
+          nameUrdu: item.nameUrdu,
+          price: item.price,
+          stock: 20, // Starter shelf stock so items can immediately be sold on day 1
+          category: mapCatalogCategory(cat.name, chosen.shopType),
+          unit: item.unit,
+          lowStockThreshold: settings.lowStockThreshold || 5,
+        });
       }
-      await updateSettings({ catalogShopType: chosen.shopType });
-    } finally {
-      setLoading(false);
     }
-    onDone(added);
+
+    if (candidates.length === 0) {
+      await updateSettings({ catalogShopType: chosen.shopType });
+      setLoading(false);
+      onDone(0);
+      return;
+    }
+
+    setImportProgress({
+      current: 0,
+      total: candidates.length,
+      itemName: candidates[0]?.name || '',
+    });
+
+    try {
+      const added = await addProductsBatch(candidates, (curr, tot, item) => {
+        setImportProgress({
+          current: curr,
+          total: tot,
+          itemName: item.name,
+        });
+      });
+      await updateSettings({ catalogShopType: chosen.shopType });
+      // Brief pause at 100% so user sees full progress completion
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      setImportProgress(null);
+      setLoading(false);
+      onDone(added);
+    } catch (err) {
+      console.error('[CatalogSetup] Batch import error:', err);
+      setImportProgress(null);
+      setLoading(false);
+      onDone(0);
+    }
   };
 
   const isAllSelected = allNames.length > 0 && selected.size === allNames.length;
@@ -547,6 +610,83 @@ export const CatalogSetupScreen: React.FC<CatalogSetupScreenProps> = ({ onDone }
           </View>
         </>
       )}
+
+      {/* Animated Loading Screen with Real-Time Progress Bar */}
+      {importProgress && (
+        <Modal transparent visible animationType="fade" statusBarTranslucent>
+          <View style={styles.loadingBackdrop}>
+            <View
+              style={[
+                styles.loadingCard,
+                {
+                  backgroundColor: theme.card,
+                  borderColor: settings.darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                },
+              ]}>
+              <Animated.View
+                style={[
+                  styles.loadingIconBox,
+                  {
+                    backgroundColor: settings.darkMode ? 'rgba(32,138,239,0.2)' : '#EFF6FF',
+                    transform: [{ scale: pulseAnim }],
+                  },
+                ]}>
+                <Ionicons name="storefront" size={38} color={theme.primary} />
+              </Animated.View>
+
+              <Text style={[styles.loadingTitle, { color: theme.text }]}>
+                {ur ? 'آپ کی دکان سجائی جا رہی ہے...' : 'Stocking Your Shelves...'}
+              </Text>
+
+              <Text style={[styles.loadingSubtitle, { color: theme.textMuted }]}>
+                {ur
+                  ? 'منتخب اشیاء، قیمتیں اور آئیکنز آپ کے فون میں محفوظ ہو رہے ہیں'
+                  : 'Adding curated items, icons & prices into your offline store database'}
+              </Text>
+
+              {/* Progress Bar Container */}
+              <View style={[styles.progressBarTrack, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      backgroundColor: theme.primary,
+                      width: `${Math.min(100, Math.max(5, Math.round((importProgress.current / Math.max(1, importProgress.total)) * 100)))}%`,
+                    },
+                  ]}
+                />
+              </View>
+
+              {/* Progress Counters Row */}
+              <View style={styles.progressStatsRow}>
+                <Text style={[styles.progressItemCount, { color: theme.text }]}>
+                  {importProgress.current} / {importProgress.total} {ur ? 'اشیاء' : 'items'}
+                </Text>
+                <Text style={[styles.progressPercentage, { color: theme.primary }]}>
+                  {Math.round((importProgress.current / Math.max(1, importProgress.total)) * 100)}%
+                </Text>
+              </View>
+
+              {/* Current Item Tag */}
+              {importProgress.itemName ? (
+                <View style={[styles.currentItemPill, { backgroundColor: theme.surfaceSubtle }]}>
+                  <Ionicons name="cube-outline" size={13} color={theme.primary} />
+                  <Text style={[styles.currentItemText, { color: theme.text }]} numberOfLines={1}>
+                    {importProgress.itemName}
+                  </Text>
+                </View>
+              ) : null}
+
+              <View style={styles.offlineGuaranteeRow}>
+                <Ionicons name="shield-checkmark" size={14} color="#10B981" />
+                <Text style={styles.offlineGuaranteeText}>
+                  {ur ? 'مکمل آف لائن محفوظ • انٹرنیٹ کی ضرورت نہیں' : '100% Offline Database • No Internet Needed'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
@@ -672,4 +812,99 @@ const styles = StyleSheet.create({
   skipBtn: { alignItems: 'center', paddingVertical: 8, paddingHorizontal: 6 },
   skipText: { fontSize: 13, fontWeight: '600' },
   footerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+
+  loadingBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.72)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  loadingCard: {
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 24,
+    alignItems: 'center',
+    ...Shadows.lg,
+  },
+  loadingIconBox: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  loadingTitle: {
+    fontSize: 19,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 6,
+    letterSpacing: -0.3,
+  },
+  loadingSubtitle: {
+    fontSize: 12.5,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 20,
+    paddingHorizontal: 6,
+  },
+  progressBarTrack: {
+    width: '100%',
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  progressStatsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  progressItemCount: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  progressPercentage: {
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  currentItemPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: BorderRadius.full,
+    maxWidth: '92%',
+    marginBottom: 16,
+  },
+  currentItemText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  offlineGuaranteeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(148, 163, 184, 0.2)',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  offlineGuaranteeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#10B981',
+  },
 });

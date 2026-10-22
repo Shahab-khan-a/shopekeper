@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { ProductCategory } from '@/types';
+import { ProductCategory, Product } from '@/types';
 import { MASTER_CATALOG, CatalogItem } from '@/data/masterCatalog';
 import { CatalogIcon } from '@/components/CatalogIcon';
 
@@ -48,13 +48,14 @@ export function mapCatalogCategory(categoryName: string, shopType: string): Prod
  * can top up his shop by tapping items instead of typing them.
  */
 export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible, onClose, onChooseType }) => {
-  const { settings, products, addProduct, language } = useShop();
+  const { settings, products, addProduct, addProductsBatch, language } = useShop();
   const insets = useSafeAreaInsets();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const ur = language === 'ur';
   const [query, setQuery] = useState('');
   const [addedNow, setAddedNow] = useState<Set<string>>(new Set());
   const [importingAll, setImportingAll] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(null);
 
   const shopType = useMemo(
     () => MASTER_CATALOG.find((s) => s.shopType === settings.catalogShopType),
@@ -113,14 +114,49 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
   const importAll = async () => {
     if (!shopType || importingAll) return;
     setImportingAll(true);
-    try {
-      for (const cat of shopType.categories) {
-        for (const item of cat.items) {
-          if (existingNames.has(item.name.trim().toLowerCase()) || addedNow.has(item.name)) continue;
-          await addOne(item, cat.name);
-        }
+    const candidates: { data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>; name: string }[] = [];
+    for (const cat of shopType.categories) {
+      for (const item of cat.items) {
+        if (existingNames.has(item.name.trim().toLowerCase()) || addedNow.has(item.name)) continue;
+        candidates.push({
+          name: item.name,
+          data: {
+            name: item.name,
+            nameUrdu: item.nameUrdu,
+            price: item.price,
+            stock: 20,
+            category: mapCatalogCategory(cat.name, shopType.shopType),
+            unit: item.unit,
+            lowStockThreshold: settings.lowStockThreshold || 5,
+          },
+        });
       }
+    }
+
+    if (candidates.length === 0) {
+      setImportingAll(false);
+      return;
+    }
+
+    setImportProgress({ current: 0, total: candidates.length });
+
+    try {
+      await addProductsBatch(
+        candidates.map((c) => c.data),
+        (curr, tot) => {
+          setImportProgress({ current: curr, total: tot });
+        }
+      );
+      setAddedNow((prev) => {
+        const next = new Set(prev);
+        for (const c of candidates) next.add(c.name);
+        return next;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    } catch (err) {
+      console.warn('[CatalogImportModal] Batch import error:', err);
     } finally {
+      setImportProgress(null);
       setImportingAll(false);
     }
   };
@@ -191,22 +227,36 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
               disabled={importingAll || missingCount === 0}
               style={[
                 styles.importAllBtn,
-                { backgroundColor: theme.primary, opacity: importingAll || missingCount === 0 ? 0.55 : 1 },
+                { backgroundColor: theme.primary, opacity: importingAll || missingCount === 0 ? 0.7 : 1 },
               ]}>
-              {importingAll ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+              {importProgress ? (
+                <View style={{ width: '100%', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                    <Text style={styles.importAllText}>
+                      {ur
+                        ? `شامل ہو رہا ہے: ${importProgress.current} / ${importProgress.total} (${Math.round((importProgress.current / importProgress.total) * 100)}%)`
+                        : `Importing: ${importProgress.current} / ${importProgress.total} (${Math.round((importProgress.current / importProgress.total) * 100)}%)`}
+                    </Text>
+                  </View>
+                  <View style={{ width: '92%', height: 4, backgroundColor: 'rgba(255,255,255,0.35)', borderRadius: 2, overflow: 'hidden' }}>
+                    <View style={{ width: `${Math.min(100, Math.round((importProgress.current / Math.max(1, importProgress.total)) * 100))}%`, height: '100%', backgroundColor: '#FFFFFF' }} />
+                  </View>
+                </View>
               ) : (
-                <Ionicons name="cloud-download-outline" size={18} color="#FFFFFF" />
+                <>
+                  <Ionicons name="cloud-download-outline" size={18} color="#FFFFFF" />
+                  <Text style={styles.importAllText}>
+                    {missingCount === 0
+                      ? ur
+                        ? 'تمام اشیاء شامل ہیں ✓'
+                        : 'All items already added ✓'
+                      : ur
+                        ? `تمام ${missingCount} اشیاء شامل کریں`
+                        : `Import all ${missingCount} items`}
+                  </Text>
+                </>
               )}
-              <Text style={styles.importAllText}>
-                {missingCount === 0
-                  ? ur
-                    ? 'تمام اشیاء شامل ہیں ✓'
-                    : 'All items already added ✓'
-                  : ur
-                    ? `تمام ${missingCount} اشیاء شامل کریں`
-                    : `Import all ${missingCount} items`}
-              </Text>
             </Pressable>
 
             <FlatList
@@ -253,8 +303,8 @@ export const CatalogImportModal: React.FC<CatalogImportModalProps> = ({ visible,
             />
             <Text style={[styles.footer, { color: theme.textMuted }]}>
               {ur
-                ? 'تصاویر: Unsplash اور Wikimedia Commons (لائسنس یافتہ)'
-                : 'Photos: Unsplash & Wikimedia Commons (licensed) — tap any product later to replace with your own photo.'}
+                ? 'ہر آئٹم کا مخصوص آئیکن اور قیمت سیٹ ہے • بعد میں کسی بھی وقت تبدیل کر سکتے ہیں'
+                : 'Curated icons, units & standard prices • Tap any product later to customize or add photos.'}
             </Text>
           </>
         )}

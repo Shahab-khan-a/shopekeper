@@ -68,6 +68,10 @@ interface ShopContextType {
   products: Product[];
   isProductsLoading: boolean;
   addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Product>;
+  addProductsBatch: (
+    productsData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>[],
+    onProgress?: (current: number, total: number, item: Product) => void
+  ) => Promise<number>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   getProductById: (id: string) => Product | undefined;
@@ -545,6 +549,48 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       return newProduct;
+    },
+    [user, isOnline, refreshProducts, refreshPendingCount]
+  );
+
+  const addProductsBatch = useCallback(
+    async (
+      productsData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>[],
+      onProgress?: (current: number, total: number, item: Product) => void
+    ): Promise<number> => {
+      let count = 0;
+      const total = productsData.length;
+      for (const pData of productsData) {
+        const now = Date.now();
+        const newProduct: Product = {
+          ...pData,
+          id: 'prod-' + now + '-' + Math.floor(Math.random() * 100000) + '-' + count,
+          sellingPrice: pData.sellingPrice ?? pData.price,
+          image: pData.image ?? pData.imageUri,
+          imageUri: pData.imageUri ?? pData.image,
+          createdAt: now,
+          updatedAt: now,
+          syncStatus: 'pending',
+        };
+        await ProductRepository.insert(newProduct, 'pending');
+        await SyncQueueRepository.enqueue('product', newProduct.id, 'create', newProduct);
+        count++;
+        if (onProgress) {
+          onProgress(count, total, newProduct);
+        }
+        // Yield briefly every 4 items to ensure UI animation remains silky smooth (60fps)
+        if (count % 4 === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 8));
+        }
+      }
+      await refreshProducts();
+      await refreshPendingCount();
+
+      if (user && isOnline) {
+        SyncQueueService.processQueue(user.uid).then(refreshPendingCount).catch(console.warn);
+      }
+
+      return count;
     },
     [user, isOnline, refreshProducts, refreshPendingCount]
   );
@@ -1312,6 +1358,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       products,
       isProductsLoading,
       addProduct,
+      addProductsBatch,
       updateProduct,
       deleteProduct,
       getProductById,
@@ -1397,6 +1444,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       products,
       isProductsLoading,
       addProduct,
+      addProductsBatch,
       updateProduct,
       deleteProduct,
       getProductById,

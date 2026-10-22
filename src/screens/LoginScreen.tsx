@@ -256,8 +256,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
               <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
             </View>
 
-            {/* Secondary Action: Open Offline Store */}
+            {/* Secondary Action: Continue as Guest */}
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={isUrdu ? 'مہمان کے طور پر جاری رکھیں' : 'Continue as Guest'}
               onPress={() => {
                 setActiveTab('dashboard');
                 onContinueAsGuest();
@@ -268,13 +270,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
                 pressed && { opacity: 0.75, backgroundColor: theme.border },
               ]}
             >
-              <Ionicons name="phone-portrait-outline" size={17} color={theme.text} />
+              <View style={[styles.guestIconWrap, { backgroundColor: settings.darkMode ? 'rgba(32,138,239,0.15)' : '#EFF6FF' }]}>
+                <Ionicons name="person-outline" size={17} color={theme.primary} />
+              </View>
               <View style={{ flex: 1, marginHorizontal: 8 }}>
                 <Text style={[styles.guestBtnText, { color: theme.text }]} numberOfLines={1}>
-                  {isUrdu ? 'آف لائن دکان شروع کریں (محفوظ لوکل ڈیٹا)' : 'Open Offline Store (Saved Locally)'}
+                  {isUrdu ? 'مہمان کے طور پر جاری رکھیں (آف لائن)' : 'Continue as Guest (Offline Mode)'}
                 </Text>
                 <Text style={{ fontSize: 10.5, color: theme.textMuted, marginTop: 1 }}>
-                  {isUrdu ? 'بغیر انٹرنیٹ کے تمام فیچرز مکمل کام کریں گے' : '100% offline - all data stays safe on device'}
+                  {isUrdu ? 'بغیر سائن ان تمام فیچرز استعمال کریں • ڈیٹا اس ڈیوائس میں محفوظ' : 'Use all features without sign-in • Saved safely on device'}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={14} color={theme.textMuted} />
@@ -536,11 +540,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 6,
   },
+  guestIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   guestBtnText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     flexShrink: 1,
-    textAlign: 'center',
   },
   footerWrap: {
     flexDirection: 'row',
