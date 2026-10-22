@@ -75,6 +75,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     user,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.35)';
+  const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
 
   // Cart state
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -2661,23 +2663,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       </Text>
                     </Pressable>
                   )}
-
-                  <Pressable
-                    onPress={toggleViewMode}
-                    style={({ pressed }) => [
-                      styles.iconSquareBtn,
-                      {
-                        backgroundColor: 'rgba(255, 255, 255, 0.16)',
-                        borderColor: 'rgba(255, 255, 255, 0.28)',
-                      },
-                      pressed && { opacity: 0.8 },
-                    ]}>
-                    <Ionicons
-                      name={viewMode === 'grid' ? 'list-outline' : 'grid-outline'}
-                      size={18}
-                      color="#FFFFFF"
-                    />
-                  </Pressable>
                 </View>
               </View>
 
@@ -2836,6 +2821,60 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   />
                 </View>
               )}
+
+              {/* Showing count + view switcher (Identical to Products screen) */}
+              <View style={styles.gridHeader}>
+                <Text style={[styles.showingText, { color: theme.textMuted }]}>
+                  {t('showingItems')}{' '}
+                  <Text style={{ color: theme.text, fontWeight: '700' }}>
+                    {filteredProducts.length} {t('itemsLabel')}
+                  </Text>
+                </Text>
+
+                <View
+                  style={[
+                    styles.viewToggle,
+                    {
+                      backgroundColor: cardBg,
+                      borderColor: softBorder,
+                    },
+                  ]}>
+                  <Pressable
+                    onPress={() => setSaleViewMode('grid')}
+                    style={[
+                      styles.viewToggleBtn,
+                      viewMode === 'grid' && {
+                        backgroundColor: settings.darkMode
+                          ? 'rgba(16,185,129,0.22)'
+                          : 'rgba(167,243,208,0.55)',
+                      },
+                    ]}
+                    accessibilityLabel={t('viewModeGrid')}>
+                    <Ionicons
+                      name="grid-outline"
+                      size={14}
+                      color={viewMode === 'grid' ? theme.primary : theme.textMuted}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setSaleViewMode('list')}
+                    style={[
+                      styles.viewToggleBtn,
+                      viewMode === 'list' && {
+                        backgroundColor: settings.darkMode
+                          ? 'rgba(16,185,129,0.22)'
+                          : 'rgba(167,243,208,0.55)',
+                      },
+                    ]}
+                    accessibilityLabel={t('viewModeList')}>
+                    <Ionicons
+                      name="list-outline"
+                      size={14}
+                      color={viewMode === 'list' ? theme.primary : theme.textMuted}
+                    />
+                  </Pressable>
+                </View>
+              </View>
 
           <ScrollView
             style={styles.catalogScroll}
@@ -3628,6 +3667,32 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.md,
     paddingTop: 8,
+  },
+  gridHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+    paddingTop: 4,
+  },
+  showingText: {
+    fontSize: 12.5,
+    fontWeight: '500',
+  },
+  viewToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 2,
+    gap: 2,
+  },
+  viewToggleBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   topControlBar: {
     flexDirection: 'row',
