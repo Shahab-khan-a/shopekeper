@@ -742,6 +742,27 @@ export const HistoryScreen: React.FC = () => {
                       {isUdhaar && !isRefunded ? (
                         <>
                           <Pressable
+                            onPress={() => setActiveReceipt(sale)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`${t('viewShort')} #${sale.billNumber}`}
+                            style={({ pressed }) => [
+                              styles.viewBtn,
+                              {
+                                borderColor: settings.darkMode
+                                  ? 'rgba(16,185,129,0.35)'
+                                  : 'rgba(5,150,105,0.25)',
+                                backgroundColor: settings.darkMode
+                                  ? 'rgba(16,185,129,0.12)'
+                                  : '#ECFDF5',
+                              },
+                              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                            ]}>
+                            <Ionicons name="receipt-outline" size={14} color={theme.primary} />
+                            <Text style={[styles.viewBtnText, { color: theme.primary }]}>
+                              {t('viewShort')}
+                            </Text>
+                          </Pressable>
+                          <Pressable
                             onPress={() => sendUdhaarReminder(sale)}
                             style={({ pressed }) => [
                               styles.reminderBtn,
@@ -771,13 +792,22 @@ export const HistoryScreen: React.FC = () => {
                         <>
                           <Pressable
                             onPress={() => setActiveReceipt(sale)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`${t('viewShort')} #${sale.billNumber}`}
                             style={({ pressed }) => [
                               styles.viewBtn,
-                              { borderColor: softBorder, backgroundColor: cardBg },
-                              pressed && { opacity: 0.88 },
+                              {
+                                borderColor: settings.darkMode
+                                  ? 'rgba(16,185,129,0.35)'
+                                  : 'rgba(5,150,105,0.25)',
+                                backgroundColor: settings.darkMode
+                                  ? 'rgba(16,185,129,0.12)'
+                                  : '#ECFDF5',
+                              },
+                              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
                             ]}>
-                            <Ionicons name="receipt-outline" size={15} color={theme.textMuted} />
-                            <Text style={[styles.viewBtnText, { color: theme.text }]}>
+                            <Ionicons name="receipt-outline" size={14} color={theme.primary} />
+                            <Text style={[styles.viewBtnText, { color: theme.primary }]}>
                               {t('viewShort')}
                             </Text>
                           </Pressable>
@@ -1154,15 +1184,16 @@ const styles = StyleSheet.create({
   viewBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
+    gap: 5,
+    paddingHorizontal: 11,
     paddingVertical: 7,
     borderRadius: 12,
     borderWidth: 1,
   },
   viewBtnText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.1,
   },
   whatsappBtn: {
     flexDirection: 'row',
