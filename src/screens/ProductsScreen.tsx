@@ -135,57 +135,76 @@ export const ProductsScreen: React.FC = () => {
       {/* ── Emerald Hero Canopy Header ── */}
       <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
         <View style={styles.heroInner}>
-          {/* Top Row: Search + Add Product */}
-          <View style={styles.topHeader}>
-            <View style={styles.searchFlex}>
-              <SearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder={language === 'ur' ? 'اشیاء یا بارکوڈ تلاش کریں...' : t('searchProductPlaceholder')}
-                height={40}
-              />
+          {/* Row 1: Screen Header (Title + Quick Action Buttons) */}
+          <View style={styles.navHeaderRow}>
+            <View style={styles.titleWrap}>
+              <Text style={styles.screenTitleText}>
+                {language === 'ur' ? 'اسٹاک و سامان' : 'Products'}
+              </Text>
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>
+                  {products.length}
+                </Text>
+              </View>
             </View>
 
-            <Pressable
-              onPress={() => {
-                setEditingProduct(null);
-                setIsAddProductOpen(true);
-              }}
-              style={({ pressed }) => [
-                styles.addProdBtn,
-                { backgroundColor: settings.darkMode ? theme.primary : '#FFFFFF' },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
-              ]}>
-              <Ionicons
-                name="add-circle"
-                size={18}
-                color={settings.darkMode ? '#FFFFFF' : '#064E3B'}
-              />
-              <Text
-                style={[
-                  styles.addProdText,
-                  { color: settings.darkMode ? '#FFFFFF' : '#064E3B' },
+            <View style={styles.actionBtnRow}>
+              {/* Catalog Import Button */}
+              <Pressable
+                onPress={() => setIsCatalogOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Open Master Catalog"
+                style={({ pressed }) => [
+                  styles.catalogHeaderBtn,
+                  pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
                 ]}>
-                {language === 'ur' ? 'نیا آئٹم' : t('addProductBtn')}
-              </Text>
-            </Pressable>
+                <Ionicons name="library-outline" size={15} color="#FFFFFF" />
+                <Text style={styles.catalogHeaderBtnText}>
+                  {language === 'ur' ? 'کیٹلاگ' : 'Catalog'}
+                </Text>
+              </Pressable>
 
-            <Pressable
-              onPress={() => setIsCatalogOpen(true)}
-              style={({ pressed }) => [
-                styles.addProdBtn,
-                {
-                  backgroundColor: 'transparent',
-                  borderWidth: 1,
-                  borderColor: 'rgba(255,255,255,0.65)',
-                },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
-              ]}>
-              <Ionicons name="library-outline" size={17} color="#FFFFFF" />
-              <Text style={[styles.addProdText, { color: '#FFFFFF' }]}>
-                {language === 'ur' ? 'کیٹلاگ' : 'Catalog'}
-              </Text>
-            </Pressable>
+              {/* Add Product Primary Button */}
+              <Pressable
+                onPress={() => {
+                  setEditingProduct(null);
+                  setIsAddProductOpen(true);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Add New Product"
+                style={({ pressed }) => [
+                  styles.addProdHeaderBtn,
+                  { backgroundColor: settings.darkMode ? theme.primary : '#FFFFFF' },
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons
+                  name="add-circle"
+                  size={16}
+                  color={settings.darkMode ? '#FFFFFF' : '#064E3B'}
+                />
+                <Text
+                  style={[
+                    styles.addProdHeaderText,
+                    { color: settings.darkMode ? '#FFFFFF' : '#064E3B' },
+                  ]}>
+                  {language === 'ur' ? 'نیا آئٹم' : t('addProductBtn')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Row 2: Dedicated Full-Width Search Bar */}
+          <View style={styles.fullSearchBarWrap}>
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={
+                language === 'ur'
+                  ? 'اشیاء کا نام یا بارکوڈ تلاش کریں...'
+                  : 'Search by item name or barcode...'
+              }
+              height={42}
+            />
           </View>
 
           {/* ── 3 Visual Inventory Action Pillars (All Items, Low Stock, Out of Stock) ── */}
@@ -657,22 +676,73 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     gap: 8,
   },
-  topHeader: {
+  navHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    justifyContent: 'space-between',
+    paddingVertical: 2,
   },
-  searchFlex: { flex: 1 },
-  addProdBtn: {
+  titleWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    height: 40,
-    paddingHorizontal: 13,
-    borderRadius: 12,
+    gap: 7,
+  },
+  screenTitleText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+  },
+  countBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  countBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  actionBtnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  catalogHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 34,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  catalogHeaderBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  addProdHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 34,
+    paddingHorizontal: 11,
+    borderRadius: 10,
     ...Shadows.sm,
   },
-  addProdText: { fontWeight: '800', fontSize: 12.5 },
+  addProdHeaderText: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  fullSearchBarWrap: {
+    width: '100%',
+    marginTop: 1,
+    marginBottom: 2,
+  },
 
   compactMetricBar: {
     flexDirection: 'row',
