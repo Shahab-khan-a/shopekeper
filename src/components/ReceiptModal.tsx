@@ -1702,7 +1702,7 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               </Pressable>
             </View>
 
-            {/* Row 2: WA Text + Save Image */}
+            {/* Row 2: WA Text + Save Image (Balanced 50/50) */}
             <View style={styles.actionRow}>
               <Pressable
                 onPress={handleShareWhatsAppText}
@@ -1712,7 +1712,13 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}>
                 <Ionicons name="chatbubble-ellipses-outline" size={17} color="#006837" />
-                <Text style={styles.whatsappTextBtnLabel}>WhatsApp Text</Text>
+                <Text
+                  style={styles.whatsappTextBtnLabel}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}>
+                  {language === 'ur' ? 'واٹس ایپ ٹیکسٹ' : 'WhatsApp Text'}
+                </Text>
               </Pressable>
 
               <Pressable
@@ -1724,39 +1730,60 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}>
                 <Ionicons name="image-outline" size={17} color="#FFFFFF" />
-                <Text style={styles.actionBtnTextWhite}>Save Image</Text>
+                <Text
+                  style={styles.actionBtnTextWhite}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}>
+                  {language === 'ur' ? 'تصویر محفوظ کریں' : 'Save Image'}
+                </Text>
               </Pressable>
             </View>
 
-            {/* Row 3: Thermal 80mm + Standard Print + PDF */}
+            {/* Row 3: Thermal 80mm + Standard Print (Balanced 50/50 — No Shrinking/Ellipsis) */}
             <View style={styles.actionRow}>
               <Pressable
                 onPress={handlePrintThermal}
                 style={({ pressed }) => [
-                  styles.actionBtnThird,
+                  styles.actionBtnHalf,
                   styles.thermalBtn,
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}>
-                <Ionicons name="receipt-outline" size={16} color="#FFFFFF" />
-                <Text style={styles.actionBtnTextWhite} numberOfLines={1}>Thermal 80mm</Text>
+                <Ionicons name="receipt-outline" size={17} color="#FFFFFF" />
+                <Text
+                  style={styles.actionBtnTextWhite}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}>
+                  {language === 'ur' ? 'تھرمل پرنٹ (80mm)' : 'Thermal (80mm)'}
+                </Text>
               </Pressable>
 
               <Pressable
                 onPress={handlePrint}
                 style={({ pressed }) => [
-                  styles.actionBtnThird,
+                  styles.actionBtnHalf,
                   styles.printBtn,
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}>
-                <Ionicons name="print-outline" size={16} color="#FFFFFF" />
-                <Text style={styles.actionBtnTextWhite} numberOfLines={1}>{t('printBill')}</Text>
+                <Ionicons name="print-outline" size={17} color="#FFFFFF" />
+                <Text
+                  style={styles.actionBtnTextWhite}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}>
+                  {language === 'ur' ? 'بل پرنٹ کریں' : 'Print Bill'}
+                </Text>
               </Pressable>
+            </View>
 
+            {/* Row 4: Share PDF + Return/Refund (Balanced 50/50) */}
+            <View style={styles.actionRow}>
               <Pressable
                 onPress={handleSharePDF}
                 disabled={isGeneratingPDF}
                 style={({ pressed }) => [
-                  styles.actionBtnThird,
+                  styles.actionBtnHalf,
                   styles.pdfShareBtn,
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}>
@@ -1765,31 +1792,43 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
                 ) : (
                   <>
                     <Ionicons name="document-text" size={16} color="#FFFFFF" />
-                    <Text style={styles.actionBtnTextWhite} numberOfLines={1}>PDF</Text>
+                    <Text
+                      style={styles.actionBtnTextWhite}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.85}>
+                      {language === 'ur' ? 'پی ڈی ایف شیئر' : 'Share PDF'}
+                    </Text>
                   </>
                 )}
               </Pressable>
-            </View>
 
-            {/* Row 4: Safe Return / Refund Flow */}
-            <View style={styles.actionRow}>
               {!isRefunded ? (
                 <Pressable
                   onPress={handleRefund}
                   style={({ pressed }) => [
-                    styles.refundBtn,
-                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                    styles.actionBtnHalf,
+                    styles.refundBtnHalf,
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
                   ]}>
                   <Ionicons name="arrow-undo-outline" size={16} color="#DC2626" />
-                  <Text style={styles.refundBtnText}>
-                    {language === 'ur' ? 'مال واپس لیں / بل منسوخ کریں (Refund)' : 'Return Goods / Refund Bill'}
+                  <Text
+                    style={styles.refundBtnHalfText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}>
+                    {language === 'ur' ? 'واپسی / ریفنڈ' : 'Refund Bill'}
                   </Text>
                 </Pressable>
               ) : (
-                <View style={styles.alreadyRefundedPill}>
+                <View style={[styles.actionBtnHalf, styles.alreadyRefundedHalf]}>
                   <Ionicons name="checkmark-done-circle" size={16} color="#DC2626" />
-                  <Text style={styles.alreadyRefundedText}>
-                    {language === 'ur' ? 'یہ بل واپس کیا جا چکا ہے (اسٹاک بحال ہے)' : 'This bill has been refunded & inventory restored'}
+                  <Text
+                    style={styles.alreadyRefundedHalfText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.85}>
+                    {language === 'ur' ? 'بل واپس شدہ' : 'Refunded'}
                   </Text>
                 </View>
               )}
@@ -2232,6 +2271,26 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     fontSize: 13,
     fontWeight: '800',
+  },
+  refundBtnHalf: {
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1.5,
+    borderColor: '#DC2626',
+  },
+  refundBtnHalfText: {
+    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  alreadyRefundedHalf: {
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  alreadyRefundedHalfText: {
+    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '700',
   },
   alreadyRefundedPill: {
     flexDirection: 'row',
