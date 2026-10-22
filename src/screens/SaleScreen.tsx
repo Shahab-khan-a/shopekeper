@@ -34,10 +34,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { SALE_CATEGORIES } from '@/constants/categories';
-
-const CATEGORIES: ProductCategory[] = SALE_CATEGORIES;
-
 const CASH_DENOMINATIONS = [100, 500, 1000, 5000];
 const DISCOUNT_SHORTCUTS = [10, 20, 50, 100];
 
@@ -238,6 +234,17 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       keywords: ['drink', 'مشروب', 'pan', 'پان', 'water', 'پانی', 'snack', 'biscuit', 'بسکٹ', 'tea', 'چائے'],
     };
   }, []);
+
+  // Dynamic categories stocked in this store (only show filter if 2 or more categories exist)
+  const activeSaleCategories = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => {
+      const cat = p.category?.trim();
+      if (cat) set.add(cat);
+    });
+    const list = Array.from(set).sort();
+    return list.length > 1 ? (['All', ...list] as ProductCategory[]) : [];
+  }, [products]);
 
   // Filter & Daypart-sorted products
   const filteredProducts = useMemo(() => {
@@ -2674,26 +2681,28 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                 </View>
               </View>
 
-              {/* Category Filter Pills — frosted glass */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.categoryScroll}
-                contentContainerStyle={styles.categoryScrollContent}>
-                {CATEGORIES.map((cat) => (
-                  <FilterChip
-                    key={cat}
-                    label={cat === 'All' ? t('allCategories') : cat}
-                    isActive={selectedCategory === cat}
-                    onPress={() => setSelectedCategory(cat)}
-                    activeBg="#FFFFFF"
-                    activeColor="#064E3B"
-                    inactiveBg="rgba(255, 255, 255, 0.16)"
-                    inactiveColor="#FFFFFF"
-                    inactiveBorder="rgba(255, 255, 255, 0.22)"
-                  />
-                ))}
-              </ScrollView>
+              {/* Category Filter Pills — Dynamic, only shown when 2+ categories exist */}
+              {activeSaleCategories.length > 1 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.categoryScroll}
+                  contentContainerStyle={styles.categoryScrollContent}>
+                  {activeSaleCategories.map((cat) => (
+                    <FilterChip
+                      key={cat}
+                      label={cat === 'All' ? t('allCategories') : cat}
+                      isActive={selectedCategory === cat}
+                      onPress={() => setSelectedCategory(cat)}
+                      activeBg="#FFFFFF"
+                      activeColor="#064E3B"
+                      inactiveBg="rgba(255, 255, 255, 0.16)"
+                      inactiveColor="#FFFFFF"
+                      inactiveBorder="rgba(255, 255, 255, 0.22)"
+                    />
+                  ))}
+                </ScrollView>
+              )}
 
               {/* AI-01: Temporal Dayparting Front Shelf Smart Pill */}
               {selectedCategory === 'All' && !searchQuery.trim() && (

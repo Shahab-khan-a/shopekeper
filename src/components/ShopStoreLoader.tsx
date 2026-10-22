@@ -96,35 +96,122 @@ export const ShopStoreLoader: React.FC<ShopStoreLoaderProps> = ({
         </Animated.View>
       </View>
 
-      {/* ── Realistic Shelf Skeleton Placeholders (Guaranteed 2-column Side-by-Side Grid) ── */}
-      <View style={styles.skeletonGrid}>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Animated.View
-            key={i}
-            style={[
-              styles.skeletonGridCard,
-              {
-                backgroundColor: skeletonCardBg,
-                borderColor: skeletonBorder,
-                opacity: pulseAnim,
-              },
-            ]}
-          >
-            <View style={styles.cardHeaderSkeleton}>
-              <View style={[styles.thumbSkeleton, { backgroundColor: skeletonBg }]} />
-              <View style={{ flex: 1, gap: 5 }}>
-                <View style={[styles.lineSkeleton, { width: '88%', height: 11, backgroundColor: skeletonBg }]} />
-                <View style={[styles.lineSkeleton, { width: '55%', height: 9, backgroundColor: skeletonBg }]} />
-              </View>
-            </View>
+      {/* ── Realistic Skeletons: Mode-aware (List vs Grid) ── */}
+      {viewMode === 'list' ? (
+        <View style={styles.skeletonList}>
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Animated.View
+              key={i}
+              style={[
+                styles.skeletonListRow,
+                {
+                  backgroundColor: skeletonCardBg,
+                  borderColor: skeletonBorder,
+                  opacity: pulseAnim,
+                },
+              ]}>
+              <View style={[styles.listThumbSkeleton, { backgroundColor: skeletonBg }]} />
 
-            <View style={styles.cardBottomSkeleton}>
-              <View style={[styles.lineSkeleton, { width: '48%', height: 14, backgroundColor: skeletonBg }]} />
-              <View style={[styles.btnSkeleton, { backgroundColor: skeletonBg }]} />
-            </View>
-          </Animated.View>
-        ))}
-      </View>
+              <View style={{ flex: 1, gap: 6, justifyContent: 'center' }}>
+                <View
+                  style={[
+                    styles.lineSkeleton,
+                    {
+                      width: i % 2 === 0 ? '72%' : '58%',
+                      height: 13,
+                      backgroundColor: skeletonBg,
+                    },
+                  ]}
+                />
+                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+                  <View
+                    style={[
+                      styles.lineSkeleton,
+                      { width: 46, height: 16, borderRadius: 5, backgroundColor: skeletonBg },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.lineSkeleton,
+                      { width: 34, height: 12, borderRadius: 4, backgroundColor: skeletonBg },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.lineSkeleton,
+                  {
+                    width: 56,
+                    height: 22,
+                    borderRadius: BorderRadius.full,
+                    backgroundColor: skeletonBg,
+                  },
+                ]}
+              />
+
+              <View style={{ alignItems: 'flex-end', gap: 4, minWidth: 48 }}>
+                <View
+                  style={[
+                    styles.lineSkeleton,
+                    { width: 46, height: 14, backgroundColor: skeletonBg },
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.lineSkeleton,
+                    { width: 28, height: 11, backgroundColor: skeletonBg },
+                  ]}
+                />
+              </View>
+            </Animated.View>
+          ))}
+        </View>
+      ) : (
+        <View style={styles.skeletonGrid}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Animated.View
+              key={i}
+              style={[
+                styles.skeletonGridCard,
+                {
+                  backgroundColor: skeletonCardBg,
+                  borderColor: skeletonBorder,
+                  opacity: pulseAnim,
+                },
+              ]}>
+              <View style={styles.cardHeaderSkeleton}>
+                <View style={[styles.thumbSkeleton, { backgroundColor: skeletonBg }]} />
+                <View style={{ flex: 1, gap: 5 }}>
+                  <View
+                    style={[
+                      styles.lineSkeleton,
+                      { width: '88%', height: 11, backgroundColor: skeletonBg },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.lineSkeleton,
+                      { width: '55%', height: 9, backgroundColor: skeletonBg },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.cardBottomSkeleton}>
+                <View
+                  style={[
+                    styles.lineSkeleton,
+                    { width: '48%', height: 14, backgroundColor: skeletonBg },
+                  ]}
+                />
+                <View style={[styles.btnSkeleton, { backgroundColor: skeletonBg }]} />
+              </View>
+            </Animated.View>
+          ))}
+        </View>
+      )}
     </View>
   );
 };

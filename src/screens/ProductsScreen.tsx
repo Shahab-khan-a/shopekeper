@@ -22,11 +22,8 @@ import {
   View,
 } from 'react-native';
 
-import { PRODUCTS_FILTER_CATEGORIES } from '@/constants/categories';
 import { CatalogImportModal } from '@/components/CatalogImportModal';
 import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
-
-const CATEGORIES: (ProductCategory | 'LowStock')[] = PRODUCTS_FILTER_CATEGORIES;
 
 export const ProductsScreen: React.FC = () => {
   const {
@@ -113,6 +110,16 @@ export const ProductsScreen: React.FC = () => {
       counts[p.category] = (counts[p.category] || 0) + 1;
     });
     return counts;
+  }, [products]);
+
+  // Dynamic store departments/categories derived purely from products in stock
+  const dynamicCategories = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => {
+      const cat = p.category?.trim();
+      if (cat) set.add(cat);
+    });
+    return Array.from(set).sort();
   }, [products]);
 
   const profitPct =
@@ -266,50 +273,47 @@ export const ProductsScreen: React.FC = () => {
             </Pressable>
           </View>
 
-          {/* Horizontal Category Filters with Frosted Glass Chips */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.filterScroll}
-            contentContainerStyle={styles.filterScrollContent}>
-            {CATEGORIES.map((cat) => {
-              const isLowStockTab = cat === 'LowStock';
-              const isAll = cat === 'All';
-              const isSelected = selectedFilter === cat;
+          {/* Dynamic Category Filters: Only shown when store has 2 or more distinct categories */}
+          {dynamicCategories.length > 1 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
+              contentContainerStyle={styles.filterScrollContent}>
+              {/* All Departments Chip */}
+              <FilterChip
+                key="All"
+                label={language === 'ur' ? `تمام شعبہ جات (${products.length})` : `All (${products.length})`}
+                isActive={selectedFilter === 'All'}
+                onPress={() => setSelectedFilter('All')}
+                activeBg="#FFFFFF"
+                activeColor="#064E3B"
+                inactiveBg="rgba(255, 255, 255, 0.16)"
+                inactiveBorder="rgba(255, 255, 255, 0.25)"
+                inactiveColor="#FFFFFF"
+              />
 
-              return (
-                <FilterChip
-                  key={cat}
-                  label={
-                    isAll
-                      ? (language === 'ur' ? `تمام (${products.length})` : `All (${products.length})`)
-                      : isLowStockTab
-                        ? (language === 'ur' ? `کم اسٹاک (${alertCount})` : `Low Stock (${alertCount})`)
-                        : cat
-                  }
-                  isActive={isSelected}
-                  onPress={() => setSelectedFilter(cat)}
-                  icon={isLowStockTab ? 'warning' : undefined}
-                  variant={isLowStockTab ? 'alert' : 'default'}
-                  activeBg={isLowStockTab ? '#EF4444' : '#FFFFFF'}
-                  activeColor={isLowStockTab ? '#FFFFFF' : '#064E3B'}
-                  inactiveBg={
-                    isLowStockTab
-                      ? (alertCount > 0 ? 'rgba(239, 68, 68, 0.35)' : 'rgba(255,255,255,0.14)')
-                      : 'rgba(255, 255, 255, 0.16)'
-                  }
-                  inactiveBorder={
-                    isLowStockTab
-                      ? (alertCount > 0 ? 'rgba(248, 113, 113, 0.65)' : 'rgba(255,255,255,0.25)')
-                      : 'rgba(255, 255, 255, 0.25)'
-                  }
-                  inactiveColor={
-                    isLowStockTab && alertCount > 0 ? '#FECACA' : '#FFFFFF'
-                  }
-                />
-              );
-            })}
-          </ScrollView>
+              {/* Dynamic store category chips */}
+              {dynamicCategories.map((cat) => {
+                const count = categoryCounts[cat] || 0;
+                const isSelected = selectedFilter === cat;
+
+                return (
+                  <FilterChip
+                    key={cat}
+                    label={`${cat} (${count})`}
+                    isActive={isSelected}
+                    onPress={() => setSelectedFilter(cat as ProductCategory)}
+                    activeBg="#FFFFFF"
+                    activeColor="#064E3B"
+                    inactiveBg="rgba(255, 255, 255, 0.16)"
+                    inactiveBorder="rgba(255, 255, 255, 0.25)"
+                    inactiveColor="#FFFFFF"
+                  />
+                );
+              })}
+            </ScrollView>
+          )}
         </View>
       </View>
 

@@ -144,40 +144,80 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <Ionicons name="chevron-forward" size={10} color={theme.primary} />
         </View>
 
-        {/* Bottom of Image: Unified Decorated Frosted Ribbon */}
-        <View style={styles.imageBottomRibbon}>
-          {/* Stock Status with glowing dot */}
-          <View style={styles.stockRibbonItem}>
-            <View
-              style={[
-                styles.stockDot,
-                {
-                  backgroundColor: isOutOfStock
-                    ? '#EF4444'
-                    : isLowStock
-                      ? '#F59E0B'
-                      : '#10B981',
-                },
-              ]}
-            />
-            <Text style={styles.stockRibbonText} numberOfLines={1}>
-              {isOutOfStock
-                ? isUr ? 'اسٹاک ختم' : 'Out of stock'
+        {/* Bottom-Left: Floating Stock Pill (Soft Frosted Pill with colored status dot) */}
+        <View
+          style={[
+            styles.floatingStockPill,
+            {
+              backgroundColor: settings.darkMode
+                ? 'rgba(15, 23, 42, 0.88)'
+                : 'rgba(255, 255, 255, 0.94)',
+              borderColor: isOutOfStock
+                ? theme.danger
                 : isLowStock
-                  ? isUr ? `${product.stock} باقی` : `${product.stock} left`
-                  : `${product.stock} ${product.unit}`}
+                  ? theme.warning
+                  : settings.darkMode
+                    ? 'rgba(16, 185, 129, 0.35)'
+                    : 'rgba(16, 185, 129, 0.3)',
+            },
+          ]}>
+          <View
+            style={[
+              styles.stockDot,
+              {
+                backgroundColor: isOutOfStock
+                  ? '#EF4444'
+                  : isLowStock
+                    ? '#F59E0B'
+                    : '#10B981',
+              },
+            ]}
+          />
+          <Text
+            style={[
+              styles.floatingStockText,
+              {
+                color: isOutOfStock
+                  ? theme.danger
+                  : isLowStock
+                    ? theme.warning
+                    : settings.darkMode
+                      ? '#A7F3D0'
+                      : '#047857',
+              },
+            ]}
+            numberOfLines={1}>
+            {isOutOfStock
+              ? isUr ? 'اسٹاک ختم' : 'Out'
+              : isLowStock
+                ? isUr ? `${product.stock} باقی` : `${product.stock} left`
+                : `${product.stock} ${product.unit}`}
+          </Text>
+        </View>
+
+        {/* Bottom-Right: Floating Profit Margin Pill (when profitable) */}
+        {unitProfit > 0 && profitMarginPercent > 0 ? (
+          <View
+            style={[
+              styles.floatingProfitPill,
+              {
+                backgroundColor: settings.darkMode
+                  ? 'rgba(15, 23, 42, 0.88)'
+                  : 'rgba(255, 255, 255, 0.94)',
+                borderColor: settings.darkMode
+                  ? 'rgba(16, 185, 129, 0.35)'
+                  : 'rgba(16, 185, 129, 0.3)',
+              },
+            ]}>
+            <Text
+              style={[
+                styles.floatingProfitText,
+                { color: settings.darkMode ? '#34D399' : '#047857' },
+              ]}>
+              +{profitMarginPercent}%
             </Text>
           </View>
-
-          {/* Profit Margin Tag (when profitable) */}
-          {unitProfit > 0 && profitMarginPercent > 0 ? (
-            <View style={styles.profitRibbonItem}>
-              <Text style={styles.profitRibbonText}>
-                +{profitMarginPercent}%
-              </Text>
-            </View>
-          ) : null}
-        </View>
+        ) : null}
       </View>
 
       {/* Clean, Breathable Card Body */}
@@ -281,48 +321,46 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.1,
   },
-  imageBottomRibbon: {
+  floatingStockPill: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 6,
+    left: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(15, 23, 42, 0.74)',
-    paddingHorizontal: 8,
-    paddingVertical: 4.5,
+    gap: 3.5,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
     zIndex: 2,
-  },
-  stockRibbonItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    flex: 1,
-    minWidth: 0,
+    maxWidth: '65%',
+    ...Shadows.sm,
   },
   stockDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
   },
-  stockRibbonText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.1,
-  },
-  profitRibbonItem: {
-    backgroundColor: 'rgba(16, 185, 129, 0.28)',
-    paddingHorizontal: 5,
-    paddingVertical: 1.5,
-    borderRadius: 4,
-    marginLeft: 4,
-  },
-  profitRibbonText: {
-    color: '#34D399',
+  floatingStockText: {
     fontSize: 9.5,
     fontWeight: '800',
+    letterSpacing: 0.1,
+  },
+  floatingProfitPill: {
+    position: 'absolute',
+    bottom: 6,
+    right: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2.5,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    zIndex: 2,
+    ...Shadows.sm,
+  },
+  floatingProfitText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    letterSpacing: 0.1,
   },
   contentWrap: {
     paddingHorizontal: 10,

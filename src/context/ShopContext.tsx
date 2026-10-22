@@ -187,7 +187,7 @@ export const SALE_VIEW_MODE_KEY = '@shopkeeper_sale_view_mode';
 export const PRODUCTS_VIEW_MODE_KEY = '@shopkeeper_products_view_mode';
 
 let cachedSaleViewMode: 'grid' | 'list' = 'grid';
-let cachedProductsViewMode: 'grid' | 'list' = 'grid';
+let cachedProductsViewMode: 'grid' | 'list' = 'list';
 
 AsyncStorage.getItem(SALE_VIEW_MODE_KEY)
   .then((v) => {
