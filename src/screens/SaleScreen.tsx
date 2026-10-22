@@ -170,6 +170,14 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Frictionless POS Parked Cart Toast with Instant Undo
+  const [heldCartToast, setHeldCartToast] = useState<{
+    visible: boolean;
+    itemsCount: number;
+    heldCart: HeldCart;
+  } | null>(null);
+  const heldToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Algorithmic Intimacy (AI-01) & Soundbox (VU-03) state
   const [soundboxEnabled, setSoundboxEnabled] = useState<boolean>(true);
   const [daypartFilteredOnly, setDaypartFilteredOnly] = useState<boolean>(false);
@@ -722,51 +730,64 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     }
   };
 
-  // Rush-Hour Counter: Hold & Resume Cart Handlers
+  // Rush-Hour Counter: Frictionless 1-Tap Hold & Resume Cart
   const handleHoldCart = () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0) {
+      showAlert({
+        type: 'info',
+        title: language === 'ur' ? 'کارٹ خالی ہے' : 'Cart is Empty',
+        message: language === 'ur' ? 'ہولڈ کرنے کے لیے پہلے اشیاء شامل کریں۔' : 'Add items to the cart before holding.',
+      });
+      return;
+    }
 
-    showAlert({
-      type: 'confirm',
-      title: language === 'ur' ? 'بل ہولڈ کریں؟' : 'Hold Current Bill?',
-      message: language === 'ur'
-        ? `یہ بل عارضی محفوظ ہو جائے گا تاکہ آپ اگلے گاہک کو سروس دے سکیں۔ بعد میں آپ نیچے امبر بینر سے جب چاہیں واپس لا سکتے ہیں۔`
-        : `Park this bill so you can attend to the next customer. You can restore it anytime from the amber banner at the bottom.`,
-      buttons: [
-        {
-          text: language === 'ur' ? 'ہاں، ہولڈ کریں' : 'Hold Bill',
-          onPress: () => {
-            const newHeldCart: HeldCart = {
-              id: 'held_' + Date.now(),
-              heldAt: Date.now(),
-              items: [...cart],
-              customerName: customerName.trim() || undefined,
-              customerPhone: customerPhone.trim() || undefined,
-              discount,
-              discountType,
-              total: grandTotal,
-              totalItemsCount,
-            };
+    const newHeldCart: HeldCart = {
+      id: 'held_' + Date.now(),
+      heldAt: Date.now(),
+      items: [...cart],
+      customerName: customerName.trim() || undefined,
+      customerPhone: customerPhone.trim() || undefined,
+      discount,
+      discountType,
+      total: grandTotal,
+      totalItemsCount,
+    };
 
-            const nextHeld = [newHeldCart, ...heldCarts];
-            setHeldCarts(nextHeld);
-            AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(nextHeld)).catch(console.error);
+    const nextHeld = [newHeldCart, ...heldCarts];
+    setHeldCarts(nextHeld);
+    AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(nextHeld)).catch(console.error);
 
-            clearCart();
-            setIsCheckoutDrawerOpen(false);
+    clearCart();
+    setIsCheckoutDrawerOpen(false);
 
-            showAlert({
-              type: 'success',
-              title: language === 'ur' ? 'بل محفوظ کر دیا گیا' : 'Bill Held',
-              message: language === 'ur'
-                ? `${newHeldCart.totalItemsCount} اشیاء عارضی محفوظ ہو گئیں۔ اب اگلے گاہک کی سیل بنائیں۔`
-                : `Bill with ${newHeldCart.totalItemsCount} item(s) held. Tap the waiting banner below to resume anytime.`,
-            });
-          },
-        },
-        { text: t('cancel'), style: 'cancel' },
-      ],
+    // Show Non-Blocking Floating Toast with instant Undo (Zero blocking modal friction)
+    if (heldToastTimer.current) clearTimeout(heldToastTimer.current);
+    setHeldCartToast({
+      visible: true,
+      itemsCount: newHeldCart.totalItemsCount,
+      heldCart: newHeldCart,
     });
+
+    heldToastTimer.current = setTimeout(() => {
+      setHeldCartToast(null);
+    }, 3800);
+  };
+
+  const handleUndoHoldCart = (heldCart: HeldCart) => {
+    if (heldToastTimer.current) clearTimeout(heldToastTimer.current);
+    setHeldCartToast(null);
+
+    // Remove from held carts
+    const updatedHeld = heldCarts.filter((c) => c.id !== heldCart.id);
+    setHeldCarts(updatedHeld);
+    AsyncStorage.setItem(HELD_CARTS_STORAGE_KEY, JSON.stringify(updatedHeld)).catch(console.error);
+
+    // Restore to active cart
+    setCart(heldCart.items);
+    setCustomerName(heldCart.customerName || '');
+    setCustomerPhone(heldCart.customerPhone || '');
+    setDiscount(heldCart.discount || '');
+    setDiscountType(heldCart.discountType || 'fixed');
   };
 
   const handleResumeCart = (heldCart: HeldCart) => {
@@ -3512,6 +3533,72 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         onAddItem={handleAddQuickItem}
       />
 
+      {/* ── Frictionless POS Held Cart Floating Toast with Instant Undo ── */}
+      {heldCartToast && heldCartToast.visible && (
+        <View
+          style={[
+            styles.heldToast,
+            {
+              backgroundColor: settings.darkMode ? '#78350F' : '#FEF3C7',
+              borderColor: settings.darkMode ? '#F59E0B' : '#F59E0B',
+            },
+          ]}>
+          <View style={styles.heldToastLeft}>
+            <View style={[styles.heldToastIconBox, { backgroundColor: '#F59E0B' }]}>
+              <Ionicons name="pause-circle" size={17} color="#FFFFFF" />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text
+                style={[
+                  styles.heldToastTitle,
+                  { color: settings.darkMode ? '#FDE68A' : '#92400E' },
+                ]}
+                numberOfLines={1}>
+                {language === 'ur'
+                  ? `بل عارضی محفوظ ہو گیا (${heldCartToast.itemsCount} اشیاء)`
+                  : `Bill Parked (${heldCartToast.itemsCount} item${heldCartToast.itemsCount > 1 ? 's' : ''})`}
+              </Text>
+              <Text
+                style={[
+                  styles.heldToastSub,
+                  { color: settings.darkMode ? '#FCD34D' : '#B45309' },
+                ]}
+                numberOfLines={1}>
+                {language === 'ur'
+                  ? 'اب اگلے گاہک کو سروس دیں۔'
+                  : 'Ready for next customer.'}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.heldToastActions}>
+            <Pressable
+              onPress={() => handleUndoHoldCart(heldCartToast.heldCart)}
+              style={({ pressed }) => [
+                styles.heldToastUndoBtn,
+                { backgroundColor: '#F59E0B' },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Ionicons name="arrow-undo" size={13} color="#FFFFFF" />
+              <Text style={styles.heldToastUndoBtnText}>
+                {language === 'ur' ? 'واپس' : 'Undo'}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setHeldCartToast(null)}
+              hitSlop={8}
+              style={{ padding: 4 }}>
+              <Ionicons
+                name="close"
+                size={18}
+                color={settings.darkMode ? '#FDE68A' : '#92400E'}
+              />
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {/* ── Micro-Friction Eraser (MF-04): Post-Sale Success & Instant WhatsApp Banner ── */}
       {showSuccessToast && lastCompletedSale && (
         <View
@@ -5168,6 +5255,64 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 11.5,
     fontWeight: '700',
+  },
+
+  // Frictionless POS Parked Cart Toast
+  heldToast: {
+    position: 'absolute',
+    bottom: 24,
+    left: 16,
+    right: 16,
+    borderRadius: 16,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1.5,
+    zIndex: 9999,
+    ...Shadows.lg,
+  },
+  heldToastLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 8,
+  },
+  heldToastIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heldToastTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+  heldToastSub: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  heldToastActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  heldToastUndoBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  heldToastUndoBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
 
   // AI-01: Temporal Dayparting Front Shelf
