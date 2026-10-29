@@ -97,7 +97,7 @@ export const DashboardScreen: React.FC = () => {
     }
   };
 
-  // Show only a few (top 3) most recent sales on home to prevent crowding busy shops
+  // Top 3 most recent sales on home
   const MAX_HOME_RECENT_SALES = 3;
   const recentSales = useMemo(() => {
     return [...sales]
@@ -105,10 +105,8 @@ export const DashboardScreen: React.FC = () => {
       .slice(0, MAX_HOME_RECENT_SALES);
   }, [sales]);
 
-  // In-home Sale Modal
+  // Modals & Triggers
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
-
-  // Day-end summary modal & Cash Drawer Tally
   const [showDayEnd, setShowDayEnd] = useState(false);
   const [showReports, setShowReports] = useState(false);
   const [isCashOutModalOpen, setIsCashOutModalOpen] = useState(false);
@@ -147,7 +145,7 @@ export const DashboardScreen: React.FC = () => {
   const todayOnline = todaySales.filter((s) => s.paymentMethod === 'online').reduce((a, b) => a + b.grandTotal, 0);
   const todayUdhaar = todaySales.filter((s) => s.paymentMethod === 'udhaar').reduce((a, b) => a + b.grandTotal, 0);
 
-  // Vasooli / Debt Recovery collected today from customers
+  // Vasooli collected today from customers
   const todayVasooli = useMemo(() => {
     let sum = 0;
     const startMs = todayStart.getTime();
@@ -172,11 +170,8 @@ export const DashboardScreen: React.FC = () => {
     return a + (s.grandTotal - cost);
   }, 0);
 
-  const getPayColor = (method: string) => {
-    if (method === 'cash') return theme.success;
-    if (method === 'online') return theme.secondary;
-    return theme.danger;
-  };
+  const isUrdu = language === 'ur';
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.07)' : 'rgba(148, 163, 184, 0.22)';
 
   return (
     <View style={[styles.rootContainer, { backgroundColor: theme.background }]}>
@@ -185,264 +180,280 @@ export const DashboardScreen: React.FC = () => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
 
-        {/* ── Hero + floating metrics (clean home header) ── */}
-        <View style={[styles.heroSection, { backgroundColor: theme.heroBg }]}>
+        {/* ── Greeting Bar ── */}
+        <View style={styles.topGreetingRow}>
+          <View style={styles.greetingLeft}>
+            <Text style={[styles.greetingSub, { color: theme.textMuted }]}>
+              {isUrdu ? 'خوش آمدید،' : 'Welcome back,'}
+            </Text>
+            <Text style={[styles.greetingName, { color: theme.text }]} numberOfLines={1}>
+              {settings.ownerName || user?.displayName || (isUrdu ? 'معزز دکاندار' : 'Valued Shopkeeper')}
+            </Text>
+          </View>
+
+          <Pressable
+            onPress={() => setActiveTab('settings')}
+            style={({ pressed }) => [
+              styles.avatarPressable,
+              pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+            ]}>
+            <View style={[styles.avatarCircle, { backgroundColor: theme.card, borderColor: softBorder }]}>
+              {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
+                <ProductImage
+                  uri={settings.profileImage}
+                  style={styles.avatarImg}
+                  fallbackIcon={
+                    <Image
+                      source={require('@/../assets/images/mainLogoImage.png')}
+                      style={styles.avatarImg}
+                      resizeMode="contain"
+                    />
+                  }
+                />
+              ) : (
+                <Image
+                  source={require('@/../assets/images/mainLogoImage.png')}
+                  style={styles.avatarImg}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
+          </Pressable>
+        </View>
+
+        {/* ── SadaPay-inspired Floating Hero Balance Card (Cash Register) ── */}
+        <Pressable
+          onPress={() => setShowDayEnd(true)}
+          style={({ pressed }) => [
+            styles.heroCard,
+            { backgroundColor: settings.darkMode ? '#064E3B' : '#059669' },
+            pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
+          ]}>
+          {/* Top Line: Label & Record Expense White Pill */}
           <View style={styles.heroTopRow}>
-            <View style={styles.heroLeft}>
-              <Text style={styles.heroGreet}>
-                {language === 'ur' ? 'خوش آمدید،' : 'Welcome back,'}
-              </Text>
-              <Text style={styles.heroOwner} numberOfLines={1}>
-                {settings.ownerName || user?.displayName || (language === 'ur' ? 'معزز دکاندار' : 'Valued Shopkeeper')}
+            <View style={styles.heroTitleWrap}>
+              <View style={styles.heroIconBadge}>
+                <Ionicons name="wallet" size={14} color="#FFFFFF" />
+              </View>
+              <Text style={styles.heroLabel}>
+                {isUrdu ? 'گلہ کا نقد کیش' : "TODAY'S CASH IN REGISTER"}
               </Text>
             </View>
 
             <Pressable
-              onPress={() => setActiveTab('settings')}
+              onPress={(e) => {
+                e.stopPropagation();
+                setIsCashOutModalOpen(true);
+              }}
+              hitSlop={6}
               style={({ pressed }) => [
-                styles.heroAvatarBtn,
-                pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+                styles.heroExpenseBtn,
+                pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
               ]}>
-              <View style={styles.heroIconCircle}>
-                {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
-                  <ProductImage
-                    uri={settings.profileImage}
-                    style={styles.heroAvatarImg}
-                    fallbackIcon={
-                      <Image
-                        source={require('@/../assets/images/mainLogoImage.png')}
-                        style={styles.heroAvatarImg}
-                        resizeMode="contain"
-                      />
-                    }
-                  />
-                ) : (
-                  <Image
-                    source={require('@/../assets/images/mainLogoImage.png')}
-                    style={styles.heroAvatarImg}
-                    resizeMode="contain"
-                  />
-                )}
-              </View>
+              <Ionicons name="arrow-up-circle" size={13} color="#DC2626" />
+              <Text style={styles.heroExpenseBtnText}>
+                {isUrdu ? 'خرچہ لکھیں' : '+ Expense'}
+              </Text>
             </Pressable>
           </View>
 
-          <View style={styles.overviewRow}>
-            <Text style={styles.overviewTitle}>{t('todayOverview')}</Text>
-            <Pressable
-              onPress={() => setShowDayEnd(true)}
-              hitSlop={8}
-              style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
-              <Text style={styles.overviewAction}>{t('showToday')}</Text>
-            </Pressable>
+          {/* Giant Clean Amount */}
+          <View style={styles.heroAmountWrap}>
+            <Text style={styles.heroAmount}>
+              {settings.currencySymbol}
+              {todayNetCashInDrawer.toLocaleString()}
+            </Text>
+            {todayCashOutTotal > 0 && (
+              <View style={styles.heroDeductedBadge}>
+                <Text style={styles.heroDeductedText}>
+                  -{settings.currencySymbol}{todayCashOutTotal.toLocaleString()} {isUrdu ? 'خرچہ' : 'exp'}
+                </Text>
+              </View>
+            )}
           </View>
+
+          {/* Translucent Soft Summary Capsules */}
+          <View style={styles.heroCapsulesRow}>
+            <View style={styles.heroCapsule}>
+              <Text style={styles.heroCapsuleText}>
+                {todaySales.length} {isUrdu ? 'بلز آج' : 'bills today'} ({settings.currencySymbol}{todaySalesTotal.toLocaleString()})
+              </Text>
+            </View>
+
+            {todayVasooli > 0 && (
+              <View style={styles.heroCapsule}>
+                <Ionicons name="arrow-down" size={11} color="#FFFFFF" />
+                <Text style={styles.heroCapsuleText}>
+                  +{settings.currencySymbol}{todayVasooli.toLocaleString()} {isUrdu ? 'ادھار وصولی' : 'recovered'}
+                </Text>
+              </View>
+            )}
+
+            <View style={[styles.heroCapsule, { backgroundColor: 'rgba(255, 255, 255, 0.28)' }]}>
+              <Text style={[styles.heroCapsuleText, { fontWeight: '800' }]}>
+                {isUrdu ? 'شام کا حساب ➔' : 'Day-End Tally ➔'}
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+
+        {/* ── Action Quick Pods (SadaPay Inspo: 2 Vibrant Soft Cards) ── */}
+        <View style={styles.actionPodsRow}>
+          {/* 1. New Sale (Primary Blue / Emerald Card) */}
+          <Pressable
+            onPress={() => setIsSaleModalOpen(true)}
+            style={({ pressed }) => [
+              styles.actionPod,
+              { backgroundColor: settings.darkMode ? '#1E293B' : '#0284C7' },
+              pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+            ]}>
+            <View style={styles.actionPodHeader}>
+              <View style={[styles.actionPodIconCircle, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
+                <Ionicons name="cart" size={18} color="#FFFFFF" />
+              </View>
+              <Ionicons name="arrow-forward" size={16} color="rgba(255, 255, 255, 0.75)" />
+            </View>
+            <View>
+              <Text style={styles.actionPodTitle}>
+                {isUrdu ? '+ نیا بل بنائیں' : '+ New Bill'}
+              </Text>
+              <Text style={styles.actionPodSub}>
+                {isUrdu ? 'تیز کاؤنٹر سیلنگ' : 'Fast counter sale'}
+              </Text>
+            </View>
+          </Pressable>
+
+          {/* 2. Evening Closing Tally (Warm Amber / Rose Card) */}
+          <Pressable
+            onPress={() => setShowDayEnd(true)}
+            style={({ pressed }) => [
+              styles.actionPod,
+              { backgroundColor: settings.darkMode ? '#78350F' : '#F97316' },
+              pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+            ]}>
+            <View style={styles.actionPodHeader}>
+              <View style={[styles.actionPodIconCircle, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
+                <Ionicons name="moon" size={18} color="#FFFFFF" />
+              </View>
+              <Ionicons name="arrow-forward" size={16} color="rgba(255, 255, 255, 0.75)" />
+            </View>
+            <View>
+              <Text style={styles.actionPodTitle}>
+                {isUrdu ? 'شام کا حساب' : 'Day-End Tally'}
+              </Text>
+              <Text style={styles.actionPodSub}>
+                {isUrdu ? 'گلہ کے نوٹ گنیں' : 'Count drawer cash'}
+              </Text>
+            </View>
+          </Pressable>
         </View>
 
-        {/* ── Today's Metrics (overlap green header) ── */}
-        <View style={styles.metricsGrid}>
-          {/* 1. Today's Total Sales */}
+        {/* ── 3 Key Metrics Pods (Soft squircle cards) ── */}
+        <View style={styles.metricsRow}>
+          {/* Metric 1: Today's Total Billed */}
           <Pressable
             onPress={() => setShowDayEnd(true)}
             style={({ pressed }) => [
               styles.metricCard,
-              { backgroundColor: theme.card },
+              { backgroundColor: theme.card, borderColor: softBorder },
               pressed && { opacity: 0.88 },
             ]}>
-            <View style={styles.metricHeaderRow}>
-              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-                {t('todaySales')}
-              </Text>
-              <Ionicons name="receipt-outline" size={15} color={theme.textMuted} />
+            <View style={[styles.metricAvatar, { backgroundColor: settings.darkMode ? 'rgba(16, 185, 129, 0.14)' : '#ECFDF5' }]}>
+              <Ionicons name="receipt" size={16} color="#059669" />
             </View>
-            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
-              {settings.currencySymbol} {todaySalesTotal.toLocaleString()}
+            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+              {t('todaySales')}
             </Text>
-            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
-              {todaySales.length > 0
-                ? `${todaySales.length} ${language === 'ur' ? 'بلز آج' : 'bills today'}`
-                : language === 'ur' ? 'آج کوئی بل نہیں' : 'No bills yet'}
+            <Text style={[styles.metricValue, { color: theme.text }]}>
+              {settings.currencySymbol}{todaySalesTotal.toLocaleString()}
+            </Text>
+            <Text style={[styles.metricSub, { color: theme.textMuted }]}>
+              {todaySales.length} {isUrdu ? 'بل' : 'bills'}
             </Text>
           </Pressable>
 
-          {/* 2. Low Stock (actionable — profit lives in Day-End / Reports below) */}
+          {/* Metric 2: Customer Credit (Khata) */}
+          <Pressable
+            onPress={() => setActiveTab('khata')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <View style={[styles.metricAvatar, { backgroundColor: settings.darkMode ? 'rgba(239, 68, 68, 0.14)' : '#FEE2E2' }]}>
+              <Ionicons name="book" size={16} color="#DC2626" />
+            </View>
+            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+              {isUrdu ? 'گاہکوں کا ادھار' : 'Pending Debt'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.danger }]}>
+              {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
+            </Text>
+            <Text style={[styles.metricSub, { color: theme.textMuted }]}>
+              {khata.filter((c: any) => (c.currentBalance || c.balance || 0) > 0).length} {isUrdu ? 'کھاتے' : 'accounts'}
+            </Text>
+          </Pressable>
+
+          {/* Metric 3: Low Stock Alerts */}
           <Pressable
             onPress={() => setActiveTab('products')}
             style={({ pressed }) => [
               styles.metricCard,
-              { backgroundColor: theme.card },
+              { backgroundColor: theme.card, borderColor: softBorder },
               pressed && { opacity: 0.88 },
             ]}>
-            <View style={styles.metricHeaderRow}>
-              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-                {language === 'ur' ? 'کم اسٹاک' : 'Low Stock'}
-              </Text>
-              <Ionicons name="warning-outline" size={15} color={theme.warning} />
+            <View
+              style={[
+                styles.metricAvatar,
+                {
+                  backgroundColor:
+                    lowStockProducts.length + outOfStockProducts.length > 0
+                      ? settings.darkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7'
+                      : settings.darkMode ? 'rgba(16, 185, 129, 0.14)' : '#ECFDF5',
+                },
+              ]}>
+              <Ionicons
+                name="warning"
+                size={16}
+                color={lowStockProducts.length + outOfStockProducts.length > 0 ? '#D97706' : '#059669'}
+              />
             </View>
+            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+              {isUrdu ? 'کم اسٹاک' : 'Low Stock'}
+            </Text>
             <Text
               style={[
                 styles.metricValue,
-                { color: lowStockProducts.length + outOfStockProducts.length > 0 ? theme.warning : theme.text },
-              ]}
-              numberOfLines={1}>
+                {
+                  color:
+                    lowStockProducts.length + outOfStockProducts.length > 0
+                      ? theme.warning
+                      : theme.text,
+                },
+              ]}>
               {lowStockProducts.length + outOfStockProducts.length}
             </Text>
-            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
+            <Text style={[styles.metricSub, { color: theme.textMuted }]}>
               {lowStockProducts.length + outOfStockProducts.length > 0
-                ? language === 'ur' ? 'آئٹمز ختم ہونے والے ہیں' : 'items to reorder'
-                : language === 'ur' ? 'تمام اسٹاک موجود ہے' : 'All stocked up'}
-            </Text>
-          </Pressable>
-
-          {/* 3. Customer Credit */}
-          <Pressable
-            onPress={() => setActiveTab('khata')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              { backgroundColor: theme.card },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <View style={styles.metricHeaderRow}>
-              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-                {language === 'ur' ? 'گاہکوں کا ادھار' : 'Customer Credit'}
-              </Text>
-              <Ionicons name="book-outline" size={15} color={theme.danger} />
-            </View>
-            <Text style={[styles.metricValue, { color: theme.danger }]} numberOfLines={1}>
-              {settings.currencySymbol} {totalUdhaarReceivable.toLocaleString()}
-            </Text>
-            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
-              {khata.filter((c: any) => (c.currentBalance || c.balance || 0) > 0).length > 0
-                ? `${khata.filter((c: any) => (c.currentBalance || c.balance || 0) > 0).length} ${language === 'ur' ? 'کھاتے بقایا' : 'pending accounts'}`
-                : language === 'ur' ? 'کوئی ادھار نہیں' : 'All cleared'}
-            </Text>
-          </Pressable>
-
-          {/* 4. Debt Recovered */}
-          <Pressable
-            onPress={() => setActiveTab('khata')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              { backgroundColor: theme.card },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <View style={styles.metricHeaderRow}>
-              <Text style={[styles.metricLabel, { color: theme.textSecondary }]} numberOfLines={1}>
-                {language === 'ur' ? 'ادھار وصولی' : 'Debt Recovered'}
-              </Text>
-              <Ionicons name="arrow-down-circle-outline" size={15} color="#059669" />
-            </View>
-            <Text style={[styles.metricValue, { color: '#059669' }]} numberOfLines={1}>
-              +{settings.currencySymbol} {todayVasooli.toLocaleString()}
-            </Text>
-            <Text style={[styles.metricSubHint, { color: theme.textMuted }]} numberOfLines={1}>
-              {language === 'ur' ? 'آج کی جمع شدہ رقم' : "Today's collections"}
+                ? (isUrdu ? 'آرڈر کریں' : 'to reorder')
+                : (isUrdu ? 'اسٹاک موجود' : 'all stocked')}
             </Text>
           </Pressable>
         </View>
 
-        {/* ── Cash Register / Cash-in-Drawer Hero Card ── */}
-        <View style={[styles.drawerActionStrip, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          {/* Header Row: Title + Info on left, Record Expense Button on right */}
-          <View style={styles.drawerTopRow}>
-            <Pressable
-              onPress={() => setShowDayEnd(true)}
-              style={styles.drawerTitleWrap}>
-              <View style={[styles.drawerSmallIcon, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="wallet" size={17} color="#059669" />
-              </View>
-              <Text style={[styles.drawerStripLabel, { color: theme.text }]} numberOfLines={1}>
-                {language === 'ur' ? 'گلہ کا نقد کیش' : 'Cash in Register'}
-              </Text>
-              <Ionicons name="information-circle-outline" size={14} color={theme.textMuted} />
-            </Pressable>
-
-            <Pressable
-              onPress={() => setIsCashOutModalOpen(true)}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.drawerStripCashOutBtn,
-                { backgroundColor: theme.dangerLight, borderColor: theme.danger },
-                pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
-              ]}>
-              <Ionicons name="arrow-up-circle-outline" size={14} color={theme.danger} />
-              <Text style={[styles.drawerStripCashOutText, { color: theme.danger }]}>
-                {language === 'ur' ? 'خرچہ لکھیں' : 'Record Expense'}
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* Hero Body: Bold Amount + Deducted Pill + Live Formula */}
-          <Pressable
-            onPress={() => setShowDayEnd(true)}
-            style={styles.drawerBottomArea}>
-            <View style={styles.drawerAmountRow}>
-              <Text style={[styles.drawerStripAmount, { color: '#059669' }]}>
-                {settings.currencySymbol} {todayNetCashInDrawer.toLocaleString()}
-              </Text>
-              {todayCashOutTotal > 0 && (
-                <View style={[styles.expDeductedPill, { backgroundColor: theme.dangerLight }]}>
-                  <Text style={[styles.expDeductedText, { color: theme.danger }]}>
-                    -{settings.currencySymbol}{todayCashOutTotal.toLocaleString()} {language === 'ur' ? 'خرچہ' : 'exp'}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <Text style={[styles.drawerFormulaSub, { color: theme.textMuted }]} numberOfLines={1}>
-              {todaySales.length === 0 && todayVasooli === 0 && todayCashOutTotal === 0
-                ? (language === 'ur' ? 'نقد سیل یا خرچہ پر گلہ خودکار اپڈیٹ ہوگا' : 'Live balance = Cash Sales + Recovered - Expenses')
-                : (language === 'ur' ? 'نقد سیل + وصولی - خرچہ' : 'Cash Sales + Recoveries - Expenses')}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* ── Evening Closing Prompt Banner (Auto-triggers after 5 PM or when sales exist) ── */}
-        {(new Date().getHours() >= 17 || todaySales.length > 0) && (
-          <Pressable
-            onPress={() => setShowDayEnd(true)}
-            style={({ pressed }) => [
-              styles.eveningClosingPromptCard,
-              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-            ]}>
-            <View style={styles.eveningPromptLeft}>
-              <View style={styles.eveningPromptMoon}>
-                <Ionicons name="moon" size={20} color="#FBBF24" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.eveningPromptTitle}>
-                  {language === 'ur'
-                    ? 'دکان بند کرنے کا وقت؟ شام کا حساب کریں'
-                    : "Ready to close shop? Tally cash drawer"}
-                </Text>
-                <Text style={styles.eveningPromptSubtitle} numberOfLines={1}>
-                  {language === 'ur'
-                    ? `گلہ میں متوقع: ${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()} • نقد نوٹ گنیں`
-                    : `Expected: ${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()} • Count notes & get report`}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.eveningPromptCta}>
-              <Text style={styles.eveningPromptCtaText}>
-                {language === 'ur' ? 'حساب کریں ↵' : 'Tally →'}
-              </Text>
-            </View>
-          </Pressable>
-        )}
-
-        
-        {/* ── Day-0 Rapid Store Setup Card (Checklist stays visible until all milestones completed or dismissed) ── */}
+        {/* ── Day-0 Rapid Store Setup Card (If not finished) ── */}
         {showSetupCard && (
-          <View style={[styles.setupCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={[styles.setupCard, { backgroundColor: theme.card, borderColor: softBorder }]}>
             <View style={styles.setupCardHeader}>
               <View style={[styles.setupIconWrap, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="sparkles" size={20} color="#059669" />
+                <Ionicons name="sparkles" size={18} color="#059669" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.setupTitle, { color: theme.text }]}>
-                  {language === 'ur' ? 'دکان شروع کرنے کے آسان 3 مراحل' : 'Quick 3-Step Store Setup'}
+                  {isUrdu ? 'دکان شروع کرنے کے آسان 3 مراحل' : 'Quick 3-Step Store Setup'}
                 </Text>
                 <Text style={[styles.setupSubtitle, { color: theme.textSecondary }]}>
-                  {language === 'ur'
+                  {isUrdu
                     ? `${completedStepsCount} از 3 مرحلے مکمل`
                     : `${completedStepsCount} of 3 steps completed`}
                 </Text>
@@ -483,7 +494,7 @@ export const DashboardScreen: React.FC = () => {
                   backgroundColor: hasProducts
                     ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
                     : theme.surfaceSubtle,
-                  borderColor: hasProducts ? theme.success : theme.border,
+                  borderColor: hasProducts ? theme.success : softBorder,
                 },
               ]}>
               <View style={styles.setupStepTop}>
@@ -501,21 +512,21 @@ export const DashboardScreen: React.FC = () => {
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.stepTitle, { color: theme.text }]}>
                     {hasProducts
-                      ? (language === 'ur' ? 'اشیاء شامل ہیں' : 'Inventory Ready')
-                      : (language === 'ur' ? 'دکان میں اشیاء شامل کریں' : 'Add Inventory Products')}
+                      ? (isUrdu ? 'اشیاء شامل ہیں' : 'Inventory Ready')
+                      : (isUrdu ? 'دکان میں اشیاء شامل کریں' : 'Add Inventory Products')}
                   </Text>
                   <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
                     {hasProducts
-                      ? (language === 'ur' ? `دکان میں ${products.length} اشیاء محفوظ ہیں` : `${products.length} products ready in catalog`)
-                      : (language === 'ur'
-                        ? 'چینی، آٹا، گھی، دالیں اور چائے کی پتی 1 کلک میں لوڈ کریں'
-                        : 'Load top 20 Pakistani staples with verified prices or add custom item')}
+                      ? (isUrdu ? `دکان میں ${products.length} اشیاء محفوظ ہیں` : `${products.length} products ready in catalog`)
+                      : (isUrdu
+                        ? 'چینی، آٹا، گھی، دالیں اور چائے 1 کلک میں لوڈ کریں'
+                        : 'Load top 20 Pakistani staples with verified prices')}
                   </Text>
                 </View>
                 {hasProducts ? (
                   <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
                     <Text style={[styles.stepDoneText, { color: '#059669' }]}>
-                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
+                      {isUrdu ? '✓ مکمل' : '✓ Done'}
                     </Text>
                   </View>
                 ) : null}
@@ -533,13 +544,13 @@ export const DashboardScreen: React.FC = () => {
                     ]}>
                     {isLoadingStaples ? (
                       <Text style={styles.loadStaplesText}>
-                        {language === 'ur' ? 'لوڈ ہو رہا ہے...' : 'Loading...'}
+                        {isUrdu ? 'لوڈ ہو رہا ہے...' : 'Loading...'}
                       </Text>
                     ) : (
                       <>
                         <Ionicons name="flash" size={15} color="#FFFFFF" />
                         <Text style={styles.loadStaplesText}>
-                          {language === 'ur' ? '⚡ 20 اہم اشیاء لوڈ کریں' : '⚡ Load Top 20 Staples'}
+                          {isUrdu ? '⚡ 20 اہم اشیاء لوڈ کریں' : '⚡ Load Top 20 Staples'}
                         </Text>
                       </>
                     )}
@@ -549,19 +560,19 @@ export const DashboardScreen: React.FC = () => {
                     onPress={() => setIsAddProductOpen(true)}
                     style={({ pressed }) => [
                       styles.customProductBtn,
-                      { borderColor: theme.border, backgroundColor: theme.card },
+                      { borderColor: softBorder, backgroundColor: theme.card },
                       pressed && { opacity: 0.8 },
                     ]}>
                     <Ionicons name="add" size={15} color={theme.text} />
                     <Text style={[styles.customProductText, { color: theme.text }]}>
-                      {language === 'ur' ? '+ نیا آئٹم' : '+ Custom Item'}
+                      {isUrdu ? '+ نیا آئٹم' : '+ Custom Item'}
                     </Text>
                   </Pressable>
                 </View>
               )}
             </View>
 
-            {/* Step 2: Add Customer Udhaar */}
+            {/* Step 2: Customer Ledger */}
             <View
               style={[
                 styles.setupStepBox,
@@ -569,10 +580,7 @@ export const DashboardScreen: React.FC = () => {
                   backgroundColor: hasCustomers
                     ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
                     : theme.surfaceSubtle,
-                  borderColor: hasCustomers
-                    ? theme.success
-                    : (!hasCustomers && hasProducts ? theme.primary : theme.border),
-                  borderWidth: !hasCustomers && hasProducts ? 1.5 : 1,
+                  borderColor: hasCustomers ? theme.success : softBorder,
                 },
               ]}>
               <View style={styles.setupStepTop}>
@@ -590,21 +598,21 @@ export const DashboardScreen: React.FC = () => {
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.stepTitle, { color: theme.text }]}>
                     {hasCustomers
-                      ? (language === 'ur' ? 'گاہک کھاتہ فعال ہے' : 'Customer Ledger Active')
-                      : (language === 'ur' ? 'پرانا ادھار کھاتہ درج کریں' : 'Register Customer Ledger')}
+                      ? (isUrdu ? 'گاہک کھاتہ فعال ہے' : 'Customer Ledger Active')
+                      : (isUrdu ? 'پرانا ادھار کھاتہ درج کریں' : 'Register Customer Ledger')}
                   </Text>
                   <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
                     {hasCustomers
-                      ? (language === 'ur' ? `کھاتے میں ${khata.length} گاہک محفوظ ہیں` : `${khata.length} customers in ledger`)
-                      : (language === 'ur'
-                        ? 'بہی کھاتہ سے اپنے پرانے ادھار گاہک اور سابقہ بقایا لکھیں'
-                        : 'Transfer customer names and opening debt balances from your notebook')}
+                      ? (isUrdu ? `کھاتے میں ${khata.length} گاہک محفوظ ہیں` : `${khata.length} customers in ledger`)
+                      : (isUrdu
+                        ? 'بہی کھاتہ سے اپنے پرانے ادھار گاہک اور رقم لکھیں'
+                        : 'Transfer customer names and debt balances')}
                   </Text>
                 </View>
                 {hasCustomers ? (
                   <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
                     <Text style={[styles.stepDoneText, { color: '#059669' }]}>
-                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
+                      {isUrdu ? '✓ مکمل' : '✓ Done'}
                     </Text>
                   </View>
                 ) : (
@@ -612,12 +620,12 @@ export const DashboardScreen: React.FC = () => {
                     onPress={() => setActiveTab('khata')}
                     style={({ pressed }) => [
                       styles.stepActionBtn,
-                      { backgroundColor: theme.primary, borderColor: theme.primary },
+                      { backgroundColor: theme.primary },
                       pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
                     ]}>
-                    <Ionicons name="person-add" size={14} color="#FFFFFF" />
-                    <Text style={[styles.stepActionText, { color: '#FFFFFF' }]}>
-                      {language === 'ur' ? 'نیا گاہک' : 'Add Customer'}
+                    <Ionicons name="person-add" size={13} color="#FFFFFF" />
+                    <Text style={styles.stepActionText}>
+                      {isUrdu ? 'نیا گاہک' : 'Add'}
                     </Text>
                   </Pressable>
                 )}
@@ -632,10 +640,7 @@ export const DashboardScreen: React.FC = () => {
                   backgroundColor: hasSales
                     ? (settings.darkMode ? 'rgba(16, 185, 129, 0.08)' : '#F0FDF4')
                     : theme.surfaceSubtle,
-                  borderColor: hasSales
-                    ? theme.success
-                    : (!hasSales && hasProducts ? '#7C3AED' : theme.border),
-                  borderWidth: !hasSales && hasProducts ? 1.5 : 1,
+                  borderColor: hasSales ? theme.success : softBorder,
                 },
               ]}>
               <View style={styles.setupStepTop}>
@@ -653,21 +658,21 @@ export const DashboardScreen: React.FC = () => {
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.stepTitle, { color: theme.text }]}>
                     {hasSales
-                      ? (language === 'ur' ? 'سیل کا ریکارڈ موجود ہے' : 'First Sale Completed')
-                      : (language === 'ur' ? 'پہلی سیل اور بل بنائیں' : 'Create First Sale Bill')}
+                      ? (isUrdu ? 'سیل کا ریکارڈ موجود ہے' : 'First Sale Completed')
+                      : (isUrdu ? 'پہلی سیل اور بل بنائیں' : 'Create First Sale Bill')}
                   </Text>
                   <Text style={[styles.stepDesc, { color: theme.textMuted }]}>
                     {hasSales
-                      ? (language === 'ur' ? `${sales.length} بل بنائے جا چکے ہیں` : `${sales.length} sales recorded`)
-                      : (language === 'ur'
+                      ? (isUrdu ? `${sales.length} بل بنائے جا چکے ہیں` : `${sales.length} sales recorded`)
+                      : (isUrdu
                         ? 'نقد فروخت یا ادھار بل کا پرنٹ و واٹس ایپ رسید'
-                        : 'Fast counter billing with instant WhatsApp receipt sharing')}
+                        : 'Fast counter billing with WhatsApp receipts')}
                   </Text>
                 </View>
                 {hasSales ? (
                   <View style={[styles.stepDoneBadge, { backgroundColor: '#D1FAE5' }]}>
                     <Text style={[styles.stepDoneText, { color: '#059669' }]}>
-                      {language === 'ur' ? '✓ مکمل' : '✓ Done'}
+                      {isUrdu ? '✓ مکمل' : '✓ Done'}
                     </Text>
                   </View>
                 ) : (
@@ -675,12 +680,12 @@ export const DashboardScreen: React.FC = () => {
                     onPress={() => setActiveTab('sale')}
                     style={({ pressed }) => [
                       styles.stepActionBtn,
-                      { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+                      { backgroundColor: '#7C3AED' },
                       pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
                     ]}>
-                    <Ionicons name="receipt-outline" size={14} color="#FFFFFF" />
-                    <Text style={[styles.stepActionText, { color: '#FFFFFF' }]}>
-                      {language === 'ur' ? 'سیل بنائیں' : 'Start Sale'}
+                    <Ionicons name="receipt" size={13} color="#FFFFFF" />
+                    <Text style={styles.stepActionText}>
+                      {isUrdu ? 'سیل بنائیں' : 'Start'}
                     </Text>
                   </Pressable>
                 )}
@@ -689,278 +694,215 @@ export const DashboardScreen: React.FC = () => {
           </View>
         )}
 
-        {/* ── Reports (collapsed by default — keeper's Home stays cash-first) ── */}
-        <Pressable
-          onPress={() => setShowReports((v) => !v)}
-          style={({ pressed }) => [
-            styles.reportsToggle,
-            { backgroundColor: theme.card, borderColor: theme.border },
-            pressed && { opacity: 0.85 },
-          ]}>
-          <Ionicons name="bar-chart-outline" size={17} color={theme.primary} />
-          <Text style={[styles.reportsToggleText, { color: theme.text }]}>
-            {language === 'ur' ? 'رپورٹس اور منافع' : 'Reports & Profit'}
+        {/* ── Recent Sales (SadaPay-style Floating Soft Cards) ── */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            {isUrdu ? 'حالیہ بلز' : 'Recent Sales'}
           </Text>
-          <Ionicons name={showReports ? 'chevron-up' : 'chevron-down'} size={16} color={theme.textMuted} />
-        </Pressable>
-
-        {showReports && (
-          <>
-        {/* ── Sales Analytics & Trends Chart ── */}
-        <SalesChart sales={sales} />
-
-        {/* ── Store Investment & Lifetime Earnings Section ── */}
-        <View style={{ marginTop: Spacing.md, marginBottom: Spacing.xs }}>
-          <SectionHeader title={t('investmentSection')} />
-        </View>
-
-        <View style={styles.financeGrid}>
-          {/* Card 1: Stock Investment & Value */}
-          <Pressable
-            onPress={() => setActiveTab('products')}
-            style={({ pressed }) => [
-              styles.financeCard,
-              { backgroundColor: theme.card, borderColor: theme.border },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-            ]}>
-            <View style={styles.financeCardHeader}>
-              <View style={[styles.financeIconWrap, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="wallet-outline" size={20} color="#059669" />
-              </View>
-              <View style={[styles.financeHeaderBadge, { backgroundColor: '#D1FAE5' }]}>
-                <Ionicons name="cube-outline" size={11} color="#059669" />
-                <Text style={[styles.financeHeaderBadgeText, { color: '#059669' }]}>
-                  {totalInventoryUnits} {language === 'ur' ? 'اشیاء' : 'units'}
-                </Text>
-              </View>
-            </View>
-
-            <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-              {t('totalInvestment')}
-            </Text>
-            <Text style={[styles.financeMainAmount, { color: theme.text }]}>
-              {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
-            </Text>
-
-            <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
-
-            <View style={styles.financeSubStatsRow}>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('stockRetailValue')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                  {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
-                </Text>
-              </View>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('expectedStockProfit')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: '#059669', fontWeight: '800' }]}>
-                  +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          {/* Card 2: Total Store Earnings & Realized Profit */}
-          <Pressable
-            onPress={() => setActiveTab('history')}
-            style={({ pressed }) => [
-              styles.financeCard,
-              { backgroundColor: theme.card, borderColor: theme.border },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-            ]}>
-            <View style={styles.financeCardHeader}>
-              <View style={[styles.financeIconWrap, { backgroundColor: '#F5F3FF' }]}>
-                <Ionicons name="trending-up-outline" size={20} color="#7C3AED" />
-              </View>
-              <View style={[styles.financeHeaderBadge, { backgroundColor: '#EDE9FE' }]}>
-                <Ionicons name="checkmark-done" size={11} color="#7C3AED" />
-                <Text style={[styles.financeHeaderBadgeText, { color: '#7C3AED' }]}>
-                  {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {language === 'ur' ? 'بلز' : 'sales'}
-                </Text>
-              </View>
-            </View>
-
-            <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-              {t('totalStoreEarnings')}
-            </Text>
-            <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
-              {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
-            </Text>
-
-            <View style={[styles.financeDivider, { backgroundColor: theme.border }]} />
-
-            <View style={styles.financeSubStatsRow}>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('totalProfitEarned')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
-                  +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
-                </Text>
-              </View>
-              <View style={styles.financeSubStat}>
-                <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                  {t('profitMargin')}
-                </Text>
-                <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                  {totalLifetimeEarnings > 0
-                    ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
-                    : '0%'}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-        </View>
-
-          </>
-        )}
-
-        {/* ── Stock Alerts ── */}
-        {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
-          <View style={[styles.alertSection, { backgroundColor: theme.warningLight, borderColor: theme.warning }]}>
-            <View style={styles.alertHeader}>
-              <Ionicons name="warning" size={18} color={theme.warning} />
-              <Text style={[styles.alertTitle, { color: theme.accent }]}>
-                {t('lowStockAlert')} ({lowStockProducts.length + outOfStockProducts.length})
+          {sales.length > 0 && (
+            <Pressable
+              onPress={() => setActiveTab('history')}
+              hitSlop={8}
+              style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
+              <Text style={[styles.sectionLink, { color: theme.primary }]}>
+                {isUrdu ? `سب دیکھیں (${sales.length}) →` : `View All (${sales.length}) →`}
               </Text>
-            </View>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.alertItemsScroll}>
-              {outOfStockProducts.map((p) => (
-                <Pressable
-                  key={p.id}
-                  onPress={() => setActiveTab('products')}
-                  style={({ pressed }) => [pressed && { opacity: 0.8 }]}>
-                  <StatusBadge
-                    label={`${p.name}: ${t('outOfStock')}`}
-                    bg={theme.dangerLight}
-                    color={theme.danger}
-                    icon="close-circle"
-                  />
-                </Pressable>
-              ))}
-              {lowStockProducts.map((p) => (
-                <Pressable
-                  key={p.id}
-                  onPress={() => setActiveTab('products')}
-                  style={({ pressed }) => [{ marginLeft: 6 }, pressed && { opacity: 0.8 }]}>
-                  <StatusBadge
-                    label={`${p.name}: ${p.stock} ${p.unit}`}
-                    bg={theme.warningLight}
-                    color={theme.accent}
-                    icon="alert-circle"
-                  />
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-
-        {/* ── Recent Sales ── */}
-        <SectionHeader
-          title={t('recentSales')}
-          actionLabel={sales.length > 0 ? (sales.length > MAX_HOME_RECENT_SALES ? `${t('viewAll')} (${sales.length})` : t('viewAll')) : undefined}
-          onAction={() => setActiveTab('history')}
-        />
+            </Pressable>
+          )}
+        </View>
 
         {recentSales.length === 0 ? (
           <EmptyState
             icon="receipt-outline"
             title={t('noRecentSales')}
-            subtitle={language === 'ur' ? 'پہلا بل بنانے کے لیے نیچے بٹن دبائیں' : 'Create your first bill to get started.'}
-            actionLabel={language === 'ur' ? 'نیا بل بنائیں' : 'Create First Bill'}
+            subtitle={isUrdu ? 'پہلا بل بنانے کے لیے اوپر بٹن دبائیں' : 'Create your first bill to get started.'}
+            actionLabel={isUrdu ? 'نیا بل بنائیں' : 'Create First Bill'}
             onAction={() => setIsSaleModalOpen(true)}
             compact
           />
         ) : (
           <View style={styles.recentSalesList}>
             {recentSales.map((s) => {
-              const payColor = getPayColor(s.paymentMethod);
+              const isCash = s.paymentMethod === 'cash';
+              const isOnline = s.paymentMethod === 'online';
+
+              const iconBg = isCash
+                ? (settings.darkMode ? 'rgba(16, 185, 129, 0.14)' : '#ECFDF5')
+                : isOnline
+                  ? (settings.darkMode ? 'rgba(56, 189, 248, 0.14)' : '#E0F2FE')
+                  : (settings.darkMode ? 'rgba(239, 68, 68, 0.14)' : '#FEE2E2');
+
+              const iconColor = isCash ? '#059669' : isOnline ? '#0284C7' : '#DC2626';
+
               return (
                 <Pressable
                   key={s.id}
                   onPress={() => setActiveReceipt(s)}
                   style={({ pressed }) => [
-                    styles.recentSaleItem,
-                    { backgroundColor: theme.card, borderColor: theme.border, borderLeftColor: payColor },
-                    pressed && { opacity: 0.82 },
+                    styles.recentSaleCard,
+                    { backgroundColor: theme.card, borderColor: softBorder },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
                   ]}>
-                  <View style={[styles.saleAvatar, { backgroundColor: theme.surfaceSubtle }]}>
+                  {/* Left Squircle Badge */}
+                  <View style={[styles.saleAvatarBadge, { backgroundColor: iconBg }]}>
                     <Ionicons
-                      name={s.paymentMethod === 'cash' ? 'cash' : s.paymentMethod === 'online' ? 'phone-portrait' : 'book'}
+                      name={isCash ? 'cash' : isOnline ? 'phone-portrait' : 'book'}
                       size={18}
-                      color={payColor}
+                      color={iconColor}
                     />
                   </View>
 
-                  <View style={styles.saleMiddle}>
-                    <Text style={[styles.saleCustomer, { color: theme.text }]} numberOfLines={1}>
-                      {s.customerName || (language === 'ur' ? 'نقد سیل' : 'Cash Sale')}
+                  {/* Middle Customer & Meta */}
+                  <View style={styles.saleMiddleBlock}>
+                    <Text style={[styles.saleCustomerName, { color: theme.text }]} numberOfLines={1}>
+                      {s.customerName || (isUrdu ? 'نقد گاہک (کاؤنٹر سیل)' : 'Walk-in Cash Customer')}
                     </Text>
-                    <Text style={[styles.saleTime, { color: theme.textMuted }]}>
-                      {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {s.billNumber} • {s.items.length} {t('itemsCount')}
+                    <Text style={[styles.saleTimeMeta, { color: theme.textMuted }]} numberOfLines={1}>
+                      {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • #{s.billNumber} • {s.items.length} {t('itemsCount')}
                     </Text>
                   </View>
 
-                  <View style={styles.saleRight}>
-                    <Text style={[styles.saleAmount, { color: theme.text }]}>
-                      {settings.currencySymbol} {s.grandTotal}
+                  {/* Right Amount & Capsule */}
+                  <View style={styles.saleRightBlock}>
+                    <Text style={[styles.saleAmountText, { color: theme.text }]}>
+                      {settings.currencySymbol}{s.grandTotal.toLocaleString()}
                     </Text>
-                    <StatusBadge
-                      label={s.paymentMethod.toUpperCase()}
-                      bg={payColor + '22'}
-                      color={payColor}
-                      size="sm"
-                    />
+                    <View style={[styles.paymentMethodCapsule, { backgroundColor: iconBg }]}>
+                      <Text style={[styles.paymentMethodText, { color: iconColor }]}>
+                        {s.paymentMethod.toUpperCase()}
+                      </Text>
+                    </View>
                   </View>
                 </Pressable>
               );
             })}
-
-            {sales.length > MAX_HOME_RECENT_SALES && (
-              <Pressable
-                onPress={() => setActiveTab('history')}
-                style={({ pressed }) => [
-                  styles.viewMoreSalesBtn,
-                  { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                  pressed && { opacity: 0.75 },
-                ]}>
-                <Text style={[styles.viewMoreSalesText, { color: theme.primary }]}>
-                  {language === 'ur'
-                    ? `تمام ${sales.length} بلز دیکھیں →`
-                    : `View All ${sales.length} Sales →`}
-                </Text>
-              </Pressable>
-            )}
           </View>
         )}
 
-        {/* ── W2-5: Day-End Summary Card ── */}
+        {/* ── Collapsible Reports & Analytics Section ── */}
         <Pressable
-          onPress={() => setShowDayEnd(true)}
+          onPress={() => setShowReports((v) => !v)}
           style={({ pressed }) => [
-            styles.dayEndCard,
-            { backgroundColor: theme.primary, borderColor: theme.primaryDark },
-            pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+            styles.reportsToggleBtn,
+            { backgroundColor: theme.card, borderColor: softBorder },
+            pressed && { opacity: 0.85 },
           ]}>
-          <View style={styles.dayEndLeft}>
-            <Ionicons name="moon-outline" size={20} color="rgba(255,255,255,0.9)" />
-            <View>
-              <Text style={styles.dayEndTitle}>
-                {language === 'ur' ? 'دن کا خلاصہ دیکھیں' : 'Day-End Summary'}
-              </Text>
-              <Text style={styles.dayEndSub}>
-                {todaySales.length} {language === 'ur' ? 'بل آج' : 'bills today'} · {settings.currencySymbol}{todaySalesTotal.toLocaleString()}
-              </Text>
+          <View style={styles.reportsToggleLeft}>
+            <Ionicons name="bar-chart" size={17} color={theme.primary} />
+            <Text style={[styles.reportsToggleTitle, { color: theme.text }]}>
+              {isUrdu ? 'دکان کی رپورٹس اور منافع کا گراف' : 'Store Analytics & Profit Reports'}
+            </Text>
+          </View>
+          <Ionicons name={showReports ? 'chevron-up' : 'chevron-down'} size={16} color={theme.textMuted} />
+        </Pressable>
+
+        {showReports && (
+          <View style={styles.reportsExpandedArea}>
+            {/* Sales Chart */}
+            <SalesChart sales={sales} />
+
+            {/* Financial Investment Breakdown */}
+            <View style={styles.financeGrid}>
+              {/* Card 1: Total Inventory Value */}
+              <Pressable
+                onPress={() => setActiveTab('products')}
+                style={({ pressed }) => [
+                  styles.financeCard,
+                  { backgroundColor: theme.card, borderColor: softBorder },
+                  pressed && { opacity: 0.9 },
+                ]}>
+                <View style={styles.financeCardHeader}>
+                  <View style={[styles.financeIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                    <Ionicons name="wallet-outline" size={18} color="#059669" />
+                  </View>
+                  <View style={[styles.financeBadge, { backgroundColor: '#D1FAE5' }]}>
+                    <Text style={[styles.financeBadgeText, { color: '#059669' }]}>
+                      {totalInventoryUnits} {isUrdu ? 'اشیاء' : 'units'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+                  {t('totalInvestment')}
+                </Text>
+                <Text style={[styles.financeMainAmount, { color: theme.text }]}>
+                  {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
+                </Text>
+
+                <View style={[styles.financeDivider, { backgroundColor: softBorder }]} />
+
+                <View style={styles.financeSubStatsRow}>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('stockRetailValue')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                      {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('expectedStockProfit')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: '#059669', fontWeight: '800' }]}>
+                      +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+
+              {/* Card 2: Total Store Earnings */}
+              <Pressable
+                onPress={() => setActiveTab('history')}
+                style={({ pressed }) => [
+                  styles.financeCard,
+                  { backgroundColor: theme.card, borderColor: softBorder },
+                  pressed && { opacity: 0.9 },
+                ]}>
+                <View style={styles.financeCardHeader}>
+                  <View style={[styles.financeIconWrap, { backgroundColor: '#F5F3FF' }]}>
+                    <Ionicons name="trending-up-outline" size={18} color="#7C3AED" />
+                  </View>
+                  <View style={[styles.financeBadge, { backgroundColor: '#EDE9FE' }]}>
+                    <Text style={[styles.financeBadgeText, { color: '#7C3AED' }]}>
+                      {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {isUrdu ? 'بلز' : 'sales'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+                  {t('totalStoreEarnings')}
+                </Text>
+                <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
+                  {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
+                </Text>
+
+                <View style={[styles.financeDivider, { backgroundColor: softBorder }]} />
+
+                <View style={styles.financeSubStatsRow}>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('totalProfitEarned')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
+                      +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.financeSubStat}>
+                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                      {t('profitMargin')}
+                    </Text>
+                    <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                      {totalLifetimeEarnings > 0
+                        ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
+                        : '0%'}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.8)" />
-        </Pressable>
+        )}
 
         {/* Day-End Cash Tally & Closing Modal */}
         <DayEndClosingModal
@@ -977,7 +919,7 @@ export const DashboardScreen: React.FC = () => {
           todayGrossProfit={todayGrossProfit}
         />
 
-        {/* ── Cash Out (Expense) Modal ── */}
+        {/* Cash Out (Expense) Modal */}
         <CashOutModal
           visible={isCashOutModalOpen}
           onClose={() => setIsCashOutModalOpen(false)}
@@ -986,7 +928,7 @@ export const DashboardScreen: React.FC = () => {
 
       </ScrollView>
 
-      {/* ── Floating Action Button: Rainbow Quick Action Arc ── */}
+      {/* Floating Action Button */}
       <RainbowQuickActionFab
         onNewSale={() => setIsSaleModalOpen(true)}
         onAddProduct={() => setIsAddProductOpen(true)}
@@ -997,7 +939,7 @@ export const DashboardScreen: React.FC = () => {
         language={language}
       />
 
-      {/* ── Direct New Sale Window on Home ── */}
+      {/* Direct New Sale Modal on Home */}
       <Modal
         visible={isSaleModalOpen}
         animationType="slide"
@@ -1016,523 +958,234 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+  },
   content: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: 0,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 12,
     paddingBottom: 110,
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
-  },
-  floatingFabWrapper: {
-    position: 'absolute',
-    bottom: 24,
-    right: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 50,
+    gap: 12,
   },
   saleModalContainer: {
     flex: 1,
   },
 
-  // Hero — full-bleed green band
-  heroSection: {
-    marginHorizontal: -Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
-    paddingBottom: 70,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+  // Greeting Bar
+  topGreetingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  greetingLeft: {
+    flex: 1,
+    gap: 1,
+  },
+  greetingSub: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  greetingName: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  avatarPressable: {
+    padding: 2,
+  },
+  avatarCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    overflow: 'hidden',
+    ...Shadows.sm,
+  },
+  avatarImg: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+
+  // SadaPay Hero Balance Card
+  heroCard: {
+    borderRadius: 24,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 16,
+    gap: 10,
+    ...Shadows.md,
   },
   heroTopRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  heroLeft: { flex: 1, paddingRight: Spacing.sm },
-  heroGreet: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  heroOwner: {
-    color: '#FFFFFF',
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    lineHeight: 32,
-  },
-  heroAvatarBtn: { marginTop: 2 },
-  heroIconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  heroAvatarImg: {
-    width: 42,
-    height: 42,
-    borderRadius: BorderRadius.full,
-  },
-  overviewRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: Spacing.lg,
-  },
-  overviewTitle: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  overviewAction: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-
-  // Metrics — float over green edge
-  metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: 12,
-    columnGap: 12,
-    marginTop: -42,
-    marginBottom: Spacing.md,
-  },
-  metricCard: {
-    width: '48%',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 4,
-    ...Shadows.md,
-  },
-  metricHeaderRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  metricLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+  heroTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     flex: 1,
   },
-  metricValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.3,
+  heroIconBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  metricSubHint: {
+  heroLabel: {
+    color: 'rgba(255, 255, 255, 0.88)',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  heroExpenseBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 12,
+    ...Shadows.sm,
+  },
+  heroExpenseBtnText: {
+    color: '#DC2626',
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+  heroAmountWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+  },
+  heroAmount: {
+    color: '#FFFFFF',
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.8,
+  },
+  heroDeductedBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.35)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  heroDeductedText: {
+    color: '#FEE2E2',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  heroCapsulesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    paddingTop: 2,
+  },
+  heroCapsule: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  heroCapsuleText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  // Action Pods (SadaPay Style)
+  actionPodsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  actionPod: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 14,
+    gap: 14,
+    ...Shadows.sm,
+  },
+  actionPodHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  actionPodIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionPodTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  actionPodSub: {
+    color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 11,
     fontWeight: '500',
     marginTop: 1,
   },
 
-  // Alert Section
-  reportsToggle: {
+  // 3 Key Metrics Row
+  metricsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    gap: 10,
+  },
+  metricCard: {
+    flex: 1,
+    borderRadius: 20,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginTop: 14,
-  },
-  reportsToggleText: { flex: 1, fontSize: 14, fontWeight: '700' },
-  alertSection: {
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    marginBottom: Spacing.lg,
-  },
-  alertHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
-  alertTitle: { fontSize: 13, fontWeight: '700' },
-  alertItemsScroll: { flexDirection: 'row' },
-
-  // Quick Actions
-  quickGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: Spacing.md,
-    columnGap: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  quickTile: {
-    width: '48%',
-    paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    overflow: 'hidden',
-    ...Shadows.md,
-  },
-  quickTileShine: {
-    position: 'absolute',
-    top: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: BorderRadius.full,
-    backgroundColor: 'rgba(255,255,255,0.10)',
-  },
-  quickTileIconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quickTileText: { color: '#FFFFFF', fontWeight: '700', fontSize: 13, textAlign: 'center' },
-
-  // Recent Sales
-  recentSalesList: { gap: Spacing.sm },
-  recentSaleItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderLeftWidth: 4,
+    padding: 12,
+    gap: 3,
     ...Shadows.sm,
   },
-  saleAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  saleMiddle: { flex: 1, gap: 2 },
-  saleCustomer: { fontSize: 14, fontWeight: '700' },
-  saleTime: { fontSize: 11, fontWeight: '500' },
-  saleRight: { alignItems: 'flex-end', gap: 4 },
-  saleAmount: { fontSize: 16, fontWeight: '800', letterSpacing: -0.3 },
-  viewMoreSalesBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.xs,
-  },
-  viewMoreSalesText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  // Finance & Investment Grid
-  financeGrid: {
-    gap: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  financeCard: {
-    padding: Spacing.md,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    ...Shadows.sm,
-  },
-  financeCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  financeIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  financeHeaderBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.full,
-  },
-  financeHeaderBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  financeCardTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  financeMainAmount: {
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-    marginTop: 2,
-    marginBottom: Spacing.xs,
-  },
-  financeDivider: {
-    height: 1,
-    width: '100%',
-    marginVertical: Spacing.xs,
-  },
-  financeSubStatsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: 4,
-  },
-  financeSubStat: {
-    flex: 1,
-    gap: 2,
-  },
-  financeSubStatLabel: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
-  financeSubStatValue: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-
-  // Evening Closing Prompt Card
-  eveningClosingPromptCard: {
-    backgroundColor: '#064E3B',
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.md,
-    marginTop: 8,
-    marginBottom: Spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    borderWidth: 1,
-    borderColor: '#047857',
-    ...Shadows.md,
-  },
-  eveningPromptLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  eveningPromptMoon: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eveningPromptTitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  eveningPromptSubtitle: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 11.5,
-    marginTop: 2,
-    lineHeight: 16,
-  },
-  eveningPromptCta: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.md,
-  },
-  eveningPromptCtaText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-  },
-
-  // W2-5: Day-End Summary card + modal
-  dayEndCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.sm,
-    ...Shadows.md,
-  },
-  dayEndLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  dayEndTitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  dayEndSub: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 12,
-    marginTop: 2,
-  },
-  dayEndOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  dayEndModal: {
-    borderTopLeftRadius: BorderRadius.xxl,
-    borderTopRightRadius: BorderRadius.xxl,
-    overflow: 'hidden',
-    ...Shadows.xl,
-  },
-  dayEndModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-  },
-  dayEndModalTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  dayEndModalTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  dayEndClose: {
-    padding: 4,
-  },
-  dayEndBody: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    gap: 0,
-  },
-  dayEndRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: Spacing.md,
-    borderBottomWidth: 1,
-  },
-  dayEndRowIcon: {
+  metricAvatar: {
     width: 32,
     height: 32,
-    borderRadius: BorderRadius.md,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-
+    marginBottom: 4,
   },
-  dayEndRowLabel: {
-    flex: 1,
-    fontSize: 13,
+  metricLabel: {
+    fontSize: 10.5,
     fontWeight: '600',
-
   },
-  dayEndRowValue: {
-    fontSize: 15,
+  metricValue: {
+    fontSize: 16,
     fontWeight: '800',
-
+    letterSpacing: -0.4,
   },
-  drawerActionStrip: {
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 14,
-    marginTop: 6,
-    marginBottom: 6,
-    minHeight: 105,
-    justifyContent: 'space-between',
-    ...Shadows.sm,
-  },
-  drawerTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  drawerTitleWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    flex: 1,
-    minWidth: 0,
-  },
-  drawerSmallIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  drawerStripLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  drawerStripCashOutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  drawerStripCashOutText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-  },
-  drawerBottomArea: {
-    marginTop: 10,
-    gap: 4,
-  },
-  drawerAmountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  drawerStripAmount: {
-    fontSize: 24,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-  },
-  expDeductedPill: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  expDeductedText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  drawerFormulaSub: {
-    fontSize: 11.5,
+  metricSub: {
+    fontSize: 10,
     fontWeight: '500',
   },
 
-  // Day-0 Setup Card
+  // Setup Card
   setupCard: {
-    borderRadius: BorderRadius.lg,
+    borderRadius: 22,
     borderWidth: 1,
     padding: Spacing.md,
-    marginTop: 6,
-    marginBottom: Spacing.sm,
-    gap: Spacing.md,
+    gap: 12,
     ...Shadows.sm,
   },
   setupCardHeader: {
@@ -1541,35 +1194,47 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   setupIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   setupTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
   },
   setupSubtitle: {
-    fontSize: 11.5,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
   },
   setupBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.sm,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   setupBadgeText: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#059669',
+  },
+  dismissBtn: {
+    padding: 4,
+  },
+  progressBarTrack: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 2,
   },
   setupStepBox: {
-    borderRadius: BorderRadius.md,
+    borderRadius: 14,
     borderWidth: 1,
-    padding: Spacing.md,
-    gap: Spacing.sm,
+    padding: 12,
+    gap: 8,
   },
   setupStepTop: {
     flexDirection: 'row',
@@ -1577,45 +1242,45 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   stepNumBubble: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepNumText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
   },
   stepTitle: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '700',
   },
   stepDesc: {
-    fontSize: 11,
+    fontSize: 10.5,
     marginTop: 1,
-    lineHeight: 15,
+    lineHeight: 14,
   },
   stepButtonsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 4,
+    marginTop: 2,
   },
   loadStaplesBtn: {
-    flex: 1.6,
+    flex: 1.5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    borderRadius: BorderRadius.md,
+    gap: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
   },
   loadStaplesText: {
     color: '#FFFFFF',
-    fontSize: 12.5,
+    fontSize: 11.5,
     fontWeight: '800',
   },
   customProductBtn: {
@@ -1624,49 +1289,196 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    borderRadius: BorderRadius.md,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
     borderWidth: 1,
   },
   customProductText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
   },
   stepActionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
     paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
   stepActionText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  dismissBtn: {
-    padding: 4,
-    marginLeft: Spacing.xs,
-  },
-  progressBarTrack: {
-    height: 5,
-    borderRadius: 3,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 3,
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '800',
   },
   stepDoneBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.sm,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   stepDoneText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
+  },
+
+  // Section Header
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 4,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  sectionLink: {
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+
+  // Recent Sales (SadaPay Inspo: Netflix / KFC style)
+  recentSalesList: {
+    gap: 8,
+  },
+  recentSaleCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    ...Shadows.sm,
+  },
+  saleAvatarBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saleMiddleBlock: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  saleCustomerName: {
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  saleTimeMeta: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  saleRightBlock: {
+    alignItems: 'flex-end',
+    gap: 3,
+  },
+  saleAmountText: {
+    fontSize: 15.5,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  paymentMethodCapsule: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  paymentMethodText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+  },
+
+  // Reports
+  reportsToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 4,
+    ...Shadows.sm,
+  },
+  reportsToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  reportsToggleTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  reportsExpandedArea: {
+    gap: 12,
+    paddingTop: 4,
+  },
+  financeGrid: {
+    gap: 10,
+  },
+  financeCard: {
+    padding: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    ...Shadows.sm,
+  },
+  financeCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  financeIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  financeBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  financeBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+  financeCardTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginTop: 6,
+  },
+  financeMainAmount: {
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+    marginTop: 2,
+  },
+  financeDivider: {
+    height: 1,
+    width: '100%',
+    marginVertical: 8,
+  },
+  financeSubStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  financeSubStat: {
+    flex: 1,
+    gap: 2,
+  },
+  financeSubStatLabel: {
+    fontSize: 10.5,
+    fontWeight: '500',
+  },
+  financeSubStatValue: {
+    fontSize: 12.5,
+    fontWeight: '700',
   },
 });
