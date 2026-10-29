@@ -178,173 +178,196 @@ export const DashboardScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}>
 
         {/* ══════════════════════════════════════════════════════════
-            1. FULL-WIDTH HERO: CASH DRAWER & CLOSING STATUS
+            0. AMBIENT TOP GLOW (Fintech Backdrop Aura)
             ══════════════════════════════════════════════════════════ */}
-        <Pressable
-          onPress={() => setShowDayEnd(true)}
-          style={({ pressed }) => [
-            styles.heroBalanceCard,
-            {
-              backgroundColor: settings.darkMode ? '#064E3B' : '#00C9A7',
-            },
-            pressed && { opacity: 0.95, transform: [{ scale: 0.995 }] },
-          ]}>
-          {/* Top Row: Label with Wallet Icon + Live Drawer Status Pill */}
-          <View style={styles.heroTopRow}>
-            <View style={styles.heroLabelWrap}>
-              <View style={styles.heroWalletIconBubble}>
-                <Ionicons name="wallet" size={14} color="#FFFFFF" />
-              </View>
-              <Text style={styles.heroLabelText}>
-                {isUrdu ? 'گلہ کا نقد کیش' : 'CASH IN REGISTER'}
-              </Text>
-            </View>
-
-            <View style={styles.heroLivePill}>
-              <View style={styles.heroGreenDot} />
-              <Text style={styles.heroLivePillText}>
-                {isUrdu ? 'لائیو گلہ' : 'Live Drawer'}
-              </Text>
-            </View>
-          </View>
-
-          {/* Amount Row */}
-          <View style={styles.heroAmountBlock}>
-            <View style={styles.heroNumberRow}>
-              <Text style={styles.heroCurrencySymbol}>{settings.currencySymbol}</Text>
-              <Text style={styles.heroAmountNumber} numberOfLines={1}>
-                {todayNetCashInDrawer.toLocaleString()}
-              </Text>
-            </View>
-            <Text style={styles.heroFormulaText} numberOfLines={1}>
-              {todaySales.length} {isUrdu ? 'بلز آج' : 'bills today'} • {isUrdu ? 'نقد سیل + وصولی منفی خرچہ' : 'Cash Sales + Vasooli − Expenses'}
-            </Text>
-          </View>
-
-          {/* Subtle Divider */}
-          <View style={styles.heroCardDivider} />
-
-          {/* Bottom Row: Expense Breakdown on left + Tally CTA on right */}
-          <View style={styles.heroFooterRow}>
-            <View style={styles.heroExpenseLeft}>
-              {todayCashOutTotal > 0 ? (
-                <View style={styles.heroExpenseDeductedPill}>
-                  <Ionicons name="arrow-up-circle" size={13} color="#FFFFFF" />
-                  <Text style={styles.heroExpenseDeductedText}>
-                    -{settings.currencySymbol}{todayCashOutTotal.toLocaleString()} {isUrdu ? 'خرچہ' : 'expenses'}
-                  </Text>
-                </View>
-              ) : (
-                <Text style={styles.heroBalancedText}>
-                  {isUrdu ? '✓ گلہ متوازن ہے' : '✓ Drawer in sync'}
-                </Text>
-              )}
-            </View>
-
-            <View style={styles.heroTallyCta}>
-              <Text style={styles.heroTallyCtaText}>
-                {isUrdu ? 'شام کا حساب' : 'Day-End Tally'}
-              </Text>
-              <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
-            </View>
-          </View>
-        </Pressable>
+        <View style={styles.ambientTopGlow} pointerEvents="none" />
 
         {/* ══════════════════════════════════════════════════════════
-            2. CLEAN 4-COLUMN ACTION BAR (Never scrolls, never clips)
+            1. THE 3-CARD HERO DECK (Mint Balance + 2 Stacked Tiles)
             ══════════════════════════════════════════════════════════ */}
-        <View
-          style={[
-            styles.actionBarCard,
-            { backgroundColor: theme.card, borderColor: softBorder },
-          ]}>
-          {/* Action 1: New Bill */}
+        <View style={styles.heroDeckRow}>
+          {/* ── Left Card (~58% width): Mint Cash Drawer Card ── */}
           <Pressable
-            onPress={() => setIsSaleModalOpen(true)}
+            onPress={() => setShowDayEnd(true)}
             style={({ pressed }) => [
-              styles.actionColBtn,
-              pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
+              styles.mintBalanceCard,
+              { backgroundColor: settings.darkMode ? '#064E3B' : '#00C9A7' },
+              pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
             ]}>
-            <View style={[styles.actionIconCircle, { backgroundColor: '#2F9FF8' }]}>
-              <Ionicons name="cart" size={22} color="#FFFFFF" />
+            {/* Top Row: Stacked Label on left, Active Pill on right */}
+            <View style={styles.mintTopRow}>
+              <View style={styles.mintLabelStack}>
+                <Text style={styles.mintMiniLabel}>{isUrdu ? 'گلہ کا' : 'AVAILABLE'}</Text>
+                <Text style={styles.mintMiniLabel}>{isUrdu ? 'نقد کیش' : 'BALANCE'}</Text>
+              </View>
+              <View style={styles.mintActivePill}>
+                <Text style={styles.mintActivePillText}>{isUrdu ? 'فعال' : 'Active'}</Text>
+              </View>
             </View>
-            <Text style={[styles.actionBtnLabel, { color: theme.text }]} numberOfLines={1}>
-              {isUrdu ? 'نیا بل' : 'New Bill'}
-            </Text>
-            <Text style={[styles.actionBtnSub, { color: theme.textMuted }]}>
-              {isUrdu ? 'سیل' : '+ Sale'}
-            </Text>
+
+            {/* Big Amount */}
+            <View style={styles.mintAmountBlock}>
+              <Text style={styles.mintCurrencySymbol}>{settings.currencySymbol}</Text>
+              <Text style={styles.mintAmountNumber} numberOfLines={1} adjustsFontSizeToFit>
+                {todayNetCashInDrawer.toLocaleString()}
+              </Text>
+              <Text style={styles.mintSubHint} numberOfLines={1}>
+                {todaySales.length > 0 ? `${todaySales.length} ${isUrdu ? 'بلز آج' : 'bills today'}` : (isUrdu ? 'گلہ متوازن ہے' : 'In register')}
+              </Text>
+            </View>
+
+            {/* Bottom Row: Duo Circles + Arrow Button */}
+            <View style={styles.mintBottomRow}>
+              <View style={styles.mintDuoDotsWrap}>
+                <View style={[styles.mintDuoDot, { backgroundColor: '#EF4444' }]} />
+                <View style={[styles.mintDuoDot, { backgroundColor: '#F59E0B', marginLeft: -6 }]} />
+                <Text style={styles.mintCardDigitsText}>
+                  {todayCashOutTotal > 0 ? `-${settings.currencySymbol}${todayCashOutTotal}` : '•• 4567'}
+                </Text>
+              </View>
+
+              <View style={styles.mintArrowBtn}>
+                <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
+              </View>
+            </View>
           </Pressable>
 
-          {/* Action 2: Barcode Scan */}
-          <Pressable
-            onPress={() => setIsSaleModalOpen(true)}
-            style={({ pressed }) => [
-              styles.actionColBtn,
-              pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
-            ]}>
-            <View style={[styles.actionIconCircle, { backgroundColor: '#00C9A7' }]}>
-              <Ionicons name="qr-code" size={20} color="#FFFFFF" />
-            </View>
-            <Text style={[styles.actionBtnLabel, { color: theme.text }]} numberOfLines={1}>
-              {isUrdu ? 'بارکوڈ' : 'Scan'}
-            </Text>
-            <Text style={[styles.actionBtnSub, { color: theme.textMuted }]}>
-              {isUrdu ? 'فوری' : 'Barcode'}
-            </Text>
-          </Pressable>
+          {/* ── Right Column (~40% width): Electric Blue & Coral Tiles ── */}
+          <View style={styles.heroRightCol}>
+            {/* Top Tile: Electric Blue -> New Sale */}
+            <Pressable
+              onPress={() => setIsSaleModalOpen(true)}
+              style={({ pressed }) => [
+                styles.rightActionCard,
+                { backgroundColor: settings.darkMode ? '#0284C7' : '#2F9FF8' },
+                pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+              ]}>
+              <View style={styles.rightCardTopRow}>
+                <View style={styles.rightCardIconCircle}>
+                  <Ionicons name="cart" size={13} color="#FFFFFF" />
+                </View>
+                <View style={styles.rightCardBadgePill}>
+                  <Text style={styles.rightCardBadgeText}>{isUrdu ? 'فوری' : 'TOP-UP'}</Text>
+                </View>
+              </View>
+              <View style={styles.rightCardTextWrap}>
+                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'نیا' : 'New'}</Text>
+                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'بل' : 'Bill'}</Text>
+              </View>
+            </Pressable>
 
-          {/* Action 3: Customer Khata */}
-          <Pressable
-            onPress={() => setActiveTab('khata')}
-            style={({ pressed }) => [
-              styles.actionColBtn,
-              pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
-            ]}>
-            <View style={[styles.actionIconCircle, { backgroundColor: '#8B5CF6' }]}>
-              <Ionicons name="book" size={20} color="#FFFFFF" />
-            </View>
-            <Text style={[styles.actionBtnLabel, { color: theme.text }]} numberOfLines={1}>
-              {isUrdu ? 'گاہک کھاتہ' : 'Khata'}
-            </Text>
-            <Text style={[styles.actionBtnSub, { color: theme.textMuted }]}>
-              {isUrdu ? 'ادھار' : 'Ledger'}
-            </Text>
-          </Pressable>
-
-          {/* Action 4: Record Expense */}
-          <Pressable
-            onPress={() => setIsCashOutModalOpen(true)}
-            style={({ pressed }) => [
-              styles.actionColBtn,
-              pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
-            ]}>
-            <View style={[styles.actionIconCircle, { backgroundColor: '#F43F5E' }]}>
-              <Ionicons name="arrow-up-circle" size={21} color="#FFFFFF" />
-            </View>
-            <Text style={[styles.actionBtnLabel, { color: theme.text }]} numberOfLines={1}>
-              {isUrdu ? 'خرچہ' : 'Expense'}
-            </Text>
-            <Text style={[styles.actionBtnSub, { color: theme.textMuted }]}>
-              {isUrdu ? 'درج کریں' : 'Cash Out'}
-            </Text>
-          </Pressable>
+            {/* Bottom Tile: Coral / Salmon -> Day-End Tally */}
+            <Pressable
+              onPress={() => setShowDayEnd(true)}
+              style={({ pressed }) => [
+                styles.rightActionCard,
+                { backgroundColor: settings.darkMode ? '#EA580C' : '#F3705A' },
+                pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+              ]}>
+              <View style={styles.rightCardTopRow}>
+                <View style={styles.rightCardIconCircle}>
+                  <Ionicons name="moon" size={13} color="#FFFFFF" />
+                </View>
+                <View style={styles.rightCardBadgePill}>
+                  <Text style={styles.rightCardBadgeText}>{isUrdu ? 'حساب' : 'CLOSING'}</Text>
+                </View>
+              </View>
+              <View style={styles.rightCardTextWrap}>
+                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'شام کا' : 'Day-End'}</Text>
+                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'حساب' : 'Tally'}</Text>
+              </View>
+            </Pressable>
+          </View>
         </View>
 
         {/* ══════════════════════════════════════════════════════════
-            3. TODAY'S STORE OVERVIEW (The 4 Core Shopkeeper Pillars)
+            2. HORIZONTAL ACTION PILLS (Soft, Flat, Zero Shadow)
+            ══════════════════════════════════════════════════════════ */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.actionPillsScroll}>
+          {/* Pill 1: Scan & Pay */}
+          <Pressable
+            onPress={() => setIsSaleModalOpen(true)}
+            style={({ pressed }) => [
+              styles.actionPillBtn,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}>
+            <View style={[styles.pillIconSquircle, { backgroundColor: '#D5F0F7' }]}>
+              <Ionicons name="qr-code-outline" size={17} color="#00A389" />
+            </View>
+            <Text style={[styles.pillText, { color: theme.text }]}>
+              {isUrdu ? 'بارکوڈ سیل' : 'Scan & Pay'}
+            </Text>
+          </Pressable>
+
+          {/* Pill 2: Khata Ledger */}
+          <Pressable
+            onPress={() => setActiveTab('khata')}
+            style={({ pressed }) => [
+              styles.actionPillBtn,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}>
+            <View style={[styles.pillIconSquircle, { backgroundColor: '#DBEAFE' }]}>
+              <Ionicons name="book-outline" size={17} color="#2563EB" />
+            </View>
+            <Text style={[styles.pillText, { color: theme.text }]}>
+              {isUrdu ? 'گاہک کھاتہ' : 'Khata Ledger'}
+            </Text>
+          </Pressable>
+
+          {/* Pill 3: Add Expense */}
+          <Pressable
+            onPress={() => setIsCashOutModalOpen(true)}
+            style={({ pressed }) => [
+              styles.actionPillBtn,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}>
+            <View style={[styles.pillIconSquircle, { backgroundColor: '#FEE2E2' }]}>
+              <Ionicons name="receipt-outline" size={17} color="#DC2626" />
+            </View>
+            <Text style={[styles.pillText, { color: theme.text }]}>
+              {isUrdu ? 'خرچہ درج کریں' : 'Add Expense'}
+            </Text>
+          </Pressable>
+
+          {/* Pill 4: Stock Alerts (if low stock exists) */}
+          {totalStockAlerts > 0 && (
+            <Pressable
+              onPress={() => setActiveTab('products')}
+              style={({ pressed }) => [
+                styles.actionPillBtn,
+                { backgroundColor: theme.card, borderColor: softBorder },
+                pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+              ]}>
+              <View style={[styles.pillIconSquircle, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="warning-outline" size={17} color="#D97706" />
+              </View>
+              <Text style={[styles.pillText, { color: theme.text }]}>
+                {totalStockAlerts} {isUrdu ? 'کم اسٹاک' : 'Low Stock'}
+              </Text>
+            </Pressable>
+          )}
+        </ScrollView>
+
+        {/* ══════════════════════════════════════════════════════════
+            3. STORE DAILY SUMMARY ("LIVE POS" - 3 Pods)
             ══════════════════════════════════════════════════════════ */}
         <View
           style={[
             styles.summarySectionCard,
             { backgroundColor: theme.card, borderColor: softBorder },
           ]}>
-          {/* Header Row: Green Dot + Title + Tally Link */}
+          {/* Header Row: Green Dot + Store Daily Summary + LIVE POS badge */}
           <View style={styles.summaryHeaderRow}>
             <View style={styles.summaryTitleWrap}>
               <View style={styles.greenLiveDot} />
               <Text style={[styles.summaryCardTitle, { color: theme.text }]}>
-                {isUrdu ? 'دکان کا آج کا جائزہ' : "Today's Store Overview"}
+                {isUrdu ? 'دکان کا یومیہ خلاصہ' : 'Store Daily Summary'}
               </Text>
             </View>
 
@@ -356,109 +379,68 @@ export const DashboardScreen: React.FC = () => {
                 { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' },
                 pressed && { opacity: 0.75 },
               ]}>
-              <Text style={[styles.livePosText, { color: theme.primary }]}>
-                {isUrdu ? 'مکمل تفصیل →' : 'Full Tally →'}
+              <Text style={[styles.livePosText, { color: theme.textMuted }]}>
+                LIVE POS
               </Text>
             </Pressable>
           </View>
 
-          {/* 4 Core Metric Pods (2x2 Grid) */}
-          <View style={styles.metricsGrid2x2}>
-            {/* 1. Today's Total Sales */}
+          {/* 3 Metric Pods */}
+          <View style={styles.summaryPodsRow}>
+            {/* Pod 1: SALES TODAY */}
             <Pressable
               onPress={() => setShowDayEnd(true)}
               style={({ pressed }) => [
-                styles.summaryPod2x2,
+                styles.summaryPod,
                 { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
                 pressed && { opacity: 0.85 },
               ]}>
-              <View style={styles.podTopRow}>
-                <Text style={[styles.podLabel, { color: theme.textMuted }]}>
-                  {isUrdu ? 'آج کی سیل' : 'SALES TODAY'}
-                </Text>
-                <Ionicons name="receipt-outline" size={14} color="#00C9A7" />
-              </View>
+              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'سیل آج' : 'SALES TODAY'}
+              </Text>
               <Text style={[styles.podValue, { color: '#00C9A7' }]}>
                 +{settings.currencySymbol}{todaySalesTotal.toLocaleString()}
               </Text>
               <Text style={[styles.podSub, { color: theme.textMuted }]}>
-                {todaySales.length > 0
-                  ? `${todaySales.length} ${isUrdu ? 'بلز آج' : 'bills today'}`
-                  : (isUrdu ? 'آج کوئی بل نہیں' : 'No bills yet')}
+                {todaySales.length} {isUrdu ? 'آرڈرز' : 'orders'}
               </Text>
             </Pressable>
 
-            {/* 2. Customer Credit (Udhaar) */}
+            {/* Pod 2: COLLECTED (VASOOLI) */}
             <Pressable
               onPress={() => setActiveTab('khata')}
               style={({ pressed }) => [
-                styles.summaryPod2x2,
+                styles.summaryPod,
                 { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
                 pressed && { opacity: 0.85 },
               ]}>
-              <View style={styles.podTopRow}>
-                <Text style={[styles.podLabel, { color: theme.textMuted }]}>
-                  {isUrdu ? 'گاہکوں کا ادھار' : 'CUSTOMER CREDIT'}
-                </Text>
-                <Ionicons name="book-outline" size={14} color="#DC2626" />
-              </View>
+              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'ادھار وصولی' : 'COLLECTED'}
+              </Text>
+              <Text style={[styles.podValue, { color: '#0284C7' }]}>
+                +{settings.currencySymbol}{todayVasooli.toLocaleString()}
+              </Text>
+              <Text style={[styles.podSub, { color: '#059669', fontWeight: '700' }]}>
+                {todayVasooli > 0 ? (isUrdu ? 'وصولی' : 'vasooli') : (isUrdu ? 'آمدن' : 'inflow')}
+              </Text>
+            </Pressable>
+
+            {/* Pod 3: UDHAAR (KHATA) */}
+            <Pressable
+              onPress={() => setActiveTab('khata')}
+              style={({ pressed }) => [
+                styles.summaryPod,
+                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
+                pressed && { opacity: 0.85 },
+              ]}>
+              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'کل ادھار' : 'UDHAAR'}
+              </Text>
               <Text style={[styles.podValue, { color: '#DC2626' }]}>
                 {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
               </Text>
               <Text style={[styles.podSub, { color: theme.textMuted }]}>
-                {pendingKhataCount > 0
-                  ? `${pendingKhataCount} ${isUrdu ? 'کھاتے بقایا' : 'pending accounts'}`
-                  : (isUrdu ? 'کوئی ادھار نہیں' : 'All cleared')}
-              </Text>
-            </Pressable>
-
-            {/* 3. Debt Recovered (Vasooli) */}
-            <Pressable
-              onPress={() => setActiveTab('khata')}
-              style={({ pressed }) => [
-                styles.summaryPod2x2,
-                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
-                pressed && { opacity: 0.85 },
-              ]}>
-              <View style={styles.podTopRow}>
-                <Text style={[styles.podLabel, { color: theme.textMuted }]}>
-                  {isUrdu ? 'ادھار وصولی' : 'DEBT RECOVERED'}
-                </Text>
-                <Ionicons name="arrow-down-circle-outline" size={14} color="#059669" />
-              </View>
-              <Text style={[styles.podValue, { color: '#059669' }]}>
-                +{settings.currencySymbol}{todayVasooli.toLocaleString()}
-              </Text>
-              <Text style={[styles.podSub, { color: theme.textMuted }]}>
-                {isUrdu ? 'آج کی وصول شدہ رقم' : "Today's collections"}
-              </Text>
-            </Pressable>
-
-            {/* 4. Stock Alerts (Low Stock) */}
-            <Pressable
-              onPress={() => setActiveTab('products')}
-              style={({ pressed }) => [
-                styles.summaryPod2x2,
-                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
-                pressed && { opacity: 0.85 },
-              ]}>
-              <View style={styles.podTopRow}>
-                <Text style={[styles.podLabel, { color: theme.textMuted }]}>
-                  {isUrdu ? 'کم اسٹاک' : 'STOCK ALERTS'}
-                </Text>
-                <Ionicons name="warning-outline" size={14} color={totalStockAlerts > 0 ? '#D97706' : theme.textMuted} />
-              </View>
-              <Text
-                style={[
-                  styles.podValue,
-                  { color: totalStockAlerts > 0 ? '#D97706' : theme.text },
-                ]}>
-                {totalStockAlerts}
-              </Text>
-              <Text style={[styles.podSub, { color: theme.textMuted }]}>
-                {totalStockAlerts > 0
-                  ? (isUrdu ? 'آئٹمز ختم ہونے والے ہیں' : 'items to reorder')
-                  : (isUrdu ? 'تمام اسٹاک موجود ہے' : 'All stocked up')}
+                {pendingKhataCount} {isUrdu ? 'کھاتے' : 'buyers'}
               </Text>
             </Pressable>
           </View>
@@ -854,178 +836,208 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // ── 1. Full-Width Hero Balance Card ──
-  heroBalanceCard: {
-    borderRadius: 24,
-    padding: 20,
-    gap: 14,
-    ...Shadows.md,
+  // ── 0. Ambient Top Glow (Memorable Fintech Backdrop) ──
+  ambientTopGlow: {
+    position: 'absolute',
+    top: -50,
+    left: -20,
+    right: -20,
+    height: 240,
+    backgroundColor: '#00C9A7',
+    opacity: 0.12,
+    borderBottomLeftRadius: 180,
+    borderBottomRightRadius: 180,
   },
-  heroTopRow: {
+
+  // ── 1. The 3-Card Hero Deck (Mint Balance + 2 Right Tiles) ──
+  heroDeckRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 12,
+    minHeight: 218,
+    marginTop: 2,
+  },
+
+  // Left Card (~58% width): Mint Cash Drawer Card
+  mintBalanceCard: {
+    flex: 1.45,
+    borderRadius: 24,
+    padding: 16,
+    justifyContent: 'space-between',
+    elevation: 0,
+    overflow: 'hidden',
+  },
+  mintTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  mintLabelStack: {
+    gap: 1,
+  },
+  mintMiniLabel: {
+    color: '#FFFFFF',
+    fontSize: 10.5,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    opacity: 0.95,
+  },
+  mintActivePill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderRadius: 999,
+  },
+  mintActivePillText: {
+    color: '#FFFFFF',
+    fontSize: 10.5,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  mintAmountBlock: {
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  mintCurrencySymbol: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '800',
+    opacity: 0.95,
+  },
+  mintAmountNumber: {
+    color: '#FFFFFF',
+    fontSize: 27,
+    fontWeight: '900',
+    letterSpacing: -0.6,
+    lineHeight: 33,
+  },
+  mintSubHint: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 3,
+  },
+  mintBottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingTop: 4,
   },
-  heroLabelWrap: {
+  mintDuoDotsWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  heroWalletIconBubble: {
+  mintDuoDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    opacity: 0.92,
+  },
+  mintCardDigitsText: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: 6,
+    letterSpacing: 0.5,
+  },
+  mintArrowBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Right Column (~40% width): Electric Blue & Coral Tiles
+  heroRightCol: {
+    flex: 1,
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  rightActionCard: {
+    flex: 1,
+    borderRadius: 22,
+    paddingHorizontal: 13,
+    paddingVertical: 12,
+    justifyContent: 'space-between',
+    elevation: 0,
+    minHeight: 100,
+  },
+  rightCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  rightCardIconCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroLabelText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-  },
-  heroLivePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-    paddingHorizontal: 10,
-    paddingVertical: 4.5,
+  rightCardBadgePill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
     borderRadius: 999,
   },
-  heroGreenDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#34D399',
-  },
-  heroLivePillText: {
+  rightCardBadgeText: {
     color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  heroAmountBlock: {
-    gap: 4,
-    marginTop: 2,
-  },
-  heroNumberRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 4,
-  },
-  heroCurrencySymbol: {
-    color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 9,
     fontWeight: '800',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+  rightCardTextWrap: {
     marginTop: 6,
   },
-  heroAmountNumber: {
+  rightCardTitleWord: {
     color: '#FFFFFF',
-    fontSize: 38,
-    fontWeight: '900',
-    letterSpacing: -1,
-    lineHeight: 44,
-  },
-  heroFormulaText: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  heroCardDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-  },
-  heroFooterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  heroExpenseLeft: {
-    flex: 1,
-  },
-  heroExpenseDeductedPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  heroExpenseDeductedText: {
-    color: '#FFFFFF',
-    fontSize: 11.5,
-    fontWeight: '700',
-  },
-  heroBalancedText: {
-    color: 'rgba(255, 255, 255, 0.88)',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  heroTallyCta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.24)',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 12,
-  },
-  heroTallyCtaText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 14.5,
     fontWeight: '800',
-    letterSpacing: 0.2,
+    lineHeight: 18,
+    letterSpacing: -0.2,
   },
 
-  // ── 2. Clean 4-Column Action Bar ──
-  actionBarCard: {
+  // ── 2. Horizontal Action Pills (Zero Muddy Shadow, Soft Border) ──
+  actionPillsScroll: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingVertical: 2,
+  },
+  actionPillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 22,
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
     borderWidth: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-    ...Shadows.sm,
+    elevation: 0,
   },
-  actionColBtn: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  actionIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+  pillIconSquircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 2,
-    ...Shadows.sm,
   },
-  actionBtnLabel: {
-    fontSize: 12,
-    fontWeight: '800',
+  pillText: {
+    fontSize: 12.5,
+    fontWeight: '700',
     letterSpacing: -0.2,
-    textAlign: 'center',
-  },
-  actionBtnSub: {
-    fontSize: 10,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 
-  // ── 3. Store Overview (The 4 Core Pillars) ──
+  // ── 3. Store Daily Summary ("LIVE POS" - Zero Shadow) ──
   summarySectionCard: {
     borderRadius: 24,
     borderWidth: 1,
     padding: 16,
     gap: 12,
-    ...Shadows.sm,
+    elevation: 0,
   },
   summaryHeaderRow: {
     flexDirection: 'row',
@@ -1035,7 +1047,7 @@ const styles = StyleSheet.create({
   summaryTitleWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: 8,
   },
   greenLiveDot: {
     width: 8,
@@ -1044,36 +1056,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#00C9A7',
   },
   summaryCardTitle: {
-    fontSize: 15.5,
+    fontSize: 15,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   livePosBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
     borderRadius: 999,
   },
   livePosText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
   },
-  metricsGrid2x2: {
+  summaryPodsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
-  summaryPod2x2: {
-    width: '48%',
-    flexGrow: 1,
-    borderRadius: 18,
-    padding: 12,
-    gap: 4,
-  },
-  podTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  summaryPod: {
+    flex: 1,
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 11,
+    gap: 3,
   },
   podLabel: {
     fontSize: 9.5,
@@ -1082,13 +1088,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   podValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
     letterSpacing: -0.4,
     marginTop: 2,
   },
   podSub: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '600',
   },
 
@@ -1103,7 +1109,7 @@ const styles = StyleSheet.create({
     gap: 12,
     borderWidth: 1,
     borderColor: '#047857',
-    ...Shadows.sm,
+    elevation: 0,
   },
   eveningPromptLeft: {
     flexDirection: 'row',
@@ -1179,7 +1185,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 22,
     borderWidth: 1,
-    ...Shadows.sm,
+    elevation: 0,
   },
   miniMethodBadge: {
     paddingHorizontal: 6,
@@ -1244,7 +1250,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: Spacing.md,
     gap: 10,
-    ...Shadows.sm,
+    elevation: 0,
   },
   setupCardHeader: {
     flexDirection: 'row',
@@ -1306,7 +1312,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 13,
     marginTop: 4,
-    ...Shadows.sm,
+    elevation: 0,
   },
   reportsPillLeft: {
     flexDirection: 'row',
@@ -1328,7 +1334,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 20,
     borderWidth: 1,
-    ...Shadows.sm,
+    elevation: 0,
   },
   financeCardHeader: {
     flexDirection: 'row',
