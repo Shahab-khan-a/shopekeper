@@ -286,12 +286,14 @@ export default function App() {
       );
     }
 
+    const topCanvasBg = settings.darkMode ? '#0A0F1E' : '#F8FAFC';
+
     // 3. Authenticated or Guest Mode -> Show Main Store POS App
     return (
-      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: theme.heroBg }]}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: topCanvasBg }]}>
         <StatusBar
-          barStyle="light-content"
-          backgroundColor={theme.heroBg}
+          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={topCanvasBg}
         />
         <View style={[styles.appContainer, { backgroundColor: theme.background }]}>
           {/* Top Shop Brand & Settings Header */}

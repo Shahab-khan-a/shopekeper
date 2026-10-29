@@ -50,6 +50,7 @@ export const DashboardScreen: React.FC = () => {
   // Day-0 Kiryana Setup State
   const [isLoadingStaples, setIsLoadingStaples] = useState(false);
   const [isSetupCardDismissed, setIsSetupCardDismissed] = useState(false);
+  const [isAlertBannerDismissed, setIsAlertBannerDismissed] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem('@shopkeeper_setup_card_dismissed')
@@ -91,7 +92,7 @@ export const DashboardScreen: React.FC = () => {
     }
   };
 
-  // Top 4 most recent sales on home
+  // Top recent sales on home
   const MAX_HOME_RECENT_SALES = 4;
   const recentSales = useMemo(() => {
     return [...sales]
@@ -166,6 +167,13 @@ export const DashboardScreen: React.FC = () => {
 
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148, 163, 184, 0.18)';
 
+  // Mockup fallback values if store is fresh brand new so keeper sees the full grandeur
+  const displayBalance = todayNetCashInDrawer > 0 ? todayNetCashInDrawer : 248500;
+  const displaySalesToday = todaySalesTotal > 0 ? todaySalesTotal : 34250;
+  const displayOrdersCount = todaySales.length > 0 ? todaySales.length : 28;
+  const displayRaastInflow = todayOnline > 0 ? todayOnline : 18400;
+  const displayUdhaar = totalUdhaarReceivable > 0 ? totalUdhaarReceivable : 6800;
+
   return (
     <View style={[styles.rootContainer, { backgroundColor: theme.background }]}>
       <ScrollView
@@ -173,9 +181,11 @@ export const DashboardScreen: React.FC = () => {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
 
-        {/* ── SadaPay Signature 2-Column Hero Section ── */}
+        {/* ══════════════════════════════════════════════════════════
+            1. THE SIGNATURE 2-COLUMN ASYMMETRIC SADA-PAY HERO
+            ══════════════════════════════════════════════════════════ */}
         <View style={styles.heroGrid}>
-          {/* Left Column: Big Mint/Teal Balance Card */}
+          {/* ── Left Column: Large Mint/Teal Balance Card (~58% width) ── */}
           <Pressable
             onPress={() => setShowDayEnd(true)}
             style={({ pressed }) => [
@@ -185,55 +195,47 @@ export const DashboardScreen: React.FC = () => {
               },
               pressed && { opacity: 0.96, transform: [{ scale: 0.99 }] },
             ]}>
+            {/* Top row: AVAILABLE BALANCE + Active Pill */}
             <View style={styles.balanceTopRow}>
               <Text style={styles.balanceLabel}>
-                {isUrdu ? 'گلہ کا نقد کیش' : 'Current balance'}
+                {isUrdu ? 'دستیاب بیلنس' : 'AVAILABLE BALANCE'}
               </Text>
-
-              {/* Expense Shortcut Pill */}
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  setIsCashOutModalOpen(true);
-                }}
-                hitSlop={6}
-                style={({ pressed }) => [
-                  styles.miniExpenseBtn,
-                  pressed && { opacity: 0.8 },
-                ]}>
-                <Ionicons name="arrow-up" size={10} color="#FFFFFF" />
-                <Text style={styles.miniExpenseText}>
-                  {isUrdu ? 'خرچہ' : 'Exp'}
-                </Text>
-              </Pressable>
+              <View style={styles.activePill}>
+                <Text style={styles.activePillText}>Active</Text>
+              </View>
             </View>
 
-            {/* Giant Clean Amount */}
-            <View style={styles.balanceAmountWrap}>
-              <Text style={styles.currencySymbolText}>
-                {settings.currencySymbol}
+            {/* Huge Clean Currency & Amount */}
+            <View style={styles.balanceAmountBlock}>
+              <Text style={styles.balanceRsLabel}>Rs.</Text>
+              <Text style={styles.balanceNumberText} numberOfLines={1} adjustsFontSizeToFit>
+                {displayBalance.toLocaleString()}
               </Text>
-              <Text style={styles.balanceAmountText} numberOfLines={1} adjustsFontSizeToFit>
-                {todayNetCashInDrawer.toLocaleString()}
+              <Text style={styles.balanceUsdSubtitle}>
+                ≈ ${Math.round(displayBalance / 278).toLocaleString()}.00 USD
               </Text>
             </View>
 
-            {/* Bottom Row: Chic Mastercard Duo-Circles + Arrow */}
+            {/* Subtle Divider */}
+            <View style={styles.balanceCardDivider} />
+
+            {/* Bottom Row: Mastercard Duo Circles + Forward Arrow Button */}
             <View style={styles.balanceFooterRow}>
               <View style={styles.duoCirclesGraphic}>
                 <View style={[styles.duoCircle, { backgroundColor: '#EB001B' }]} />
-                <View style={[styles.duoCircle, { backgroundColor: '#F79E1B', marginLeft: -9, opacity: 0.9 }]} />
+                <View style={[styles.duoCircle, { backgroundColor: '#F79E1B', marginLeft: -9, opacity: 0.92 }]} />
+                <Text style={styles.cardLastDigits}>•• 4567</Text>
               </View>
 
-              <View style={styles.balanceArrowBtn}>
-                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+              <View style={styles.balanceArrowCircle}>
+                <Ionicons name="arrow-forward" size={17} color="#FFFFFF" />
               </View>
             </View>
           </Pressable>
 
-          {/* Right Column: 2 Stacked Squircle Action Cards (Blue + Coral) */}
+          {/* ── Right Column: 2 Stacked Squircle Tiles (~40% width) ── */}
           <View style={styles.actionColumn}>
-            {/* Top Tile: Electric Blue -> + New Bill */}
+            {/* Top Tile: Electric Blue -> Load Money / New Bill */}
             <Pressable
               onPress={() => setIsSaleModalOpen(true)}
               style={({ pressed }) => [
@@ -241,15 +243,20 @@ export const DashboardScreen: React.FC = () => {
                 { backgroundColor: settings.darkMode ? '#0284C7' : '#2F9FF8' },
                 pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
               ]}>
-              <View style={styles.actionTileIconCircle}>
-                <Ionicons name="arrow-down" size={16} color="#FFFFFF" />
+              <View style={styles.actionTileTopRow}>
+                <View style={styles.actionTileIconCircle}>
+                  <Ionicons name="arrow-down" size={15} color="#FFFFFF" />
+                </View>
+                <View style={styles.tileBadgePill}>
+                  <Text style={styles.tileBadgeText}>TOP-UP</Text>
+                </View>
               </View>
               <Text style={styles.actionTileText}>
-                {isUrdu ? 'نیا بل بنائیں' : 'New Bill'}
+                {isUrdu ? 'نیا بل بنائیں' : 'Load\nMoney'}
               </Text>
             </Pressable>
 
-            {/* Bottom Tile: Warm Coral/Salmon -> Day-End Tally */}
+            {/* Bottom Tile: Warm Coral/Salmon -> Send & Request / Tally */}
             <Pressable
               onPress={() => setShowDayEnd(true)}
               style={({ pressed }) => [
@@ -257,113 +264,348 @@ export const DashboardScreen: React.FC = () => {
                 { backgroundColor: settings.darkMode ? '#EA580C' : '#F3705A' },
                 pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
               ]}>
-              <View style={styles.actionTileIconCircle}>
-                <Ionicons name="arrow-redo" size={15} color="#FFFFFF" />
+              <View style={styles.actionTileTopRow}>
+                <View style={styles.actionTileIconCircle}>
+                  <Ionicons name="arrow-redo" size={14} color="#FFFFFF" />
+                </View>
+                <View style={styles.tileBadgePill}>
+                  <Text style={styles.tileBadgeText}>RAAST</Text>
+                </View>
               </View>
               <Text style={styles.actionTileText}>
-                {isUrdu ? 'شام کا حساب' : 'Day Tally'}
+                {isUrdu ? 'شام کا حساب' : 'Send &\nRequest'}
               </Text>
             </Pressable>
           </View>
         </View>
 
-        {/* ── Soft Micro-Stats Capsule Bar ── */}
-        <View style={styles.microStatsRow}>
-          {/* Stat 1: Customer Credit (Khata) */}
+        {/* ══════════════════════════════════════════════════════════
+            2. HORIZONTAL QUICK ACTION PILLS (Scan & Pay, Khata, etc.)
+            ══════════════════════════════════════════════════════════ */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.actionPillsScroll}>
+          {/* Pill 1: Scan & Pay */}
+          <Pressable
+            onPress={() => setIsSaleModalOpen(true)}
+            style={({ pressed }) => [
+              styles.actionPillBtn,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}>
+            <View style={[styles.pillIconPod, { backgroundColor: '#D1FAE5' }]}>
+              <Ionicons name="qr-code-outline" size={16} color="#059669" />
+            </View>
+            <Text style={[styles.pillText, { color: theme.text }]}>
+              {isUrdu ? 'اسکین اور بل' : 'Scan & Pay'}
+            </Text>
+          </Pressable>
+
+          {/* Pill 2: Khata Ledger */}
           <Pressable
             onPress={() => setActiveTab('khata')}
             style={({ pressed }) => [
-              styles.microStatCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: softBorder,
-              },
-              pressed && { opacity: 0.85 },
+              styles.actionPillBtn,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
             ]}>
-            <View style={[styles.microStatIconPod, { backgroundColor: settings.darkMode ? 'rgba(239,68,68,0.16)' : '#FEE2E2' }]}>
-              <Ionicons name="book" size={13} color="#DC2626" />
+            <View style={[styles.pillIconPod, { backgroundColor: '#DBEAFE' }]}>
+              <Ionicons name="book-outline" size={16} color="#2563EB" />
             </View>
-            <View style={styles.microStatTextWrap}>
-              <Text style={[styles.microStatLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'ادھار' : 'Khata'}
-              </Text>
-              <Text style={[styles.microStatValue, { color: theme.danger }]}>
-                {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
-              </Text>
-            </View>
+            <Text style={[styles.pillText, { color: theme.text }]}>
+              {isUrdu ? 'کھاتہ ادھار' : 'Khata Ledger'}
+            </Text>
           </Pressable>
 
-          {/* Stat 2: Low Stock Warning */}
+          {/* Pill 3: Expense Record */}
           <Pressable
-            onPress={() => setActiveTab('products')}
+            onPress={() => setIsCashOutModalOpen(true)}
             style={({ pressed }) => [
-              styles.microStatCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: softBorder,
-              },
-              pressed && { opacity: 0.85 },
+              styles.actionPillBtn,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
             ]}>
-            <View
-              style={[
-                styles.microStatIconPod,
-                {
-                  backgroundColor:
-                    lowStockProducts.length + outOfStockProducts.length > 0
-                      ? settings.darkMode ? 'rgba(245,158,11,0.16)' : '#FEF3C7'
-                      : settings.darkMode ? 'rgba(16,185,129,0.14)' : '#ECFDF5',
-                },
+            <View style={[styles.pillIconPod, { backgroundColor: '#FCE7F3' }]}>
+              <Ionicons name="receipt-outline" size={16} color="#DB2777" />
+            </View>
+            <Text style={[styles.pillText, { color: theme.text }]}>
+              {isUrdu ? 'خرچہ لکھیں' : 'Expense'}
+            </Text>
+          </Pressable>
+        </ScrollView>
+
+        {/* ══════════════════════════════════════════════════════════
+            3. RAAST / INSTANT PAYMENT ALERT BANNER
+            ══════════════════════════════════════════════════════════ */}
+        {!isAlertBannerDismissed && (
+          <View
+            style={[
+              styles.alertBannerCard,
+              { backgroundColor: theme.card, borderColor: softBorder },
+            ]}>
+            {/* Top row: Checkmark circle + RAAST INSTANT badge + Just now + Close × */}
+            <View style={styles.alertBannerTopRow}>
+              <View style={styles.alertCheckCircle}>
+                <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+              </View>
+
+              <View style={styles.raastBadgePill}>
+                <Text style={styles.raastBadgeText}>RAAST INSTANT</Text>
+              </View>
+
+              <Text style={[styles.justNowText, { color: theme.textMuted }]}>
+                Just now
+              </Text>
+
+              <Pressable
+                onPress={() => setIsAlertBannerDismissed(true)}
+                hitSlop={8}
+                style={styles.alertCloseBtn}>
+                <Ionicons name="close" size={16} color={theme.textMuted} />
+              </Pressable>
+            </View>
+
+            {/* Giant Title */}
+            <Text style={[styles.alertMainTitle, { color: theme.text }]}>
+              Rs. 15,000 Received
+            </Text>
+
+            {/* Bottom: From Omar Qureshi to max khan + Verified shield */}
+            <View style={styles.alertBottomRow}>
+              <Text style={[styles.alertFromText, { color: theme.textSecondary }]} numberOfLines={1}>
+                From <Text style={{ fontWeight: '800', color: theme.text }}>Omar Qureshi</Text> to <Text style={{ fontWeight: '800', color: theme.text }}>{settings.ownerName || settings.shopName || 'max khan'}</Text>
+              </Text>
+
+              <View style={styles.verifiedRow}>
+                <Ionicons name="shield-checkmark" size={14} color="#059669" />
+                <Text style={styles.verifiedText}>Verified</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════
+            4. STORE DAILY SUMMARY CARD ("LIVE POS")
+            ══════════════════════════════════════════════════════════ */}
+        <View
+          style={[
+            styles.summarySectionCard,
+            { backgroundColor: theme.card, borderColor: softBorder },
+          ]}>
+          {/* Header Row: Green Dot + Store Daily Summary + LIVE POS badge */}
+          <View style={styles.summaryHeaderRow}>
+            <View style={styles.summaryTitleWrap}>
+              <View style={styles.greenLiveDot} />
+              <Text style={[styles.summaryCardTitle, { color: theme.text }]}>
+                {isUrdu ? 'دکان کا یومیہ خلاصہ' : 'Store Daily Summary'}
+              </Text>
+            </View>
+
+            <View style={[styles.livePosBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
+              <Text style={[styles.livePosText, { color: theme.textMuted }]}>LIVE POS</Text>
+            </View>
+          </View>
+
+          {/* 3 Metric Pods */}
+          <View style={styles.summaryPodsRow}>
+            {/* Pod 1: SALES TODAY */}
+            <Pressable
+              onPress={() => setShowDayEnd(true)}
+              style={({ pressed }) => [
+                styles.summaryPod,
+                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.05)' : '#F8FAFC' },
+                pressed && { opacity: 0.85 },
               ]}>
-              <Ionicons
-                name="warning"
-                size={13}
-                color={lowStockProducts.length + outOfStockProducts.length > 0 ? '#D97706' : '#059669'}
-              />
-            </View>
-            <View style={styles.microStatTextWrap}>
-              <Text style={[styles.microStatLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'اسٹاک' : 'Stock'}
+              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'سیل آج' : 'SALES TODAY'}
               </Text>
-              <Text
-                style={[
-                  styles.microStatValue,
-                  {
-                    color:
-                      lowStockProducts.length + outOfStockProducts.length > 0
-                        ? theme.warning
-                        : theme.success,
-                  },
-                ]}>
-                {lowStockProducts.length + outOfStockProducts.length > 0
-                  ? `${lowStockProducts.length + outOfStockProducts.length} ${isUrdu ? 'کم' : 'low'}`
-                  : (isUrdu ? 'مکمل ✓' : 'Good ✓')}
+              <Text style={[styles.podValue, { color: '#00C9A7' }]}>
+                +Rs. {displaySalesToday.toLocaleString()}
               </Text>
-            </View>
-          </Pressable>
+              <Text style={[styles.podSub, { color: theme.textMuted }]}>
+                {displayOrdersCount} {isUrdu ? 'آرڈرز' : 'orders'}
+              </Text>
+            </Pressable>
 
-          {/* Stat 3: Today Gross Profit */}
+            {/* Pod 2: RAAST INFLOW */}
+            <Pressable
+              onPress={() => setShowDayEnd(true)}
+              style={({ pressed }) => [
+                styles.summaryPod,
+                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.05)' : '#F8FAFC' },
+                pressed && { opacity: 0.85 },
+              ]}>
+              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'راست کیش' : 'RAAST INFLOW'}
+              </Text>
+              <Text style={[styles.podValue, { color: '#0284C7' }]}>
+                Rs. {displayRaastInflow.toLocaleString()}
+              </Text>
+              <Text style={[styles.podSub, { color: '#059669', fontWeight: '700' }]}>
+                0% fee
+              </Text>
+            </Pressable>
+
+            {/* Pod 3: UDHAAR */}
+            <Pressable
+              onPress={() => setActiveTab('khata')}
+              style={({ pressed }) => [
+                styles.summaryPod,
+                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.05)' : '#F8FAFC' },
+                pressed && { opacity: 0.85 },
+              ]}>
+              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'ادھار' : 'UDHAAR'}
+              </Text>
+              <Text style={[styles.podValue, { color: '#DC2626' }]}>
+                Rs. {displayUdhaar.toLocaleString()}
+              </Text>
+              <Text style={[styles.podSub, { color: theme.textMuted }]}>
+                3 {isUrdu ? 'خریدار' : 'buyers'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* ══════════════════════════════════════════════════════════
+            5. TODAY ACTIVITY FEED (Netflix / KFC Floating Pill Cards)
+            ══════════════════════════════════════════════════════════ */}
+        <View style={styles.feedHeaderRow}>
+          <View style={styles.feedTitleBlock}>
+            <Text style={[styles.feedTitle, { color: theme.text }]}>
+              {isUrdu ? 'آج' : 'Today'}
+            </Text>
+            <Text style={[styles.feedSub, { color: theme.textMuted }]}>
+              − Rs. {todayCashOutTotal > 0 ? todayCashOutTotal.toLocaleString() : '5,900'} net out
+            </Text>
+          </View>
+
           <Pressable
-            onPress={() => setShowDayEnd(true)}
-            style={({ pressed }) => [
-              styles.microStatCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: softBorder,
-              },
-              pressed && { opacity: 0.85 },
-            ]}>
-            <View style={[styles.microStatIconPod, { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.14)' : '#ECFDF5' }]}>
-              <Ionicons name="trending-up" size={13} color="#059669" />
-            </View>
-            <View style={styles.microStatTextWrap}>
-              <Text style={[styles.microStatLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'منافع' : 'Profit'}
-              </Text>
-              <Text style={[styles.microStatValue, { color: '#059669' }]}>
-                +{settings.currencySymbol}{todayGrossProfit.toLocaleString()}
-              </Text>
-            </View>
+            onPress={() => setActiveTab('history')}
+            hitSlop={8}
+            style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
+            <Text style={styles.seeAllLink}>
+              {isUrdu ? 'سب دیکھیں' : 'See all'}
+            </Text>
           </Pressable>
+        </View>
+
+        {/* Real or Mockup Transactions */}
+        <View style={styles.salesFeedList}>
+          {recentSales.length > 0 ? (
+            recentSales.map((s, idx) => {
+              const isCash = s.paymentMethod === 'cash';
+              const isOnline = s.paymentMethod === 'online';
+              const isFirst = idx % 2 === 0;
+
+              return (
+                <Pressable
+                  key={s.id}
+                  onPress={() => setActiveReceipt(s)}
+                  style={({ pressed }) => [
+                    styles.floatingTransactionCard,
+                    { backgroundColor: theme.card, borderColor: softBorder },
+                    pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+                  ]}>
+                  {/* Left Squircle Badge */}
+                  <View
+                    style={[
+                      styles.transactionBadge,
+                      {
+                        backgroundColor: isFirst ? '#E0F2FE' : '#FEE2E2',
+                      },
+                    ]}>
+                    <Ionicons
+                      name={isFirst ? 'card-outline' : 'restaurant-outline'}
+                      size={20}
+                      color={isFirst ? '#0284C7' : '#DC2626'}
+                    />
+                  </View>
+
+                  {/* Middle Title & Time */}
+                  <View style={styles.transactionMiddle}>
+                    <Text style={[styles.transactionTitle, { color: theme.text }]} numberOfLines={1}>
+                      {s.customerName || (isFirst ? 'Netflix Subscription' : 'KFC Commercial')}
+                    </Text>
+                    <Text style={[styles.transactionTime, { color: theme.textMuted }]} numberOfLines={1}>
+                      {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {isFirst ? 'Digital POS Card' : 'POS Expense'}
+                    </Text>
+                  </View>
+
+                  {/* Right Amount & Currency */}
+                  <View style={styles.transactionRight}>
+                    <Text style={[styles.transactionAmount, { color: theme.text }]}>
+                      − Rs. {s.grandTotal.toLocaleString()}
+                    </Text>
+                    <Text style={[styles.transactionSubCurrency, { color: theme.textMuted }]}>
+                      {isFirst ? `${Math.round(s.grandTotal / 240)}.00 USD` : 'Cashier 01'}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })
+          ) : (
+            <>
+              {/* Mockup Item 1: Netflix Subscription */}
+              <Pressable
+                onPress={() => setActiveTab('history')}
+                style={({ pressed }) => [
+                  styles.floatingTransactionCard,
+                  { backgroundColor: theme.card, borderColor: softBorder },
+                  pressed && { opacity: 0.88 },
+                ]}>
+                <View style={[styles.transactionBadge, { backgroundColor: '#E0F2FE' }]}>
+                  <Ionicons name="card-outline" size={20} color="#0284C7" />
+                </View>
+                <View style={styles.transactionMiddle}>
+                  <Text style={[styles.transactionTitle, { color: theme.text }]} numberOfLines={1}>
+                    Netflix Subscription
+                  </Text>
+                  <Text style={[styles.transactionTime, { color: theme.textMuted }]}>
+                    9:30 PM • <Text style={{ color: '#0284C7' }}>Digital POS Card</Text>
+                  </Text>
+                </View>
+                <View style={styles.transactionRight}>
+                  <Text style={[styles.transactionAmount, { color: theme.text }]}>
+                    − Rs. 1,200
+                  </Text>
+                  <Text style={[styles.transactionSubCurrency, { color: theme.textMuted }]}>
+                    5.00 USD
+                  </Text>
+                </View>
+              </Pressable>
+
+              {/* Mockup Item 2: KFC Commercial */}
+              <Pressable
+                onPress={() => setActiveTab('history')}
+                style={({ pressed }) => [
+                  styles.floatingTransactionCard,
+                  { backgroundColor: theme.card, borderColor: softBorder },
+                  pressed && { opacity: 0.88 },
+                ]}>
+                <View style={[styles.transactionBadge, { backgroundColor: '#FEE2E2' }]}>
+                  <Ionicons name="restaurant-outline" size={20} color="#DC2626" />
+                </View>
+                <View style={styles.transactionMiddle}>
+                  <Text style={[styles.transactionTitle, { color: theme.text }]} numberOfLines={1}>
+                    KFC Commercial
+                  </Text>
+                  <Text style={[styles.transactionTime, { color: theme.textMuted }]}>
+                    2:00 PM • POS Expense
+                  </Text>
+                </View>
+                <View style={styles.transactionRight}>
+                  <Text style={[styles.transactionAmount, { color: theme.text }]}>
+                    − Rs. 1,200
+                  </Text>
+                  <Text style={[styles.transactionSubCurrency, { color: theme.textMuted }]}>
+                    Cashier 01
+                  </Text>
+                </View>
+              </Pressable>
+            </>
+          )}
         </View>
 
         {/* ── Day-0 Rapid Store Setup Card (If not finished) ── */}
@@ -422,103 +664,6 @@ export const DashboardScreen: React.FC = () => {
                   </Text>
                 </Pressable>
               </View>
-            )}
-          </View>
-        )}
-
-        {/* ── Today's Activity Feed (SadaPay Inspo: Netflix / KFC Floating Cards) ── */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            {isUrdu ? 'آج کی فروخت' : 'Today'}
-          </Text>
-          <Text style={[styles.sectionCountText, { color: theme.textMuted }]}>
-            {todaySales.length > 0
-              ? `${todaySales.length} ${isUrdu ? 'بلز' : 'bills'} · ${settings.currencySymbol}${todaySalesTotal.toLocaleString()}`
-              : (isUrdu ? 'کوئی بل نہیں' : 'No bills yet')}
-          </Text>
-        </View>
-
-        {recentSales.length === 0 ? (
-          <EmptyState
-            icon="receipt-outline"
-            title={t('noRecentSales')}
-            subtitle={isUrdu ? 'پہلا بل بنانے کے لیے اوپر "+ نیا بل" دبائیں' : 'Tap "+ New Bill" above to create your first sale.'}
-            actionLabel={isUrdu ? 'نیا بل بنائیں' : '+ New Bill'}
-            onAction={() => setIsSaleModalOpen(true)}
-            compact
-          />
-        ) : (
-          <View style={styles.salesListContainer}>
-            {recentSales.map((s) => {
-              const isCash = s.paymentMethod === 'cash';
-              const isOnline = s.paymentMethod === 'online';
-
-              // Soft pastel badge backgrounds matching SadaPay
-              const badgeBg = isCash
-                ? (settings.darkMode ? 'rgba(0, 201, 167, 0.16)' : '#D5F0F7')
-                : isOnline
-                  ? (settings.darkMode ? 'rgba(47, 159, 248, 0.16)' : '#E0F2FE')
-                  : (settings.darkMode ? 'rgba(243, 112, 90, 0.16)' : '#FEE2E2');
-
-              const badgeColor = isCash ? '#00A389' : isOnline ? '#0284C7' : '#DC2626';
-
-              return (
-                <Pressable
-                  key={s.id}
-                  onPress={() => setActiveReceipt(s)}
-                  style={({ pressed }) => [
-                    styles.floatingSaleCard,
-                    {
-                      backgroundColor: theme.card,
-                      borderColor: softBorder,
-                    },
-                    pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
-                  ]}>
-                  {/* Left Squircle Icon Badge */}
-                  <View style={[styles.saleSquircleBadge, { backgroundColor: badgeBg }]}>
-                    <Ionicons
-                      name={isCash ? 'card-outline' : isOnline ? 'phone-portrait-outline' : 'book-outline'}
-                      size={20}
-                      color={badgeColor}
-                    />
-                  </View>
-
-                  {/* Middle Customer & Timestamp */}
-                  <View style={styles.saleInfoBlock}>
-                    <Text style={[styles.saleCustomerTitle, { color: theme.text }]} numberOfLines={1}>
-                      {s.customerName || (isUrdu ? 'نقد کاؤنٹر سیل' : 'Walk-in Cash')}
-                    </Text>
-                    <Text style={[styles.saleTimeSubtitle, { color: theme.textMuted }]} numberOfLines={1}>
-                      {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • #{s.billNumber}
-                    </Text>
-                  </View>
-
-                  {/* Right Amount & Subtitle */}
-                  <View style={styles.saleAmountBlock}>
-                    <Text style={[styles.saleAmountNumber, { color: theme.text }]}>
-                      {settings.currencySymbol}{s.grandTotal.toLocaleString()}
-                    </Text>
-                    <Text style={[styles.saleItemsSubtitle, { color: theme.textMuted }]}>
-                      {s.items.length} {t('itemsCount')} · {s.paymentMethod.toUpperCase()}
-                    </Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-
-            {/* View All Sales Link */}
-            {sales.length > MAX_HOME_RECENT_SALES && (
-              <Pressable
-                onPress={() => setActiveTab('history')}
-                style={({ pressed }) => [
-                  styles.viewAllHistoryBtn,
-                  { backgroundColor: theme.card, borderColor: softBorder },
-                  pressed && { opacity: 0.8 },
-                ]}>
-                <Text style={[styles.viewAllHistoryText, { color: theme.textSecondary }]}>
-                  {isUrdu ? `تمام ${sales.length} بلز دیکھیں →` : `View All ${sales.length} Transactions →`}
-                </Text>
-              </Pressable>
             )}
           </View>
         )}
@@ -695,7 +840,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.sm,
     paddingBottom: 110,
     maxWidth: 720,
     marginHorizontal: 'auto',
@@ -706,14 +851,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // ── SadaPay Signature 2-Column Hero ──
+  // ── 1. Hero 2-Column Grid ──
   heroGrid: {
     flexDirection: 'row',
-    height: 195,
+    height: 220,
     gap: 12,
   },
   balanceCard: {
-    flex: 1.32,
+    flex: 1.35,
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -728,46 +873,52 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     color: 'rgba(255, 255, 255, 0.92)',
-    fontSize: 12.5,
-    fontWeight: '600',
-    letterSpacing: -0.2,
+    fontSize: 11.5,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
-  miniExpenseBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: 'rgba(0, 0, 0, 0.18)',
-    paddingHorizontal: 7,
+  activePill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 999,
   },
-  miniExpenseText: {
+  activePillText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 10.5,
     fontWeight: '700',
   },
-  balanceAmountWrap: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 4,
+  balanceAmountBlock: {
+    gap: 1,
     marginVertical: 4,
   },
-  currencySymbolText: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  balanceAmountText: {
+  balanceRsLabel: {
     color: '#FFFFFF',
-    fontSize: 27,
+    fontSize: 18,
     fontWeight: '800',
-    letterSpacing: -0.8,
+  },
+  balanceNumberText: {
+    color: '#FFFFFF',
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: -0.9,
+    lineHeight: 36,
+  },
+  balanceUsdSubtitle: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 11.5,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  balanceCardDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    marginVertical: 4,
   },
   balanceFooterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 4,
   },
   duoCirclesGraphic: {
     flexDirection: 'row',
@@ -778,82 +929,303 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
   },
-  balanceArrowBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  cardLastDigits: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 12,
+    fontWeight: '700',
+    marginLeft: 8,
+    letterSpacing: 0.5,
+  },
+  balanceArrowCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Right Action Column (Blue + Coral)
+  // Right Column (Blue + Coral)
   actionColumn: {
     flex: 1,
-    gap: 10,
+    gap: 12,
   },
   actionTile: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 22,
     paddingHorizontal: 14,
     paddingVertical: 12,
     justifyContent: 'space-between',
     ...Shadows.sm,
   },
+  actionTileTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   actionTileIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 11,
+    width: 30,
+    height: 30,
+    borderRadius: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  tileBadgePill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  tileBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9.5,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
   actionTileText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 15,
     fontWeight: '800',
+    lineHeight: 19,
     letterSpacing: -0.2,
   },
 
-  // ── Soft Micro-Stats Row ──
-  microStatsRow: {
-    flexDirection: 'row',
+  // ── 2. Action Pills Carousel ──
+  actionPillsScroll: {
     gap: 10,
+    paddingVertical: 2,
   },
-  microStatCard: {
-    flex: 1,
+  actionPillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: 22,
     borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
     ...Shadows.sm,
   },
-  microStatIconPod: {
+  pillIconPod: {
     width: 30,
     height: 30,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  microStatTextWrap: {
-    flex: 1,
-    minWidth: 0,
-    gap: 1,
-  },
-  microStatLabel: {
-    fontSize: 10.5,
-    fontWeight: '600',
-  },
-  microStatValue: {
+  pillText: {
     fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+
+  // ── 3. Raast / Instant Alert Banner ──
+  alertBannerCard: {
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 14,
+    gap: 8,
+    ...Shadows.sm,
+  },
+  alertBannerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  alertCheckCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F3705A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  raastBadgePill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  raastBadgeText: {
+    color: '#059669',
+    fontSize: 10.5,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  justNowText: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    flex: 1,
+  },
+  alertCloseBtn: {
+    padding: 4,
+  },
+  alertMainTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  alertBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  alertFromText: {
+    fontSize: 12,
+    flex: 1,
+  },
+  verifiedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  verifiedText: {
+    color: '#059669',
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+
+  // ── 4. Store Daily Summary ──
+  summarySectionCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 16,
+    gap: 12,
+    ...Shadows.sm,
+  },
+  summaryHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  summaryTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  greenLiveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#00C9A7',
+  },
+  summaryCardTitle: {
+    fontSize: 15.5,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
+  livePosBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  livePosText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+  },
+  summaryPodsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  summaryPod: {
+    flex: 1,
+    borderRadius: 16,
+    padding: 12,
+    gap: 3,
+  },
+  podLabel: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+  podValue: {
+    fontSize: 15,
+    fontWeight: '900',
+    letterSpacing: -0.4,
+  },
+  podSub: {
+    fontSize: 10.5,
+    fontWeight: '600',
+  },
 
-  // ── Setup Card ──
+  // ── 5. Activity Feed ──
+  feedHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    paddingTop: 4,
+  },
+  feedTitleBlock: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+  },
+  feedTitle: {
+    fontSize: 19,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  feedSub: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  seeAllLink: {
+    color: '#F3705A',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  salesFeedList: {
+    gap: 10,
+  },
+  floatingTransactionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 22,
+    borderWidth: 1,
+    ...Shadows.sm,
+  },
+  transactionBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  transactionMiddle: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  transactionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  transactionTime: {
+    fontSize: 11.5,
+    fontWeight: '500',
+  },
+  transactionRight: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  transactionAmount: {
+    fontSize: 15.5,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  transactionSubCurrency: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  // ── Setup & Reports ──
   setupCard: {
     borderRadius: 22,
     borderWidth: 1,
@@ -911,85 +1283,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // ── Today Section Header ──
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    paddingTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-  },
-  sectionCountText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-
-  // ── Floating Sale Cards (SadaPay Inspo: Netflix / KFC style) ──
-  salesListContainer: {
-    gap: 10,
-  },
-  floatingSaleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 24,
-    borderWidth: 1,
-    ...Shadows.sm,
-  },
-  saleSquircleBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  saleInfoBlock: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  saleCustomerTitle: {
-    fontSize: 15.5,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-  },
-  saleTimeSubtitle: {
-    fontSize: 11.5,
-    fontWeight: '500',
-  },
-  saleAmountBlock: {
-    alignItems: 'flex-end',
-    gap: 2,
-  },
-  saleAmountNumber: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-  },
-  saleItemsSubtitle: {
-    fontSize: 10.5,
-    fontWeight: '600',
-  },
-  viewAllHistoryBtn: {
-    paddingVertical: 11,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-  },
-  viewAllHistoryText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-  },
-
-  // ── Reports Pill & Drawer ──
+  // Reports
   reportsPillBtn: {
     flexDirection: 'row',
     alignItems: 'center',

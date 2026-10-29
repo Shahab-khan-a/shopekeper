@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
@@ -23,16 +23,16 @@ export const ShopHeader: React.FC = () => {
     syncNow,
     showAlert,
   } = useShop();
-  const theme = settings.darkMode ? Colors.dark : Colors.light;
 
+  const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const isUrdu = language === 'ur';
   const totalAlerts = lowStockProducts.length + outOfStockProducts.length;
 
   const handleSyncPillPress = async () => {
     if (!isOnline) {
-      const msg =
-        language === 'ur'
-          ? `آپ آف لائن ہیں۔ ${pendingSyncCount} تبدیلیاں محفوظ ہیں اور انٹرنیٹ آتے ہی خود بخود کلاؤڈ پر منتقل ہو جائیں گی۔`
-          : `You are offline. ${pendingSyncCount} local changes are safely queued and will sync automatically when internet returns.`;
+      const msg = isUrdu
+        ? `آپ آف لائن ہیں۔ ${pendingSyncCount} تبدیلیاں محفوظ ہیں اور انٹرنیٹ آتے ہی خود بخود کلاؤڈ پر منتقل ہو جائیں گی۔`
+        : `You are offline. ${pendingSyncCount} local changes are safely queued and will sync automatically when internet returns.`;
       showAlert({
         type: 'info',
         title: 'Offline Mode',
@@ -49,162 +49,115 @@ export const ShopHeader: React.FC = () => {
     await syncNow();
   };
 
-  // Determine Pill Appearance for Emerald Header
-  const getSyncPillConfig = () => {
-    const isUrdu = language === 'ur';
-    if (!isOnline) {
-      return {
-        bg: 'rgba(239, 68, 68, 0.3)',
-        border: 'rgba(252, 165, 165, 0.45)',
-        color: '#FECACA',
-        icon: 'cloud-offline' as const,
-        label: pendingSyncCount > 0
-          ? (isUrdu ? `آف لائن (${pendingSyncCount})` : `Offline (${pendingSyncCount})`)
-          : (isUrdu ? 'آف لائن' : 'Offline'),
-      };
-    }
+  const storeDisplayName =
+    (isUrdu && settings.shopNameUrdu)
+      ? settings.shopNameUrdu
+      : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (isUrdu ? 'میری دکان' : "max khan's Store")));
 
-    if (syncStatus === 'syncing') {
-      return {
-        bg: 'rgba(251, 191, 36, 0.25)',
-        border: 'rgba(253, 224, 71, 0.5)',
-        color: '#FEF08A',
-        icon: 'sync' as const,
-        label: pendingSyncCount > 0
-          ? (isUrdu ? `ہم آہنگ ${pendingSyncCount}...` : `Syncing ${pendingSyncCount}...`)
-          : (isUrdu ? 'ہم آہنگ...' : 'Syncing...'),
-      };
-    }
+  // Initials for avatar pod (e.g. "MK")
+  const storeInitials = (storeDisplayName || 'MK')
+    .split(' ')
+    .map((w: string) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'MK';
 
-    if (syncStatus === 'error') {
-      return {
-        bg: 'rgba(239, 68, 68, 0.3)',
-        border: 'rgba(252, 165, 165, 0.45)',
-        color: '#FECACA',
-        icon: 'alert-circle' as const,
-        label: isUrdu ? 'ہم آہنگی ناکام' : 'Sync failed',
-      };
-    }
-
-    if (pendingSyncCount > 0) {
-      return {
-        bg: 'rgba(249, 115, 22, 0.28)',
-        border: 'rgba(253, 186, 116, 0.5)',
-        color: '#FED7AA',
-        icon: 'cloud-upload' as const,
-        label: isUrdu ? `${pendingSyncCount} زیر التوا` : `${pendingSyncCount} pending`,
-      };
-    }
-
-    return {
-      bg: 'rgba(255, 255, 255, 0.18)',
-      border: 'rgba(255, 255, 255, 0.28)',
-      color: '#A7F3D0',
-      icon: 'checkmark-circle' as const,
-      label: isUrdu ? 'ہم آہنگ' : 'Synced',
-    };
-  };
-
-  const pill = getSyncPillConfig();
-  const isContinuousHero = activeTab === 'dashboard' || activeTab === 'products';
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148, 163, 184, 0.2)';
+  const headerBg = settings.darkMode ? '#0A0F1E' : '#F8FAFC';
 
   return (
     <View
       style={[
         styles.headerContainer,
         {
-          backgroundColor: theme.heroBg,
-          borderWidth: 0,
-          borderBottomWidth: 0,
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
+          backgroundColor: headerBg,
         },
       ]}>
-      {/* Left: Clickable Logo + Shop Info (Opens Quick Edit Shop Modal) */}
+      {/* ── Left: Avatar pod with green online dot + Business POS • Online + Store Name ── */}
       <Pressable
         onPress={() => setIsEditShopOpen(true)}
         style={({ pressed }) => [
           styles.leftSection,
           pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
         ]}>
-        <View style={styles.logoBadge}>
+        {/* Avatar with small green online indicator */}
+        <View style={styles.avatarWrap}>
           {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
             <ProductImage
               uri={settings.profileImage}
-              style={styles.logoImage}
+              style={styles.avatarImg}
               fallbackIcon={
-                <Image
-                  source={require('@/../assets/images/mainLogoImage.png')}
-                  style={styles.logoImage}
-                  resizeMode="contain"
-                />
+                <View style={[styles.avatarInitialsPod, { backgroundColor: '#A7F3D0' }]}>
+                  <Text style={styles.avatarInitialsText}>{storeInitials}</Text>
+                </View>
               }
             />
           ) : (
-            <Image
-              source={require('@/../assets/images/mainLogoImage.png')}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
+            <View style={[styles.avatarInitialsPod, { backgroundColor: '#A7F3D0' }]}>
+              <Text style={styles.avatarInitialsText}>{storeInitials}</Text>
+            </View>
           )}
+
+          {/* Green Online Dot on bottom-right of avatar */}
+          <View style={[styles.onlineDot, { backgroundColor: isOnline ? '#10B981' : '#F87171' }]} />
         </View>
+
+        {/* Text Block */}
         <View style={styles.titleWrap}>
-          {/* Artistic Pill Badge with App Name */}
-          <View style={styles.brushWrapper}>
-            <View style={styles.brushStrokeBack} />
-            <View style={styles.brushStrokeFront} />
-            <Text style={styles.brushAppName}>⚡ DIGISHOP</Text>
+          <View style={styles.badgeRow}>
+            <Text style={[styles.posBadgeText, { color: theme.textMuted }]}>
+              {isUrdu ? 'بزنس پی او ایس' : 'BUSINESS POS'}
+            </Text>
+            <View style={styles.bulletDot} />
+            <Text style={[styles.onlineStatusText, { color: isOnline ? '#059669' : '#EF4444' }]}>
+              {isOnline ? (isUrdu ? 'آن لائن' : 'Online') : (isUrdu ? 'آف لائن' : 'Offline')}
+            </Text>
           </View>
-          <Text style={styles.shopTitle} numberOfLines={1}>
-            {language === 'ur' && settings.shopNameUrdu
-              ? settings.shopNameUrdu
-              : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (language === 'ur' ? 'میری دکان' : 'My Store')))}
-          </Text>
-          <Text style={styles.shopSubtitle} numberOfLines={1}>
-            {settings.ownerName || user?.displayName || ''}
-            {settings.phone ? (settings.ownerName || user?.displayName ? ` • ${settings.phone}` : settings.phone) : ''}
+
+          <Text style={[styles.shopTitle, { color: theme.text }]} numberOfLines={1}>
+            {storeDisplayName}
           </Text>
         </View>
       </Pressable>
 
-      {/* Right: Controls */}
+      {/* ── Right: Notification Bell in soft circle + Profile in soft circle ── */}
       <View style={styles.rightSection}>
-        {/* Sync Status Pill — hidden in guest mode: a guest shop is
-            local-only, so a permanent "pending" counter only confuses. */}
-        {!isGuestMode && (
+        {/* Notification Bell Circle */}
         <Pressable
-          onPress={handleSyncPillPress}
-          accessibilityLabel="Sync Status Indicator"
+          onPress={() => {
+            if (totalAlerts > 0) {
+              setActiveTab('products');
+            } else if (!isOnline || pendingSyncCount > 0) {
+              handleSyncPillPress();
+            } else {
+              showAlert({
+                type: 'info',
+                title: isUrdu ? 'اطلاعات' : 'Notifications',
+                message: isUrdu ? 'تمام سسٹمز فعال اور ہم آہنگ ہیں۔' : 'All systems normal. 0 pending alerts.',
+              });
+            }
+          }}
+          accessibilityLabel="Notifications"
           style={({ pressed }) => [
-            styles.syncPill,
-            { backgroundColor: pill.bg, borderColor: pill.border },
-            pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
+            styles.roundCircleBtn,
+            { backgroundColor: theme.card, borderColor: softBorder },
+            pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
           ]}>
-          <Ionicons name={pill.icon} size={13} color={pill.color} />
-          <Text style={[styles.syncPillText, { color: pill.color }]}>{pill.label}</Text>
+          <Ionicons name="notifications-outline" size={18} color={theme.text} />
+          {/* Orange alert dot */}
+          {(totalAlerts > 0 || pendingSyncCount > 0 || !isOnline) && (
+            <View style={styles.bellAlertDot} />
+          )}
         </Pressable>
-        )}
 
-        {/* Alert Badge */}
-        {totalAlerts > 0 && (
-          <Pressable
-            onPress={() => setActiveTab('products')}
-            style={({ pressed }) => [
-              styles.alertButton,
-              pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
-            ]}>
-            <Ionicons name="warning" size={13} color="#FFFFFF" />
-            <Text style={styles.alertText}>{totalAlerts}</Text>
-          </Pressable>
-        )}
-
-        {/* Profile Avatar / Cloud Login Button */}
+        {/* User Profile Avatar / Settings Circle */}
         <Pressable
           onPress={() => (user ? setActiveTab('settings') : setIsAuthModalOpen(true))}
           accessibilityLabel="Account & Settings"
           style={({ pressed }) => [
-            styles.profileBtn,
+            styles.roundCircleBtn,
+            { backgroundColor: theme.card, borderColor: softBorder },
             pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
           ]}>
           {user?.photoURL ? (
@@ -212,8 +165,8 @@ export const ShopHeader: React.FC = () => {
           ) : (
             <Ionicons
               name={user ? 'person' : 'person-outline'}
-              size={17}
-              color="#FFFFFF"
+              size={18}
+              color={theme.text}
             />
           )}
         </Pressable>
@@ -228,143 +181,109 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
     zIndex: 10,
-    borderWidth: 0,
-    elevation: 0,
-    shadowColor: 'transparent',
-    shadowOpacity: 0,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 0,
   },
   leftSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    gap: 10,
     flex: 1,
     marginRight: Spacing.sm,
   },
-  logoBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
+  avatarWrap: {
+    position: 'relative',
+    width: 42,
+    height: 42,
+  },
+  avatarImg: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+  avatarInitialsPod: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+  },
+  avatarInitialsText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#064E3B',
+    letterSpacing: -0.5,
+  },
+  onlineDot: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-  },
-  logoImage: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
-  },
-  logoInner: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: '#FFFFFF',
   },
   titleWrap: {
     flex: 1,
+    gap: 1,
   },
-  brushWrapper: {
-    position: 'relative',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 7,
-    paddingVertical: 1.5,
-    marginBottom: 2,
-    justifyContent: 'center',
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
-  brushStrokeBack: {
-    position: 'absolute',
-    top: 1,
-    bottom: -1,
-    left: -4,
-    right: -6,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    transform: [{ rotate: '-2deg' }, { skewX: '-10deg' }],
+  posBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
-  brushStrokeFront: {
-    position: 'absolute',
-    top: 1.5,
-    bottom: 0.5,
-    left: -1,
-    right: -2,
-    borderRadius: 3.5,
-    backgroundColor: 'rgba(16, 185, 129, 0.55)',
-    transform: [{ rotate: '1deg' }, { skewX: '4deg' }],
+  bulletDot: {
+    width: 3.5,
+    height: 3.5,
+    borderRadius: 2,
+    backgroundColor: '#94A3B8',
   },
-  brushAppName: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '900',
-    letterSpacing: 1.1,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+  onlineStatusText: {
+    fontSize: 10.5,
+    fontWeight: '700',
   },
   shopTitle: {
     fontSize: 16.5,
     fontWeight: '800',
     letterSpacing: -0.4,
-    color: '#FFFFFF',
-  },
-  shopSubtitle: {
-    fontSize: 11,
-    marginTop: 1,
-    fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.85)',
   },
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: 8,
   },
-  syncPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 4.5,
-    borderRadius: BorderRadius.full,
+  roundCircleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: 1,
-  },
-  syncPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-  },
-  alertButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 4.5,
-    borderRadius: BorderRadius.full,
-    backgroundColor: '#EF4444',
-  },
-  alertText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  profileBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    position: 'relative',
+    ...Shadows.sm,
+  },
+  bellAlertDot: {
+    position: 'absolute',
+    top: 9,
+    right: 10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#F97316',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
   profileAvatarImg: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.full,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
   },
 });
