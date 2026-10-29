@@ -183,111 +183,175 @@ export const DashboardScreen: React.FC = () => {
         <View style={styles.ambientTopGlow} pointerEvents="none" />
 
         {/* ══════════════════════════════════════════════════════════
-            1. THE 3-CARD HERO DECK (Mint Balance + 2 Stacked Tiles)
+            1. THE 3-CARD RETAIL COMMAND DECK
+               - Card 1: Master Cash Drawer Card (100% width)
+               - Card 2: Today's Revenue & Bills (50% width)
+               - Card 3: Market Udhaar & Recovery (50% width)
             ══════════════════════════════════════════════════════════ */}
-        <View style={styles.heroDeckRow}>
-          {/* ── Left Card (~58% width): Mint Cash Drawer Card ── */}
+        <View style={styles.commandDeckContainer}>
+          {/* ── CARD 1: MASTER CASH REGISTER (گلہ میں نقد رقم) ── */}
           <Pressable
             onPress={() => setShowDayEnd(true)}
             style={({ pressed }) => [
-              styles.mintBalanceCard,
-              { backgroundColor: settings.darkMode ? '#064E3B' : '#00C9A7' },
+              styles.masterDrawerCard,
+              { backgroundColor: settings.darkMode ? '#064E3B' : '#00A389' },
               pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
             ]}>
-            {/* Top Row: Stacked Label on left, Active Pill on right */}
-            <View style={styles.mintTopRow}>
-              <View style={styles.mintLabelStack}>
-                <Text style={styles.mintMiniLabel}>{isUrdu ? 'گلہ کا' : 'AVAILABLE'}</Text>
-                <Text style={styles.mintMiniLabel}>{isUrdu ? 'نقد کیش' : 'BALANCE'}</Text>
-              </View>
-              <View style={styles.mintActivePill}>
-                <Text style={styles.mintActivePillText}>{isUrdu ? 'فعال' : 'Active'}</Text>
-              </View>
-            </View>
-
-            {/* Big Amount */}
-            <View style={styles.mintAmountBlock}>
-              <Text style={styles.mintCurrencySymbol}>{settings.currencySymbol}</Text>
-              <Text style={styles.mintAmountNumber} numberOfLines={1} adjustsFontSizeToFit>
-                {todayNetCashInDrawer.toLocaleString()}
-              </Text>
-              <Text style={styles.mintSubHint} numberOfLines={1}>
-                {todaySales.length > 0 ? `${todaySales.length} ${isUrdu ? 'بلز آج' : 'bills today'}` : (isUrdu ? 'گلہ متوازن ہے' : 'In register')}
-              </Text>
-            </View>
-
-            {/* Bottom Row: Duo Circles + Arrow Button */}
-            <View style={styles.mintBottomRow}>
-              <View style={styles.mintDuoDotsWrap}>
-                <View style={[styles.mintDuoDot, { backgroundColor: '#EF4444' }]} />
-                <View style={[styles.mintDuoDot, { backgroundColor: '#F59E0B', marginLeft: -6 }]} />
-                <Text style={styles.mintCardDigitsText}>
-                  {todayCashOutTotal > 0 ? `-${settings.currencySymbol}${todayCashOutTotal}` : '•• 4567'}
+            {/* Header: Register status & active pill */}
+            <View style={styles.masterCardHeader}>
+              <View style={styles.drawerTitleBlock}>
+                <View style={styles.drawerIconCircle}>
+                  <Ionicons name="wallet" size={15} color="#FFFFFF" />
+                </View>
+                <Text style={styles.drawerTitleText}>
+                  {isUrdu ? 'گلہ میں نقد کیش' : 'CASH IN DRAWER'}
                 </Text>
               </View>
 
-              <View style={styles.mintArrowBtn}>
-                <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
+              <View style={styles.liveTillBadge}>
+                <View style={styles.liveGreenPulse} />
+                <Text style={styles.liveTillBadgeText}>
+                  {isUrdu ? 'فعال گلہ' : 'Till Active'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Big Cash Amount */}
+            <View style={styles.drawerAmountBlock}>
+              <View style={styles.drawerNumberRow}>
+                <Text style={styles.drawerCurrencySymbol}>{settings.currencySymbol}</Text>
+                <Text style={styles.drawerAmountNumber} numberOfLines={1} adjustsFontSizeToFit>
+                  {todayNetCashInDrawer.toLocaleString()}
+                </Text>
+              </View>
+              <Text style={styles.drawerSubHint} numberOfLines={1}>
+                {todaySales.length > 0
+                  ? (isUrdu ? `${todaySales.length} بلز جاری ہو چکے ہیں` : `${todaySales.length} bills generated today`)
+                  : (isUrdu ? 'گلہ متوازن ہے، کاؤنٹر تیار ہے' : 'Counter ready • Physical cash')}
+              </Text>
+            </View>
+
+            {/* Bottom Strip: Real retail equation (+Cash in / -Kharcha out) + Tally trigger */}
+            <View style={styles.drawerBottomStrip}>
+              <View style={styles.drawerEquationWrap}>
+                <Text style={styles.drawerEquationText} numberOfLines={1}>
+                  +{settings.currencySymbol}{(todayCash + todayVasooli).toLocaleString()} in
+                  {todayCashOutTotal > 0 ? `  ·  -${settings.currencySymbol}${todayCashOutTotal.toLocaleString()} out` : ''}
+                </Text>
+              </View>
+
+              <View style={styles.drawerTallyCta}>
+                <Ionicons name="calculator-outline" size={13} color="#FFFFFF" />
+                <Text style={styles.drawerTallyCtaText}>
+                  {isUrdu ? 'حساب کریں' : 'Tally'}
+                </Text>
+                <Ionicons name="chevron-forward" size={12} color="#FFFFFF" />
               </View>
             </View>
           </Pressable>
 
-          {/* ── Right Column (~40% width): Electric Blue & Coral Tiles ── */}
-          <View style={styles.heroRightCol}>
-            {/* Top Tile: Electric Blue -> New Sale */}
+          {/* ── CARD 2 & 3: TWIN METRIC CARDS (Side-by-Side 50/50 Row) ── */}
+          <View style={styles.twinCardsRow}>
+            {/* CARD 2: Today's Revenue (آج کی کل سیل) */}
             <Pressable
-              onPress={() => setIsSaleModalOpen(true)}
+              onPress={() => setActiveTab('history')}
               style={({ pressed }) => [
-                styles.rightActionCard,
-                { backgroundColor: settings.darkMode ? '#0284C7' : '#2F9FF8' },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+                styles.twinCard,
+                { backgroundColor: theme.card, borderColor: softBorder },
+                pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
               ]}>
-              <View style={styles.rightCardTopRow}>
-                <View style={styles.rightCardIconCircle}>
-                  <Ionicons name="cart" size={13} color="#FFFFFF" />
+              <View style={styles.twinCardHeader}>
+                <View style={[styles.twinIconWrap, { backgroundColor: settings.darkMode ? 'rgba(37,99,235,0.2)' : '#DBEAFE' }]}>
+                  <Ionicons name="cart-outline" size={16} color="#2563EB" />
                 </View>
-                <View style={styles.rightCardBadgePill}>
-                  <Text style={styles.rightCardBadgeText}>{isUrdu ? 'فوری' : 'TOP-UP'}</Text>
+                <View style={[styles.twinPillBadge, { backgroundColor: settings.darkMode ? 'rgba(37,99,235,0.15)' : '#EFF6FF' }]}>
+                  <Text style={[styles.twinPillText, { color: '#2563EB' }]}>
+                    {todaySales.length} {isUrdu ? 'بلز' : 'bills'}
+                  </Text>
                 </View>
               </View>
-              <View style={styles.rightCardTextWrap}>
-                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'نیا' : 'New'}</Text>
-                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'بل' : 'Bill'}</Text>
+
+              <View style={styles.twinCardContent}>
+                <Text style={[styles.twinCardLabel, { color: theme.textMuted }]}>
+                  {isUrdu ? 'آج کی کل سیل' : "TODAY'S SALES"}
+                </Text>
+                <Text style={[styles.twinCardAmount, { color: theme.text }]} numberOfLines={1}>
+                  {settings.currencySymbol}{todaySalesTotal.toLocaleString()}
+                </Text>
+              </View>
+
+              <View style={styles.twinCardFooter}>
+                <Text style={[styles.twinFooterText, { color: '#059669' }]} numberOfLines={1}>
+                  {todayGrossProfit > 0
+                    ? `+${settings.currencySymbol}${todayGrossProfit.toLocaleString()} ${isUrdu ? 'منافع' : 'profit'}`
+                    : (isUrdu ? 'تمام ادائیگیاں' : 'Cash & Online')}
+                </Text>
               </View>
             </Pressable>
 
-            {/* Bottom Tile: Coral / Salmon -> Day-End Tally */}
+            {/* CARD 3: Customer Udhaar & Vasooli (گاہک کھاتہ) */}
             <Pressable
-              onPress={() => setShowDayEnd(true)}
+              onPress={() => setActiveTab('khata')}
               style={({ pressed }) => [
-                styles.rightActionCard,
-                { backgroundColor: settings.darkMode ? '#EA580C' : '#F3705A' },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+                styles.twinCard,
+                { backgroundColor: theme.card, borderColor: softBorder },
+                pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
               ]}>
-              <View style={styles.rightCardTopRow}>
-                <View style={styles.rightCardIconCircle}>
-                  <Ionicons name="moon" size={13} color="#FFFFFF" />
+              <View style={styles.twinCardHeader}>
+                <View style={[styles.twinIconWrap, { backgroundColor: settings.darkMode ? 'rgba(220,38,38,0.2)' : '#FEE2E2' }]}>
+                  <Ionicons name="book-outline" size={16} color="#DC2626" />
                 </View>
-                <View style={styles.rightCardBadgePill}>
-                  <Text style={styles.rightCardBadgeText}>{isUrdu ? 'حساب' : 'CLOSING'}</Text>
+                <View style={[styles.twinPillBadge, { backgroundColor: settings.darkMode ? 'rgba(220,38,38,0.15)' : '#FEF2F2' }]}>
+                  <Text style={[styles.twinPillText, { color: '#DC2626' }]}>
+                    {pendingKhataCount} {isUrdu ? 'کھاتے' : 'buyers'}
+                  </Text>
                 </View>
               </View>
-              <View style={styles.rightCardTextWrap}>
-                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'شام کا' : 'Day-End'}</Text>
-                <Text style={styles.rightCardTitleWord}>{isUrdu ? 'حساب' : 'Tally'}</Text>
+
+              <View style={styles.twinCardContent}>
+                <Text style={[styles.twinCardLabel, { color: theme.textMuted }]}>
+                  {isUrdu ? 'کل ادھار بقایا' : 'MARKET UDHAAR'}
+                </Text>
+                <Text style={[styles.twinCardAmount, { color: totalUdhaarReceivable > 0 ? '#DC2626' : theme.text }]} numberOfLines={1}>
+                  {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
+                </Text>
+              </View>
+
+              <View style={styles.twinCardFooter}>
+                <Text style={[styles.twinFooterText, { color: todayVasooli > 0 ? '#059669' : theme.textMuted }]} numberOfLines={1}>
+                  {todayVasooli > 0
+                    ? `+${settings.currencySymbol}${todayVasooli.toLocaleString()} ${isUrdu ? 'وصولی آج' : 'vasooli'}`
+                    : (isUrdu ? 'کھاتہ لیجر کھولیں →' : 'View Khata →')}
+                </Text>
               </View>
             </Pressable>
           </View>
         </View>
 
         {/* ══════════════════════════════════════════════════════════
-            2. HORIZONTAL ACTION PILLS (Soft, Flat, Zero Shadow)
+            2. QUICK CASHIER ACTION HUB (Clean Squircles, Zero Shadow)
             ══════════════════════════════════════════════════════════ */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.actionPillsScroll}>
-          {/* Pill 1: Scan & Pay */}
+          {/* Action 1: New Sale (Primary Highlight) */}
+          <Pressable
+            onPress={() => setIsSaleModalOpen(true)}
+            style={({ pressed }) => [
+              styles.actionPillBtn,
+              { backgroundColor: settings.darkMode ? '#065F46' : '#00C9A7', borderColor: 'transparent' },
+              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+            ]}>
+            <View style={[styles.pillIconSquircle, { backgroundColor: 'rgba(255,255,255,0.25)' }]}>
+              <Ionicons name="add" size={19} color="#FFFFFF" />
+            </View>
+            <Text style={[styles.pillText, { color: '#FFFFFF', fontWeight: '800' }]}>
+              {isUrdu ? 'نیا بل بنائیں' : '+ New Bill'}
+            </Text>
+          </Pressable>
+
+          {/* Action 2: Scan Barcode */}
           <Pressable
             onPress={() => setIsSaleModalOpen(true)}
             style={({ pressed }) => [
@@ -299,27 +363,11 @@ export const DashboardScreen: React.FC = () => {
               <Ionicons name="qr-code-outline" size={17} color="#00A389" />
             </View>
             <Text style={[styles.pillText, { color: theme.text }]}>
-              {isUrdu ? 'بارکوڈ سیل' : 'Scan & Pay'}
+              {isUrdu ? 'بارکوڈ اسکین' : 'Scan Barcode'}
             </Text>
           </Pressable>
 
-          {/* Pill 2: Khata Ledger */}
-          <Pressable
-            onPress={() => setActiveTab('khata')}
-            style={({ pressed }) => [
-              styles.actionPillBtn,
-              { backgroundColor: theme.card, borderColor: softBorder },
-              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-            ]}>
-            <View style={[styles.pillIconSquircle, { backgroundColor: '#DBEAFE' }]}>
-              <Ionicons name="book-outline" size={17} color="#2563EB" />
-            </View>
-            <Text style={[styles.pillText, { color: theme.text }]}>
-              {isUrdu ? 'گاہک کھاتہ' : 'Khata Ledger'}
-            </Text>
-          </Pressable>
-
-          {/* Pill 3: Add Expense */}
+          {/* Action 3: Add Expense (Kharcha) */}
           <Pressable
             onPress={() => setIsCashOutModalOpen(true)}
             style={({ pressed }) => [
@@ -335,7 +383,23 @@ export const DashboardScreen: React.FC = () => {
             </Text>
           </Pressable>
 
-          {/* Pill 4: Stock Alerts (if low stock exists) */}
+          {/* Action 4: Customer Khata */}
+          <Pressable
+            onPress={() => setActiveTab('khata')}
+            style={({ pressed }) => [
+              styles.actionPillBtn,
+              { backgroundColor: theme.card, borderColor: softBorder },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}>
+            <View style={[styles.pillIconSquircle, { backgroundColor: '#DBEAFE' }]}>
+              <Ionicons name="book-outline" size={17} color="#2563EB" />
+            </View>
+            <Text style={[styles.pillText, { color: theme.text }]}>
+              {isUrdu ? 'گاہک کھاتہ' : 'Khata Book'}
+            </Text>
+          </Pressable>
+
+          {/* Action 5: Stock Alert (if any) */}
           {totalStockAlerts > 0 && (
             <Pressable
               onPress={() => setActiveTab('products')}
@@ -353,98 +417,6 @@ export const DashboardScreen: React.FC = () => {
             </Pressable>
           )}
         </ScrollView>
-
-        {/* ══════════════════════════════════════════════════════════
-            3. STORE DAILY SUMMARY ("LIVE POS" - 3 Pods)
-            ══════════════════════════════════════════════════════════ */}
-        <View
-          style={[
-            styles.summarySectionCard,
-            { backgroundColor: theme.card, borderColor: softBorder },
-          ]}>
-          {/* Header Row: Green Dot + Store Daily Summary + LIVE POS badge */}
-          <View style={styles.summaryHeaderRow}>
-            <View style={styles.summaryTitleWrap}>
-              <View style={styles.greenLiveDot} />
-              <Text style={[styles.summaryCardTitle, { color: theme.text }]}>
-                {isUrdu ? 'دکان کا یومیہ خلاصہ' : 'Store Daily Summary'}
-              </Text>
-            </View>
-
-            <Pressable
-              onPress={() => setShowDayEnd(true)}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.livePosBadge,
-                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' },
-                pressed && { opacity: 0.75 },
-              ]}>
-              <Text style={[styles.livePosText, { color: theme.textMuted }]}>
-                LIVE POS
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* 3 Metric Pods */}
-          <View style={styles.summaryPodsRow}>
-            {/* Pod 1: SALES TODAY */}
-            <Pressable
-              onPress={() => setShowDayEnd(true)}
-              style={({ pressed }) => [
-                styles.summaryPod,
-                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
-                pressed && { opacity: 0.85 },
-              ]}>
-              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'سیل آج' : 'SALES TODAY'}
-              </Text>
-              <Text style={[styles.podValue, { color: '#00C9A7' }]}>
-                +{settings.currencySymbol}{todaySalesTotal.toLocaleString()}
-              </Text>
-              <Text style={[styles.podSub, { color: theme.textMuted }]}>
-                {todaySales.length} {isUrdu ? 'آرڈرز' : 'orders'}
-              </Text>
-            </Pressable>
-
-            {/* Pod 2: COLLECTED (VASOOLI) */}
-            <Pressable
-              onPress={() => setActiveTab('khata')}
-              style={({ pressed }) => [
-                styles.summaryPod,
-                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
-                pressed && { opacity: 0.85 },
-              ]}>
-              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'ادھار وصولی' : 'COLLECTED'}
-              </Text>
-              <Text style={[styles.podValue, { color: '#0284C7' }]}>
-                +{settings.currencySymbol}{todayVasooli.toLocaleString()}
-              </Text>
-              <Text style={[styles.podSub, { color: '#059669', fontWeight: '700' }]}>
-                {todayVasooli > 0 ? (isUrdu ? 'وصولی' : 'vasooli') : (isUrdu ? 'آمدن' : 'inflow')}
-              </Text>
-            </Pressable>
-
-            {/* Pod 3: UDHAAR (KHATA) */}
-            <Pressable
-              onPress={() => setActiveTab('khata')}
-              style={({ pressed }) => [
-                styles.summaryPod,
-                { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F8FAFC' },
-                pressed && { opacity: 0.85 },
-              ]}>
-              <Text style={[styles.podLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'کل ادھار' : 'UDHAAR'}
-              </Text>
-              <Text style={[styles.podValue, { color: '#DC2626' }]}>
-                {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
-              </Text>
-              <Text style={[styles.podSub, { color: theme.textMuted }]}>
-                {pendingKhataCount} {isUrdu ? 'کھاتے' : 'buyers'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
 
         {/* ══════════════════════════════════════════════════════════
             4. EVENING CLOSING PROMPT BANNER (Smart Day-End Closing)
@@ -849,157 +821,186 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 180,
   },
 
-  // ── 1. The 3-Card Hero Deck (Mint Balance + 2 Right Tiles) ──
-  heroDeckRow: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
+  // ── 1. The 3-Card Retail Command Deck ──
+  commandDeckContainer: {
     gap: 12,
-    minHeight: 218,
     marginTop: 2,
   },
 
-  // Left Card (~58% width): Mint Cash Drawer Card
-  mintBalanceCard: {
-    flex: 1.45,
+  // CARD 1: Master Cash Drawer Card (100% width)
+  masterDrawerCard: {
     borderRadius: 24,
-    padding: 16,
-    justifyContent: 'space-between',
+    padding: 18,
+    gap: 14,
     elevation: 0,
     overflow: 'hidden',
   },
-  mintTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  mintLabelStack: {
-    gap: 1,
-  },
-  mintMiniLabel: {
-    color: '#FFFFFF',
-    fontSize: 10.5,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    opacity: 0.95,
-  },
-  mintActivePill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 999,
-  },
-  mintActivePillText: {
-    color: '#FFFFFF',
-    fontSize: 10.5,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  mintAmountBlock: {
-    marginTop: 6,
-    marginBottom: 6,
-  },
-  mintCurrencySymbol: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '800',
-    opacity: 0.95,
-  },
-  mintAmountNumber: {
-    color: '#FFFFFF',
-    fontSize: 27,
-    fontWeight: '900',
-    letterSpacing: -0.6,
-    lineHeight: 33,
-  },
-  mintSubHint: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 3,
-  },
-  mintBottomRow: {
+  masterCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 4,
   },
-  mintDuoDotsWrap: {
+  drawerTitleBlock: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
-  mintDuoDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    opacity: 0.92,
-  },
-  mintCardDigitsText: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 11,
-    fontWeight: '700',
-    marginLeft: 6,
-    letterSpacing: 0.5,
-  },
-  mintArrowBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Right Column (~40% width): Electric Blue & Coral Tiles
-  heroRightCol: {
-    flex: 1,
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  rightActionCard: {
-    flex: 1,
-    borderRadius: 22,
-    paddingHorizontal: 13,
-    paddingVertical: 12,
-    justifyContent: 'space-between',
-    elevation: 0,
-    minHeight: 100,
-  },
-  rightCardTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  rightCardIconCircle: {
+  drawerIconCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rightCardBadgePill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.24)',
-    paddingHorizontal: 7,
-    paddingVertical: 2.5,
-    borderRadius: 999,
-  },
-  rightCardBadgeText: {
+  drawerTitleText: {
     color: '#FFFFFF',
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '800',
-    letterSpacing: 0.3,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
-  rightCardTextWrap: {
-    marginTop: 6,
+  liveTillBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: 999,
   },
-  rightCardTitleWord: {
+  liveGreenPulse: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#34D399',
+  },
+  liveTillBadgeText: {
     color: '#FFFFFF',
-    fontSize: 14.5,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  drawerAmountBlock: {
+    gap: 3,
+  },
+  drawerNumberRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  drawerCurrencySymbol: {
+    color: '#FFFFFF',
+    fontSize: 20,
     fontWeight: '800',
-    lineHeight: 18,
-    letterSpacing: -0.2,
+    marginTop: 5,
+    opacity: 0.95,
+  },
+  drawerAmountNumber: {
+    color: '#FFFFFF',
+    fontSize: 34,
+    fontWeight: '900',
+    letterSpacing: -0.8,
+    lineHeight: 40,
+  },
+  drawerSubHint: {
+    color: 'rgba(255, 255, 255, 0.88)',
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  drawerBottomStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.16)',
+    gap: 10,
+  },
+  drawerEquationWrap: {
+    flex: 1,
+  },
+  drawerEquationText: {
+    color: 'rgba(255, 255, 255, 0.92)',
+    fontSize: 11.5,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  drawerTallyCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  drawerTallyCtaText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+
+  // CARD 2 & 3: Twin Metric Cards (50% / 50% row)
+  twinCardsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  twinCard: {
+    flex: 1,
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 14,
+    justifyContent: 'space-between',
+    minHeight: 130,
+    elevation: 0,
+  },
+  twinCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  twinIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  twinPillBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  twinPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  twinCardContent: {
+    marginVertical: 6,
+    gap: 2,
+  },
+  twinCardLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  twinCardAmount: {
+    fontSize: 18.5,
+    fontWeight: '900',
+    letterSpacing: -0.4,
+  },
+  twinCardFooter: {
+    paddingTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(148, 163, 184, 0.12)',
+  },
+  twinFooterText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
 
   // ── 2. Horizontal Action Pills (Zero Muddy Shadow, Soft Border) ──
@@ -1029,73 +1030,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     letterSpacing: -0.2,
-  },
-
-  // ── 3. Store Daily Summary ("LIVE POS" - Zero Shadow) ──
-  summarySectionCard: {
-    borderRadius: 24,
-    borderWidth: 1,
-    padding: 16,
-    gap: 12,
-    elevation: 0,
-  },
-  summaryHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  summaryTitleWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  greenLiveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#00C9A7',
-  },
-  summaryCardTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-  },
-  livePosBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 999,
-  },
-  livePosText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
-  summaryPodsRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  summaryPod: {
-    flex: 1,
-    borderRadius: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 11,
-    gap: 3,
-  },
-  podLabel: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-  },
-  podValue: {
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: -0.4,
-    marginTop: 2,
-  },
-  podSub: {
-    fontSize: 10.5,
-    fontWeight: '600',
   },
 
   // ── 4. Evening Closing Prompt Card ──
