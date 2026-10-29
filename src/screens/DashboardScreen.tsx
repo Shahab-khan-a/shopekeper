@@ -418,40 +418,6 @@ export const DashboardScreen: React.FC = () => {
           )}
         </ScrollView>
 
-        {/* ══════════════════════════════════════════════════════════
-            4. EVENING CLOSING PROMPT BANNER (Smart Day-End Closing)
-            ══════════════════════════════════════════════════════════ */}
-        {(new Date().getHours() >= 17 || todaySales.length > 0) && (
-          <Pressable
-            onPress={() => setShowDayEnd(true)}
-            style={({ pressed }) => [
-              styles.eveningClosingPromptCard,
-              pressed && { opacity: 0.92, transform: [{ scale: 0.99 }] },
-            ]}>
-            <View style={styles.eveningPromptLeft}>
-              <View style={styles.eveningPromptMoon}>
-                <Ionicons name="moon" size={18} color="#FBBF24" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.eveningPromptTitle}>
-                  {isUrdu
-                    ? 'دکان بند کرنے کا وقت؟ شام کا حساب کریں'
-                    : 'Ready to close shop? Tally cash drawer'}
-                </Text>
-                <Text style={styles.eveningPromptSubtitle} numberOfLines={1}>
-                  {isUrdu
-                    ? `گلہ میں متوقع: ${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()} • نقد نوٹ گنیں`
-                    : `Expected: ${settings.currencySymbol}${todayNetCashInDrawer.toLocaleString()} • Count notes & get report`}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.eveningPromptCta}>
-              <Text style={styles.eveningPromptCtaText}>
-                {isUrdu ? 'حساب کریں ↵' : 'Tally →'}
-              </Text>
-            </View>
-          </Pressable>
-        )}
 
         {/* ══════════════════════════════════════════════════════════
             5. TODAY ACTIVITY FEED (Real Recent Sales)
@@ -1032,55 +998,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
 
-  // ── 4. Evening Closing Prompt Card ──
-  eveningClosingPromptCard: {
-    backgroundColor: '#064E3B',
-    borderRadius: 22,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    borderWidth: 1,
-    borderColor: '#047857',
-    elevation: 0,
-  },
-  eveningPromptLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  eveningPromptMoon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eveningPromptTitle: {
-    color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '800',
-  },
-  eveningPromptSubtitle: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 11,
-    marginTop: 1,
-    lineHeight: 15,
-  },
-  eveningPromptCta: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 10,
-  },
-  eveningPromptCtaText: {
-    color: '#FFFFFF',
-    fontSize: 11.5,
-    fontWeight: '800',
-  },
 
   // ── 5. Activity Feed ──
   feedHeaderRow: {
