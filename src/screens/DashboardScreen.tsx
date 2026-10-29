@@ -189,107 +189,121 @@ export const DashboardScreen: React.FC = () => {
                - Card 3: Market Udhaar & Recovery (50% width)
             ══════════════════════════════════════════════════════════ */}
         <View style={styles.commandDeckContainer}>
-          {/* ── CARD 1: MASTER CASH REGISTER (گلہ میں نقد رقم) ── */}
+          {/* ── CARD 1: COLORFUL, MINIMAL & ATTRACTIVE HERO CARD (Today's Store Performance) ── */}
           <Pressable
-            onPress={() => setShowDayEnd(true)}
+            onPress={() => setActiveTab('history')}
             style={({ pressed }) => [
-              styles.masterDrawerCard,
-              { backgroundColor: settings.darkMode ? '#064E3B' : '#00A389' },
+              styles.auroraHeroCard,
+              { backgroundColor: settings.darkMode ? '#064E3B' : '#00A88F' },
               pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
             ]}>
-            {/* Header: Register status & active pill */}
-            <View style={styles.masterCardHeader}>
-              <View style={styles.drawerTitleBlock}>
-                <View style={styles.drawerIconCircle}>
-                  <Ionicons name="wallet" size={15} color="#FFFFFF" />
-                </View>
-                <Text style={styles.drawerTitleText}>
-                  {isUrdu ? 'گلہ میں نقد کیش' : 'CASH IN DRAWER'}
+            {/* Colorful Embedded Ambient Atmosphere Orbs */}
+            <View style={styles.auroraOrbCyan} pointerEvents="none" />
+            <View style={styles.auroraOrbViolet} pointerEvents="none" />
+            <View style={styles.auroraOrbAmber} pointerEvents="none" />
+
+            {/* Top Row: Clean Sparkle Label + Frosted Live Bills Badge */}
+            <View style={styles.heroTopRow}>
+              <View style={styles.heroTitleWrap}>
+                <Ionicons name="sparkles" size={13} color="#FDE047" />
+                <Text style={styles.heroCardSuperLabel}>
+                  {isUrdu ? 'آج کی کل سیل' : "TODAY'S TOTAL SALES"}
                 </Text>
               </View>
 
-              <View style={styles.liveTillBadge}>
-                <View style={styles.liveGreenPulse} />
-                <Text style={styles.liveTillBadgeText}>
-                  {isUrdu ? 'فعال گلہ' : 'Till Active'}
+              <View style={styles.heroFrostedBadge}>
+                <View style={styles.heroLivePulse} />
+                <Text style={styles.heroFrostedBadgeText}>
+                  {todaySales.length} {isUrdu ? 'بلز جاری' : 'bills today'}
                 </Text>
               </View>
             </View>
 
-            {/* Big Cash Amount */}
-            <View style={styles.drawerAmountBlock}>
-              <View style={styles.drawerNumberRow}>
-                <Text style={styles.drawerCurrencySymbol}>{settings.currencySymbol}</Text>
-                <Text style={styles.drawerAmountNumber} numberOfLines={1} adjustsFontSizeToFit>
-                  {todayNetCashInDrawer.toLocaleString()}
+            {/* Center: Big Confident Numbers */}
+            <View style={styles.heroCenterBlock}>
+              <View style={styles.heroCurrencyRow}>
+                <Text style={styles.heroCurrencySign}>{settings.currencySymbol}</Text>
+                <Text style={styles.heroLargeAmount} numberOfLines={1} adjustsFontSizeToFit>
+                  {todaySalesTotal.toLocaleString()}
                 </Text>
               </View>
-              <Text style={styles.drawerSubHint} numberOfLines={1}>
-                {todaySales.length > 0
-                  ? (isUrdu ? `${todaySales.length} بلز جاری ہو چکے ہیں` : `${todaySales.length} bills generated today`)
-                  : (isUrdu ? 'گلہ متوازن ہے، کاؤنٹر تیار ہے' : 'Counter ready • Physical cash')}
+
+              <Text style={styles.heroSubtitle}>
+                {todayGrossProfit > 0
+                  ? `+${settings.currencySymbol}${todayGrossProfit.toLocaleString()} ${isUrdu ? 'متوقع منافع' : 'estimated gross profit'}`
+                  : (todaySales.length > 0 ? (isUrdu ? 'تمام بلز فعال ہیں' : 'All transactions recorded') : (isUrdu ? 'کاؤنٹر تیار ہے • نیا بل بنائیں' : 'Ready for new customers'))}
               </Text>
             </View>
 
-            {/* Bottom Strip: Real retail equation (+Cash in / -Kharcha out) + Tally trigger */}
-            <View style={styles.drawerBottomStrip}>
-              <View style={styles.drawerEquationWrap}>
-                <Text style={styles.drawerEquationText} numberOfLines={1}>
-                  +{settings.currencySymbol}{(todayCash + todayVasooli).toLocaleString()} in
-                  {todayCashOutTotal > 0 ? `  ·  -${settings.currencySymbol}${todayCashOutTotal.toLocaleString()} out` : ''}
-                </Text>
+            {/* Bottom: Frosted Glass Floating Ribbon for Physical Cash Drawer */}
+            <Pressable
+              onPress={() => setShowDayEnd(true)}
+              style={({ pressed }) => [
+                styles.heroFloatingGlassRibbon,
+                pressed && { opacity: 0.88 },
+              ]}>
+              <View style={styles.glassRibbonLeft}>
+                <View style={styles.glassRibbonIconBubble}>
+                  <Ionicons name="wallet-outline" size={14} color="#FFFFFF" />
+                </View>
+                <View>
+                  <Text style={styles.glassRibbonSubLabel}>
+                    {isUrdu ? 'گلہ میں نقد کیش' : 'CASH IN DRAWER'}
+                  </Text>
+                  <Text style={styles.glassRibbonAmount}>
+                    {settings.currencySymbol}{todayNetCashInDrawer.toLocaleString()}
+                  </Text>
+                </View>
               </View>
 
-              <View style={styles.drawerTallyCta}>
+              <View style={styles.glassRibbonCtaBtn}>
                 <Ionicons name="calculator-outline" size={13} color="#FFFFFF" />
-                <Text style={styles.drawerTallyCtaText}>
+                <Text style={styles.glassRibbonCtaText}>
                   {isUrdu ? 'حساب کریں' : 'Tally'}
                 </Text>
-                <Ionicons name="chevron-forward" size={12} color="#FFFFFF" />
+                <Ionicons name="chevron-forward" size={11} color="#FFFFFF" />
               </View>
-            </View>
+            </Pressable>
           </Pressable>
 
-          {/* ── CARD 2 & 3: TWIN METRIC CARDS (Side-by-Side 50/50 Row) ── */}
+          {/* ── CARDS 2 & 3: TWIN OPERATIONAL CARDS (Side-by-Side 50/50 Row) ── */}
           <View style={styles.twinCardsRow}>
-            {/* CARD 2: Today's Revenue (آج کی کل سیل) */}
+            {/* Card 2: Cash In Drawer Breakdown */}
             <Pressable
-              onPress={() => setActiveTab('history')}
+              onPress={() => setShowDayEnd(true)}
               style={({ pressed }) => [
                 styles.twinCard,
                 { backgroundColor: theme.card, borderColor: softBorder },
                 pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
               ]}>
               <View style={styles.twinCardHeader}>
-                <View style={[styles.twinIconWrap, { backgroundColor: settings.darkMode ? 'rgba(37,99,235,0.2)' : '#DBEAFE' }]}>
-                  <Ionicons name="cart-outline" size={16} color="#2563EB" />
+                <View style={[styles.twinIconWrap, { backgroundColor: settings.darkMode ? 'rgba(0,201,167,0.18)' : '#D1FAE5' }]}>
+                  <Ionicons name="cash-outline" size={16} color="#059669" />
                 </View>
-                <View style={[styles.twinPillBadge, { backgroundColor: settings.darkMode ? 'rgba(37,99,235,0.15)' : '#EFF6FF' }]}>
-                  <Text style={[styles.twinPillText, { color: '#2563EB' }]}>
-                    {todaySales.length} {isUrdu ? 'بلز' : 'bills'}
+                <View style={[styles.twinPillBadge, { backgroundColor: settings.darkMode ? 'rgba(0,201,167,0.15)' : '#ECFDF5' }]}>
+                  <Text style={[styles.twinPillText, { color: '#059669' }]}>
+                    {todayCashOutTotal > 0 ? `-${settings.currencySymbol}${todayCashOutTotal}` : (isUrdu ? 'کیش' : 'Cash')}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.twinCardContent}>
                 <Text style={[styles.twinCardLabel, { color: theme.textMuted }]}>
-                  {isUrdu ? 'آج کی کل سیل' : "TODAY'S SALES"}
+                  {isUrdu ? 'گلہ میں کیش' : 'DRAWER CASH'}
                 </Text>
                 <Text style={[styles.twinCardAmount, { color: theme.text }]} numberOfLines={1}>
-                  {settings.currencySymbol}{todaySalesTotal.toLocaleString()}
+                  {settings.currencySymbol}{todayNetCashInDrawer.toLocaleString()}
                 </Text>
               </View>
 
               <View style={styles.twinCardFooter}>
-                <Text style={[styles.twinFooterText, { color: '#059669' }]} numberOfLines={1}>
-                  {todayGrossProfit > 0
-                    ? `+${settings.currencySymbol}${todayGrossProfit.toLocaleString()} ${isUrdu ? 'منافع' : 'profit'}`
-                    : (isUrdu ? 'تمام ادائیگیاں' : 'Cash & Online')}
+                <Text style={[styles.twinFooterText, { color: theme.textMuted }]} numberOfLines={1}>
+                  +{settings.currencySymbol}{(todayCash + todayVasooli).toLocaleString()} in
                 </Text>
               </View>
             </Pressable>
 
-            {/* CARD 3: Customer Udhaar & Vasooli (گاہک کھاتہ) */}
+            {/* Card 3: Market Udhaar & Vasooli */}
             <Pressable
               onPress={() => setActiveTab('khata')}
               style={({ pressed }) => [
@@ -320,8 +334,8 @@ export const DashboardScreen: React.FC = () => {
               <View style={styles.twinCardFooter}>
                 <Text style={[styles.twinFooterText, { color: todayVasooli > 0 ? '#059669' : theme.textMuted }]} numberOfLines={1}>
                   {todayVasooli > 0
-                    ? `+${settings.currencySymbol}${todayVasooli.toLocaleString()} ${isUrdu ? 'وصولی آج' : 'vasooli'}`
-                    : (isUrdu ? 'کھاتہ لیجر کھولیں →' : 'View Khata →')}
+                    ? `+${settings.currencySymbol}${todayVasooli.toLocaleString()} ${isUrdu ? 'وصولی' : 'vasooli'}`
+                    : (isUrdu ? 'کھاتہ دیکھیں →' : 'View Khata →')}
                 </Text>
               </View>
             </Pressable>
@@ -793,117 +807,160 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // CARD 1: Master Cash Drawer Card (100% width)
-  masterDrawerCard: {
+  // CARD 1: Luminous Colorful & Minimal Aurora Hero Card
+  auroraHeroCard: {
     borderRadius: 24,
     padding: 18,
     gap: 14,
     elevation: 0,
     overflow: 'hidden',
+    position: 'relative',
+    minHeight: 185,
   },
-  masterCardHeader: {
+  auroraOrbCyan: {
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    backgroundColor: '#0284C7',
+    opacity: 0.38,
+    position: 'absolute',
+    top: -50,
+    right: -40,
+  },
+  auroraOrbViolet: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    backgroundColor: '#6366F1',
+    opacity: 0.28,
+    position: 'absolute',
+    top: 30,
+    right: 50,
+  },
+  auroraOrbAmber: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#F59E0B',
+    opacity: 0.22,
+    position: 'absolute',
+    bottom: -40,
+    left: -20,
+  },
+  heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    zIndex: 2,
   },
-  drawerTitleBlock: {
+  heroTitleWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
-  drawerIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  drawerTitleText: {
+  heroCardSuperLabel: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
-  liveTillBadge: {
+  heroFrostedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     paddingHorizontal: 10,
-    paddingVertical: 4.5,
+    paddingVertical: 4,
     borderRadius: 999,
   },
-  liveGreenPulse: {
-    width: 7,
-    height: 7,
+  heroLivePulse: {
+    width: 6.5,
+    height: 6.5,
     borderRadius: 3.5,
     backgroundColor: '#34D399',
   },
-  liveTillBadgeText: {
+  heroFrostedBadgeText: {
     color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     letterSpacing: 0.2,
   },
-  drawerAmountBlock: {
+  heroCenterBlock: {
     gap: 3,
+    zIndex: 2,
   },
-  drawerNumberRow: {
+  heroCurrencyRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 4,
   },
-  drawerCurrencySymbol: {
+  heroCurrencySign: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: '800',
     marginTop: 5,
     opacity: 0.95,
   },
-  drawerAmountNumber: {
+  heroLargeAmount: {
     color: '#FFFFFF',
-    fontSize: 34,
+    fontSize: 36,
     fontWeight: '900',
-    letterSpacing: -0.8,
-    lineHeight: 40,
+    letterSpacing: -0.9,
+    lineHeight: 42,
   },
-  drawerSubHint: {
+  heroSubtitle: {
     color: 'rgba(255, 255, 255, 0.88)',
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
   },
-  drawerBottomStrip: {
+  heroFloatingGlassRibbon: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.16)',
-    gap: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    zIndex: 2,
   },
-  drawerEquationWrap: {
-    flex: 1,
-  },
-  drawerEquationText: {
-    color: 'rgba(255, 255, 255, 0.92)',
-    fontSize: 11.5,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  drawerTallyCta: {
+  glassRibbonLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.24)',
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 10,
+    gap: 8,
   },
-  drawerTallyCtaText: {
+  glassRibbonIconBubble: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glassRibbonSubLabel: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 9.5,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+  glassRibbonAmount: {
     color: '#FFFFFF',
-    fontSize: 11.5,
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+  glassRibbonCtaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.26)',
+    paddingHorizontal: 10,
+    paddingVertical: 5.5,
+    borderRadius: 9,
+  },
+  glassRibbonCtaText: {
+    color: '#FFFFFF',
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.2,
   },
