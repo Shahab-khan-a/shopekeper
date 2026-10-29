@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Linking,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -39,7 +38,13 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
   const isSettled = customer.totalDebt <= 0 && !hasAdvance;
   const isOverdue = !isSettled && !hasAdvance && overdueDays >= 7;
   const isUrdu = language === 'ur';
-  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.35)';
+
+  // Ambient soft border (delicate, never harsh)
+  const softBorder = settings.darkMode
+    ? 'rgba(255,255,255,0.07)'
+    : isOverdue
+      ? 'rgba(239, 68, 68, 0.22)'
+      : 'rgba(148, 163, 184, 0.22)';
 
   const primaryName = isUrdu && customer.nameUrdu ? customer.nameUrdu : customer.name;
   const secondaryName = isUrdu && customer.nameUrdu ? customer.name : customer.nameUrdu;
@@ -52,14 +57,14 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
     : null;
 
   const lastTxLabel = () => {
-    if (!lastTx) return '—';
+    if (!lastTx) return null;
     const isPayment = lastTx.type === 'payment_received' || lastTx.type === 'payment';
     const d = new Date(lastTx.date);
     const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     if (isPayment) {
       return `${settings.currencySymbol}${lastTx.amount.toLocaleString()} · ${dateStr}`;
     }
-    if (lastTx.billNumber) return `#${lastTx.billNumber}`;
+    if (lastTx.billNumber) return `#${lastTx.billNumber} · ${dateStr}`;
     return dateStr;
   };
 
@@ -120,12 +125,32 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
       return new Date(dateStr).toLocaleDateString(undefined, {
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
       });
     } catch {
       return dateStr;
     }
   };
+
+  // Avatar pastel tint (soft & friendly)
+  const avatarBg = isSettled
+    ? (settings.darkMode ? 'rgba(16,185,129,0.12)' : '#ECFDF5')
+    : isOverdue
+      ? (settings.darkMode ? 'rgba(239,68,68,0.14)' : '#FEE2E2')
+      : hasAdvance
+        ? (settings.darkMode ? 'rgba(16,185,129,0.12)' : '#D1FAE5')
+        : (settings.darkMode ? 'rgba(56,189,248,0.14)' : '#E0F2FE');
+
+  const avatarColor = isSettled
+    ? theme.success
+    : isOverdue
+      ? theme.danger
+      : hasAdvance
+        ? '#059669'
+        : (settings.darkMode ? '#38BDF8' : '#0284C7');
+
+  const billCount = customer.transactions?.filter(
+    (tx) => tx.type === 'credit_sale' || tx.type === 'credit'
+  ).length || 0;
 
   return (
     <View
@@ -133,320 +158,310 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
         styles.card,
         {
           backgroundColor: theme.card,
-          borderColor: isOverdue
-            ? settings.darkMode
-              ? 'rgba(248,113,113,0.35)'
-              : 'rgba(220,38,38,0.28)'
-            : softBorder,
+          borderColor: softBorder,
         },
       ]}>
-      {/* Identity */}
-      <View style={styles.header}>
-        <View
-          style={[
-            styles.avatar,
-            {
-              backgroundColor: isSettled
-                ? theme.successLight
-                : isOverdue
-                  ? theme.dangerLight
-                  : settings.darkMode
-                    ? 'rgba(56,189,248,0.16)'
-                    : '#E0F2FE',
-            },
-          ]}>
+      {/* ── Main Tap Area: Customer Summary & Balance (SadaPay Inspo Style) ── */}
+      <Pressable
+        onPress={onToggleExpand}
+        style={styles.cardHeaderArea}
+        accessibilityRole="button"
+        accessibilityLabel={`${primaryName}, ${customer.totalDebt} rupees`}>
+        {/* Soft squircle Avatar */}
+        <View style={[styles.avatar, { backgroundColor: avatarBg }]}>
           <Text
             style={[
               styles.avatarText,
               {
-                color: isSettled
-                  ? theme.success
-                  : isOverdue
-                    ? theme.danger
-                    : settings.darkMode
-                      ? '#7DD3FC'
-                      : '#0369A1',
-                fontFamily:
-                  isUrdu && customer.nameUrdu ? Typography.urduFontFamily : undefined,
+                color: avatarColor,
+                fontFamily: isUrdu && customer.nameUrdu ? Typography.urduFontFamily : undefined,
               },
             ]}>
             {avatarChar}
           </Text>
         </View>
 
+        {/* Center: Identity & Subtitle */}
         <View style={styles.nameBlock}>
-          <Text
-            style={[
-              styles.primaryName,
-              {
-                color: theme.text,
-                fontFamily:
-                  isUrdu && customer.nameUrdu ? Typography.urduFontFamily : undefined,
-              },
-            ]}
-            numberOfLines={1}>
-            {primaryName}
-          </Text>
-          {secondaryName ? (
+          <View style={styles.nameRow}>
             <Text
               style={[
-                styles.secondaryName,
+                styles.primaryName,
                 {
-                  color: theme.textMuted,
-                  fontFamily:
-                    !isUrdu && customer.nameUrdu ? Typography.urduFontFamily : undefined,
+                  color: theme.text,
+                  fontFamily: isUrdu && customer.nameUrdu ? Typography.urduFontFamily : undefined,
                 },
               ]}
               numberOfLines={1}>
-              ({secondaryName})
+              {primaryName}
             </Text>
-          ) : null}
-          <Text style={[styles.metaLine, { color: theme.textMuted }]} numberOfLines={1}>
-            {[customer.address, customer.phone].filter(Boolean).join(' · ') || '—'}
-          </Text>
-        </View>
-
-        <Pressable
-          onPress={onToggleExpand}
-          hitSlop={8}
-          style={({ pressed }) => [
-            styles.moreBtn,
-            pressed && { opacity: 0.7 },
-          ]}>
-          <Ionicons
-            name={isExpanded ? 'chevron-up' : 'ellipsis-vertical'}
-            size={16}
-            color={theme.textMuted}
-          />
-        </Pressable>
-      </View>
-
-      {/* Debt box */}
-      <View
-        style={[
-          styles.debtBox,
-          {
-            backgroundColor: settings.darkMode ? theme.surfaceSubtle : '#F1F5FB',
-            borderColor: softBorder,
-          },
-        ]}>
-        <View style={styles.debtLeft}>
-          <Text style={[styles.debtLabel, { color: theme.textMuted }]}>
-            {hasAdvance
-              ? (isUrdu ? 'پیشگی جمع رقم (Advance)' : 'Advance Deposit')
-              : isSettled
-                ? (isUrdu ? 'حساب بے باق (برابر)' : 'Account Cleared')
-                : (isUrdu ? 'پیسے لینے ہیں (ادھار)' : 'To Collect (Udhaar)')}
-          </Text>
-          <View style={styles.debtAmountRow}>
-            <Text
-              style={[
-                styles.debtAmount,
-                { color: hasAdvance ? '#059669' : isSettled ? theme.success : theme.danger },
-              ]}>
-              {settings.currencySymbol}
-              {hasAdvance
-                ? advanceAmount.toLocaleString()
-                : Math.max(0, customer.totalDebt).toLocaleString()}
-            </Text>
-            {hasAdvance ? (
-              <View style={[styles.overduePill, { backgroundColor: '#D1FAE5' }]}>
-                <Text style={[styles.overduePillText, { color: '#059669', fontWeight: '800' }]}>
-                  {isUrdu ? 'پیشگی رقم' : 'Advance'}
-                </Text>
-              </View>
-            ) : isOverdue ? (
-              <View style={[styles.overduePill, { backgroundColor: theme.dangerLight }]}>
-                <Text style={[styles.overduePillText, { color: theme.danger }]}>
-                  {overdueDays}d {t('daysOverdue')}
-                </Text>
-              </View>
-            ) : !isSettled ? (
-              <View
-                style={[
-                  styles.overduePill,
-                  {
-                    backgroundColor: settings.darkMode
-                      ? 'rgba(16,185,129,0.15)'
-                      : 'rgba(167,243,208,0.45)',
-                  },
-                ]}>
-                <Text style={[styles.overduePillText, { color: theme.primary }]}>
-                  {customer.transactions?.filter(
-                    (tx) => tx.type === 'credit_sale' || tx.type === 'credit'
-                  ).length || 0}{' '}
-                  {language === 'ur' ? 'بل' : 'bills'}
-                </Text>
-              </View>
+            {secondaryName ? (
+              <Text style={[styles.secondaryName, { color: theme.textMuted }]} numberOfLines={1}>
+                ({secondaryName})
+              </Text>
             ) : null}
           </View>
-        </View>
-        <View style={styles.debtRight}>
-          <Text style={[styles.debtLabel, { color: theme.textMuted }]}>
-            {t('lastTxLabel')}
+
+          <Text style={[styles.metaLine, { color: theme.textMuted }]} numberOfLines={1}>
+            {customer.phone || customer.address || (lastTxLabel() ? `${t('lastTxLabel')}: ${lastTxLabel()}` : (isUrdu ? 'کھاتہ فعال' : 'Active Account'))}
           </Text>
+        </View>
+
+        {/* Right: Clean Prominent Amount & Soft Pill */}
+        <View style={styles.balanceBlock}>
           <Text
             style={[
-              styles.lastTxValue,
+              styles.balanceAmount,
               {
-                color:
-                  lastTx &&
-                    (lastTx.type === 'payment_received' || lastTx.type === 'payment')
-                    ? theme.primary
-                    : theme.text,
+                color: hasAdvance
+                  ? '#059669'
+                  : isSettled
+                    ? theme.textMuted
+                    : theme.danger,
               },
-            ]}
-            numberOfLines={1}>
-            {lastTxLabel()}
-          </Text>
-        </View>
-      </View>
-
-      {/* Actions */}
-      <View style={styles.actionsRow}>
-        {/* Direct Credit Button */}
-        <Pressable
-          onPress={() => (onAddCredit ? onAddCredit(customer) : onToggleExpand())}
-          style={({ pressed }) => [
-            styles.creditBtn,
-            {
-              backgroundColor: settings.darkMode ? 'rgba(239, 68, 68, 0.15)' : '#FEE2E2',
-              borderColor: settings.darkMode ? 'rgba(239, 68, 68, 0.3)' : '#FCA5A5',
-            },
-            pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
-          ]}>
-          <Ionicons name="add-circle" size={15} color={theme.danger} />
-          <Text style={[styles.creditBtnText, { color: theme.danger }]} numberOfLines={1} ellipsizeMode="tail">
-            {isUrdu ? '+ مال دیا' : '+ Gave Goods'}
-          </Text>
-        </Pressable>
-
-        {isSettled ? (
-          <View style={styles.settledWrap}>
-            <Ionicons name="checkmark-circle" size={16} color={theme.success} />
-            <Text style={[styles.settledText, { color: theme.success }]} numberOfLines={1}>
-              {t('settled')}
-            </Text>
-          </View>
-        ) : (
-          <Pressable
-            onPress={() => onRecordPayment(customer)}
-            style={({ pressed }) => [
-              styles.vasooliBtn,
-              { backgroundColor: theme.primary },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}>
-            <Ionicons name="cash" size={15} color="#FFFFFF" />
-            <Text style={styles.vasooliBtnText} numberOfLines={1} ellipsizeMode="tail">
-              {isUrdu ? 'وصولی کی' : t('vasooliCash')}
-            </Text>
-          </Pressable>
-        )}
-
-        {!isSettled && customer.phone ? (
-          <Pressable
-            onPress={sendWhatsAppReminder}
-            hitSlop={6}
-            style={({ pressed }) => [
-              styles.iconBtn,
-              {
-                backgroundColor: settings.darkMode ? '#065F46' : '#DCFCE7',
-                borderWidth: 1,
-                borderColor: settings.darkMode ? '#059669' : '#22C55E',
-              },
-              pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-            ]}>
-            <Ionicons name="logo-whatsapp" size={17} color={settings.darkMode ? '#34D399' : '#16A34A'} />
-          </Pressable>
-        ) : null}
-
-        {customer.phone ? (
-          <Pressable
-            onPress={handlePhoneCall}
-            hitSlop={6}
-            style={({ pressed }) => [
-              styles.iconBtn,
-              {
-                backgroundColor: settings.darkMode ? theme.surfaceSubtle : '#EFF6FF',
-                borderWidth: 1,
-                borderColor: settings.darkMode ? theme.border : '#BFDBFE',
-              },
-              pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-            ]}>
-            <Ionicons name="call" size={16} color="#2563EB" />
-          </Pressable>
-        ) : (
-          <Pressable
-            onPress={onToggleExpand}
-            hitSlop={6}
-            style={({ pressed }) => [
-              styles.iconBtn,
-              {
-                backgroundColor: settings.darkMode ? theme.surfaceSubtle : '#E5EEFF',
-              },
-              pressed && { opacity: 0.8 },
-            ]}>
-            <Ionicons name="time-outline" size={16} color={theme.textSecondary} />
-          </Pressable>
-        )}
-      </View>
-
-      {/* History */}
-      {isExpanded ? (
-        <View style={[styles.historyContainer, { borderTopColor: softBorder }]}>
-          <Text style={[styles.historyTitle, { color: theme.textMuted }]}>
-            {t('recentTransactions')} ({customer.transactions.length})
+            {settings.currencySymbol}
+            {hasAdvance
+              ? advanceAmount.toLocaleString()
+              : Math.max(0, customer.totalDebt).toLocaleString()}
           </Text>
 
-          {customer.transactions.length === 0 ? (
-            <Text style={[styles.noTxText, { color: theme.textMuted }]}>
-              {t('noTransactions')}
-            </Text>
+          {/* Soft Capsule Pill */}
+          {hasAdvance ? (
+            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.16)' : '#DCFCE7' }]}>
+              <Text style={[styles.capsulePillText, { color: '#059669' }]}>
+                {isUrdu ? 'پیشگی رقم' : 'Advance'}
+              </Text>
+            </View>
+          ) : isOverdue ? (
+            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(239,68,68,0.18)' : '#FEE2E2' }]}>
+              <Text style={[styles.capsulePillText, { color: theme.danger }]}>
+                {overdueDays}d {t('daysOverdue')}
+              </Text>
+            </View>
+          ) : isSettled ? (
+            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }]}>
+              <Text style={[styles.capsulePillText, { color: theme.textSecondary }]}>
+                {t('settled')} ✓
+              </Text>
+            </View>
           ) : (
-            customer.transactions.slice(0, 8).map((tx) => {
-              const isPayment = tx.type === 'payment_received' || tx.type === 'payment';
-              return (
-                <View
-                  key={tx.id}
-                  style={[
-                    styles.txItem,
-                    {
-                      backgroundColor: isPayment
-                        ? settings.darkMode
-                          ? 'rgba(16,185,129,0.12)'
-                          : '#F0FDF4'
-                        : settings.darkMode
-                          ? 'rgba(248,113,113,0.1)'
-                          : '#FEF2F2',
-                    },
-                  ]}>
-                  <View style={styles.txMiddle}>
+            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }]}>
+              <Text style={[styles.capsulePillText, { color: theme.textSecondary }]}>
+                {billCount} {isUrdu ? 'بلز' : 'bills'}
+              </Text>
+            </View>
+          )}
+        </View>
+      </Pressable>
+
+      {/* ── Soft Clean Actions Row (Rule of Two: Vasooli + WhatsApp) ── */}
+      <View style={styles.actionsRow}>
+        {isSettled ? (
+          /* Settled State: Clean Cleared State + Gave Goods Option */
+          <>
+            <View
+              style={[
+                styles.settledBanner,
+                { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.1)' : '#F0FDF4' },
+              ]}>
+              <Ionicons name="checkmark-circle" size={15} color={theme.success} />
+              <Text style={[styles.settledBannerText, { color: theme.success }]}>
+                {isUrdu ? 'حساب بے باق ہے (کوئی واجبات نہیں)' : 'Account Cleared · Zero Balance'}
+              </Text>
+            </View>
+
+            <Pressable
+              onPress={() => (onAddCredit ? onAddCredit(customer) : onToggleExpand())}
+              style={({ pressed }) => [
+                styles.subtleActionBtn,
+                {
+                  backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F8FAFC',
+                  borderColor: softBorder,
+                },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Ionicons name="add" size={15} color={theme.textSecondary} />
+              <Text style={[styles.subtleActionText, { color: theme.textSecondary }]}>
+                {isUrdu ? '+ مال دیا' : '+ Credit'}
+              </Text>
+            </Pressable>
+          </>
+        ) : (
+          /* Pending Debt State: Primary Vasooli Pill + 1-Tap WhatsApp */
+          <>
+            {/* Primary Action: Vasooli (وصولی کی) */}
+            <Pressable
+              onPress={() => onRecordPayment(customer)}
+              style={({ pressed }) => [
+                styles.vasooliPillBtn,
+                { backgroundColor: theme.primary },
+                pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+              ]}>
+              <Ionicons name="cash" size={16} color="#FFFFFF" />
+              <Text style={styles.vasooliPillText}>
+                {isUrdu ? 'وصولی کی' : t('vasooliCash')}
+              </Text>
+            </Pressable>
+
+            {/* WhatsApp Reminder (1-Tap) */}
+            {customer.phone ? (
+              <Pressable
+                onPress={sendWhatsAppReminder}
+                hitSlop={6}
+                accessibilityLabel="Send WhatsApp bill reminder"
+                style={({ pressed }) => [
+                  styles.whatsappPillBtn,
+                  {
+                    backgroundColor: settings.darkMode ? '#064E3B' : '#DCFCE7',
+                    borderColor: settings.darkMode ? '#059669' : '#86EFAC',
+                  },
+                  pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+                ]}>
+                <Ionicons
+                  name="logo-whatsapp"
+                  size={18}
+                  color={settings.darkMode ? '#34D399' : '#15803D'}
+                />
+              </Pressable>
+            ) : null}
+
+            {/* Expand / More Details */}
+            <Pressable
+              onPress={onToggleExpand}
+              hitSlop={6}
+              style={({ pressed }) => [
+                styles.expandToggleBtn,
+                {
+                  backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F8FAFC',
+                  borderColor: softBorder,
+                },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Ionicons
+                name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                size={16}
+                color={theme.textMuted}
+              />
+            </Pressable>
+          </>
+        )}
+      </View>
+
+      {/* ── Expanded Drawer: Quick Actions & Transaction History ── */}
+      {isExpanded ? (
+        <View
+          style={[
+            styles.expandedContainer,
+            {
+              borderTopColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+            },
+          ]}>
+          {/* Secondary Actions Tray */}
+          <View style={styles.secondaryActionsRow}>
+            {/* Gave Credit (+ مال دیا) */}
+            <Pressable
+              onPress={() => (onAddCredit ? onAddCredit(customer) : null)}
+              style={({ pressed }) => [
+                styles.secondaryPillBtn,
+                {
+                  backgroundColor: settings.darkMode ? 'rgba(239, 68, 68, 0.12)' : '#FEE2E2',
+                  borderColor: settings.darkMode ? 'rgba(239, 68, 68, 0.25)' : '#FECACA',
+                },
+                pressed && { opacity: 0.85 },
+              ]}>
+              <Ionicons name="add-circle" size={14} color={theme.danger} />
+              <Text style={[styles.secondaryPillText, { color: theme.danger }]}>
+                {isUrdu ? '+ نیا ادھار / مال دیا' : '+ Gave Goods (Credit)'}
+              </Text>
+            </Pressable>
+
+            {/* Call Customer */}
+            {customer.phone ? (
+              <Pressable
+                onPress={handlePhoneCall}
+                style={({ pressed }) => [
+                  styles.secondaryPillBtn,
+                  {
+                    backgroundColor: settings.darkMode ? 'rgba(56, 189, 248, 0.12)' : '#EFF6FF',
+                    borderColor: settings.darkMode ? 'rgba(56, 189, 248, 0.25)' : '#BFDBFE',
+                  },
+                  pressed && { opacity: 0.85 },
+                ]}>
+                <Ionicons name="call" size={13} color="#2563EB" />
+                <Text style={[styles.secondaryPillText, { color: '#2563EB' }]}>
+                  {isUrdu ? 'کال کریں' : 'Call'}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+
+          {/* Transactions List */}
+          <View style={styles.historyList}>
+            <Text style={[styles.historyHeader, { color: theme.textMuted }]}>
+              {t('recentTransactions')} ({customer.transactions?.length || 0})
+            </Text>
+
+            {!customer.transactions || customer.transactions.length === 0 ? (
+              <Text style={[styles.noTxText, { color: theme.textMuted }]}>
+                {t('noTransactions')}
+              </Text>
+            ) : (
+              customer.transactions.slice(0, 6).map((tx) => {
+                const isPayment = tx.type === 'payment_received' || tx.type === 'payment';
+                return (
+                  <View
+                    key={tx.id}
+                    style={[
+                      styles.txRow,
+                      {
+                        backgroundColor: isPayment
+                          ? settings.darkMode
+                            ? 'rgba(16,185,129,0.1)'
+                            : '#F0FDF4'
+                          : settings.darkMode
+                            ? 'rgba(248,113,113,0.08)'
+                            : '#FEF2F2',
+                      },
+                    ]}>
+                    <View style={styles.txLeft}>
+                      <View
+                        style={[
+                          styles.txDot,
+                          { backgroundColor: isPayment ? theme.success : theme.danger },
+                        ]}
+                      />
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text
+                          style={[
+                            styles.txTitle,
+                            { color: isPayment ? theme.success : theme.danger },
+                          ]}
+                          numberOfLines={1}>
+                          {isPayment ? t('paymentReceived') : t('creditSale')}
+                          {tx.billNumber ? ` · #${tx.billNumber}` : ''}
+                        </Text>
+                        <Text style={[styles.txMeta, { color: theme.textMuted }]} numberOfLines={1}>
+                          {formatTxDate(tx.date)}
+                          {tx.note ? ` · ${tx.note}` : ''}
+                        </Text>
+                      </View>
+                    </View>
+
                     <Text
                       style={[
-                        styles.txType,
+                        styles.txAmount,
                         { color: isPayment ? theme.success : theme.danger },
                       ]}>
-                      {isPayment ? t('paymentReceived') : t('creditSale')}
-                      {tx.billNumber ? ` · #${tx.billNumber}` : ''}
-                    </Text>
-                    <Text style={[styles.txDate, { color: theme.textMuted }]}>
-                      {formatTxDate(tx.date)}
-                      {tx.note ? ` · ${tx.note}` : ''}
+                      {isPayment ? '−' : '+'}
+                      {settings.currencySymbol}
+                      {tx.amount.toLocaleString()}
                     </Text>
                   </View>
-                  <Text
-                    style={[
-                      styles.txAmount,
-                      { color: isPayment ? theme.success : theme.danger },
-                    ]}>
-                    {isPayment ? '−' : '+'}
-                    {settings.currencySymbol}
-                    {tx.amount.toLocaleString()}
-                  </Text>
-                </View>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </View>
         </View>
       ) : null}
     </View>
@@ -455,184 +470,209 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
+    borderRadius: 22,
     borderWidth: 1,
-    padding: 14,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 14,
     gap: 12,
     ...Shadows.sm,
   },
-  header: {
+  cardHeaderArea: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
+    alignItems: 'center',
+    gap: 12,
   },
   avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '800',
   },
   nameBlock: {
     flex: 1,
     minWidth: 0,
-    gap: 1,
+    gap: 2,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap',
   },
   primaryName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   secondaryName: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '500',
   },
   metaLine: {
     fontSize: 12,
     fontWeight: '500',
-    marginTop: 1,
   },
-  moreBtn: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+  balanceBlock: {
+    alignItems: 'flex-end',
+    gap: 4,
   },
-
-  debtBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  debtLeft: { flex: 1, gap: 3, minWidth: 0 },
-  debtRight: { alignItems: 'flex-end', gap: 3, maxWidth: '42%' },
-  debtLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-  },
-  debtAmountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  debtAmount: {
-    fontSize: 18,
+  balanceAmount: {
+    fontSize: 17,
     fontWeight: '800',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
-  overduePill: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+  capsulePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 999,
   },
-  overduePillText: {
+  capsulePillText: {
     fontSize: 10,
     fontWeight: '700',
   },
-  lastTxValue: {
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'right',
-  },
 
+  // Actions Row
   actionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
+    paddingTop: 2,
   },
-  settledWrap: {
+  vasooliPillBtn: {
     flex: 1,
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+  },
+  vasooliPillText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  whatsappPillBtn: {
+    width: 42,
+    height: 40,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  expandToggleBtn: {
+    width: 38,
+    height: 40,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  settledBanner: {
+    flex: 1,
+    height: 38,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
   },
-  settledText: {
-    fontSize: 13,
+  settledBannerText: {
+    fontSize: 12,
     fontWeight: '700',
   },
-  creditBtn: {
-    flex: 1.1,
+  subtleActionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 4,
-    paddingVertical: 9,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    minWidth: 0,
-  },
-  creditBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
-    flexShrink: 1,
-  },
-  vasooliBtn: {
-    flex: 1.1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    paddingVertical: 9,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    minWidth: 0,
-    overflow: 'hidden',
-  },
-  vasooliBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-    flexShrink: 1,
-  },
-  iconBtn: {
-    width: 38,
     height: 38,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  subtleActionText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
 
-  historyContainer: {
+  // Expanded
+  expandedContainer: {
     borderTopWidth: 1,
-    paddingTop: 10,
-    gap: 6,
+    paddingTop: 12,
+    gap: 10,
   },
-  historyTitle: {
-    fontSize: 11,
+  secondaryActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  secondaryPillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  secondaryPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  historyList: {
+    gap: 6,
+    paddingTop: 2,
+  },
+  historyHeader: {
+    fontSize: 10.5,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
     marginBottom: 2,
   },
   noTxText: {
     fontSize: 12,
     fontStyle: 'italic',
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
-  txItem: {
+  txRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
-  txMiddle: { flex: 1, minWidth: 0, gap: 2 },
-  txType: { fontSize: 12, fontWeight: '700' },
-  txDate: { fontSize: 10.5, fontWeight: '500' },
-  txAmount: { fontSize: 13, fontWeight: '800' },
+  txLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  txDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  txTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  txMeta: {
+    fontSize: 10.5,
+    fontWeight: '500',
+  },
+  txAmount: {
+    fontSize: 12.5,
+    fontWeight: '800',
+  },
 });

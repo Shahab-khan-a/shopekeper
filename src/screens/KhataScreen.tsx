@@ -15,13 +15,12 @@ import { CustomerKhataCard } from '@/components/CustomerKhataCard';
 import { CustomerModal, CustomerModalMode } from '@/components/CustomerModal';
 import { SupplierCard } from '@/components/SupplierCard';
 import { SupplierModal, SupplierModalMode } from '@/components/SupplierModal';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { Colors, Spacing, Shadows } from '@/constants/theme';
 import { TourBeacon } from '@/components/TourBeacon';
 import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { openWhatsAppWithMessage } from '@/utils/whatsapp';
 
 type KhataFilter = 'all' | 'pending' | 'overdue' | 'settled';
 
@@ -68,7 +67,7 @@ export const KhataScreen: React.FC = () => {
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
 
-  // Hands-On Tour Step 6: Auto-seed Aslam Bhai if Khata is empty so shopkeeper can see the 1-tap WhatsApp action
+  // Hands-On Tour Step 6: Auto-seed Aslam Bhai if Khata is empty
   useEffect(() => {
     if (tourStep === 6 && khata.length === 0) {
       addCustomer({
@@ -98,9 +97,6 @@ export const KhataScreen: React.FC = () => {
   const [supplierModalMode, setSupplierModalMode] = useState<SupplierModalMode>('add_supplier');
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierKhata | null>(null);
   const [expandedSupplierId, setExpandedSupplierId] = useState<string | null>(null);
-
-  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.4)';
-  const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
 
   // Load suppliers on mount
   useEffect(() => {
@@ -256,57 +252,6 @@ export const KhataScreen: React.FC = () => {
     } catch (err: any) {
       console.error('[KhataScreen] Error recording credit:', err);
     }
-  };
-
-  const buildReminderMessage = (customer: CustomerKhata) => {
-    const msgLang = settings.whatsappReminderLanguage || language;
-    const shopHeader =
-      msgLang === 'ur' && settings.shopNameUrdu ? settings.shopNameUrdu : settings.shopName;
-    const name =
-      msgLang === 'ur' && customer.nameUrdu ? customer.nameUrdu : customer.name;
-    const amount = `${settings.currencySymbol} ${Math.max(0, customer.totalDebt).toLocaleString()}`;
-
-    if (msgLang === 'ur') {
-      return `السلام علیکم ${name} صاحب!\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopHeader}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${amount}* ہے۔\n\nشکریہ!\n*${settings.shopName}*`;
-    }
-    return `Dear ${name},\n\nGentle reminder from *${shopHeader}* regarding your pending balance:\n👉 *${amount}*\n\nThank you!\n*${settings.shopName}*`;
-  };
-
-  const openWhatsApp = (phone: string, message: string) => {
-    openWhatsAppWithMessage(phone, message);
-  };
-
-  const handleNotifyAllOverdue = () => {
-    const withPhone = overdueCustomers.filter((c) => c.phone);
-    if (withPhone.length === 0) {
-      showAlert({
-        type: 'info',
-        title: t('overdueFollowUp'),
-        message:
-          language === 'ur'
-            ? 'واجب الادا گاہکوں کے فون نمبر موجود نہیں۔'
-            : 'No overdue customers with phone numbers.',
-        buttons: [{ text: t('close'), style: 'cancel' }],
-      });
-      return;
-    }
-
-    const first = withPhone[0];
-    showAlert({
-      type: 'confirm',
-      title: t('notifyAll'),
-      message:
-        language === 'ur'
-          ? `${withPhone.length} گاہکوں کو یاد دہانی بھیجنی ہے؟ پہلا واٹس ایپ کھلے گا۔`
-          : `Send reminders to ${withPhone.length} overdue customers? WhatsApp will open for the first one.`,
-      buttons: [
-        {
-          text: t('notifyAll'),
-          onPress: () => openWhatsApp(first.phone, buildReminderMessage(first)),
-        },
-        { text: t('cancel'), style: 'cancel' },
-      ],
-    });
   };
 
   // ---------------- Supplier Handlers ----------------
@@ -483,227 +428,201 @@ export const KhataScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* ── Top Emerald Canopy (Seamless continuation from ShopHeader) ── */}
-      <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
-        <View style={styles.heroInner}>
-          {/* Title + Action Button */}
-          <View style={styles.titleRow}>
-            <View style={styles.titleBlock}>
-              <Text style={styles.screenTitle}>
-                {activeLedgerTab === 'customers' ? t('khataTitleSimple') : (language === 'ur' ? 'سپلائر کھاتہ' : 'Supplier Ledger')}
-              </Text>
-              <Text style={styles.screenSubtitle}>
-                {activeLedgerTab === 'customers'
-                  ? t('khataSubtitleSimple')
-                  : (language === 'ur'
-                    ? 'ڈسٹری بیوٹرز اور ہول سیلرز کے واجبات اور ادائیگیاں'
-                    : 'Distributor deliveries, payables, and payments')}
-              </Text>
-            </View>
+      {/* ── Top Section: Segment Switcher + SadaPay-inspired Hero Card ── */}
+      <View style={styles.topSection}>
+        {/* Soft Pill Segment Switcher */}
+        <View
+          style={[
+            styles.segmentContainer,
+            {
+              backgroundColor: settings.darkMode ? '#1E293B' : '#E2E8F0',
+            },
+          ]}>
+          <Pressable
+            onPress={() => {
+              setActiveLedgerTab('customers');
+              setSearchQuery('');
+            }}
+            style={[
+              styles.segmentBtn,
+              activeLedgerTab === 'customers' && [
+                styles.segmentBtnActive,
+                { backgroundColor: theme.card },
+              ],
+            ]}>
+            <Ionicons
+              name="people"
+              size={15}
+              color={activeLedgerTab === 'customers' ? '#059669' : theme.textMuted}
+            />
+            <Text
+              style={[
+                styles.segmentBtnText,
+                activeLedgerTab === 'customers'
+                  ? [styles.segmentBtnTextActive, { color: settings.darkMode ? '#34D399' : '#065F46' }]
+                  : [styles.segmentBtnTextInactive, { color: theme.textMuted }],
+              ]}>
+              {language === 'ur' ? 'گاہک کھاتہ' : 'Customers'} ({khata.length})
+            </Text>
+          </Pressable>
 
-            {activeLedgerTab === 'customers' ? (
+          <Pressable
+            onPress={() => {
+              setActiveLedgerTab('suppliers');
+              setSearchQuery('');
+            }}
+            style={[
+              styles.segmentBtn,
+              activeLedgerTab === 'suppliers' && [
+                styles.segmentBtnActive,
+                { backgroundColor: theme.card },
+              ],
+            ]}>
+            <Ionicons
+              name="bus"
+              size={15}
+              color={activeLedgerTab === 'suppliers' ? '#D97706' : theme.textMuted}
+            />
+            <Text
+              style={[
+                styles.segmentBtnText,
+                activeLedgerTab === 'suppliers'
+                  ? [styles.segmentBtnTextActive, { color: settings.darkMode ? '#FBBF24' : '#B45309' }]
+                  : [styles.segmentBtnTextInactive, { color: theme.textMuted }],
+              ]}>
+              {language === 'ur' ? 'سپلائر کھاتہ' : 'Suppliers'} ({suppliers.length})
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* ── SadaPay-style Floating Hero Balance Card ── */}
+        {activeLedgerTab === 'customers' ? (
+          <View
+            style={[
+              styles.heroCard,
+              {
+                backgroundColor: settings.darkMode ? '#064E3B' : '#059669',
+              },
+            ]}>
+            {/* Top row: Label + White Pill Add Button */}
+            <View style={styles.heroTopRow}>
+              <View style={styles.heroLabelWrap}>
+                <Text style={styles.heroLabel}>
+                  {language === 'ur' ? 'کل وصول طلب ادھار' : 'TOTAL UDHAAR TO COLLECT'}
+                </Text>
+              </View>
+
               <Pressable
                 onPress={handleOpenAddCustomer}
                 style={({ pressed }) => [
-                  styles.addBtn,
+                  styles.heroAddBtn,
                   pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
                 ]}>
-                <Ionicons name="person-add" size={15} color="#064E3B" />
-                <Text style={styles.addBtnText}>
-                  {language === 'ur' ? '+ نیا گاہک' : '+ Add Customer'}
+                <Ionicons name="person-add" size={13} color="#064E3B" />
+                <Text style={styles.heroAddBtnText}>
+                  {language === 'ur' ? '+ نیا گاہک' : '+ Customer'}
                 </Text>
               </Pressable>
-            ) : (
+            </View>
+
+            {/* Giant Clean Amount */}
+            <Text style={styles.heroAmount}>
+              {settings.currencySymbol}
+              {totalUdhaarReceivable.toLocaleString()}
+            </Text>
+
+            {/* Translucent Soft Status Pills inside Hero Card */}
+            <View style={styles.heroCapsulesRow}>
+              <View style={styles.heroCapsule}>
+                <Text style={styles.heroCapsuleText}>
+                  {pendingCount} {language === 'ur' ? 'گاہکوں کا ادھار' : 'pending accounts'}
+                </Text>
+              </View>
+
+              {overdueCustomers.length > 0 ? (
+                <View style={[styles.heroCapsule, styles.heroCapsuleOverdue]}>
+                  <Ionicons name="alert-circle" size={12} color="#FEE2E2" />
+                  <Text style={styles.heroCapsuleOverdueText}>
+                    {overdueCustomers.length} {language === 'ur' ? 'تاخیر' : 'overdue'}
+                  </Text>
+                </View>
+              ) : null}
+
+              {recoveredThisMonth > 0 ? (
+                <View style={styles.heroCapsule}>
+                  <Text style={styles.heroCapsuleText}>
+                    +{settings.currencySymbol}{recoveredThisMonth.toLocaleString()} {language === 'ur' ? 'وصول' : 'recovered'}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </View>
+        ) : (
+          /* Supplier Hero Card (Warm Amber Tone) */
+          <View
+            style={[
+              styles.heroCard,
+              {
+                backgroundColor: settings.darkMode ? '#78350F' : '#D97706',
+              },
+            ]}>
+            <View style={styles.heroTopRow}>
+              <View style={styles.heroLabelWrap}>
+                <Text style={styles.heroLabel}>
+                  {language === 'ur' ? 'کل سپلائر واجبات (دینے ہیں)' : 'TOTAL PAYABLE TO SUPPLIERS'}
+                </Text>
+              </View>
+
               <Pressable
                 onPress={handleOpenAddSupplier}
                 style={({ pressed }) => [
-                  styles.addBtn,
+                  styles.heroAddBtn,
                   pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
                 ]}>
-                <Ionicons name="person-add" size={15} color="#064E3B" />
-                <Text style={styles.addBtnText}>
-                  {language === 'ur' ? '+ نیا سپلائر' : '+ Add Supplier'}
+                <Ionicons name="bus" size={13} color="#78350F" />
+                <Text style={[styles.heroAddBtnText, { color: '#78350F' }]}>
+                  {language === 'ur' ? '+ نیا سپلائر' : '+ Supplier'}
                 </Text>
               </Pressable>
-            )}
-          </View>
-
-          {/* ── Segment Switcher: Customers vs Suppliers (Frosted glass container) ── */}
-          <View style={styles.segmentContainer}>
-            <Pressable
-              onPress={() => {
-                setActiveLedgerTab('customers');
-                setSearchQuery('');
-              }}
-              style={[
-                styles.segmentBtn,
-                activeLedgerTab === 'customers' && styles.segmentBtnActive,
-              ]}>
-              <Ionicons
-                name="people"
-                size={14}
-                color={activeLedgerTab === 'customers' ? '#064E3B' : 'rgba(255, 255, 255, 0.75)'}
-              />
-              <Text
-                style={[
-                  styles.segmentBtnText,
-                  activeLedgerTab === 'customers' ? styles.segmentBtnTextActive : styles.segmentBtnTextInactive,
-                ]}>
-                {language === 'ur' ? 'گاہک کھاتہ (لینے ہیں)' : 'Customers (Receivable)'} ({khata.length})
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                setActiveLedgerTab('suppliers');
-                setSearchQuery('');
-              }}
-              style={[
-                styles.segmentBtn,
-                activeLedgerTab === 'suppliers' && styles.segmentBtnActive,
-              ]}>
-              <Ionicons
-                name="bus"
-                size={14}
-                color={activeLedgerTab === 'suppliers' ? '#064E3B' : 'rgba(255, 255, 255, 0.75)'}
-              />
-              <Text
-                style={[
-                  styles.segmentBtnText,
-                  activeLedgerTab === 'suppliers' ? styles.segmentBtnTextActive : styles.segmentBtnTextInactive,
-                ]}>
-                {language === 'ur' ? 'سپلائر کھاتہ (دینے ہیں)' : 'Suppliers (Payable)'} ({suppliers.length})
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.contentWrap}>
-
-        {/* ==================== TAB 1: CUSTOMERS ==================== */}
-        {activeLedgerTab === 'customers' ? (
-          <>
-            {/* Total receivable card */}
-            <View
-              style={[
-                styles.summaryCard,
-                { backgroundColor: cardBg, borderColor: softBorder },
-              ]}>
-              <View style={styles.summaryTop}>
-                <View style={styles.summaryTopLeft}>
-                  <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>
-                    {t('totalReceivable')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.summaryValue,
-                      {
-                        color:
-                          totalUdhaarReceivable > 0 ? theme.danger : theme.success,
-                      },
-                    ]}>
-                    {settings.currencySymbol}
-                    {totalUdhaarReceivable.toLocaleString()}
-                  </Text>
-                </View>
-                {overdueCustomers.length > 0 ? (
-                  <View
-                    style={[
-                      styles.urgentPill,
-                      { backgroundColor: theme.dangerLight },
-                    ]}>
-                    <Ionicons name="alert" size={11} color={theme.danger} />
-                    <Text style={[styles.urgentPillText, { color: theme.danger }]}>
-                      {overdueCustomers.length} {t('filterOverdue')}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-
-              <View style={[styles.summaryGrid, { borderTopColor: softBorder }]}>
-                <View style={styles.statCol}>
-                  <Text style={[styles.statLabel, { color: theme.textMuted }]}>
-                    {t('pendingDebtors')}
-                  </Text>
-                  <Text style={[styles.statValue, { color: theme.text }]}>
-                    {pendingCount} {t('accountsLabel')}
-                  </Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: softBorder }]} />
-                <View style={styles.statCol}>
-                  <Text style={[styles.statLabel, { color: theme.textMuted }]}>
-                    {t('recoveredThisMonth')}
-                  </Text>
-                  <Text style={[styles.statValue, { color: theme.primary }]}>
-                    {settings.currencySymbol}
-                    {recoveredThisMonth.toLocaleString()}
-                  </Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: softBorder }]} />
-                <View style={styles.statCol}>
-                  <Text style={[styles.statLabel, { color: theme.textMuted }]}>
-                    {t('filterSettled')}
-                  </Text>
-                  <Text style={[styles.statValue, { color: theme.textSecondary }]}>
-                    {settledCount}
-                  </Text>
-                </View>
-              </View>
             </View>
 
-            {/* Overdue follow-up */}
-            {overdueCustomers.length > 0 ? (
-              <View
-                style={[
-                  styles.followUpBanner,
-                  {
-                    backgroundColor: settings.darkMode
-                      ? 'rgba(16,185,129,0.12)'
-                      : 'rgba(167,243,208,0.35)',
-                    borderColor: settings.darkMode
-                      ? 'rgba(16,185,129,0.3)'
-                      : 'rgba(5,150,105,0.25)',
-                  },
-                ]}>
-                <View style={styles.followUpLeft}>
-                  <View
-                    style={[
-                      styles.followUpIcon,
-                      { backgroundColor: theme.primary },
-                    ]}>
-                    <Ionicons name="flash" size={14} color="#FFFFFF" />
-                  </View>
-                  <View style={styles.followUpText}>
-                    <Text style={[styles.followUpTitle, { color: theme.text }]}>
-                      {t('overdueFollowUp')}
-                    </Text>
-                    <Text style={[styles.followUpSub, { color: theme.textMuted }]}>
-                      {overdueCustomers.length} {t('overdueFollowUpSub')}
-                    </Text>
-                  </View>
-                </View>
-                <Pressable
-                  onPress={handleNotifyAllOverdue}
-                  style={({ pressed }) => [
-                    styles.notifyBtn,
-                    { backgroundColor: theme.primary },
-                    pressed && { opacity: 0.9 },
-                  ]}>
-                  <Text style={styles.notifyBtnText}>{t('notifyAll')}</Text>
-                </Pressable>
-              </View>
-            ) : null}
+            <Text style={styles.heroAmount}>
+              {settings.currencySymbol}
+              {totalSupplierPayable.toLocaleString()}
+            </Text>
 
-            {/* Search */}
+            <View style={styles.heroCapsulesRow}>
+              <View style={styles.heroCapsule}>
+                <Text style={styles.heroCapsuleText}>
+                  {suppliers.length} {language === 'ur' ? 'فعال سپلائرز' : 'active suppliers'}
+                </Text>
+              </View>
+
+              {supplierPaymentsThisMonth > 0 ? (
+                <View style={styles.heroCapsule}>
+                  <Text style={styles.heroCapsuleText}>
+                    {settings.currencySymbol}{supplierPaymentsThisMonth.toLocaleString()} {language === 'ur' ? 'ادا شدہ' : 'paid this month'}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </View>
+        )}
+      </View>
+
+      {/* ── Content Body: Search, Filters, List ── */}
+      <View style={styles.contentWrap}>
+        {activeLedgerTab === 'customers' ? (
+          <>
+            {/* Search Bar */}
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder={t('searchCustomer')}
-              height={40}
+              placeholder={language === 'ur' ? 'گاہک کا نام، نمبر یا پتہ تلاش کریں...' : 'Search customer by name or phone...'}
+              height={42}
             />
 
-            {/* Filters */}
+            {/* Filter Chips */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -806,68 +725,12 @@ export const KhataScreen: React.FC = () => {
         ) : (
           /* ==================== TAB 2: SUPPLIERS ==================== */
           <>
-            {/* Total Payable Summary Card */}
-            <View
-              style={[
-                styles.summaryCard,
-                { backgroundColor: cardBg, borderColor: softBorder },
-              ]}>
-              <View style={styles.summaryTop}>
-                <View style={styles.summaryTopLeft}>
-                  <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>
-                    {language === 'ur' ? 'کل واجب الادا رقم (دینے ہیں)' : 'Total Payable to Suppliers'}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.summaryValue,
-                      {
-                        color: totalSupplierPayable > 0 ? '#D97706' : theme.success,
-                      },
-                    ]}>
-                    {settings.currencySymbol}
-                    {totalSupplierPayable.toLocaleString()}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.urgentPill,
-                    { backgroundColor: theme.surfaceSubtle },
-                  ]}>
-                  <Ionicons name="bus" size={12} color={theme.primary} />
-                  <Text style={[styles.urgentPillText, { color: theme.textSecondary }]}>
-                    {suppliers.length} {language === 'ur' ? 'سپلائرز' : 'Suppliers'}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={[styles.summaryGrid, { borderTopColor: softBorder }]}>
-                <View style={styles.statCol}>
-                  <Text style={[styles.statLabel, { color: theme.textMuted }]}>
-                    {language === 'ur' ? 'کل سپلائرز' : 'Active Suppliers'}
-                  </Text>
-                  <Text style={[styles.statValue, { color: theme.text }]}>
-                    {suppliers.length}
-                  </Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: softBorder }]} />
-                <View style={styles.statCol}>
-                  <Text style={[styles.statLabel, { color: theme.textMuted }]}>
-                    {language === 'ur' ? 'اس ماہ ادائیگیاں' : 'Paid This Month'}
-                  </Text>
-                  <Text style={[styles.statValue, { color: theme.primary }]}>
-                    {settings.currencySymbol}
-                    {supplierPaymentsThisMonth.toLocaleString()}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
             {/* Supplier Search */}
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder={language === 'ur' ? 'سپلائر یا کمپنی تلاش کریں...' : 'Search supplier or company...'}
-              height={40}
+              height={42}
             />
 
             {/* Suppliers List */}
@@ -979,80 +842,24 @@ export const KhataScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  heroCanopy: {
-    width: '100%',
-    paddingTop: 8,
-    paddingBottom: 12,
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
-    borderWidth: 0,
-    borderTopWidth: 0,
-    elevation: 0,
-    shadowColor: 'transparent',
-    shadowOpacity: 0,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 0,
-  },
-  heroInner: {
-    maxWidth: 720,
-    marginHorizontal: 'auto',
-    width: '100%',
-    paddingHorizontal: Spacing.lg,
-    gap: 10,
-  },
-  contentWrap: {
+  container: {
     flex: 1,
+  },
+  topSection: {
     paddingHorizontal: Spacing.lg,
     paddingTop: 10,
+    paddingBottom: 4,
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
-    gap: Spacing.sm,
-  },
-
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 10,
   },
-  titleBlock: { flex: 1, gap: 1 },
-  screenTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-  },
-  screenSubtitle: {
-    color: 'rgba(255, 255, 255, 0.78)',
-    fontSize: 11.5,
-    fontWeight: '500',
-  },
-  addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 10,
-    ...Shadows.sm,
-  },
-  addBtnText: {
-    color: '#064E3B',
-    fontSize: 12,
-    fontWeight: '800',
-  },
 
-  // Segment Tab
+  // Soft Pill Segment Switcher
   segmentContainer: {
     flexDirection: 'row',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 3,
-    backgroundColor: 'rgba(0, 0, 0, 0.18)',
-    borderColor: 'rgba(255, 255, 255, 0.16)',
-    borderWidth: 1,
   },
   segmentBtn: {
     flex: 1,
@@ -1061,130 +868,121 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   segmentBtnActive: {
-    backgroundColor: '#FFFFFF',
     ...Shadows.sm,
   },
   segmentBtnText: {
-    fontSize: 12,
+    fontSize: 12.5,
   },
   segmentBtnTextActive: {
-    color: '#064E3B',
     fontWeight: '800',
   },
   segmentBtnTextInactive: {
-    color: 'rgba(255, 255, 255, 0.78)',
     fontWeight: '600',
   },
 
-  summaryCard: {
-    borderRadius: 12,
-    borderWidth: 1,
+  // SadaPay-inspired Hero Card
+  heroCard: {
+    borderRadius: 24,
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 16,
+    gap: 8,
+    ...Shadows.md,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  heroLabelWrap: {
+    flex: 1,
+  },
+  heroLabel: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  heroAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 7,
+    borderRadius: 12,
     ...Shadows.sm,
   },
-  summaryTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 8,
-  },
-  summaryTopLeft: { flex: 1, gap: 1 },
-  summaryLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  summaryValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  urgentPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.full,
-  },
-  urgentPillText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    paddingTop: 8,
-  },
-  statCol: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 1,
-    paddingHorizontal: 2,
-  },
-  statLabel: {
-    fontSize: 9,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-    textAlign: 'center',
-  },
-  statValue: {
+  heroAddBtnText: {
+    color: '#064E3B',
     fontSize: 12,
     fontWeight: '800',
-    textAlign: 'center',
   },
-  statDivider: {
-    width: 1,
-    marginVertical: 1,
-  },
-
-  followUpBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  followUpLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    flex: 1,
-  },
-  followUpIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  followUpText: { flex: 1, gap: 0 },
-  followUpTitle: { fontSize: 12, fontWeight: '700' },
-  followUpSub: { fontSize: 10.5, fontWeight: '500' },
-  notifyBtn: {
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  notifyBtnText: {
+  heroAmount: {
     color: '#FFFFFF',
-    fontSize: 10.5,
+    fontSize: 30,
+    fontWeight: '800',
+    letterSpacing: -0.8,
+  },
+  heroCapsulesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    paddingTop: 2,
+  },
+  heroCapsule: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderRadius: 999,
+  },
+  heroCapsuleText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  heroCapsuleOverdue: {
+    backgroundColor: 'rgba(239, 68, 68, 0.35)',
+  },
+  heroCapsuleOverdueText: {
+    color: '#FEE2E2',
+    fontSize: 11,
     fontWeight: '800',
   },
 
-  filterScroll: { maxHeight: 38 },
-  filterScrollContent: { gap: 6, alignItems: 'center' },
+  // Content Area
+  contentWrap: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 8,
+    maxWidth: 720,
+    marginHorizontal: 'auto',
+    width: '100%',
+    gap: Spacing.sm,
+  },
 
-  customersScroll: { flex: 1 },
-  customersList: { gap: Spacing.md, paddingBottom: 100 },
+  filterScroll: {
+    maxHeight: 38,
+  },
+  filterScrollContent: {
+    gap: 6,
+    alignItems: 'center',
+  },
+
+  customersScroll: {
+    flex: 1,
+  },
+  customersList: {
+    gap: 10,
+    paddingBottom: 100,
+  },
 });
