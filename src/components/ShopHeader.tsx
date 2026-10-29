@@ -52,16 +52,16 @@ export const ShopHeader: React.FC = () => {
   const storeDisplayName =
     (isUrdu && settings.shopNameUrdu)
       ? settings.shopNameUrdu
-      : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (isUrdu ? 'میری دکان' : "max khan's Store")));
+      : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (isUrdu ? 'میری دکان' : 'My Store')));
 
-  // Initials for avatar pod (e.g. "MK")
-  const storeInitials = (storeDisplayName || 'MK')
+  // Initials for avatar pod (e.g. "DS" or shop initials)
+  const storeInitials = (storeDisplayName || 'DS')
     .split(' ')
     .map((w: string) => w[0])
     .filter(Boolean)
     .slice(0, 2)
     .join('')
-    .toUpperCase() || 'MK';
+    .toUpperCase() || 'DS';
 
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148, 163, 184, 0.2)';
   const headerBg = settings.darkMode ? '#0A0F1E' : '#F8FAFC';
@@ -74,7 +74,7 @@ export const ShopHeader: React.FC = () => {
           backgroundColor: headerBg,
         },
       ]}>
-      {/* ── Left: Avatar pod with green online dot + Business POS • Online + Store Name ── */}
+      {/* ── Left: Avatar pod with green online dot + DIGISHOP • Online + Store Name ── */}
       <Pressable
         onPress={() => setIsEditShopOpen(true)}
         style={({ pressed }) => [
@@ -107,7 +107,7 @@ export const ShopHeader: React.FC = () => {
         <View style={styles.titleWrap}>
           <View style={styles.badgeRow}>
             <Text style={[styles.posBadgeText, { color: theme.textMuted }]}>
-              {isUrdu ? 'بزنس پی او ایس' : 'BUSINESS POS'}
+              {isUrdu ? '⚡ ڈیجی شاپ' : '⚡ DIGISHOP'}
             </Text>
             <View style={styles.bulletDot} />
             <Text style={[styles.onlineStatusText, { color: isOnline ? '#059669' : '#EF4444' }]}>
@@ -118,6 +118,11 @@ export const ShopHeader: React.FC = () => {
           <Text style={[styles.shopTitle, { color: theme.text }]} numberOfLines={1}>
             {storeDisplayName}
           </Text>
+          {settings.ownerName ? (
+            <Text style={[styles.ownerSubtitle, { color: theme.textMuted }]} numberOfLines={1}>
+              {settings.ownerName}
+            </Text>
+          ) : null}
         </View>
       </Pressable>
 
@@ -254,6 +259,11 @@ const styles = StyleSheet.create({
     fontSize: 16.5,
     fontWeight: '800',
     letterSpacing: -0.4,
+  },
+  ownerSubtitle: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 0.5,
   },
   rightSection: {
     flexDirection: 'row',
