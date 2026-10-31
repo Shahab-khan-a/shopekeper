@@ -1,9 +1,8 @@
 import { CASH_OUT_STORAGE_KEY, CashOutEntry, CashOutModal } from '@/components/CashOutModal';
 import { DayEndClosingModal } from '@/components/DayEndClosingModal';
-import { RainbowQuickActionFab } from '@/components/RainbowQuickActionFab';
 import { SalesChart } from '@/components/SalesChart';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Colors, Shadows, Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,8 +21,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export const DashboardScreen: React.FC = () => {
   const {
     todaySalesTotal,
-    lowStockProducts,
-    outOfStockProducts,
     products,
     sales,
     khata,
@@ -37,7 +34,6 @@ export const DashboardScreen: React.FC = () => {
     settings,
     setActiveTab,
     setActiveReceipt,
-    setIsAddProductOpen,
     t,
     language,
     showAlert,
@@ -47,7 +43,6 @@ export const DashboardScreen: React.FC = () => {
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const isUrdu = language === 'ur';
 
-  // Day-0 Kiryana Setup State
   const [isLoadingStaples, setIsLoadingStaples] = useState(false);
   const [isSetupCardDismissed, setIsSetupCardDismissed] = useState(false);
 
@@ -91,7 +86,6 @@ export const DashboardScreen: React.FC = () => {
     }
   };
 
-  // Top recent sales for activity feed
   const MAX_HOME_RECENT_SALES = 4;
   const recentSales = useMemo(() => {
     return [...sales]
@@ -99,7 +93,6 @@ export const DashboardScreen: React.FC = () => {
       .slice(0, MAX_HOME_RECENT_SALES);
   }, [sales]);
 
-  // Modals & Triggers
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
   const [showDayEnd, setShowDayEnd] = useState(false);
   const [showReports, setShowReports] = useState(false);
@@ -139,7 +132,6 @@ export const DashboardScreen: React.FC = () => {
   const todayOnline = todaySales.filter((s) => s.paymentMethod === 'online').reduce((a, b) => a + b.grandTotal, 0);
   const todayUdhaar = todaySales.filter((s) => s.paymentMethod === 'udhaar').reduce((a, b) => a + b.grandTotal, 0);
 
-  // Vasooli collected today from customers
   const todayVasooli = useMemo(() => {
     let sum = 0;
     const startMs = todayStart.getTime();
@@ -156,7 +148,6 @@ export const DashboardScreen: React.FC = () => {
     return sum;
   }, [khata, todayStart]);
 
-  // Net Cash in Drawer = Cash Sales + Khata Vasooli - Cash Out
   const todayNetCashInDrawer = Math.max(0, todayCash + todayVasooli - todayCashOutTotal);
 
   const todayGrossProfit = todaySales.reduce((a, s) => {
@@ -165,285 +156,126 @@ export const DashboardScreen: React.FC = () => {
   }, 0);
 
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148, 163, 184, 0.18)';
-  const totalStockAlerts = lowStockProducts.length + outOfStockProducts.length;
   const pendingKhataCount = useMemo(() => {
     return (khata || []).filter((c: any) => (c.currentBalance || c.balance || 0) > 0).length;
   }, [khata]);
 
+  const hasUdhaar = totalUdhaarReceivable > 0;
+  const heroSubtitle = todayGrossProfit > 0
+    ? `+${settings.currencySymbol}${todayGrossProfit.toLocaleString()} ${isUrdu ? 'متوقع منافع' : 'estimated profit'}`
+    : todaySales.length > 0
+      ? (isUrdu ? 'تمام بلز درج ہیں' : 'All bills recorded')
+      : (isUrdu ? 'کاؤنٹر تیار ہے' : 'Ready for customers');
+
   return (
     <View style={[styles.rootContainer, { backgroundColor: theme.background }]}>
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.background }]}
+        style={styles.container}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
 
-        {/* ══════════════════════════════════════════════════════════
-            0. AMBIENT TOP GLOW (Fintech Backdrop Aura)
-            ══════════════════════════════════════════════════════════ */}
-        <View style={styles.ambientTopGlow} pointerEvents="none" />
-
-        {/* ══════════════════════════════════════════════════════════
-            1. THE 3-CARD RETAIL COMMAND DECK
-               - Card 1: Master Cash Drawer Card (100% width)
-               - Card 2: Today's Revenue & Bills (50% width)
-               - Card 3: Market Udhaar & Recovery (50% width)
-            ══════════════════════════════════════════════════════════ */}
-        <View style={styles.commandDeckContainer}>
-          {/* ── CARD 1: COLORFUL, MINIMAL & ATTRACTIVE HERO CARD (Today's Store Performance) ── */}
-          <Pressable
-            onPress={() => setActiveTab('history')}
-            style={({ pressed }) => [
-              styles.auroraHeroCard,
-              { backgroundColor: settings.darkMode ? '#064E3B' : '#00A88F' },
-              pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
-            ]}>
-            {/* Colorful Embedded Ambient Atmosphere Orbs */}
-            <View style={styles.auroraOrbCyan} pointerEvents="none" />
-            <View style={styles.auroraOrbViolet} pointerEvents="none" />
-            <View style={styles.auroraOrbAmber} pointerEvents="none" />
-
-            {/* Top Row: Clean Sparkle Label + Frosted Live Bills Badge */}
-            <View style={styles.heroTopRow}>
-              <View style={styles.heroTitleWrap}>
-                <Ionicons name="sparkles" size={13} color="#FDE047" />
-                <Text style={styles.heroCardSuperLabel}>
-                  {isUrdu ? 'آج کی کل سیل' : "TODAY'S TOTAL SALES"}
-                </Text>
-              </View>
-
-              <View style={styles.heroFrostedBadge}>
-                <View style={styles.heroLivePulse} />
-                <Text style={styles.heroFrostedBadgeText}>
-                  {todaySales.length} {isUrdu ? 'بلز جاری' : 'bills today'}
-                </Text>
-              </View>
-            </View>
-
-            {/* Center: Big Confident Numbers */}
-            <View style={styles.heroCenterBlock}>
-              <View style={styles.heroCurrencyRow}>
-                <Text style={styles.heroCurrencySign}>{settings.currencySymbol}</Text>
-                <Text style={styles.heroLargeAmount} numberOfLines={1} adjustsFontSizeToFit>
-                  {todaySalesTotal.toLocaleString()}
-                </Text>
-              </View>
-
-              <Text style={styles.heroSubtitle}>
-                {todayGrossProfit > 0
-                  ? `+${settings.currencySymbol}${todayGrossProfit.toLocaleString()} ${isUrdu ? 'متوقع منافع' : 'estimated gross profit'}`
-                  : (todaySales.length > 0 ? (isUrdu ? 'تمام بلز فعال ہیں' : 'All transactions recorded') : (isUrdu ? 'کاؤنٹر تیار ہے • نیا بل بنائیں' : 'Ready for new customers'))}
-              </Text>
-            </View>
-
-            {/* Bottom: Frosted Glass Floating Ribbon for Physical Cash Drawer */}
-            <Pressable
-              onPress={() => setShowDayEnd(true)}
-              style={({ pressed }) => [
-                styles.heroFloatingGlassRibbon,
-                pressed && { opacity: 0.88 },
-              ]}>
-              <View style={styles.glassRibbonLeft}>
-                <View style={styles.glassRibbonIconBubble}>
-                  <Ionicons name="wallet-outline" size={14} color="#FFFFFF" />
-                </View>
-                <View>
-                  <Text style={styles.glassRibbonSubLabel}>
-                    {isUrdu ? 'گلہ میں نقد کیش' : 'CASH IN DRAWER'}
-                  </Text>
-                  <Text style={styles.glassRibbonAmount}>
-                    {settings.currencySymbol}{todayNetCashInDrawer.toLocaleString()}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.glassRibbonCtaBtn}>
-                <Ionicons name="calculator-outline" size={13} color="#FFFFFF" />
-                <Text style={styles.glassRibbonCtaText}>
-                  {isUrdu ? 'حساب کریں' : 'Tally'}
-                </Text>
-                <Ionicons name="chevron-forward" size={11} color="#FFFFFF" />
-              </View>
-            </Pressable>
-          </Pressable>
-
-          {/* ── CARDS 2 & 3: TWIN OPERATIONAL CARDS (Side-by-Side 50/50 Row) ── */}
-          <View style={styles.twinCardsRow}>
-            {/* Card 2: Cash In Drawer Breakdown */}
-            <Pressable
-              onPress={() => setShowDayEnd(true)}
-              style={({ pressed }) => [
-                styles.twinCard,
-                { backgroundColor: theme.card, borderColor: softBorder },
-                pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
-              ]}>
-              <View style={styles.twinCardHeader}>
-                <View style={[styles.twinIconWrap, { backgroundColor: settings.darkMode ? 'rgba(0,201,167,0.18)' : '#D1FAE5' }]}>
-                  <Ionicons name="cash-outline" size={16} color="#059669" />
-                </View>
-                <View style={[styles.twinPillBadge, { backgroundColor: settings.darkMode ? 'rgba(0,201,167,0.15)' : '#ECFDF5' }]}>
-                  <Text style={[styles.twinPillText, { color: '#059669' }]}>
-                    {todayCashOutTotal > 0 ? `-${settings.currencySymbol}${todayCashOutTotal}` : (isUrdu ? 'کیش' : 'Cash')}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.twinCardContent}>
-                <Text style={[styles.twinCardLabel, { color: theme.textMuted }]}>
-                  {isUrdu ? 'گلہ میں کیش' : 'DRAWER CASH'}
-                </Text>
-                <Text style={[styles.twinCardAmount, { color: theme.text }]} numberOfLines={1}>
-                  {settings.currencySymbol}{todayNetCashInDrawer.toLocaleString()}
-                </Text>
-              </View>
-
-              <View style={styles.twinCardFooter}>
-                <Text style={[styles.twinFooterText, { color: theme.textMuted }]} numberOfLines={1}>
-                  +{settings.currencySymbol}{(todayCash + todayVasooli).toLocaleString()} in
-                </Text>
-              </View>
-            </Pressable>
-
-            {/* Card 3: Market Udhaar & Vasooli */}
-            <Pressable
-              onPress={() => setActiveTab('khata')}
-              style={({ pressed }) => [
-                styles.twinCard,
-                { backgroundColor: theme.card, borderColor: softBorder },
-                pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
-              ]}>
-              <View style={styles.twinCardHeader}>
-                <View style={[styles.twinIconWrap, { backgroundColor: settings.darkMode ? 'rgba(220,38,38,0.2)' : '#FEE2E2' }]}>
-                  <Ionicons name="book-outline" size={16} color="#DC2626" />
-                </View>
-                <View style={[styles.twinPillBadge, { backgroundColor: settings.darkMode ? 'rgba(220,38,38,0.15)' : '#FEF2F2' }]}>
-                  <Text style={[styles.twinPillText, { color: '#DC2626' }]}>
-                    {pendingKhataCount} {isUrdu ? 'کھاتے' : 'buyers'}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.twinCardContent}>
-                <Text style={[styles.twinCardLabel, { color: theme.textMuted }]}>
-                  {isUrdu ? 'کل ادھار بقایا' : 'MARKET UDHAAR'}
-                </Text>
-                <Text style={[styles.twinCardAmount, { color: totalUdhaarReceivable > 0 ? '#DC2626' : theme.text }]} numberOfLines={1}>
-                  {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
-                </Text>
-              </View>
-
-              <View style={styles.twinCardFooter}>
-                <Text style={[styles.twinFooterText, { color: todayVasooli > 0 ? '#059669' : theme.textMuted }]} numberOfLines={1}>
-                  {todayVasooli > 0
-                    ? `+${settings.currencySymbol}${todayVasooli.toLocaleString()} ${isUrdu ? 'وصولی' : 'vasooli'}`
-                    : (isUrdu ? 'کھاتہ دیکھیں →' : 'View Khata →')}
-                </Text>
-              </View>
-            </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isUrdu ? 'آج کی کل سیل' : "Today's sales"}
+          onPress={() => setActiveTab('history')}
+          style={({ pressed }) => [
+            styles.heroCard,
+            { backgroundColor: theme.heroFill },
+            pressed && { opacity: 0.94 },
+          ]}>
+          <Text style={styles.heroLabel}>
+            {isUrdu ? 'آج کی کل سیل' : "Today's sales"}
+          </Text>
+          <View style={styles.heroAmountRow}>
+            <Text style={styles.heroCurrency}>{settings.currencySymbol}</Text>
+            <Text
+              style={styles.heroAmount}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              selectable>
+              {todaySalesTotal.toLocaleString()}
+            </Text>
           </View>
-        </View>
+          <Text style={styles.heroSubtitle}>{heroSubtitle}</Text>
+          <Text style={styles.heroMeta}>
+            {todaySales.length} {isUrdu ? 'بلز' : todaySales.length === 1 ? 'bill' : 'bills'}
+          </Text>
+        </Pressable>
 
-        {/* ══════════════════════════════════════════════════════════
-            2. QUICK CASHIER ACTION HUB (Clean Squircles, Zero Shadow)
-            ══════════════════════════════════════════════════════════ */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.actionPillsScroll}>
-          {/* Action 1: New Sale (Primary Highlight) */}
+        <View style={styles.actionRow}>
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isUrdu ? 'نیا بل' : 'New Bill'}
             onPress={() => setIsSaleModalOpen(true)}
             style={({ pressed }) => [
-              styles.actionPillBtn,
-              { backgroundColor: settings.darkMode ? '#065F46' : '#00C9A7', borderColor: 'transparent' },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+              styles.actionTile,
+              { backgroundColor: theme.secondary },
+              pressed && { opacity: 0.9 },
             ]}>
-            <View style={[styles.pillIconSquircle, { backgroundColor: 'rgba(255,255,255,0.25)' }]}>
-              <Ionicons name="add" size={19} color="#FFFFFF" />
+            <View style={styles.actionIconWrap}>
+              <Ionicons name="add" size={22} color="#FFFFFF" />
             </View>
-            <Text style={[styles.pillText, { color: '#FFFFFF', fontWeight: '800' }]}>
-              {isUrdu ? 'نیا بل بنائیں' : '+ New Bill'}
+            <Text style={styles.actionTileTitle}>
+              {isUrdu ? 'نیا بل' : 'New Bill'}
+            </Text>
+            <Text style={styles.actionTileSub}>
+              {isUrdu ? 'سیل درج کریں' : 'Start a sale'}
             </Text>
           </Pressable>
 
-          {/* Action 2: Scan Barcode */}
           <Pressable
-            onPress={() => setIsSaleModalOpen(true)}
-            style={({ pressed }) => [
-              styles.actionPillBtn,
-              { backgroundColor: theme.card, borderColor: softBorder },
-              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-            ]}>
-            <View style={[styles.pillIconSquircle, { backgroundColor: '#D5F0F7' }]}>
-              <Ionicons name="qr-code-outline" size={17} color="#00A389" />
-            </View>
-            <Text style={[styles.pillText, { color: theme.text }]}>
-              {isUrdu ? 'بارکوڈ اسکین' : 'Scan Barcode'}
-            </Text>
-          </Pressable>
-
-          {/* Action 3: Add Expense (Kharcha) */}
-          <Pressable
-            onPress={() => setIsCashOutModalOpen(true)}
-            style={({ pressed }) => [
-              styles.actionPillBtn,
-              { backgroundColor: theme.card, borderColor: softBorder },
-              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-            ]}>
-            <View style={[styles.pillIconSquircle, { backgroundColor: '#FEE2E2' }]}>
-              <Ionicons name="receipt-outline" size={17} color="#DC2626" />
-            </View>
-            <Text style={[styles.pillText, { color: theme.text }]}>
-              {isUrdu ? 'خرچہ درج کریں' : 'Add Expense'}
-            </Text>
-          </Pressable>
-
-          {/* Action 4: Customer Khata */}
-          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isUrdu ? 'کھاتہ' : 'Khata'}
             onPress={() => setActiveTab('khata')}
             style={({ pressed }) => [
-              styles.actionPillBtn,
-              { backgroundColor: theme.card, borderColor: softBorder },
-              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+              styles.actionTile,
+              hasUdhaar
+                ? { backgroundColor: theme.coral }
+                : { backgroundColor: theme.card, borderWidth: 1, borderColor: softBorder },
+              pressed && { opacity: 0.9 },
             ]}>
-            <View style={[styles.pillIconSquircle, { backgroundColor: '#DBEAFE' }]}>
-              <Ionicons name="book-outline" size={17} color="#2563EB" />
+            <View style={[
+              styles.actionIconWrap,
+              !hasUdhaar && { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : theme.dangerLight },
+            ]}>
+              <Ionicons
+                name="book-outline"
+                size={20}
+                color={hasUdhaar ? '#FFFFFF' : theme.danger}
+              />
             </View>
-            <Text style={[styles.pillText, { color: theme.text }]}>
-              {isUrdu ? 'گاہک کھاتہ' : 'Khata Book'}
+            <Text style={[styles.actionTileTitle, !hasUdhaar && { color: theme.text }]}>
+              {isUrdu ? 'کھاتہ' : 'Khata'}
+            </Text>
+            <Text
+              style={[styles.actionTileAmount, !hasUdhaar && { color: theme.text }]}
+              numberOfLines={1}
+              selectable>
+              {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
+            </Text>
+            <Text style={[styles.actionTileSub, !hasUdhaar && { color: theme.textMuted }]}>
+              {hasUdhaar
+                ? `${pendingKhataCount} ${isUrdu ? 'بقایا' : 'pending'}`
+                : (isUrdu ? 'کوئی ادھار نہیں' : 'No udhaar due')}
             </Text>
           </Pressable>
+        </View>
 
-          {/* Action 5: Stock Alert (if any) */}
-          {totalStockAlerts > 0 && (
-            <Pressable
-              onPress={() => setActiveTab('products')}
-              style={({ pressed }) => [
-                styles.actionPillBtn,
-                { backgroundColor: theme.card, borderColor: softBorder },
-                pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-              ]}>
-              <View style={[styles.pillIconSquircle, { backgroundColor: '#FEF3C7' }]}>
-                <Ionicons name="warning-outline" size={17} color="#D97706" />
-              </View>
-              <Text style={[styles.pillText, { color: theme.text }]}>
-                {totalStockAlerts} {isUrdu ? 'کم اسٹاک' : 'Low Stock'}
-              </Text>
-            </Pressable>
-          )}
-        </ScrollView>
-
-
-        {/* ══════════════════════════════════════════════════════════
-            5. TODAY ACTIVITY FEED (Real Recent Sales)
-            ══════════════════════════════════════════════════════════ */}
         <View style={styles.feedHeaderRow}>
           <View style={styles.feedTitleBlock}>
             <Text style={[styles.feedTitle, { color: theme.text }]}>
-              {isUrdu ? 'آج کے بلز' : "Today's Sales"}
+              {isUrdu ? 'آج کے بلز' : 'Today'}
             </Text>
-            <Text style={[styles.feedSub, { color: theme.textMuted }]}>
-              {todaySales.length} {isUrdu ? 'بلز' : 'bills'} · {todayCashOutTotal > 0 ? `− ${settings.currencySymbol}${todayCashOutTotal.toLocaleString()} exp` : `${settings.currencySymbol}${todaySalesTotal.toLocaleString()}`}
-            </Text>
+            <Pressable
+              onPress={() => setShowDayEnd(true)}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={isUrdu ? 'گلہ کا حساب' : 'Tally cash drawer'}
+              style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
+              <Text style={[styles.tallyLink, { color: theme.textMuted }]}>
+                {isUrdu ? 'گلہ کا حساب' : 'Tally drawer'}
+              </Text>
+            </Pressable>
           </View>
 
           {sales.length > 0 && (
@@ -451,14 +283,13 @@ export const DashboardScreen: React.FC = () => {
               onPress={() => setActiveTab('history')}
               hitSlop={8}
               style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
-              <Text style={styles.seeAllLink}>
-                {isUrdu ? 'سب دیکھیں →' : 'See all →'}
+              <Text style={[styles.seeAllLink, { color: theme.primary }]}>
+                {isUrdu ? 'سب دیکھیں' : 'See all'}
               </Text>
             </Pressable>
           )}
         </View>
 
-        {/* Real Transactions Feed */}
         <View style={styles.salesFeedList}>
           {recentSales.length > 0 ? (
             <>
@@ -479,11 +310,10 @@ export const DashboardScreen: React.FC = () => {
                     key={s.id}
                     onPress={() => setActiveReceipt(s)}
                     style={({ pressed }) => [
-                      styles.floatingTransactionCard,
+                      styles.transactionCard,
                       { backgroundColor: theme.card, borderColor: softBorder },
-                      pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+                      pressed && { opacity: 0.88 },
                     ]}>
-                    {/* Left Squircle Badge with payment glyph */}
                     <View style={[styles.transactionBadge, { backgroundColor: badgeBg }]}>
                       <Ionicons
                         name={isCash ? 'cash-outline' : isOnline ? 'phone-portrait-outline' : 'book-outline'}
@@ -492,26 +322,22 @@ export const DashboardScreen: React.FC = () => {
                       />
                     </View>
 
-                    {/* Middle Customer Title & Time */}
                     <View style={styles.transactionMiddle}>
                       <Text style={[styles.transactionTitle, { color: theme.text }]} numberOfLines={1}>
-                        {s.customerName || (isUrdu ? 'نقد کاؤنٹر سیل' : 'Walk-in Cash Sale')}
+                        {s.customerName || (isUrdu ? 'نقد کاؤنٹر سیل' : 'Walk-in cash sale')}
                       </Text>
                       <Text style={[styles.transactionTime, { color: theme.textMuted }]} numberOfLines={1}>
-                        {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Bill #{s.billNumber} • {s.items ? s.items.length : 0} {t('itemsCount')}
+                        {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {s.items ? s.items.length : 0} {t('itemsCount')}
                       </Text>
                     </View>
 
-                    {/* Right Amount & Payment Method */}
                     <View style={styles.transactionRight}>
                       <Text style={[styles.transactionAmount, { color: theme.text }]}>
                         +{settings.currencySymbol}{s.grandTotal.toLocaleString()}
                       </Text>
-                      <View style={[styles.miniMethodBadge, { backgroundColor: badgeBg }]}>
-                        <Text style={[styles.miniMethodText, { color: badgeColor }]}>
-                          {s.paymentMethod.toUpperCase()}
-                        </Text>
-                      </View>
+                      <Text style={[styles.transactionMethod, { color: badgeColor }]}>
+                        {s.paymentMethod}
+                      </Text>
                     </View>
                   </Pressable>
                 );
@@ -527,8 +353,8 @@ export const DashboardScreen: React.FC = () => {
                   ]}>
                   <Text style={[styles.viewMoreSalesText, { color: theme.primary }]}>
                     {isUrdu
-                      ? `تمام ${sales.length} بلز دیکھیں →`
-                      : `View All ${sales.length} Bills →`}
+                      ? `تمام ${sales.length} بلز دیکھیں`
+                      : `View all ${sales.length} bills`}
                   </Text>
                 </Pressable>
               )}
@@ -537,24 +363,23 @@ export const DashboardScreen: React.FC = () => {
             <EmptyState
               icon="receipt-outline"
               title={t('noRecentSales')}
-              subtitle={isUrdu ? 'آج کی پہلی سیل درج کرنے کے لیے اوپر "New Bill" بٹن دبائیں' : 'No sales recorded yet today. Tap "+ New Bill" above.'}
-              actionLabel={isUrdu ? 'نیا بل بنائیں' : '+ New Bill'}
+              subtitle={isUrdu ? 'پہلی سیل کے لیے "نیا بل" دبائیں' : 'Tap New Bill to record today\'s first sale.'}
+              actionLabel={isUrdu ? 'نیا بل' : 'New Bill'}
               onAction={() => setIsSaleModalOpen(true)}
               compact
             />
           )}
         </View>
 
-        {/* ── Day-0 Rapid Store Setup Card (If not finished) ── */}
         {showSetupCard && (
           <View style={[styles.setupCard, { backgroundColor: theme.card, borderColor: softBorder }]}>
             <View style={styles.setupCardHeader}>
-              <View style={[styles.setupIconWrap, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="sparkles" size={17} color="#059669" />
+              <View style={[styles.setupIconWrap, { backgroundColor: theme.successLight }]}>
+                <Ionicons name="storefront-outline" size={17} color={theme.primary} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.setupTitle, { color: theme.text }]}>
-                  {isUrdu ? 'دکان شروع کرنے کے آسان مراحل' : 'Quick Store Setup'}
+                  {isUrdu ? 'دکان شروع کرنے کے آسان مراحل' : 'Quick store setup'}
                 </Text>
                 <Text style={[styles.setupSubtitle, { color: theme.textSecondary }]}>
                   {completedStepsCount}/3 {isUrdu ? 'مراحل مکمل' : 'completed'}
@@ -569,20 +394,18 @@ export const DashboardScreen: React.FC = () => {
               </Pressable>
             </View>
 
-            {/* Progress track */}
             <View style={[styles.progressBarTrack, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#E2E8F0' }]}>
               <View
                 style={[
                   styles.progressBarFill,
                   {
-                    backgroundColor: '#00C9A7',
+                    backgroundColor: theme.primary,
                     width: `${Math.max(12, Math.round((completedStepsCount / 3) * 100))}%`,
                   },
                 ]}
               />
             </View>
 
-            {/* Step 1: Add Staples */}
             {!hasProducts && (
               <View style={styles.setupActionRow}>
                 <Pressable
@@ -590,14 +413,14 @@ export const DashboardScreen: React.FC = () => {
                   disabled={isLoadingStaples}
                   style={({ pressed }) => [
                     styles.setupPrimaryBtn,
-                    { backgroundColor: '#00C9A7' },
+                    { backgroundColor: theme.primary },
                     pressed && { opacity: 0.9 },
                   ]}>
-                  <Ionicons name="flash" size={14} color="#FFFFFF" />
+                  <Ionicons name="flash-outline" size={14} color="#FFFFFF" />
                   <Text style={styles.setupPrimaryBtnText}>
                     {isLoadingStaples
                       ? (isUrdu ? 'لوڈ ہو رہا ہے...' : 'Loading...')
-                      : (isUrdu ? '⚡ 20 بنیادی اشیاء شامل کریں' : '⚡ Load Top 20 Staples')}
+                      : (isUrdu ? '20 بنیادی اشیاء شامل کریں' : 'Load top 20 staples')}
                   </Text>
                 </Pressable>
               </View>
@@ -605,7 +428,6 @@ export const DashboardScreen: React.FC = () => {
           </View>
         )}
 
-        {/* ── Collapsible Analytics & Reports Drawer ── */}
         <Pressable
           onPress={() => setShowReports((v) => !v)}
           style={({ pressed }) => [
@@ -614,9 +436,9 @@ export const DashboardScreen: React.FC = () => {
             pressed && { opacity: 0.85 },
           ]}>
           <View style={styles.reportsPillLeft}>
-            <Ionicons name="bar-chart-outline" size={17} color="#00C9A7" />
+            <Ionicons name="bar-chart-outline" size={17} color={theme.primary} />
             <Text style={[styles.reportsPillTitle, { color: theme.text }]}>
-              {isUrdu ? 'دکان کی رپورٹس اور منافع کا گراف' : 'Analytics & Profit Reports'}
+              {isUrdu ? 'رپورٹس اور منافع' : 'Reports'}
             </Text>
           </View>
           <Ionicons name={showReports ? 'chevron-up' : 'chevron-down'} size={16} color={theme.textMuted} />
@@ -627,7 +449,6 @@ export const DashboardScreen: React.FC = () => {
             <SalesChart sales={sales} />
 
             <View style={styles.financeGrid}>
-              {/* Card 1: Inventory Value */}
               <Pressable
                 onPress={() => setActiveTab('products')}
                 style={({ pressed }) => [
@@ -639,7 +460,7 @@ export const DashboardScreen: React.FC = () => {
                   <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
                     {t('totalInvestment')}
                   </Text>
-                  <Text style={[styles.financeBadgeText, { color: '#00C9A7' }]}>
+                  <Text style={[styles.financeBadgeText, { color: theme.primary }]}>
                     {totalInventoryUnits} {isUrdu ? 'اشیاء' : 'units'}
                   </Text>
                 </View>
@@ -663,14 +484,13 @@ export const DashboardScreen: React.FC = () => {
                     <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
                       {t('expectedStockProfit')}
                     </Text>
-                    <Text style={[styles.financeSubStatValue, { color: '#00C9A7', fontWeight: '800' }]}>
+                    <Text style={[styles.financeSubStatValue, { color: theme.primary, fontWeight: '800' }]}>
                       +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
                     </Text>
                   </View>
                 </View>
               </Pressable>
 
-              {/* Card 2: Total Store Lifetime Earnings */}
               <Pressable
                 onPress={() => setActiveTab('history')}
                 style={({ pressed }) => [
@@ -682,12 +502,12 @@ export const DashboardScreen: React.FC = () => {
                   <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
                     {t('totalStoreEarnings')}
                   </Text>
-                  <Text style={[styles.financeBadgeText, { color: '#7C3AED' }]}>
+                  <Text style={[styles.financeBadgeText, { color: theme.secondary }]}>
                     {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {isUrdu ? 'بلز' : 'sales'}
                   </Text>
                 </View>
 
-                <Text style={[styles.financeMainAmount, { color: '#7C3AED' }]}>
+                <Text style={[styles.financeMainAmount, { color: theme.text }]}>
                   {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
                 </Text>
 
@@ -718,7 +538,6 @@ export const DashboardScreen: React.FC = () => {
           </View>
         )}
 
-        {/* Day-End Cash Tally & Closing Modal */}
         <DayEndClosingModal
           visible={showDayEnd}
           onClose={() => setShowDayEnd(false)}
@@ -733,7 +552,6 @@ export const DashboardScreen: React.FC = () => {
           todayGrossProfit={todayGrossProfit}
         />
 
-        {/* Cash Out (Expense) Modal */}
         <CashOutModal
           visible={isCashOutModalOpen}
           onClose={() => setIsCashOutModalOpen(false)}
@@ -742,18 +560,6 @@ export const DashboardScreen: React.FC = () => {
 
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <RainbowQuickActionFab
-        onNewSale={() => setIsSaleModalOpen(true)}
-        onAddProduct={() => setIsAddProductOpen(true)}
-        onDayEnd={() => setShowDayEnd(true)}
-        onSettings={() => setActiveTab('settings')}
-        primaryColor="#00C9A7"
-        isDark={!!settings.darkMode}
-        language={language}
-      />
-
-      {/* Direct New Sale Modal on Home */}
       <Modal
         visible={isSaleModalOpen}
         animationType="slide"
@@ -770,7 +576,6 @@ export const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    position: 'relative',
   },
   container: {
     flex: 1,
@@ -782,281 +587,97 @@ const styles = StyleSheet.create({
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
-    gap: 14,
+    gap: 16,
   },
   saleModalContainer: {
     flex: 1,
   },
 
-  // ── 0. Ambient Top Glow (Memorable Fintech Backdrop) ──
-  ambientTopGlow: {
-    position: 'absolute',
-    top: -50,
-    left: -20,
-    right: -20,
-    height: 240,
-    backgroundColor: '#00C9A7',
-    opacity: 0.12,
-    borderBottomLeftRadius: 180,
-    borderBottomRightRadius: 180,
-  },
-
-  // ── 1. The 3-Card Retail Command Deck ──
-  commandDeckContainer: {
-    gap: 12,
-    marginTop: 2,
-  },
-
-  // CARD 1: Luminous Colorful & Minimal Aurora Hero Card
-  auroraHeroCard: {
+  heroCard: {
     borderRadius: 24,
-    padding: 18,
-    gap: 14,
-    elevation: 0,
-    overflow: 'hidden',
-    position: 'relative',
-    minHeight: 185,
-  },
-  auroraOrbCyan: {
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    backgroundColor: '#0284C7',
-    opacity: 0.38,
-    position: 'absolute',
-    top: -50,
-    right: -40,
-  },
-  auroraOrbViolet: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    backgroundColor: '#6366F1',
-    opacity: 0.28,
-    position: 'absolute',
-    top: 30,
-    right: 50,
-  },
-  auroraOrbAmber: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: '#F59E0B',
-    opacity: 0.22,
-    position: 'absolute',
-    bottom: -40,
-    left: -20,
-  },
-  heroTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    zIndex: 2,
-  },
-  heroTitleWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    borderCurve: 'continuous',
+    paddingHorizontal: 20,
+    paddingVertical: 22,
     gap: 6,
   },
-  heroCardSuperLabel: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+  heroLabel: {
+    color: 'rgba(255, 255, 255, 0.86)',
+    fontSize: 15,
+    fontWeight: '600',
   },
-  heroFrostedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  heroLivePulse: {
-    width: 6.5,
-    height: 6.5,
-    borderRadius: 3.5,
-    backgroundColor: '#34D399',
-  },
-  heroFrostedBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 10.5,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  heroCenterBlock: {
-    gap: 3,
-    zIndex: 2,
-  },
-  heroCurrencyRow: {
+  heroAmountRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 4,
   },
-  heroCurrencySign: {
+  heroCurrency: {
     color: '#FFFFFF',
-    fontSize: 21,
-    fontWeight: '800',
-    marginTop: 5,
-    opacity: 0.95,
+    fontSize: 22,
+    fontWeight: '700',
+    marginTop: 10,
   },
-  heroLargeAmount: {
+  heroAmount: {
     color: '#FFFFFF',
-    fontSize: 36,
-    fontWeight: '900',
-    letterSpacing: -0.9,
-    lineHeight: 42,
+    fontSize: 40,
+    fontWeight: '800',
+    letterSpacing: -1,
+    lineHeight: 46,
+    fontVariant: ['tabular-nums'],
+    flex: 1,
   },
   heroSubtitle: {
     color: 'rgba(255, 255, 255, 0.88)',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '500',
   },
-  heroFloatingGlassRibbon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    paddingHorizontal: 13,
-    paddingVertical: 9,
-    zIndex: 2,
-  },
-  glassRibbonLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  glassRibbonIconBubble: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: 'rgba(255, 255, 255, 0.24)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  glassRibbonSubLabel: {
-    color: 'rgba(255, 255, 255, 0.82)',
-    fontSize: 9.5,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-  },
-  glassRibbonAmount: {
-    color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '800',
-  },
-  glassRibbonCtaBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.26)',
-    paddingHorizontal: 10,
-    paddingVertical: 5.5,
-    borderRadius: 9,
-  },
-  glassRibbonCtaText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.2,
+  heroMeta: {
+    color: 'rgba(255, 255, 255, 0.72)',
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 2,
   },
 
-  // CARD 2 & 3: Twin Metric Cards (50% / 50% row)
-  twinCardsRow: {
+  actionRow: {
     flexDirection: 'row',
     gap: 12,
   },
-  twinCard: {
+  actionTile: {
     flex: 1,
     borderRadius: 22,
-    borderWidth: 1,
-    padding: 14,
-    justifyContent: 'space-between',
-    minHeight: 130,
-    elevation: 0,
+    borderCurve: 'continuous',
+    padding: 16,
+    gap: 6,
+    minHeight: 112,
+    justifyContent: 'flex-end',
   },
-  twinCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  twinIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 11,
+  actionIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 4,
   },
-  twinPillBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
+  actionTileTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
-  twinPillText: {
-    fontSize: 10,
+  actionTileAmount: {
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: '800',
-    letterSpacing: 0.2,
-  },
-  twinCardContent: {
-    marginVertical: 6,
-    gap: 2,
-  },
-  twinCardLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  twinCardAmount: {
-    fontSize: 18.5,
-    fontWeight: '900',
     letterSpacing: -0.4,
+    fontVariant: ['tabular-nums'],
   },
-  twinCardFooter: {
-    paddingTop: 4,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(148, 163, 184, 0.12)',
-  },
-  twinFooterText: {
-    fontSize: 11,
-    fontWeight: '700',
+  actionTileSub: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 13,
+    fontWeight: '500',
   },
 
-  // ── 2. Horizontal Action Pills (Zero Muddy Shadow, Soft Border) ──
-  actionPillsScroll: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingVertical: 2,
-  },
-  actionPillBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 999,
-    borderWidth: 1,
-    elevation: 0,
-  },
-  pillIconSquircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pillText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    letterSpacing: -0.2,
-  },
-
-
-  // ── 5. Activity Feed ──
   feedHeaderRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
@@ -1066,61 +687,51 @@ const styles = StyleSheet.create({
   feedTitleBlock: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 8,
+    gap: 10,
   },
   feedTitle: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: '800',
     letterSpacing: -0.4,
   },
-  feedSub: {
-    fontSize: 12,
-    fontWeight: '500',
+  tallyLink: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   seeAllLink: {
-    color: '#F3705A',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
   salesFeedList: {
     gap: 10,
   },
-  floatingTransactionCard: {
+  transactionCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 22,
+    borderCurve: 'continuous',
     borderWidth: 1,
-    elevation: 0,
-  },
-  miniMethodBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 5,
-  },
-  miniMethodText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    letterSpacing: 0.3,
   },
   viewMoreSalesBtn: {
     paddingVertical: 12,
     borderRadius: 16,
+    borderCurve: 'continuous',
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
   },
   viewMoreSalesText: {
-    fontSize: 12.5,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '700',
   },
   transactionBadge: {
     width: 44,
     height: 44,
     borderRadius: 15,
+    borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1131,11 +742,11 @@ const styles = StyleSheet.create({
   },
   transactionTitle: {
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '700',
     letterSpacing: -0.3,
   },
   transactionTime: {
-    fontSize: 11.5,
+    fontSize: 13,
     fontWeight: '500',
   },
   transactionRight: {
@@ -1143,22 +754,23 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   transactionAmount: {
-    fontSize: 15.5,
+    fontSize: 15,
     fontWeight: '800',
     letterSpacing: -0.3,
+    fontVariant: ['tabular-nums'],
   },
-  transactionSubCurrency: {
-    fontSize: 11,
-    fontWeight: '700',
+  transactionMethod: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
   },
 
-  // ── Setup & Reports ──
   setupCard: {
     borderRadius: 22,
+    borderCurve: 'continuous',
     borderWidth: 1,
     padding: Spacing.md,
     gap: 10,
-    elevation: 0,
   },
   setupCardHeader: {
     flexDirection: 'row',
@@ -1169,15 +781,16 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 12,
+    borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
   },
   setupTitle: {
-    fontSize: 13.5,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
   },
   setupSubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     marginTop: 1,
   },
   dismissBtn: {
@@ -1201,26 +814,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    minHeight: 44,
     borderRadius: 12,
+    borderCurve: 'continuous',
   },
   setupPrimaryBtnText: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '700',
   },
 
-  // Reports
   reportsPillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: 18,
+    borderCurve: 'continuous',
     borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 13,
-    marginTop: 4,
-    elevation: 0,
+    minHeight: 48,
   },
   reportsPillLeft: {
     flexDirection: 'row',
@@ -1228,12 +842,11 @@ const styles = StyleSheet.create({
     gap: 9,
   },
   reportsPillTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
   reportsDrawerArea: {
     gap: 12,
-    paddingTop: 4,
   },
   financeGrid: {
     gap: 10,
@@ -1241,8 +854,8 @@ const styles = StyleSheet.create({
   financeCard: {
     padding: 14,
     borderRadius: 20,
+    borderCurve: 'continuous',
     borderWidth: 1,
-    elevation: 0,
   },
   financeCardHeader: {
     flexDirection: 'row',
@@ -1250,20 +863,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   financeBadgeText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '700',
   },
   financeCardTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontSize: 12,
+    fontWeight: '600',
   },
   financeMainAmount: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '800',
     letterSpacing: -0.5,
     marginTop: 4,
+    fontVariant: ['tabular-nums'],
   },
   financeDivider: {
     height: 1,
@@ -1279,11 +891,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   financeSubStatLabel: {
-    fontSize: 10.5,
+    fontSize: 12,
     fontWeight: '500',
   },
   financeSubStatValue: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
 });

@@ -4,7 +4,7 @@ import { ProductImage } from '@/components/ProductImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { Product, ProductCategory } from '@/types';
 import { formatCompactPrice } from '@/utils/formatters';
@@ -35,14 +35,10 @@ export const ProductsScreen: React.FC = () => {
     setEditingProduct,
     setIsAddProductOpen,
     settings,
-    totalInventoryInvestment,
-    totalInventoryRetailValue,
-    totalExpectedStockProfit,
     t,
     language,
     lowStockProducts,
     outOfStockProducts,
-    showAlert,
     productsViewMode,
     setProductsViewMode,
   } = useShop();
@@ -102,8 +98,6 @@ export const ProductsScreen: React.FC = () => {
     });
   }, [products, searchQuery, selectedFilter, settings.lowStockThreshold]);
 
-  const alertCount = lowStockProducts.length + outOfStockProducts.length;
-
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { All: products.length };
     products.forEach((p) => {
@@ -122,223 +116,160 @@ export const ProductsScreen: React.FC = () => {
     return Array.from(set).sort();
   }, [products]);
 
-  const profitPct =
-    totalInventoryInvestment > 0
-      ? ((totalExpectedStockProfit / totalInventoryInvestment) * 100).toFixed(1)
-      : '0.0';
-
-  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.4)';
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.18)';
   const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
+  const isUrdu = language === 'ur';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* ── Emerald Hero Canopy Header ── */}
-      <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
-        <View style={styles.heroInner}>
-          {/* Row 1: Screen Header (Title + Quick Action Buttons) */}
-          <View style={styles.navHeaderRow}>
-            <View style={styles.titleWrap}>
-              <Text style={styles.screenTitleText}>
-                {language === 'ur' ? 'اسٹاک و سامان' : 'Products'}
-              </Text>
-              <View style={styles.countBadge}>
-                <Text style={styles.countBadgeText}>
-                  {products.length}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.actionBtnRow}>
-              {/* Catalog Import Button */}
-              <Pressable
-                onPress={() => setIsCatalogOpen(true)}
-                accessibilityRole="button"
-                accessibilityLabel="Open Master Catalog"
-                style={({ pressed }) => [
-                  styles.catalogHeaderBtn,
-                  pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
-                ]}>
-                <Ionicons name="library-outline" size={15} color="#FFFFFF" />
-                <Text style={styles.catalogHeaderBtnText}>
-                  {language === 'ur' ? 'کیٹلاگ' : 'Catalog'}
-                </Text>
-              </Pressable>
-
-              {/* Add Product Primary Button */}
-              <Pressable
-                onPress={() => {
-                  setEditingProduct(null);
-                  setIsAddProductOpen(true);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Add New Product"
-                style={({ pressed }) => [
-                  styles.addProdHeaderBtn,
-                  { backgroundColor: settings.darkMode ? theme.primary : '#FFFFFF' },
-                  pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
-                ]}>
-                <Ionicons
-                  name="add-circle"
-                  size={16}
-                  color={settings.darkMode ? '#FFFFFF' : '#064E3B'}
-                />
-                <Text
-                  style={[
-                    styles.addProdHeaderText,
-                    { color: settings.darkMode ? '#FFFFFF' : '#064E3B' },
-                  ]}>
-                  {language === 'ur' ? 'نیا آئٹم' : t('addProductBtn')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Row 2: Dedicated Full-Width Search Bar */}
-          <View style={styles.fullSearchBarWrap}>
-            <SearchBar
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={
-                language === 'ur'
-                  ? 'اشیاء کا نام یا بارکوڈ تلاش کریں...'
-                  : 'Search by item name or barcode...'
-              }
-              height={42}
-            />
-          </View>
-
-          {/* ── 3 Visual Inventory Action Pillars (All Items, Low Stock, Out of Stock) ── */}
-          <View style={styles.compactMetricBar}>
-            {/* 1. Total Catalog Items */}
-            <Pressable
-              onPress={() => setSelectedFilter('All')}
-              style={({ pressed }) => [
-                styles.compactMetricItem,
-                selectedFilter === 'All' && styles.compactMetricItemActive,
-                pressed && { opacity: 0.8 },
-              ]}>
-              <Text style={styles.compactMetricTitle} numberOfLines={1}>
-                {language === 'ur' ? 'تمام سامان' : 'All Items'}
-              </Text>
-              <View style={styles.metricValRow}>
-                <Ionicons name="cube" size={12} color="#A7F3D0" />
-                <Text
-                  style={styles.compactMetricBold}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.7}>
-                  {products.length}
-                </Text>
-              </View>
-              <Text style={styles.compactMetricSub} numberOfLines={1}>
-                {language === 'ur' ? 'کل اشیاء' : 'in store'}
-              </Text>
-            </Pressable>
-
-            <View style={styles.compactMetricDivider} />
-
-            {/* 2. Low Stock (Reorder Alert) */}
-            <Pressable
-              onPress={() => setSelectedFilter('LowStock')}
-              style={({ pressed }) => [
-                styles.compactMetricItem,
-                selectedFilter === 'LowStock' && styles.compactMetricItemActive,
-                pressed && { opacity: 0.8 },
-              ]}>
-              <Text style={[styles.compactMetricTitle, { color: '#FDE68A' }]} numberOfLines={1}>
-                {language === 'ur' ? 'کم اسٹاک' : 'Low Stock'}
-              </Text>
-              <View style={styles.metricValRow}>
-                <Ionicons name="alert-circle" size={12} color="#FDE68A" />
-                <Text
-                  style={[styles.compactMetricBold, { color: '#FDE68A' }]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.7}>
-                  {lowStockProducts.length}
-                </Text>
-              </View>
-              <Text style={[styles.compactMetricSub, { color: '#FDE68A' }]} numberOfLines={1}>
-                {language === 'ur' ? 'آرڈر کریں' : 'reorder'}
-              </Text>
-            </Pressable>
-
-            <View style={styles.compactMetricDivider} />
-
-            {/* 3. Out of Stock (Urgent Sold Out) */}
-            <Pressable
-              onPress={() => setSelectedFilter('OutOfStock')}
-              style={({ pressed }) => [
-                styles.compactMetricItem,
-                selectedFilter === 'OutOfStock' && styles.compactMetricItemActive,
-                pressed && { opacity: 0.8 },
-              ]}>
-              <Text style={[styles.compactMetricTitle, { color: '#FCA5A5' }]} numberOfLines={1}>
-                {language === 'ur' ? 'ختم شدہ' : 'Out of Stock'}
-              </Text>
-              <View style={styles.metricValRow}>
-                <Ionicons name="close-circle" size={12} color="#FCA5A5" />
-                <Text
-                  style={[styles.compactMetricBold, { color: '#FCA5A5' }]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.7}>
-                  {outOfStockProducts.length}
-                </Text>
-              </View>
-              <Text style={[styles.compactMetricSub, { color: '#FCA5A5' }]} numberOfLines={1}>
-                {language === 'ur' ? 'دستیاب نہیں' : 'sold out'}
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* Dynamic Category Filters: Only shown when store has 2 or more distinct categories */}
-          {dynamicCategories.length > 1 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.filterScroll}
-              contentContainerStyle={styles.filterScrollContent}>
-              {/* All Departments Chip */}
-              <FilterChip
-                key="All"
-                label={language === 'ur' ? `تمام شعبہ جات (${products.length})` : `All (${products.length})`}
-                isActive={selectedFilter === 'All'}
-                onPress={() => setSelectedFilter('All')}
-                activeBg="#FFFFFF"
-                activeColor="#064E3B"
-                inactiveBg="rgba(255, 255, 255, 0.16)"
-                inactiveBorder="rgba(255, 255, 255, 0.25)"
-                inactiveColor="#FFFFFF"
-              />
-
-              {/* Dynamic store category chips */}
-              {dynamicCategories.map((cat) => {
-                const count = categoryCounts[cat] || 0;
-                const isSelected = selectedFilter === cat;
-
-                return (
-                  <FilterChip
-                    key={cat}
-                    label={`${cat} (${count})`}
-                    isActive={isSelected}
-                    onPress={() => setSelectedFilter(cat as ProductCategory)}
-                    activeBg="#FFFFFF"
-                    activeColor="#064E3B"
-                    inactiveBg="rgba(255, 255, 255, 0.16)"
-                    inactiveBorder="rgba(255, 255, 255, 0.25)"
-                    inactiveColor="#FFFFFF"
-                  />
-                );
-              })}
-            </ScrollView>
-          )}
+      <View style={styles.topSection}>
+        <View style={styles.titleRow}>
+          <Text style={[styles.screenTitleText, { color: theme.text }]}>
+            {isUrdu ? 'اسٹاک و سامان' : 'Products'}
+          </Text>
+          <Text style={[styles.countText, { color: theme.textMuted }]}>
+            {products.length} {isUrdu ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
+          </Text>
         </View>
+
+        <View style={styles.actionRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isUrdu ? 'نیا آئٹم' : t('addProductBtn')}
+            onPress={() => {
+              setEditingProduct(null);
+              setIsAddProductOpen(true);
+            }}
+            style={({ pressed }) => [
+              styles.actionTile,
+              { backgroundColor: theme.heroFill },
+              pressed && { opacity: 0.9 },
+            ]}>
+            <View style={styles.actionIconWrap}>
+              <Ionicons name="add" size={18} color="#FFFFFF" />
+            </View>
+            <Text style={styles.actionTileTitle}>
+              {isUrdu ? 'نیا آئٹم' : t('addProductBtn')}
+            </Text>
+            <Text style={styles.actionTileSub}>
+              {isUrdu ? 'اسٹاک میں شامل کریں' : 'Add to stock'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isUrdu ? 'کیٹلاگ' : 'Catalog'}
+            onPress={() => setIsCatalogOpen(true)}
+            style={({ pressed }) => [
+              styles.actionTile,
+              { backgroundColor: theme.secondary },
+              pressed && { opacity: 0.9 },
+            ]}>
+            <View style={styles.actionIconWrap}>
+              <Ionicons name="library-outline" size={16} color="#FFFFFF" />
+            </View>
+            <Text style={styles.actionTileTitle}>
+              {isUrdu ? 'کیٹلاگ' : 'Catalog'}
+            </Text>
+            <Text style={styles.actionTileSub}>
+              {isUrdu ? 'تیار فہرست' : 'Ready-made list'}
+            </Text>
+          </Pressable>
+        </View>
+
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder={
+            isUrdu
+              ? 'اشیاء کا نام یا بارکوڈ تلاش کریں...'
+              : 'Search by item name or barcode...'
+          }
+          height={42}
+        />
+
+        <View style={styles.metricRow}>
+          <Pressable
+            onPress={() => setSelectedFilter('All')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              {
+                backgroundColor: theme.card,
+                borderColor: selectedFilter === 'All' ? theme.primary : softBorder,
+              },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+              {isUrdu ? 'تمام' : 'All'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.text }]}>{products.length}</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSelectedFilter('LowStock')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              {
+                backgroundColor: theme.card,
+                borderColor: selectedFilter === 'LowStock' ? theme.warning : softBorder,
+              },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.warning }]}>
+              {isUrdu ? 'کم اسٹاک' : 'Low'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.warning }]}>
+              {lowStockProducts.length}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSelectedFilter('OutOfStock')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              {
+                backgroundColor: theme.card,
+                borderColor: selectedFilter === 'OutOfStock' ? theme.danger : softBorder,
+              },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.danger }]}>
+              {isUrdu ? 'ختم' : 'Out'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.danger }]}>
+              {outOfStockProducts.length}
+            </Text>
+          </Pressable>
+        </View>
+
+        {dynamicCategories.length > 1 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filterScroll}
+            contentContainerStyle={styles.filterScrollContent}>
+            <FilterChip
+              key="All"
+              label={isUrdu ? `تمام (${products.length})` : `All (${products.length})`}
+              isActive={selectedFilter === 'All'}
+              onPress={() => setSelectedFilter('All')}
+            />
+            {dynamicCategories.map((cat) => {
+              const count = categoryCounts[cat] || 0;
+              return (
+                <FilterChip
+                  key={cat}
+                  label={`${cat} (${count})`}
+                  isActive={selectedFilter === cat}
+                  onPress={() => setSelectedFilter(cat as ProductCategory)}
+                />
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
-      {/* ── Main Content Area ── */}
       <View style={styles.contentWrap}>
-        {/* Showing count + view switcher */}
         <View style={styles.gridHeader}>
           <Text style={[styles.showingText, { color: theme.textMuted }]}>
             {t('showingItems')}{' '}
@@ -392,7 +323,6 @@ export const ProductsScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Products Display */}
         {isProductsLoading || isRefreshing || (!isLoaded && products.length === 0) ? (
           <ShopStoreLoader viewMode={viewMode} />
         ) : filteredProducts.length === 0 ? (
@@ -451,7 +381,7 @@ export const ProductsScreen: React.FC = () => {
                           : softBorder,
                       borderWidth: isLow || isOut ? 1.5 : 1,
                     },
-                    pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+                    pressed && { opacity: 0.9 },
                   ]}>
                   <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
                     <ProductImage
@@ -646,170 +576,103 @@ export const ProductsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  contentWrap: {
-    flex: 1,
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xs,
-    maxWidth: 820,
-    marginHorizontal: 'auto',
-    width: '100%',
-  },
-
-  heroCanopy: {
-    width: '100%',
+  topSection: {
+    paddingHorizontal: Spacing.lg,
     paddingTop: 8,
-    paddingBottom: 10,
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
-    borderWidth: 0,
-    borderTopWidth: 0,
-    elevation: 0,
-    shadowColor: 'transparent',
-    shadowOpacity: 0,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 0,
-  },
-  heroInner: {
-    maxWidth: 820,
+    paddingBottom: 4,
+    maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
-    paddingHorizontal: Spacing.md,
+    gap: 10,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
     gap: 8,
   },
-  navHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 2,
-  },
-  titleWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
   screenTitleText: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: -0.3,
-  },
-  countBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.full,
-  },
-  countBadgeText: {
-    fontSize: 11,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#FFFFFF',
+    letterSpacing: -0.4,
   },
-  actionBtnRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
+  countText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
-  catalogHeaderBtn: {
+  actionRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 34,
-    paddingHorizontal: 10,
+    gap: 10,
+  },
+  actionTile: {
+    flex: 1,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    padding: 12,
+    gap: 2,
+    minHeight: 86,
+    justifyContent: 'flex-end',
+  },
+  actionIconWrap: {
+    width: 30,
+    height: 30,
     borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  catalogHeaderBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  addProdHeaderBtn: {
-    flexDirection: 'row',
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
-    gap: 4,
-    height: 34,
-    paddingHorizontal: 11,
-    borderRadius: 10,
-    ...Shadows.sm,
-  },
-  addProdHeaderText: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  fullSearchBarWrap: {
-    width: '100%',
-    marginTop: 1,
+    justifyContent: 'center',
     marginBottom: 2,
   },
-
-  compactMetricBar: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderColor: 'rgba(255, 255, 255, 0.18)',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 7,
-    paddingHorizontal: 4,
-  },
-  compactMetricItem: {
-    flex: 1,
-    minWidth: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 1,
-    gap: 1,
-    borderRadius: 8,
-  },
-  compactMetricItemActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-  },
-  compactMetricTitle: {
-    color: 'rgba(255, 255, 255, 0.82)',
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.2,
-    textAlign: 'center',
-  },
-  metricValRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2.5,
-    marginTop: 1,
-    maxWidth: '100%',
-    flexShrink: 1,
-  },
-  compactMetricBold: {
+  actionTileTitle: {
     color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: -0.3,
+    fontSize: 15,
+    fontWeight: '700',
   },
-  compactMetricSub: {
-    color: 'rgba(255, 255, 255, 0.65)',
-    fontSize: 9,
+  actionTileSub: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 12,
     fontWeight: '500',
-    textAlign: 'center',
   },
-  compactMetricDivider: {
-    width: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    marginVertical: 2,
+  metricRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  metricCard: {
+    flex: 1,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    gap: 1,
+  },
+  metricLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    fontVariant: ['tabular-nums'],
   },
 
   filterScroll: { maxHeight: 38 },
   filterScrollContent: { gap: 8, alignItems: 'center', paddingRight: 4 },
 
+  contentWrap: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xs,
+    maxWidth: 720,
+    marginHorizontal: 'auto',
+    width: '100%',
+  },
   gridHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.sm,
-    paddingTop: 4,
+    paddingTop: 2,
   },
   showingText: {
     fontSize: 12.5,
@@ -835,11 +698,11 @@ const styles = StyleSheet.create({
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 8,
     paddingBottom: 100,
   },
   cardContainer: {
-    width: Platform.select({ web: 'calc(50% - 6px)' as any, default: '48.2%' }),
+    width: Platform.select({ web: 'calc(50% - 4px)' as any, default: '48.6%' }),
   },
 
   productsList: { gap: 8, paddingBottom: 100 },

@@ -7,26 +7,20 @@ import {
   Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CustomerKhata, SupplierKhata, SupplierTransaction } from '@/types';
+import { CustomerKhata } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { KhataModal } from '@/components/KhataModal';
 import { CustomerKhataCard } from '@/components/CustomerKhataCard';
 import { CustomerModal, CustomerModalMode } from '@/components/CustomerModal';
-import { SupplierCard } from '@/components/SupplierCard';
-import { SupplierModal, SupplierModalMode } from '@/components/SupplierModal';
-import { Colors, Spacing, Shadows } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import { TourBeacon } from '@/components/TourBeacon';
 import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { FilterChip } from '@/components/ui/FilterChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 type KhataFilter = 'all' | 'pending' | 'overdue' | 'settled';
 
 const OVERDUE_DAYS = 7;
-const SUPPLIERS_STORAGE_KEY = '@shopkeeper_suppliers_ledger';
-const CASH_OUT_STORAGE_KEY = '@shopkeeper_cash_out_entries';
 
 const daysSince = (isoOrMs?: string | number) => {
   if (!isoOrMs) return 0;
@@ -66,8 +60,9 @@ export const KhataScreen: React.FC = () => {
     endHandsOnTour,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.18)';
+  const isUrdu = language === 'ur';
 
-  // Hands-On Tour Step 6: Auto-seed Aslam Bhai if Khata is empty
   useEffect(() => {
     if (tourStep === 6 && khata.length === 0) {
       addCustomer({
@@ -79,10 +74,6 @@ export const KhataScreen: React.FC = () => {
     }
   }, [tourStep, khata.length, addCustomer]);
 
-  // Segment Tab: Customers vs Suppliers
-  const [activeLedgerTab, setActiveLedgerTab] = useState<'customers' | 'suppliers'>('customers');
-
-  // Customer Ledger States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<KhataFilter>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerKhata | null>(null);
@@ -91,33 +82,6 @@ export const KhataScreen: React.FC = () => {
   const [customerModalMode, setCustomerModalMode] = useState<CustomerModalMode>('add_customer');
   const [expandedCustId, setExpandedCustId] = useState<string | null>(null);
 
-  // Supplier Ledger States
-  const [suppliers, setSuppliers] = useState<SupplierKhata[]>([]);
-  const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
-  const [supplierModalMode, setSupplierModalMode] = useState<SupplierModalMode>('add_supplier');
-  const [selectedSupplier, setSelectedSupplier] = useState<SupplierKhata | null>(null);
-  const [expandedSupplierId, setExpandedSupplierId] = useState<string | null>(null);
-
-  // Load suppliers on mount
-  useEffect(() => {
-    AsyncStorage.getItem(SUPPLIERS_STORAGE_KEY)
-      .then((saved) => {
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
-            setSuppliers(parsed);
-          }
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  const saveSuppliers = (updated: SupplierKhata[]) => {
-    setSuppliers(updated);
-    AsyncStorage.setItem(SUPPLIERS_STORAGE_KEY, JSON.stringify(updated)).catch(console.error);
-  };
-
-  // ---------------- Customer Ledger Memos ----------------
   const pendingCount = useMemo(() => khata.filter((c) => c.totalDebt > 0).length, [khata]);
   const settledCount = useMemo(() => khata.filter((c) => c.totalDebt <= 0).length, [khata]);
   const overdueCustomers = useMemo(() => khata.filter(isOverdueCustomer), [khata]);
@@ -160,38 +124,6 @@ export const KhataScreen: React.FC = () => {
     });
   }, [khata, searchQuery, selectedFilter]);
 
-  // ---------------- Supplier Ledger Memos ----------------
-  const totalSupplierPayable = useMemo(() => {
-    return suppliers.reduce((sum, s) => sum + Math.max(0, s.totalPayable), 0);
-  }, [suppliers]);
-
-  const supplierPaymentsThisMonth = useMemo(() => {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = now.getMonth();
-    let sum = 0;
-    suppliers.forEach((s) => {
-      s.transactions?.forEach((tx) => {
-        if (tx.type !== 'payment_made') return;
-        const d = new Date(tx.date);
-        if (d.getFullYear() === y && d.getMonth() === m) sum += tx.amount;
-      });
-    });
-    return sum;
-  }, [suppliers]);
-
-  const filteredSuppliers = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return suppliers;
-    return suppliers.filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
-        (s.companyName && s.companyName.toLowerCase().includes(q)) ||
-        (s.phone && s.phone.includes(q))
-    );
-  }, [suppliers, searchQuery]);
-
-  // ---------------- Customer Handlers ----------------
   const handleRecordPayment = (customer: CustomerKhata) => {
     setSelectedCustomer(customer);
     setIsPaymentModalOpen(true);
@@ -227,13 +159,12 @@ export const KhataScreen: React.FC = () => {
       });
       showAlert({
         type: 'success',
-        title: language === 'ur' ? 'گاہک محفوظ ہو گیا' : 'Customer Saved',
-        message:
-          language === 'ur'
-            ? `${data.nameUrdu || data.name} کو کھاتے میں کامیابی سے شامل کر دیا گیا۔`
-            : `${data.name} has been added to customer ledger.`,
+        title: isUrdu ? 'گاہک محفوظ ہو گیا' : 'Customer Saved',
+        message: isUrdu
+          ? `${data.nameUrdu || data.name} کو کھاتے میں کامیابی سے شامل کر دیا گیا۔`
+          : `${data.name} has been added to customer ledger.`,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('[KhataScreen] Error saving customer:', err);
     }
   };
@@ -243,541 +174,218 @@ export const KhataScreen: React.FC = () => {
       await addCustomerCredit(customerId, amount, note);
       showAlert({
         type: 'success',
-        title: language === 'ur' ? 'ادھار درج ہو گیا' : 'Credit Recorded',
-        message:
-          language === 'ur'
-            ? `${settings.currencySymbol}${amount.toLocaleString()} کا نیا ادھار درج کر دیا گیا۔`
-            : `Added ${settings.currencySymbol}${amount.toLocaleString()} credit entry.`,
+        title: isUrdu ? 'ادھار درج ہو گیا' : 'Credit Recorded',
+        message: isUrdu
+          ? `${settings.currencySymbol}${amount.toLocaleString()} کا نیا ادھار درج کر دیا گیا۔`
+          : `Added ${settings.currencySymbol}${amount.toLocaleString()} credit entry.`,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('[KhataScreen] Error recording credit:', err);
     }
   };
 
-  // ---------------- Supplier Handlers ----------------
-  const handleOpenAddSupplier = () => {
-    setSelectedSupplier(null);
-    setSupplierModalMode('add_supplier');
-    setIsSupplierModalOpen(true);
-  };
-
-  const handleOpenAddPurchase = (supplier: SupplierKhata) => {
-    setSelectedSupplier(supplier);
-    setSupplierModalMode('add_purchase');
-    setIsSupplierModalOpen(true);
-  };
-
-  const handleOpenMakePayment = (supplier: SupplierKhata) => {
-    setSelectedSupplier(supplier);
-    setSupplierModalMode('make_payment');
-    setIsSupplierModalOpen(true);
-  };
-
-  const handleSaveSupplier = (data: {
-    name: string;
-    companyName?: string;
-    phone?: string;
-    initialBalance: number;
-  }) => {
-    const newSupplierId = 'sup_' + Date.now();
-    const newSupplier: SupplierKhata = {
-      id: newSupplierId,
-      name: data.name,
-      companyName: data.companyName,
-      phone: data.phone,
-      totalPayable: data.initialBalance,
-      transactions:
-        data.initialBalance > 0
-          ? [
-              {
-                id: 'suptx_' + Date.now(),
-                supplierId: newSupplierId,
-                date: new Date().toISOString(),
-                type: 'purchase_credit',
-                amount: data.initialBalance,
-                note: language === 'ur' ? 'ابتدائی سابقہ بقایا' : 'Opening balance',
-                createdAt: Date.now(),
-              },
-            ]
-          : [],
-      createdAt: Date.now(),
-      lastUpdated: Date.now(),
-    };
-    saveSuppliers([newSupplier, ...suppliers]);
-  };
-
-  const handleSavePurchase = (
-    supplierId: string,
-    amount: number,
-    billNumber?: string,
-    note?: string
-  ) => {
-    const updated = suppliers.map((s) => {
-      if (s.id !== supplierId) return s;
-      const newTx: SupplierTransaction = {
-        id: 'suptx_' + Date.now(),
-        supplierId,
-        date: new Date().toISOString(),
-        type: 'purchase_credit',
-        amount,
-        billNumber,
-        note,
-        createdAt: Date.now(),
-      };
-      return {
-        ...s,
-        totalPayable: s.totalPayable + amount,
-        transactions: [newTx, ...(s.transactions || [])],
-        lastUpdated: Date.now(),
-      };
-    });
-    saveSuppliers(updated);
-    showAlert({
-      type: 'success',
-      title: language === 'ur' ? 'مال کی خریداری درج ہو گئی' : 'Purchase Recorded',
-      message: `${settings.currencySymbol}${amount.toLocaleString()} ${
-        language === 'ur' ? 'سپلائر کے کھاتے میں شامل کر دیے گئے۔' : 'added to supplier ledger.'
-      }`,
-    });
-  };
-
-  const handleSavePayment = async (
-    supplierId: string,
-    amount: number,
-    note?: string,
-    alsoLogDrawerExpense: boolean = true
-  ) => {
-    const targetSup = suppliers.find((s) => s.id === supplierId);
-    const updated = suppliers.map((s) => {
-      if (s.id !== supplierId) return s;
-      const newTx: SupplierTransaction = {
-        id: 'suptx_' + Date.now(),
-        supplierId,
-        date: new Date().toISOString(),
-        type: 'payment_made',
-        amount,
-        note,
-        createdAt: Date.now(),
-      };
-      return {
-        ...s,
-        totalPayable: s.totalPayable - amount,
-        transactions: [newTx, ...(s.transactions || [])],
-        lastUpdated: Date.now(),
-      };
-    });
-    saveSuppliers(updated);
-
-    if (alsoLogDrawerExpense) {
-      try {
-        const existingRaw = await AsyncStorage.getItem(CASH_OUT_STORAGE_KEY);
-        const existingList = existingRaw ? JSON.parse(existingRaw) : [];
-        const newExpense = {
-          id: 'cashout_' + Date.now(),
-          amount,
-          category: 'supplier',
-          note: note
-            ? `${targetSup?.name || 'Supplier'}: ${note}`
-            : `Payment to ${targetSup?.name || 'Supplier'}`,
-          timestamp: Date.now(),
-        };
-        const nextList = [newExpense, ...existingList];
-        await AsyncStorage.setItem(CASH_OUT_STORAGE_KEY, JSON.stringify(nextList));
-      } catch (err) {
-        console.error('Failed to log drawer expense for supplier payment:', err);
-      }
-    }
-
-    showAlert({
-      type: 'success',
-      title: language === 'ur' ? 'ادائیگی ریکارڈ ہو گئی' : 'Payment Recorded',
-      message: `${settings.currencySymbol}${amount.toLocaleString()} ${
-        language === 'ur'
-          ? 'سپلائر کو ادا کر دیے گئے'
-          : 'paid to supplier'
-      }${
-        alsoLogDrawerExpense
-          ? language === 'ur'
-            ? ' اور گلہ سے کیش آؤٹ میں شامل کر لیے گئے۔'
-            : ' and logged in drawer cash-out.'
-          : '.'
-      }`,
-    });
-  };
-
-  const handleDeleteSupplier = (supplier: SupplierKhata) => {
-    showAlert({
-      type: 'confirm',
-      title: language === 'ur' ? 'سپلائر حذف کریں؟' : 'Delete Supplier?',
-      message:
-        language === 'ur'
-          ? `کیا آپ واقعی "${supplier.name}" کا کھاتہ حذف کرنا چاہتے ہیں؟`
-          : `Are you sure you want to delete "${supplier.name}"?`,
-      buttons: [
-        {
-          text: language === 'ur' ? 'حذف کریں' : 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            saveSuppliers(suppliers.filter((s) => s.id !== supplier.id));
-          },
-        },
-        { text: t('cancel'), style: 'cancel' },
-      ],
-    });
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* ── Top Section: Segment Switcher + SadaPay-inspired Hero Card ── */}
       <View style={styles.topSection}>
-        {/* Soft Pill Segment Switcher */}
-        <View
-          style={[
-            styles.segmentContainer,
-            {
-              backgroundColor: settings.darkMode ? '#1E293B' : '#E2E8F0',
-            },
-          ]}>
-          <Pressable
-            onPress={() => {
-              setActiveLedgerTab('customers');
-              setSearchQuery('');
-            }}
-            style={[
-              styles.segmentBtn,
-              activeLedgerTab === 'customers' && [
-                styles.segmentBtnActive,
-                { backgroundColor: theme.card },
-              ],
-            ]}>
-            <Ionicons
-              name="people"
-              size={15}
-              color={activeLedgerTab === 'customers' ? '#059669' : theme.textMuted}
-            />
-            <Text
-              style={[
-                styles.segmentBtnText,
-                activeLedgerTab === 'customers'
-                  ? [styles.segmentBtnTextActive, { color: settings.darkMode ? '#34D399' : '#065F46' }]
-                  : [styles.segmentBtnTextInactive, { color: theme.textMuted }],
-              ]}>
-              {language === 'ur' ? 'گاہک کھاتہ' : 'Customers'} ({khata.length})
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => {
-              setActiveLedgerTab('suppliers');
-              setSearchQuery('');
-            }}
-            style={[
-              styles.segmentBtn,
-              activeLedgerTab === 'suppliers' && [
-                styles.segmentBtnActive,
-                { backgroundColor: theme.card },
-              ],
-            ]}>
-            <Ionicons
-              name="bus"
-              size={15}
-              color={activeLedgerTab === 'suppliers' ? '#D97706' : theme.textMuted}
-            />
-            <Text
-              style={[
-                styles.segmentBtnText,
-                activeLedgerTab === 'suppliers'
-                  ? [styles.segmentBtnTextActive, { color: settings.darkMode ? '#FBBF24' : '#B45309' }]
-                  : [styles.segmentBtnTextInactive, { color: theme.textMuted }],
-              ]}>
-              {language === 'ur' ? 'سپلائر کھاتہ' : 'Suppliers'} ({suppliers.length})
-            </Text>
-          </Pressable>
+        <View style={styles.titleRow}>
+          <Text style={[styles.screenTitleText, { color: theme.text }]}>
+            {isUrdu ? 'کھاتہ' : 'Khata'}
+          </Text>
+          <Text style={[styles.countText, { color: theme.textMuted }]}>
+            {khata.length}{' '}
+            {isUrdu ? 'گاہک' : khata.length === 1 ? 'customer' : 'customers'}
+          </Text>
         </View>
 
-        {/* ── SadaPay-style Floating Hero Balance Card ── */}
-        {activeLedgerTab === 'customers' ? (
-          <View
-            style={[
-              styles.heroCard,
-              {
-                backgroundColor: settings.darkMode ? '#064E3B' : '#059669',
-              },
-            ]}>
-            {/* Top row: Label + White Pill Add Button */}
-            <View style={styles.heroTopRow}>
-              <View style={styles.heroLabelWrap}>
-                <Text style={styles.heroLabel}>
-                  {language === 'ur' ? 'کل وصول طلب ادھار' : 'TOTAL UDHAAR TO COLLECT'}
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={handleOpenAddCustomer}
-                style={({ pressed }) => [
-                  styles.heroAddBtn,
-                  pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
-                ]}>
-                <Ionicons name="person-add" size={13} color="#064E3B" />
-                <Text style={styles.heroAddBtnText}>
-                  {language === 'ur' ? '+ نیا گاہک' : '+ Customer'}
-                </Text>
-              </Pressable>
-            </View>
-
-            {/* Giant Clean Amount */}
-            <Text style={styles.heroAmount}>
-              {settings.currencySymbol}
-              {totalUdhaarReceivable.toLocaleString()}
+        <View style={[styles.heroCard, { backgroundColor: theme.heroFill }]}>
+          <Text style={styles.heroLabel}>
+            {isUrdu ? 'کل وصول طلب ادھار' : 'To collect'}
+          </Text>
+          <Text style={styles.heroAmount}>
+            {settings.currencySymbol}
+            {totalUdhaarReceivable.toLocaleString()}
+          </Text>
+          {recoveredThisMonth > 0 ? (
+            <Text style={styles.heroSub}>
+              +{settings.currencySymbol}
+              {recoveredThisMonth.toLocaleString()}{' '}
+              {isUrdu ? 'اس مہینے وصول' : 'recovered this month'}
             </Text>
-
-            {/* Translucent Soft Status Pills inside Hero Card */}
-            <View style={styles.heroCapsulesRow}>
-              <View style={styles.heroCapsule}>
-                <Text style={styles.heroCapsuleText}>
-                  {pendingCount} {language === 'ur' ? 'گاہکوں کا ادھار' : 'pending accounts'}
-                </Text>
-              </View>
-
-              {overdueCustomers.length > 0 ? (
-                <View style={[styles.heroCapsule, styles.heroCapsuleOverdue]}>
-                  <Ionicons name="alert-circle" size={12} color="#FEE2E2" />
-                  <Text style={styles.heroCapsuleOverdueText}>
-                    {overdueCustomers.length} {language === 'ur' ? 'تاخیر' : 'overdue'}
-                  </Text>
-                </View>
-              ) : null}
-
-              {recoveredThisMonth > 0 ? (
-                <View style={styles.heroCapsule}>
-                  <Text style={styles.heroCapsuleText}>
-                    +{settings.currencySymbol}{recoveredThisMonth.toLocaleString()} {language === 'ur' ? 'وصول' : 'recovered'}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-          </View>
-        ) : (
-          /* Supplier Hero Card (Warm Amber Tone) */
-          <View
-            style={[
-              styles.heroCard,
-              {
-                backgroundColor: settings.darkMode ? '#78350F' : '#D97706',
-              },
-            ]}>
-            <View style={styles.heroTopRow}>
-              <View style={styles.heroLabelWrap}>
-                <Text style={styles.heroLabel}>
-                  {language === 'ur' ? 'کل سپلائر واجبات (دینے ہیں)' : 'TOTAL PAYABLE TO SUPPLIERS'}
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={handleOpenAddSupplier}
-                style={({ pressed }) => [
-                  styles.heroAddBtn,
-                  pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] },
-                ]}>
-                <Ionicons name="bus" size={13} color="#78350F" />
-                <Text style={[styles.heroAddBtnText, { color: '#78350F' }]}>
-                  {language === 'ur' ? '+ نیا سپلائر' : '+ Supplier'}
-                </Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.heroAmount}>
-              {settings.currencySymbol}
-              {totalSupplierPayable.toLocaleString()}
+          ) : (
+            <Text style={styles.heroSub}>
+              {pendingCount}{' '}
+              {isUrdu ? 'گاہکوں کا ادھار باقی' : 'accounts with balance'}
             </Text>
+          )}
+        </View>
 
-            <View style={styles.heroCapsulesRow}>
-              <View style={styles.heroCapsule}>
-                <Text style={styles.heroCapsuleText}>
-                  {suppliers.length} {language === 'ur' ? 'فعال سپلائرز' : 'active suppliers'}
-                </Text>
-              </View>
-
-              {supplierPaymentsThisMonth > 0 ? (
-                <View style={styles.heroCapsule}>
-                  <Text style={styles.heroCapsuleText}>
-                    {settings.currencySymbol}{supplierPaymentsThisMonth.toLocaleString()} {language === 'ur' ? 'ادا شدہ' : 'paid this month'}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isUrdu ? 'نیا گاہک' : 'Add customer'}
+          onPress={handleOpenAddCustomer}
+          style={({ pressed }) => [
+            styles.actionTile,
+            { backgroundColor: theme.secondary },
+            pressed && { opacity: 0.9 },
+          ]}>
+          <View style={styles.actionIconWrap}>
+            <Ionicons name="person-add" size={16} color="#FFFFFF" />
           </View>
-        )}
+          <View style={styles.actionTileCopy}>
+            <Text style={styles.actionTileTitle}>
+              {isUrdu ? 'نیا گاہک' : 'Add customer'}
+            </Text>
+            <Text style={styles.actionTileSub}>
+              {isUrdu ? 'کھاتہ کھولیں' : 'Open a new ledger'}
+            </Text>
+          </View>
+        </Pressable>
+
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder={
+            isUrdu
+              ? 'گاہک کا نام یا نمبر تلاش کریں...'
+              : 'Search by name or phone...'
+          }
+          height={42}
+        />
+
+        <View style={styles.metricRow}>
+          <Pressable
+            onPress={() => setSelectedFilter('all')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              {
+                backgroundColor: theme.card,
+                borderColor: selectedFilter === 'all' ? theme.primary : softBorder,
+              },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+              {isUrdu ? 'تمام' : 'All'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.text }]}>{khata.length}</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSelectedFilter('pending')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              {
+                backgroundColor: theme.card,
+                borderColor: selectedFilter === 'pending' ? theme.primary : softBorder,
+              },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+              {isUrdu ? 'ادھار' : 'Due'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.text }]}>{pendingCount}</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSelectedFilter('overdue')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              {
+                backgroundColor: theme.card,
+                borderColor: selectedFilter === 'overdue' ? theme.danger : softBorder,
+              },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.danger }]}>
+              {isUrdu ? 'تاخیر' : 'Late'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.danger }]}>
+              {overdueCustomers.length}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSelectedFilter('settled')}
+            style={({ pressed }) => [
+              styles.metricCard,
+              {
+                backgroundColor: theme.card,
+                borderColor: selectedFilter === 'settled' ? theme.success : softBorder,
+              },
+              pressed && { opacity: 0.88 },
+            ]}>
+            <Text style={[styles.metricLabel, { color: theme.success }]}>
+              {isUrdu ? 'صاف' : 'Clear'}
+            </Text>
+            <Text style={[styles.metricValue, { color: theme.success }]}>{settledCount}</Text>
+          </Pressable>
+        </View>
       </View>
 
-      {/* ── Content Body: Search, Filters, List ── */}
       <View style={styles.contentWrap}>
-        {activeLedgerTab === 'customers' ? (
-          <>
-            {/* Search Bar */}
-            <SearchBar
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={language === 'ur' ? 'گاہک کا نام، نمبر یا پتہ تلاش کریں...' : 'Search customer by name or phone...'}
-              height={42}
-            />
-
-            {/* Filter Chips */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.filterScroll}
-              contentContainerStyle={styles.filterScrollContent}>
-              <FilterChip
-                label={t('filterKhataAll')}
-                isActive={selectedFilter === 'all'}
-                onPress={() => setSelectedFilter('all')}
-                count={khata.length}
-              />
-              <FilterChip
-                label={t('filterPending')}
-                isActive={selectedFilter === 'pending'}
-                onPress={() => setSelectedFilter('pending')}
-                count={pendingCount}
-              />
-              <FilterChip
-                label={t('filterOverdue')}
-                isActive={selectedFilter === 'overdue'}
-                onPress={() => setSelectedFilter('overdue')}
-                variant="alert"
-                icon="warning"
-                count={overdueCustomers.length}
-                activeBg={theme.danger}
-              />
-              <FilterChip
-                label={t('filterSettled')}
-                isActive={selectedFilter === 'settled'}
-                onPress={() => setSelectedFilter('settled')}
-                count={settledCount}
-                activeBg={theme.success}
-              />
-            </ScrollView>
-
-            {/* Customers List */}
-            {filteredCustomers.length === 0 ? (
-              <EmptyState
-                icon="people-outline"
-                title={t('noKhataFound')}
-                subtitle={
-                  searchQuery
-                    ? language === 'ur'
-                      ? 'مختلف نام یا فون نمبر سے تلاش کریں'
-                      : 'Try a different name or phone number.'
-                    : language === 'ur'
-                    ? 'ابھی کوئی اُدھار کھاتہ نہیں ہے'
-                    : 'No customers match the current filter.'
-                }
-                actionLabel={
-                  !searchQuery && selectedFilter === 'all'
-                    ? (language === 'ur' ? '+ نیا گاہک درج کریں' : '+ Add New Customer')
-                    : undefined
-                }
-                onAction={
-                  !searchQuery && selectedFilter === 'all'
-                    ? handleOpenAddCustomer
-                    : undefined
-                }
-              />
-            ) : (
-              <ScrollView
-                style={styles.customersScroll}
-                contentContainerStyle={[
-                  styles.customersList,
-                  tourStep === 6 && { paddingBottom: 220 },
-                ]}
-                showsVerticalScrollIndicator={false}>
-                {filteredCustomers.map((customer, idx) => (
-                  <View key={customer.id} style={{ position: 'relative' }}>
-                    {tourStep === 6 && idx === 0 && (
-                      <TourBeacon
-                        textUrdu="1-ٹیپ واٹس ایپ بل کا بٹن دیکھیں"
-                        textEn="1-Tap WhatsApp Bill Reminder"
-                        position="top"
-                        onSkip={endHandsOnTour}
-                      />
-                    )}
-                    <CustomerKhataCard
-                      customer={customer}
-                      isExpanded={expandedCustId === customer.id}
-                      onToggleExpand={() =>
-                        setExpandedCustId((prev) =>
-                          prev === customer.id ? null : customer.id
-                        )
-                      }
-                      onRecordPayment={handleRecordPayment}
-                      onAddCredit={handleOpenAddCredit}
-                      overdueDays={
-                        isOverdueCustomer(customer)
-                          ? daysSince(getLastActivityDate(customer))
-                          : 0
-                      }
-                    />
-                  </View>
-                ))}
-              </ScrollView>
-            )}
-          </>
+        {filteredCustomers.length === 0 ? (
+          <EmptyState
+            icon="people-outline"
+            title={t('noKhataFound')}
+            subtitle={
+              searchQuery
+                ? isUrdu
+                  ? 'مختلف نام یا فون نمبر سے تلاش کریں'
+                  : 'Try a different name or phone number.'
+                : isUrdu
+                  ? 'ابھی کوئی اُدھار کھاتہ نہیں ہے'
+                  : 'No customers match the current filter.'
+            }
+            actionLabel={
+              !searchQuery && selectedFilter === 'all'
+                ? isUrdu
+                  ? '+ نیا گاہک درج کریں'
+                  : '+ Add customer'
+                : undefined
+            }
+            onAction={
+              !searchQuery && selectedFilter === 'all' ? handleOpenAddCustomer : undefined
+            }
+          />
         ) : (
-          /* ==================== TAB 2: SUPPLIERS ==================== */
-          <>
-            {/* Supplier Search */}
-            <SearchBar
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={language === 'ur' ? 'سپلائر یا کمپنی تلاش کریں...' : 'Search supplier or company...'}
-              height={42}
-            />
-
-            {/* Suppliers List */}
-            {filteredSuppliers.length === 0 ? (
-              <EmptyState
-                icon="bus-outline"
-                title={language === 'ur' ? 'کوئی سپلائر نہیں ملا' : 'No Suppliers Found'}
-                subtitle={
-                  searchQuery
-                    ? language === 'ur'
-                      ? 'مختلف نام یا کمپنی سے تلاش کریں'
-                      : 'Try a different supplier name or company.'
-                    : language === 'ur'
-                    ? 'ڈسٹری بیوٹرز (یونی لیور، شان، بیکری) کا ادھار کھاتہ رکھنے کے لیے نیا سپلائر شامل کریں۔'
-                    : 'Track deliveries, wholesale credit, and payments by adding your first supplier.'
-                }
-                actionLabel={language === 'ur' ? '+ نیا سپلائر شامل کریں' : '+ Add New Supplier'}
-                onAction={handleOpenAddSupplier}
-              />
-            ) : (
-              <ScrollView
-                style={styles.customersScroll}
-                contentContainerStyle={styles.customersList}
-                showsVerticalScrollIndicator={false}>
-                {filteredSuppliers.map((sup) => (
-                  <SupplierCard
-                    key={sup.id}
-                    supplier={sup}
-                    currencySymbol={settings.currencySymbol}
-                    language={language}
-                    isDarkMode={settings.darkMode}
-                    isExpanded={expandedSupplierId === sup.id}
-                    onToggleExpand={() =>
-                      setExpandedSupplierId((prev) => (prev === sup.id ? null : sup.id))
-                    }
-                    onAddPurchase={handleOpenAddPurchase}
-                    onMakePayment={handleOpenMakePayment}
-                    onDelete={handleDeleteSupplier}
+          <ScrollView
+            style={styles.customersScroll}
+            contentContainerStyle={[
+              styles.customersList,
+              tourStep === 6 && { paddingBottom: 220 },
+            ]}
+            showsVerticalScrollIndicator={false}>
+            {filteredCustomers.map((customer, idx) => (
+              <View key={customer.id} style={{ position: 'relative' }}>
+                {tourStep === 6 && idx === 0 && (
+                  <TourBeacon
+                    textUrdu="1-ٹیپ واٹس ایپ بل کا بٹن دیکھیں"
+                    textEn="1-Tap WhatsApp Bill Reminder"
+                    position="top"
+                    onSkip={endHandsOnTour}
                   />
-                ))}
-              </ScrollView>
-            )}
-          </>
+                )}
+                <CustomerKhataCard
+                  customer={customer}
+                  isExpanded={expandedCustId === customer.id}
+                  onToggleExpand={() =>
+                    setExpandedCustId((prev) =>
+                      prev === customer.id ? null : customer.id
+                    )
+                  }
+                  onRecordPayment={handleRecordPayment}
+                  onAddCredit={handleOpenAddCredit}
+                  overdueDays={
+                    isOverdueCustomer(customer)
+                      ? daysSince(getLastActivityDate(customer))
+                      : 0
+                  }
+                />
+              </View>
+            ))}
+          </ScrollView>
         )}
       </View>
 
-      {/* Customer Payment Modal */}
       <KhataModal
         customer={selectedCustomer}
         visible={isPaymentModalOpen}
@@ -787,7 +395,6 @@ export const KhataScreen: React.FC = () => {
         }}
       />
 
-      {/* Customer Modal: Add Customer with Opening Debt & Direct Credit */}
       <CustomerModal
         visible={isCustomerModalOpen}
         mode={customerModalMode}
@@ -803,24 +410,6 @@ export const KhataScreen: React.FC = () => {
         onSaveCredit={handleSaveCredit}
       />
 
-      {/* Supplier Modal */}
-      <SupplierModal
-        visible={isSupplierModalOpen}
-        mode={supplierModalMode}
-        supplier={selectedSupplier}
-        currencySymbol={settings.currencySymbol}
-        language={language}
-        isDarkMode={settings.darkMode}
-        onClose={() => {
-          setIsSupplierModalOpen(false);
-          setSelectedSupplier(null);
-        }}
-        onSaveSupplier={handleSaveSupplier}
-        onSavePurchase={handleSavePurchase}
-        onSavePayment={handleSavePayment}
-      />
-
-      {/* Hands-On Tour Step 6: Advance to Cash Drawer & Profit */}
       {tourStep === 6 && (
         <FloatingTourPrompt
           bottom={10}
@@ -847,119 +436,107 @@ const styles = StyleSheet.create({
   },
   topSection: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: 10,
+    paddingTop: 8,
     paddingBottom: 4,
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
     gap: 10,
   },
-
-  // Soft Pill Segment Switcher
-  segmentContainer: {
+  titleRow: {
     flexDirection: 'row',
-    borderRadius: 14,
-    padding: 3,
+    alignItems: 'baseline',
+    gap: 8,
   },
-  segmentBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  segmentBtnActive: {
-    ...Shadows.sm,
-  },
-  segmentBtnText: {
-    fontSize: 12.5,
-  },
-  segmentBtnTextActive: {
+  screenTitleText: {
+    fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.4,
   },
-  segmentBtnTextInactive: {
+  countText: {
+    fontSize: 14,
     fontWeight: '600',
   },
-
-  // SadaPay-inspired Hero Card
   heroCard: {
-    borderRadius: 24,
-    paddingHorizontal: 18,
-    paddingTop: 16,
-    paddingBottom: 16,
-    gap: 8,
-    ...Shadows.md,
-  },
-  heroTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  heroLabelWrap: {
-    flex: 1,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 4,
   },
   heroLabel: {
     color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
-  heroAddBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 12,
-    ...Shadows.sm,
-  },
-  heroAddBtnText: {
-    color: '#064E3B',
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '600',
   },
   heroAmount: {
     color: '#FFFFFF',
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '800',
-    letterSpacing: -0.8,
+    letterSpacing: -0.6,
+    fontVariant: ['tabular-nums'],
   },
-  heroCapsulesRow: {
+  heroSub: {
+    color: 'rgba(255, 255, 255, 0.78)',
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  actionTile: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
-    paddingTop: 2,
+    gap: 12,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    padding: 12,
+    minHeight: 64,
   },
-  heroCapsule: {
-    flexDirection: 'row',
+  actionIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 999,
+    justifyContent: 'center',
   },
-  heroCapsuleText: {
+  actionTileCopy: {
+    flex: 1,
+    gap: 1,
+  },
+  actionTileTitle: {
     color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 15,
     fontWeight: '700',
   },
-  heroCapsuleOverdue: {
-    backgroundColor: 'rgba(239, 68, 68, 0.35)',
+  actionTileSub: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 12,
+    fontWeight: '500',
   },
-  heroCapsuleOverdueText: {
-    color: '#FEE2E2',
+  metricRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  metricCard: {
+    flex: 1,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    gap: 1,
+  },
+  metricLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '600',
   },
-
-  // Content Area
+  metricValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    fontVariant: ['tabular-nums'],
+  },
   contentWrap: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
@@ -967,17 +544,7 @@ const styles = StyleSheet.create({
     maxWidth: 720,
     marginHorizontal: 'auto',
     width: '100%',
-    gap: Spacing.sm,
   },
-
-  filterScroll: {
-    maxHeight: 38,
-  },
-  filterScrollContent: {
-    gap: 6,
-    alignItems: 'center',
-  },
-
   customersScroll: {
     flex: 1,
   },

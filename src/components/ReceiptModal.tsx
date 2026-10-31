@@ -16,9 +16,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ProductImage } from '@/components/ProductImage';
+import { productIconFor } from '@/utils/productIcon';
 
 interface ReceiptModalProps {
   sale: Sale | null;
@@ -29,6 +33,8 @@ interface ReceiptModalProps {
 export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClose }) => {
   const { settings, language, t, user, refundSale, showAlert } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
 
   const receiptViewRef = useRef<View>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -1439,401 +1445,310 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
     }
   };
 
+  const money = (n: number) => `${settings.currencySymbol}${n.toLocaleString()}`;
+  const payLine =
+    sale.paymentMethod === 'udhaar'
+      ? language === 'ur'
+        ? 'ادھار'
+        : 'Khata'
+      : sale.paymentMethod === 'cash'
+        ? language === 'ur'
+          ? 'نقد'
+          : 'Cash'
+        : language === 'ur'
+          ? 'آن لائن'
+          : 'Online';
+
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
-        <View style={[styles.receiptCard, { backgroundColor: theme.surface }]}>
-          {/* Header Close Bar */}
-          <View style={[styles.modalTopBar, { borderBottomColor: theme.border }]}>
-            <View style={[styles.topBadge, isRefunded && { backgroundColor: '#FEE2E2', borderColor: '#EF4444' }]}>
-              <Ionicons
-                name={isRefunded ? 'arrow-undo-circle' : 'checkmark-circle'}
-                size={20}
-                color={isRefunded ? '#DC2626' : '#006837'}
-              />
-              <Text style={[styles.topBadgeText, isRefunded && { color: '#DC2626' }]}>
+        <View
+          style={[
+            styles.receiptCard,
+            {
+              backgroundColor: theme.background,
+              height: Math.min(windowHeight * 0.9, 820),
+            },
+          ]}>
+          <View style={styles.modalTopBar}>
+            <View style={styles.topTitleWrap}>
+              <Text style={[styles.topTitle, { color: theme.text }]}>
+                {language === 'ur' ? 'رسید' : 'Receipt'}
+              </Text>
+              <Text style={[styles.topSubtitle, { color: theme.textMuted }]}>
+                #{sale.billNumber}
                 {isRefunded
-                  ? (language === 'ur' ? 'واپس شدہ بل (Refunded)' : 'Refunded & Voided')
-                  : t('saleCompleted')}
+                  ? language === 'ur'
+                    ? '  ·  واپس شدہ'
+                    : '  ·  Refunded'
+                  : ''}
               </Text>
             </View>
-            <Pressable onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color={theme.textSecondary} />
+            <Pressable
+              onPress={onClose}
+              hitSlop={8}
+              style={({ pressed }) => [styles.closeBtn, pressed && { opacity: 0.7 }]}>
+              <Ionicons name="close" size={22} color={theme.textMuted} />
             </Pressable>
           </View>
 
-          {/* On-screen Preview matching the exact design & capturable as image */}
           <ScrollView
             style={styles.receiptScroll}
             contentContainerStyle={styles.receiptPaper}
-            showsVerticalScrollIndicator={false}>
-            <View
-              ref={receiptViewRef}
-              collapsable={false}
-              style={styles.paperInner}>
-              {/* Header */}
-              <View style={styles.previewHeader}>
-                <View style={styles.cartIconCircle}>
-                  <Ionicons name="cart" size={32} color="#006837" />
+            showsVerticalScrollIndicator
+            nestedScrollEnabled>
+            <View style={styles.itemPreviewBlock}>
+              <Text style={[styles.itemPreviewLabel, { color: theme.textMuted }]}>
+                {language === 'ur' ? 'اشیاء دیکھیں' : 'Check items'}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.itemPreviewRow}>
+                {sale.items.map((it, idx) => (
+                  <View key={`${it.product.id || it.product.name}-${idx}`} style={styles.itemPreviewCard}>
+                    <View style={styles.itemPreviewThumb}>
+                      <ProductImage
+                        uri={it.product.image || it.product.imageUri}
+                        style={styles.itemPreviewImage}
+                        fallbackSize={22}
+                        fallbackColor="#94A3B8"
+                        iconName={productIconFor(it.product.name, it.product.category)}
+                      />
+                    </View>
+                    <Text style={[styles.itemPreviewName, { color: theme.text }]} numberOfLines={2}>
+                      {it.product.name}
+                    </Text>
+                    <Text style={[styles.itemPreviewMeta, { color: theme.textMuted }]}>
+                      ×{it.quantity}
+                    </Text>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+
+            <Text style={[styles.itemPreviewLabel, { color: theme.textMuted }]}>
+              {language === 'ur' ? 'رسید' : 'Receipt preview'}
+            </Text>
+            <View ref={receiptViewRef} collapsable={false} style={styles.paperInner}>
+              <View style={styles.letterhead}>
+                <View style={styles.shopLogoWrap}>
+                  {settings.profileImage &&
+                  !settings.profileImage.includes('googleusercontent.com/a/') ? (
+                    <ProductImage
+                      uri={settings.profileImage}
+                      style={styles.shopLogo}
+                      fallbackSize={22}
+                      fallbackColor="#64748B"
+                    />
+                  ) : (
+                    <Text style={styles.shopLogoInitials}>
+                      {(dynamicShopName || 'S')
+                        .split(' ')
+                        .map((w) => w[0])
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase()}
+                    </Text>
+                  )}
                 </View>
-                <View style={styles.headerTextWrap}>
+                <View style={styles.letterheadText}>
                   <Text style={styles.previewStoreTitle}>{dynamicShopName}</Text>
-                  <Text style={styles.previewStoreUrdu}>{dynamicShopUrdu}</Text>
-                  <Text style={styles.previewTaglineEn}>Fresh Products • Better Prices • Your Trusted Shop</Text>
-                  <Text style={styles.previewTaglineUr}>تازہ اشیاء • مناسب قیمت • آپ کا بھروسہ</Text>
-                </View>
-              </View>
-
-              {/* Green Divider */}
-              <View style={styles.previewGreenDivider} />
-
-              {/* Refunded Banner in Preview */}
-              {isRefunded && (
-                <View style={styles.refundedWatermarkBanner}>
-                  <Ionicons name="alert-circle" size={16} color="#DC2626" />
-                  <Text style={styles.refundedWatermarkText}>
-                    {language === 'ur'
-                      ? '⚠️ یہ بل واپس / منسوخ ہو چکا ہے (اسٹاک بحال ہے)'
-                      : '⚠️ VOIDED / REFUNDED (Stock Restored)'}
-                  </Text>
-                </View>
-              )}
-
-              {/* Google Drive Auto-Saved Indicator – only shown after a real successful upload */}
-              {driveSaved && (
-                <View style={styles.driveStatusRow}>
-                  <Ionicons name="cloud-done" size={13} color="#059669" />
-                  <Text style={styles.driveStatusText}>
-                    {language === 'ur'
-                      ? '✓ گوگل ڈرائیو میں محفوظ'
-                      : '✓ Saved to Google Drive'}
-                  </Text>
-                </View>
-              )}
-
-              {/* Bill & Store Metadata */}
-              <View style={styles.previewMetaGrid}>
-                <View style={styles.metaColLeft}>
-                  <View style={styles.metaRow}>
-                    <Ionicons name="document-text" size={14} color="#006837" />
-                    <Text style={styles.metaText}>
-                      <Text style={styles.boldText}>Bill #: </Text>{sale.billNumber}
-                    </Text>
-                  </View>
-                  <View style={styles.metaRow}>
-                    <Ionicons name="calendar" size={14} color="#006837" />
-                    <Text style={styles.metaText}>{formattedDate}</Text>
-                  </View>
-                  <View style={styles.metaRow}>
-                    <Ionicons name="person" size={14} color="#006837" />
-                    <Text style={styles.metaText}>
-                      <Text style={styles.boldText}>Customer: </Text>{customerDisplayName}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.metaColCenter}>
-                  <View style={styles.metaRow}>
-                    <Ionicons name="location" size={14} color="#006837" />
-                    <View>
-                      <Text style={[styles.metaText, styles.boldText]}>{dynamicShopName}</Text>
-                      {dynamicAddress ? (
-                        <Text style={styles.metaSubText} numberOfLines={2}>{dynamicAddress}</Text>
-                      ) : null}
-                    </View>
-                  </View>
-                  {dynamicPhone ? (
-                    <View style={styles.metaRow}>
-                      <Ionicons name="call" size={14} color="#006837" />
-                      <Text style={styles.metaText}>{dynamicPhone}</Text>
-                    </View>
+                  {dynamicShopUrdu ? (
+                    <Text style={styles.previewStoreUrdu}>{dynamicShopUrdu}</Text>
                   ) : null}
-                </View>
-
-                <View style={styles.metaColRight}>
-                  {/* High-fidelity Barcode Stripes */}
-                  <View style={styles.barcodeLinesRow}>
-                    {sale.billNumber.split('').map((char, i) => {
-                      const code = char.charCodeAt(0);
-                      return (
-                        <React.Fragment key={i}>
-                          <View style={[styles.barcodeBar, { width: (code % 2) + 1.2 }]} />
-                          <View style={[styles.barcodeSpace, { width: 1.5 }]} />
-                          <View style={[styles.barcodeBar, { width: ((code >> 1) % 2) + 1.5 }]} />
-                          <View style={[styles.barcodeSpace, { width: 2 }]} />
-                        </React.Fragment>
-                      );
-                    })}
-                  </View>
-                  <Text style={styles.barcodeText}>{sale.billNumber}</Text>
+                  {dynamicAddress ? (
+                    <Text style={styles.metaSubText} numberOfLines={2}>
+                      {dynamicAddress}
+                    </Text>
+                  ) : null}
+                  {dynamicPhone ? <Text style={styles.metaSubText}>{dynamicPhone}</Text> : null}
                 </View>
               </View>
 
-              {/* Items Table */}
-              <View style={styles.previewTableHead}>
-                <Text style={[styles.tableCol, { width: '8%', textAlign: 'center' }]}>#</Text>
-                <Text style={[styles.tableCol, { width: '44%' }]}>Item / سامان</Text>
-                <Text style={[styles.tableCol, { width: '16%', textAlign: 'center' }]}>Qty / مقدار</Text>
-                <Text style={[styles.tableCol, { width: '16%', textAlign: 'center' }]}>Rate / قیمت</Text>
-                <Text style={[styles.tableCol, { width: '16%', textAlign: 'right' }]}>Total / کل رقم</Text>
-              </View>
+              <View style={styles.softRule} />
+
+              {isRefunded ? (
+                <Text style={styles.refundLine}>
+                  {language === 'ur' ? 'یہ بل واپس ہو چکا ہے' : 'This bill was refunded'}
+                </Text>
+              ) : null}
+
+              <Text style={styles.metaLine}>
+                {language === 'ur' ? 'گاہک' : 'Customer'}  ·  {customerDisplayName}
+              </Text>
+              <Text style={styles.metaLine}>{formattedDate}</Text>
+              <Text style={styles.metaLine}>
+                {language === 'ur' ? 'ادائیگی' : 'Paid'}  ·  {payLine}
+              </Text>
+
+              {driveSaved ? (
+                <Text style={styles.driveLine}>
+                  {language === 'ur' ? 'گوگل ڈرائیو میں محفوظ' : 'Saved to Google Drive'}
+                </Text>
+              ) : null}
+
+              <View style={styles.softRule} />
 
               {sale.items.map((it, idx) => (
-                <View key={idx} style={styles.previewTableRow}>
-                  <Text style={[styles.rowTextBold, { width: '8%', textAlign: 'center' }]}>{idx + 1}</Text>
-                  <View style={{ width: '44%' }}>
-                    <Text style={styles.itemNameBold}>{it.product.name}</Text>
-                    {it.product.nameUrdu ? (
-                      <Text style={styles.itemNameUrdu}>({it.product.nameUrdu})</Text>
-                    ) : null}
-                    <Text style={styles.itemUnitSubtitle}>{it.quantity} {it.product.unit}</Text>
-                  </View>
-                  <Text style={[styles.rowText, { width: '16%', textAlign: 'center' }]}>
-                    {it.quantity} {it.product.unit}
+                <View key={idx} style={styles.previewItemRow}>
+                  <Text style={[styles.itemNameBold, { flex: 1 }]} numberOfLines={2}>
+                    {it.product.name}
+                    <Text style={styles.itemQtyInline}>
+                      {'  '}×{it.quantity}
+                    </Text>
                   </Text>
-                  <Text style={[styles.rowText, { width: '16%', textAlign: 'center' }]}>
-                    Rs.{it.unitPrice}
-                  </Text>
-                  <Text style={[styles.rowTextBold, { width: '16%', textAlign: 'right' }]}>
-                    Rs.{it.total}
-                  </Text>
+                  <Text style={styles.itemTotalBold}>{money(it.total)}</Text>
                 </View>
               ))}
 
-              {/* Watermark & Calculation Box */}
-              <View style={styles.previewCalcSection}>
-                <View style={styles.watermarkBox}>
-                  <Ionicons name="cart-outline" size={72} color="rgba(0, 104, 55, 0.12)" />
-                </View>
+              <View style={styles.softRule} />
 
-                <View style={styles.previewCalcBox}>
-                  <View style={styles.calcRow}>
-                    <Text style={styles.calcLabel}>Subtotal / سب ٹوٹل</Text>
-                    <Text style={styles.calcValBold}>Rs.${sale.subtotal}</Text>
-                  </View>
-                  {sale.discount > 0 && (
-                    <View style={styles.calcRow}>
-                      <Text style={[styles.calcLabel, { color: '#DC2626' }]}>Discount / ڈسکاؤنٹ</Text>
-                      <Text style={[styles.calcValBold, { color: '#DC2626' }]}>- Rs.${sale.discount}</Text>
-                    </View>
-                  )}
-                  <View style={styles.boxDivider} />
-                  <View style={styles.grandTotalRow}>
-                    <Text style={styles.grandTotalLabel}>Grand Total / کل رقم</Text>
-                    <Text style={styles.grandTotalVal}>Rs.${sale.grandTotal}</Text>
-                  </View>
-                  <View style={styles.boxDivider} />
-                  <View style={styles.calcRow}>
-                    <View>
-                      <Text style={styles.calcLabelBold}>Payment / ادائیگی کا طریقہ</Text>
-                      <Text style={styles.calcMethod}>{paymentLabel}</Text>
-                    </View>
-                    <Text style={styles.calcValBold}>Rs.${sale.grandTotal}</Text>
-                  </View>
+              {sale.discount > 0 ? (
+                <View style={styles.calcRow}>
+                  <Text style={styles.calcLabel}>
+                    {language === 'ur' ? 'ڈسکاؤنٹ' : 'Discount'}
+                  </Text>
+                  <Text style={styles.calcLabel}>-{money(sale.discount)}</Text>
                 </View>
-              </View>
-
-              {/* Greetings */}
-              <View style={styles.previewFooterNotes}>
-                <Text style={styles.footerUrduText}>
-                  — {settings.footerNoteUrdu || 'خریداری کا شکریہ! دوبارہ تشریف لائیں۔'} —
+              ) : null}
+              <View style={styles.grandTotalRow}>
+                <Text style={styles.grandTotalLabel}>
+                  {language === 'ur' ? 'کل رقم' : 'Total'}
                 </Text>
-                <Text style={styles.footerEngText}>
-                  {settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
-                </Text>
-                <Text style={styles.heartRow}>— 💚 —</Text>
+                <Text style={styles.grandTotalVal}>{money(sale.grandTotal)}</Text>
               </View>
 
-              {/* Bottom WhatsApp & Shop Local */}
-              <View style={styles.previewBottomBar}>
-                {dynamicPhone ? (
-                  <View style={styles.waContactRow}>
-                    <View style={styles.waCircle}>
-                      <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
-                    </View>
-                    <View>
-                      <Text style={styles.waSub}>For any queries, contact us on WhatsApp</Text>
-                      <Text style={styles.waNum}>{dynamicPhone}</Text>
-                    </View>
-                  </View>
-                ) : (
-                  <View />
-                )}
-
-                <View style={styles.shopLocalWrap}>
-                  <Text style={styles.shopLocalText}>Shop Local</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                    <Text style={styles.shopLocalText}>Support Local</Text>
-                    <Ionicons name="leaf" size={14} color="#006837" />
-                  </View>
-                </View>
-              </View>
-
-              {/* Serrated Bottom Edge */}
-              <View style={styles.sawtoothStrip}>
-                {Array.from({ length: 30 }).map((_, i) => (
-                  <View key={i} style={styles.sawtoothTooth} />
-                ))}
-              </View>
+              <Text style={styles.footerEngText}>
+                {language === 'ur'
+                  ? settings.footerNoteUrdu || 'خریداری کا شکریہ'
+                  : settings.footerNote || 'Thank you for shopping with us'}
+              </Text>
             </View>
           </ScrollView>
 
-          {/* Action Buttons Bar */}
-          <View style={[styles.actionButtonsWrap, { borderTopColor: theme.border }]}>
+          <View
+            style={[
+              styles.actionButtonsWrap,
+              {
+                borderTopColor: theme.border,
+                paddingBottom: Math.max(insets.bottom, 16),
+              },
+            ]}>
+            <Pressable
+              onPress={handleShareWhatsAppImage}
+              disabled={isGeneratingImage}
+              style={({ pressed }) => [
+                styles.actionBtnFull,
+                { backgroundColor: theme.heroFill },
+                pressed && { opacity: 0.9 },
+              ]}>
+              {isGeneratingImage ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
+                  <Text style={styles.actionBtnTextWhite}>
+                    {language === 'ur' ? 'واٹس ایپ' : 'WhatsApp'}
+                  </Text>
+                </>
+              )}
+            </Pressable>
 
-            {/* Row 1: Full-width WhatsApp Image hero CTA */}
-            <View style={styles.actionRow}>
-              <Pressable
-                onPress={handleShareWhatsAppImage}
-                disabled={isGeneratingImage}
-                style={({ pressed }) => [
-                  styles.actionBtnFull,
-                  styles.whatsappBtn,
-                  pressed && { transform: [{ scale: 0.98 }], opacity: 0.92 },
-                ]}>
-                {isGeneratingImage ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <>
-                    <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" />
-                    <Text style={styles.actionBtnTextWhite}>WhatsApp (Image)</Text>
-                  </>
-                )}
-              </Pressable>
-            </View>
-
-            {/* Row 2: WA Text + Save Image (Balanced 50/50) */}
             <View style={styles.actionRow}>
               <Pressable
                 onPress={handleShareWhatsAppText}
                 style={({ pressed }) => [
                   styles.actionBtnHalf,
-                  styles.whatsappTextBtn,
-                  pressed && { transform: [{ scale: 0.96 }] },
+                  { backgroundColor: theme.primaryLight },
+                  pressed && { opacity: 0.85 },
                 ]}>
-                <Ionicons name="chatbubble-ellipses-outline" size={17} color="#006837" />
-                <Text
-                  style={styles.whatsappTextBtnLabel}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.85}>
-                  {language === 'ur' ? 'واٹس ایپ ٹیکسٹ' : 'WhatsApp Text'}
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color={theme.primary} />
+                <Text style={[styles.actionBtnSoftText, { color: theme.primary }]} numberOfLines={1}>
+                  {language === 'ur' ? 'ٹیکسٹ' : 'Text'}
                 </Text>
               </Pressable>
-
               <Pressable
                 onPress={handleDownloadImage}
                 disabled={isGeneratingImage}
                 style={({ pressed }) => [
                   styles.actionBtnHalf,
-                  styles.imageDownloadBtn,
-                  pressed && { transform: [{ scale: 0.96 }] },
+                  { backgroundColor: theme.primaryLight },
+                  pressed && { opacity: 0.85 },
                 ]}>
-                <Ionicons name="image-outline" size={17} color="#FFFFFF" />
-                <Text
-                  style={styles.actionBtnTextWhite}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.85}>
-                  {language === 'ur' ? 'تصویر محفوظ کریں' : 'Save Image'}
+                <Ionicons name="image-outline" size={16} color={theme.primary} />
+                <Text style={[styles.actionBtnSoftText, { color: theme.primary }]} numberOfLines={1}>
+                  {language === 'ur' ? 'تصویر' : 'Save'}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handlePrint}
+                style={({ pressed }) => [
+                  styles.actionBtnHalf,
+                  { backgroundColor: theme.primaryLight },
+                  pressed && { opacity: 0.85 },
+                ]}>
+                <Ionicons name="print-outline" size={16} color={theme.primary} />
+                <Text style={[styles.actionBtnSoftText, { color: theme.primary }]} numberOfLines={1}>
+                  {language === 'ur' ? 'پرنٹ' : 'Print'}
                 </Text>
               </Pressable>
             </View>
 
-            {/* Row 3: Thermal 80mm + Standard Print (Balanced 50/50 — No Shrinking/Ellipsis) */}
             <View style={styles.actionRow}>
               <Pressable
                 onPress={handlePrintThermal}
                 style={({ pressed }) => [
                   styles.actionBtnHalf,
-                  styles.thermalBtn,
-                  pressed && { transform: [{ scale: 0.96 }] },
+                  { backgroundColor: theme.surfaceSubtle },
+                  pressed && { opacity: 0.85 },
                 ]}>
-                <Ionicons name="receipt-outline" size={17} color="#FFFFFF" />
-                <Text
-                  style={styles.actionBtnTextWhite}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.85}>
-                  {language === 'ur' ? 'تھرمل پرنٹ (80mm)' : 'Thermal (80mm)'}
+                <Ionicons name="receipt-outline" size={16} color={theme.text} />
+                <Text style={[styles.actionBtnSoftText, { color: theme.text }]} numberOfLines={1}>
+                  {language === 'ur' ? 'تھرمل' : 'Thermal'}
                 </Text>
               </Pressable>
-
-              <Pressable
-                onPress={handlePrint}
-                style={({ pressed }) => [
-                  styles.actionBtnHalf,
-                  styles.printBtn,
-                  pressed && { transform: [{ scale: 0.96 }] },
-                ]}>
-                <Ionicons name="print-outline" size={17} color="#FFFFFF" />
-                <Text
-                  style={styles.actionBtnTextWhite}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.85}>
-                  {language === 'ur' ? 'بل پرنٹ کریں' : 'Print Bill'}
-                </Text>
-              </Pressable>
-            </View>
-
-            {/* Row 4: Share PDF + Return/Refund (Balanced 50/50) */}
-            <View style={styles.actionRow}>
               <Pressable
                 onPress={handleSharePDF}
                 disabled={isGeneratingPDF}
                 style={({ pressed }) => [
                   styles.actionBtnHalf,
-                  styles.pdfShareBtn,
-                  pressed && { transform: [{ scale: 0.96 }] },
+                  { backgroundColor: theme.surfaceSubtle },
+                  pressed && { opacity: 0.85 },
                 ]}>
                 {isGeneratingPDF ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color={theme.text} />
                 ) : (
                   <>
-                    <Ionicons name="document-text" size={16} color="#FFFFFF" />
-                    <Text
-                      style={styles.actionBtnTextWhite}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.85}>
-                      {language === 'ur' ? 'پی ڈی ایف شیئر' : 'Share PDF'}
+                    <Ionicons name="document-text-outline" size={16} color={theme.text} />
+                    <Text style={[styles.actionBtnSoftText, { color: theme.text }]} numberOfLines={1}>
+                      PDF
                     </Text>
                   </>
                 )}
               </Pressable>
-
               {!isRefunded ? (
                 <Pressable
                   onPress={handleRefund}
                   style={({ pressed }) => [
                     styles.actionBtnHalf,
-                    styles.refundBtnHalf,
-                    pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+                    { backgroundColor: theme.dangerLight },
+                    pressed && { opacity: 0.85 },
                   ]}>
-                  <Ionicons name="arrow-undo-outline" size={16} color="#DC2626" />
-                  <Text
-                    style={styles.refundBtnHalfText}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.85}>
-                    {language === 'ur' ? 'واپسی / ریفنڈ' : 'Refund Bill'}
+                  <Ionicons name="return-down-back" size={16} color={theme.danger} />
+                  <Text style={[styles.actionBtnSoftText, { color: theme.danger }]} numberOfLines={1}>
+                    {language === 'ur' ? 'واپس' : 'Refund'}
                   </Text>
                 </Pressable>
               ) : (
-                <View style={[styles.actionBtnHalf, styles.alreadyRefundedHalf]}>
-                  <Ionicons name="checkmark-done-circle" size={16} color="#DC2626" />
-                  <Text
-                    style={styles.alreadyRefundedHalfText}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.85}>
-                    {language === 'ur' ? 'بل واپس شدہ' : 'Refunded'}
+                <View style={[styles.actionBtnHalf, { backgroundColor: theme.dangerLight }]}>
+                  <Text style={[styles.actionBtnSoftText, { color: theme.danger }]}>
+                    {language === 'ur' ? 'واپس شدہ' : 'Refunded'}
                   </Text>
                 </View>
               )}
             </View>
-
           </View>
 
           {/* Web WhatsApp Instructions Card */}
@@ -1897,36 +1812,38 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.md,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'flex-end',
   },
   receiptCard: {
     width: '100%',
-    maxWidth: 520,
-    maxHeight: '94%',
-    borderRadius: BorderRadius.xl,
+    maxWidth: 560,
+    alignSelf: 'center',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderCurve: 'continuous',
     overflow: 'hidden',
-    ...Shadows.lg,
   },
   modalTopBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
+    paddingTop: 16,
+    paddingBottom: 10,
   },
-  topBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+  topTitleWrap: {
+    flex: 1,
+    gap: 2,
   },
-  topBadgeText: {
-    fontSize: 14,
+  topTitle: {
+    fontSize: 20,
     fontWeight: '800',
-    color: '#006837',
+    letterSpacing: -0.4,
+  },
+  topSubtitle: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   closeBtn: {
     padding: 4,
@@ -1934,50 +1851,144 @@ const styles = StyleSheet.create({
   },
   receiptScroll: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    minHeight: 220,
   },
   receiptPaper: {
-    padding: 12,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: 16,
+    gap: 12,
+    flexGrow: 1,
+  },
+  itemPreviewBlock: {
+    gap: 8,
+  },
+  itemPreviewLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  itemPreviewRow: {
+    gap: 10,
+    paddingRight: 4,
+  },
+  itemPreviewCard: {
+    width: 76,
+    gap: 4,
+  },
+  itemPreviewThumb: {
+    width: 76,
+    height: 76,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    backgroundColor: '#F1F5F9',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemPreviewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  itemPreviewName: {
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 15,
+  },
+  itemPreviewMeta: {
+    fontSize: 11,
+    fontWeight: '500',
   },
   paperInner: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 16,
-    paddingBottom: 0,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    padding: 18,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(148, 163, 184, 0.25)',
+  },
+  letterhead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  shopLogoWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    backgroundColor: '#F1F5F9',
     overflow: 'hidden',
-    ...Shadows.sm,
-  },
-  previewHeader: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    paddingTop: 4,
-  },
-  cartIconCircle: {
-    position: 'absolute',
-    left: 0,
-    top: 4,
-    width: 48,
-    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerTextWrap: {
-    alignItems: 'center',
-    paddingHorizontal: 40,
+  shopLogo: {
+    width: '100%',
+    height: '100%',
+  },
+  shopLogoInitials: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: 0.4,
+  },
+  letterheadText: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
   },
   previewStoreTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#111827',
-    textAlign: 'center',
-  },
-  previewStoreUrdu: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#006837',
-    textAlign: 'center',
-    marginTop: 1,
+    color: '#111827',
+    letterSpacing: -0.3,
+  },
+  previewStoreUrdu: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#334155',
+  },
+  softRule: {
+    height: 1,
+    backgroundColor: 'rgba(148, 163, 184, 0.28)',
+    marginVertical: 8,
+  },
+  refundLine: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#DC2626',
+  },
+  metaLine: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#475569',
+  },
+  driveLine: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#059669',
+    marginTop: 4,
+  },
+  previewItemRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 5,
+  },
+  itemQtyInline: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#64748B',
+  },
+  itemTotalBold: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+    fontVariant: ['tabular-nums'],
+  },
+  actionBtnSoftText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   previewTaglineEn: {
     fontSize: 11,
@@ -2065,7 +2076,7 @@ const styles = StyleSheet.create({
   },
   rowTextBold: { fontSize: 12, fontWeight: '800', color: '#111827' },
   rowText: { fontSize: 11, fontWeight: '600', color: '#374151' },
-  itemNameBold: { fontSize: 12, fontWeight: '800', color: '#111827' },
+  itemNameBold: { fontSize: 14, fontWeight: '700', color: '#111827', letterSpacing: -0.2 },
   itemNameUrdu: { fontSize: 11, color: '#4B5563' },
   itemUnitSubtitle: { fontSize: 10, color: '#9CA3AF' },
   previewCalcSection: {
@@ -2102,15 +2113,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 3,
   },
-  grandTotalLabel: { fontSize: 12, fontWeight: '800', color: '#111827' },
-  grandTotalVal: { fontSize: 17, fontWeight: '900', color: '#006837' },
+  grandTotalLabel: { fontSize: 15, fontWeight: '700', color: '#0F172A' },
+  grandTotalVal: { fontSize: 20, fontWeight: '800', color: '#0F172A', letterSpacing: -0.4 },
   previewFooterNotes: {
     alignItems: 'center',
     marginVertical: 10,
     gap: 2,
   },
   footerUrduText: { fontSize: 13, fontWeight: '800', color: '#111827' },
-  footerEngText: { fontSize: 11, color: '#4B5563' },
+  footerEngText: { fontSize: 12, color: '#64748B', marginTop: 8, textAlign: 'center' },
   heartRow: { fontSize: 11, color: '#006837', marginTop: 2 },
   previewBottomBar: {
     flexDirection: 'row',
@@ -2156,10 +2167,12 @@ const styles = StyleSheet.create({
     borderTopColor: '#FFFFFF',
   },
   actionButtonsWrap: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 10,
+    paddingBottom: 16,
     gap: 8,
     borderTopWidth: 1,
+    flexShrink: 0,
   },
   // Each row of buttons
   actionRow: {
@@ -2168,25 +2181,27 @@ const styles = StyleSheet.create({
   },
   // Full-width button (Row 1 hero)
   actionBtnFull: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 14,
+    minHeight: 46,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 14,
+    borderCurve: 'continuous',
   },
-  // Half-width buttons (Rows 2 & 3 — 2 buttons per row)
   actionBtnHalf: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: BorderRadius.lg,
+    gap: 5,
+    minHeight: 42,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    borderCurve: 'continuous',
   },
   // Legacy aliases kept for safety
   actionBtn: {

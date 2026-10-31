@@ -36,6 +36,8 @@ export const Colors = {
     // Hero banner layer colors
     heroBg: '#064E3B',
     heroLayer: '#059669',
+    heroFill: '#00A88F',
+    coral: '#E36B5A',
   },
   dark: {
     primary: '#10B981',
@@ -72,6 +74,8 @@ export const Colors = {
     // Hero banner layer colors
     heroBg: '#022C22',
     heroLayer: '#064E3B',
+    heroFill: '#064E3B',
+    coral: '#F3705A',
   },
 } as const;
 

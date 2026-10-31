@@ -1,4 +1,4 @@
-import { Colors, Shadows, Typography } from '@/constants/theme';
+import { Colors, Typography } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { CustomerKhata } from '@/types';
 import { openWhatsAppWithMessage } from '@/utils/whatsapp';
@@ -267,7 +267,7 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
               ]}>
               <Ionicons name="checkmark-circle" size={15} color={theme.success} />
               <Text style={[styles.settledBannerText, { color: theme.success }]}>
-                {isUrdu ? 'حساب بے باق ہے (کوئی واجبات نہیں)' : 'Account Cleared · Zero Balance'}
+                {isUrdu ? 'حساب صاف ہے' : 'Account clear'}
               </Text>
             </View>
 
@@ -470,13 +470,13 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 22,
+    borderRadius: 20,
+    borderCurve: 'continuous',
     borderWidth: 1,
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 14,
-    gap: 12,
-    ...Shadows.sm,
+    paddingTop: 14,
+    paddingBottom: 12,
+    gap: 10,
   },
   cardHeaderArea: {
     flexDirection: 'row',

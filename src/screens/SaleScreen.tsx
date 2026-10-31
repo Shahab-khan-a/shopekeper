@@ -50,8 +50,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   // W3-3: Responsive grid — 2 col narrow, 3 col medium, 4 col wide
   const catalogWidth = isWideScreen ? width * 0.55 : width;
   const gridCols = catalogWidth >= 700 ? 4 : catalogWidth >= 480 ? 3 : 2;
-  const gridGap = 6;
-  const gridColWidth = (catalogWidth - Spacing.md * 2 - gridGap * (gridCols - 1)) / gridCols;
+  const gridGap = 8;
+  const gridColWidth = Math.floor(
+    (catalogWidth - Spacing.md * 2 - gridGap * (gridCols - 1) - 2) / gridCols
+  );
 
   const {
     products,
@@ -2518,120 +2520,119 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       <View style={styles.mainLayout}>
         {/* ================= Catalog Section (Full Screen on Mobile) ================= */}
         <View style={styles.catalogSection}>
-          {/* Top Emerald Canopy (Seamless continuation from ShopHeader) */}
-          <View style={[styles.heroCanopy, { backgroundColor: theme.heroBg }]}>
-            <View style={styles.heroInner}>
-              {/* Top Control Bar: Search + Barcode + Flash + Parked + View Toggle */}
-              <View style={styles.topControlBar}>
-                <View style={styles.searchFlex}>
-                  <View style={styles.searchInlineRow}>
-                    <View style={{ flex: 1 }}>
-                      <SearchBar
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        placeholder={language === 'ur' ? 'نام یا بارکوڈ...' : 'Search name or barcode...'}
-                        height={40}
-                        onSubmitEditing={handleSearchSubmit}
-                        returnKeyType="done"
-                      />
-                    </View>
-
-                    <Pressable
-                      onPress={() => setIsBarcodeOpen(true)}
-                      style={({ pressed }) => [
-                        styles.searchBarcodeBtn,
-                        {
-                          backgroundColor: 'rgba(255, 255, 255, 0.16)',
-                          borderColor: 'rgba(255, 255, 255, 0.28)',
-                        },
-                        pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-                      ]}>
-                      <Ionicons name="barcode-outline" size={20} color="#FFFFFF" />
-                    </Pressable>
-
-                    <Pressable
-                      onPress={() => setIsQuickItemOpen(true)}
-                      accessibilityLabel="Add custom or loose item"
-                      accessibilityRole="button"
-                      style={({ pressed }) => [
-                        styles.searchBarcodeBtn,
-                        {
-                          backgroundColor: 'rgba(245, 158, 11, 0.22)',
-                          borderColor: 'rgba(245, 158, 11, 0.45)',
-                        },
-                        pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-                      ]}>
-                      <Ionicons name="flash" size={19} color="#FDE68A" />
-                    </Pressable>
-                  </View>
-                </View>
-
-                <View style={styles.topBarActions}>
-                  {/* VU-03: Bolta Galla Voice Box Mute / Unmute Button */}
-                  <Pressable
-                    onPress={() => setSoundboxEnabled(!soundboxEnabled)}
-                    accessibilityLabel={soundboxEnabled ? "Mute Bolta Galla" : "Enable Bolta Galla"}
-                    style={({ pressed }) => [
-                      styles.iconSquareBtn,
-                      {
-                        backgroundColor: soundboxEnabled ? 'rgba(16, 185, 129, 0.28)' : 'rgba(255, 255, 255, 0.16)',
-                        borderColor: soundboxEnabled ? '#34D399' : 'rgba(255, 255, 255, 0.28)',
-                      },
-                      pressed && { opacity: 0.8 },
-                    ]}>
-                    <Ionicons
-                      name={soundboxEnabled ? 'volume-high' : 'volume-mute'}
-                      size={18}
-                      color={soundboxEnabled ? '#6EE7B7' : '#E2E8F0'}
-                    />
-                  </Pressable>
-
-                  {/* Parked Carts Button */}
-                  {heldCarts.length > 0 && (
-                    <Pressable
-                      onPress={() => setIsHeldCartsModalOpen(true)}
-                      style={({ pressed }) => [
-                        styles.heldPillBtn,
-                        {
-                          backgroundColor: '#FEF3C7',
-                          borderColor: '#FDE68A',
-                        },
-                        pressed && { opacity: 0.8 },
-                      ]}>
-                      <Ionicons name="pause-circle" size={15} color="#D97706" />
-                      <Text style={[styles.heldPillText, { color: '#B45309' }]}>
-                        {heldCarts.length}
-                      </Text>
-                    </Pressable>
-                  )}
-                </View>
-              </View>
-
-              {/* Category Filter Pills — Dynamic, only shown when 2+ categories exist */}
-              {activeSaleCategories.length > 1 && (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.categoryScroll}
-                  contentContainerStyle={styles.categoryScrollContent}>
-                  {activeSaleCategories.map((cat) => (
-                    <FilterChip
-                      key={cat}
-                      label={cat === 'All' ? t('allCategories') : cat}
-                      isActive={selectedCategory === cat}
-                      onPress={() => setSelectedCategory(cat)}
-                      activeBg="#FFFFFF"
-                      activeColor="#064E3B"
-                      inactiveBg="rgba(255, 255, 255, 0.16)"
-                      inactiveColor="#FFFFFF"
-                      inactiveBorder="rgba(255, 255, 255, 0.22)"
-                    />
-                  ))}
-                </ScrollView>
+          <View style={styles.topSection}>
+            <View style={styles.titleRow}>
+              <Text style={[styles.screenTitleText, { color: theme.text }]}>
+                {language === 'ur' ? 'نئی سیل' : 'New sale'}
+              </Text>
+              <Text style={[styles.countText, { color: theme.textMuted }]}>
+                {products.length}{' '}
+                {language === 'ur' ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
+              </Text>
+              <View style={styles.titleSpacer} />
+              <Pressable
+                onPress={() => setSoundboxEnabled(!soundboxEnabled)}
+                accessibilityLabel={soundboxEnabled ? 'Mute Bolta Galla' : 'Enable Bolta Galla'}
+                style={({ pressed }) => [
+                  styles.iconSquareBtn,
+                  {
+                    backgroundColor: soundboxEnabled ? theme.primaryLight : cardBg,
+                    borderColor: soundboxEnabled ? theme.primary : softBorder,
+                  },
+                  pressed && { opacity: 0.8 },
+                ]}>
+                <Ionicons
+                  name={soundboxEnabled ? 'volume-high' : 'volume-mute'}
+                  size={18}
+                  color={soundboxEnabled ? theme.primary : theme.textMuted}
+                />
+              </Pressable>
+              {heldCarts.length > 0 && (
+                <Pressable
+                  onPress={() => setIsHeldCartsModalOpen(true)}
+                  style={({ pressed }) => [
+                    styles.heldPillBtn,
+                    {
+                      backgroundColor: theme.warningLight,
+                      borderColor: theme.warning,
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}>
+                  <Ionicons name="pause-circle" size={15} color={theme.warning} />
+                  <Text style={[styles.heldPillText, { color: theme.warning }]}>
+                    {heldCarts.length}
+                  </Text>
+                </Pressable>
               )}
-
-
             </View>
+
+            <View style={styles.actionRow}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={language === 'ur' ? 'بارکوڈ اسکین' : 'Scan barcode'}
+                onPress={() => setIsBarcodeOpen(true)}
+                style={({ pressed }) => [
+                  styles.actionTile,
+                  { backgroundColor: theme.heroFill },
+                  pressed && { opacity: 0.9 },
+                ]}>
+                <View style={styles.actionIconWrap}>
+                  <Ionicons name="barcode-outline" size={18} color="#FFFFFF" />
+                </View>
+                <Text style={styles.actionTileTitle}>
+                  {language === 'ur' ? 'اسکین' : 'Scan'}
+                </Text>
+                <Text style={styles.actionTileSub}>
+                  {language === 'ur' ? 'بارکوڈ' : 'Barcode'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Add custom or loose item"
+                onPress={() => setIsQuickItemOpen(true)}
+                style={({ pressed }) => [
+                  styles.actionTile,
+                  { backgroundColor: theme.secondary },
+                  pressed && { opacity: 0.9 },
+                ]}>
+                <View style={styles.actionIconWrap}>
+                  <Ionicons name="flash-outline" size={16} color="#FFFFFF" />
+                </View>
+                <Text style={styles.actionTileTitle}>
+                  {language === 'ur' ? 'فوری آئٹم' : 'Quick item'}
+                </Text>
+                <Text style={styles.actionTileSub}>
+                  {language === 'ur' ? 'وزن یا کسٹم' : 'Loose or custom'}
+                </Text>
+              </Pressable>
+            </View>
+
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={language === 'ur' ? 'نام یا بارکوڈ...' : 'Search name or barcode...'}
+              height={42}
+              onSubmitEditing={handleSearchSubmit}
+              returnKeyType="done"
+            />
+
+            {activeSaleCategories.length > 1 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categoryScroll}
+                contentContainerStyle={styles.categoryScrollContent}>
+                {activeSaleCategories.map((cat) => (
+                  <FilterChip
+                    key={cat}
+                    label={cat === 'All' ? t('allCategories') : cat}
+                    isActive={selectedCategory === cat}
+                    onPress={() => setSelectedCategory(cat)}
+                  />
+                ))}
+              </ScrollView>
+            )}
           </View>
 
           {/* Products List / Grid or Empty State */}
@@ -2767,7 +2768,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           <ScrollView
             style={styles.catalogScroll}
             contentContainerStyle={[
-              viewMode === 'grid' ? styles.catalogGrid : styles.catalogList,
+              viewMode === 'grid' ? [styles.catalogGrid, { gap: gridGap }] : styles.catalogList,
               // Generous bottom padding so catalog products scroll completely clear of the unified POS dock
               !isWideScreen && cart.length > 0 && { paddingBottom: 150 },
             ]}
@@ -2788,8 +2789,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       styles.listRow,
                       {
                         backgroundColor: theme.card,
-                        borderColor: isTargetSugar ? '#10B981' : inCartItem ? theme.primary : theme.border,
-                        borderWidth: isTargetSugar ? 2.5 : inCartItem ? 1.5 : 1,
+                        borderColor: isTargetSugar
+                          ? theme.primary
+                          : inCartItem
+                            ? theme.primary
+                            : softBorder,
+                        borderWidth: 1,
                         opacity: isOut ? 0.6 : 1,
                       },
                       pressed && !isOut && !inCartItem && { opacity: 0.9, transform: [{ scale: 0.99 }] },
@@ -2914,7 +2919,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                               styles.listAddBtn,
                               {
                                 backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
-                                borderColor: isOut ? theme.border : theme.primary,
                               },
                               pressed && { opacity: 0.8 },
                             ]}>
@@ -2948,8 +2952,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                       {
                         width: gridColWidth,
                         backgroundColor: theme.card,
-                        borderColor: isTargetSugar ? '#10B981' : inCartItem ? theme.primary : theme.border,
-                        borderWidth: isTargetSugar ? 2.5 : inCartItem ? 1.5 : 1,
+                        borderColor: isTargetSugar
+                          ? theme.primary
+                          : inCartItem
+                            ? theme.primary
+                            : softBorder,
+                        borderWidth: 1,
                         opacity: isOut ? 0.6 : 1,
                       },
                       pressed && !inCartItem && { transform: [{ scale: 0.98 }] },
@@ -3075,13 +3083,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                               />
                             </Pressable>
                           )}
-                          <Pressable
+                            <Pressable
                             onPress={() => addToCart(product)}
                             style={[
                               styles.cardAddBtn,
                               {
                                 backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
-                                borderColor: isOut ? theme.border : theme.primary,
                               },
                             ]}>
                             <Ionicons
@@ -3596,26 +3603,64 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  heroCanopy: {
+  topSection: {
     width: '100%',
-    paddingTop: 8,
-    paddingBottom: 10,
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
-    borderWidth: 0,
-    borderTopWidth: 0,
-    elevation: 0,
-    shadowColor: 'transparent',
-    shadowOpacity: 0,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 0,
-  },
-  heroInner: {
-    maxWidth: 820,
+    maxWidth: 720,
     marginHorizontal: 'auto',
-    width: '100%',
-    paddingHorizontal: Spacing.md,
-    gap: 7,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 8,
+    paddingBottom: 4,
+    gap: 10,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  titleSpacer: {
+    flex: 1,
+  },
+  screenTitleText: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  countText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  actionTile: {
+    flex: 1,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    padding: 12,
+    gap: 2,
+    minHeight: 86,
+    justifyContent: 'flex-end',
+  },
+  actionIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  actionTileTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  actionTileSub: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 12,
+    fontWeight: '500',
   },
   catalogItemsWrap: {
     flex: 1,
@@ -3647,32 +3692,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  topControlBar: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    alignItems: 'center',
-  },
-  searchFlex: {
-    flex: 1,
-  },
-  searchInlineRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  searchBarcodeBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topBarActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
   },
   quickItemBtn: {
     flexDirection: 'row',
@@ -3721,17 +3740,17 @@ const styles = StyleSheet.create({
   catalogGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 8,
     paddingBottom: Spacing.xl,
   },
   gridCard: {
-    borderRadius: 12,
+    borderRadius: 14,
+    borderCurve: 'continuous',
     padding: 10,
     justifyContent: 'space-between',
     minHeight: 98,
     position: 'relative',
     overflow: 'hidden',
-    ...Shadows.sm,
   },
   stockTag: {
     position: 'absolute',
@@ -3795,7 +3814,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
   },
   cardAddBtnText: {
     fontSize: 10,
@@ -3842,7 +3860,7 @@ const styles = StyleSheet.create({
 
   // List View Styles
   catalogList: {
-    gap: 6,
+    gap: 8,
     paddingBottom: Spacing.xl,
   },
   listRow: {
@@ -3853,8 +3871,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     minHeight: 64,
     gap: 8,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 14,
+    borderCurve: 'continuous',
     overflow: 'hidden',
     position: 'relative',
   },
@@ -3974,7 +3992,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
   },
   listAddBtnText: {
     fontSize: 11,
