@@ -1,5 +1,6 @@
 import { Linking, Platform } from 'react-native';
 import { Sale, ShopSettings } from '@/types';
+import { getPaymentBreakdown } from './payment';
 
 /**
  * Standardize phone numbers to international Pakistani WhatsApp format (923XXXXXXXXX)
@@ -69,13 +70,12 @@ export function buildWhatsAppReceiptText(
     itemsList += `${idx + 1}. ${name}${nameUrdu}\n   ${it.quantity} ${it.product.unit || 'pc'} × ${settings.currencySymbol}${it.unitPrice} = *${settings.currencySymbol}${it.total}*\n`;
   });
 
-  const isSplit = sale.paymentMethod === 'udhaar' && (sale.amountPaid || 0) > 0;
-  const baki = isSplit ? Math.max(0, sale.grandTotal - (sale.amountPaid || 0)) : 0;
+  const { cleanPaid, baki, isSplit } = getPaymentBreakdown(sale);
 
   const paymentText = isSplit
     ? (language === 'ur'
-        ? `نقد + ادھار (نقد: ${settings.currencySymbol}${sale.amountPaid} | باقی ادھار: ${settings.currencySymbol}${baki})`
-        : `Split (Cash: ${settings.currencySymbol}${sale.amountPaid} | Balance Due: ${settings.currencySymbol}${baki})`)
+        ? `نقد + ادھار (نقد: ${settings.currencySymbol}${cleanPaid} | باقی ادھار: ${settings.currencySymbol}${baki})`
+        : `Split (Cash: ${settings.currencySymbol}${cleanPaid} | Balance Due: ${settings.currencySymbol}${baki})`)
     : sale.paymentMethod === 'cash'
     ? (language === 'ur' ? 'نقد (Cash)' : 'Cash')
     : sale.paymentMethod === 'online'
@@ -95,7 +95,7 @@ export function buildWhatsAppReceiptText(
 ${itemsList}---------------------------------
 سب ٹوٹل (Subtotal): ${settings.currencySymbol}${sale.subtotal}
 ${sale.discount > 0 ? `ڈسکاؤنٹ (Discount): -${settings.currencySymbol}${sale.discount}\n` : ''}*کل بل (Grand Total): ${settings.currencySymbol}${sale.grandTotal}*
-${isSplit ? `ادا شدہ نقد (Cash Paid): ${settings.currencySymbol}${sale.amountPaid}\nباقی ادھار کھاتہ (Balance Due): ${settings.currencySymbol}${baki}\n` : ''}ادائیگی کا طریقہ (Payment): ${paymentText}
+${isSplit ? `ادا شدہ نقد (Cash Paid): ${settings.currencySymbol}${cleanPaid}\nباقی ادھار کھاتہ (Balance Due): ${settings.currencySymbol}${baki}\n` : ''}ادائیگی کا طریقہ (Payment): ${paymentText}
 ---------------------------------
 ${settings.footerNoteUrdu || 'خریداری کا شکریہ! دوبارہ تشریف لائیں۔'}
 ${settings.footerNote || 'Thank you for shopping with us!'}

@@ -11,6 +11,11 @@ import { SettingsRepository } from './SettingsRepository';
 import { SyncQueueRepository } from './SyncQueueRepository';
 
 function mapRowToSale(row: any, items: CartItem[] = []): Sale {
+  const grandTotal = Number(row.total || 0);
+  // Cap amountPaid at grandTotal so change on legacy cash sales is never counted as paid or resulting in negative baki
+  const rawPaid = row.amountPaid !== undefined && row.amountPaid !== null ? Number(row.amountPaid) : grandTotal;
+  const amountPaid = Math.min(grandTotal, Math.max(0, rawPaid));
+
   return {
     id: row.id,
     billNumber: row.invoiceNumber,
@@ -23,12 +28,12 @@ function mapRowToSale(row: any, items: CartItem[] = []): Sale {
     subtotal: row.subtotal,
     discount: row.discount,
     discountType: row.discountType || 'fixed',
-    grandTotal: row.total,
-    total: row.total,
+    grandTotal: grandTotal,
+    total: grandTotal,
     totalProfit: row.totalProfit,
     paymentMethod: row.paymentMethod,
-    amountPaid: row.amountPaid,
-    change: row.change,
+    amountPaid: amountPaid,
+    change: Math.max(0, Number(row.change || 0)),
     status: row.status,
     refundReason: row.refundReason || undefined,
     refundedAt: row.refundedAt || undefined,
@@ -526,9 +531,14 @@ export const SaleRepository = {
         // 4. Reverse Khata if Udhaar (reverse baki debt only)
         let customerObj: any = null;
         let reversalTxId: string | null = null;
+        let bakiRecorded = 0;
 
         if (sRow.paymentMethod === 'udhaar' && sRow.customerId) {
-          const bakiRecorded = Math.max(0, (sRow.total || 0) - (sRow.amountPaid || 0));
+          const grandTotal = Number(sRow.total || 0);
+          const rawPaid = Number(sRow.amountPaid || 0);
+          const cleanPaid = Math.min(grandTotal, Math.max(0, rawPaid));
+          bakiRecorded = Math.max(0, grandTotal - cleanPaid);
+
           if (bakiRecorded > 0) {
             const cust = await tx.get<any>(`SELECT * FROM customers WHERE id = ?`, [sRow.customerId]);
             if (cust) {
@@ -555,7 +565,13 @@ export const SaleRepository = {
           }
         }
 
-        // 5. Update Sale record status to 'refunded'
+        // 5. Reverse / Remove any payments recorded for this sale so cash drawer / payments audit does not retain returned money
+        const pmtRows = await tx.all<any>(`SELECT * FROM payments WHERE saleId = ?`, [saleId]);
+        if (pmtRows.length > 0) {
+          await tx.run(`DELETE FROM payments WHERE saleId = ?`, [saleId]);
+        }
+
+        // 6. Update Sale record status to 'refunded'
         await tx.run(
           `UPDATE sales SET status = 'refunded', refundReason = ?, refundedAt = ?, updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
           [reason, now, now, saleId]
@@ -563,7 +579,7 @@ export const SaleRepository = {
 
         const updatedSale = await this.getById(saleId, tx);
 
-        // 6. Enqueue sync operations
+        // 7. Enqueue sync operations
         const syncOps: any[] = [
           {
             entityType: 'sale',
@@ -572,6 +588,15 @@ export const SaleRepository = {
             payload: updatedSale,
           },
         ];
+
+        for (const pmt of pmtRows) {
+          syncOps.push({
+            entityType: 'payment',
+            entityId: pmt.id,
+            operation: 'delete',
+            payload: { id: pmt.id },
+          });
+        }
 
         for (const p of restoredProducts) {
           syncOps.push({
@@ -590,7 +615,6 @@ export const SaleRepository = {
             payload: customerObj,
           });
 
-          const bakiRecorded = Math.max(0, (sRow.total || 0) - (sRow.amountPaid || 0));
           syncOps.push({
             entityType: 'khata_transaction',
             entityId: reversalTxId,

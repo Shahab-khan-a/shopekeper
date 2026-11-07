@@ -2,6 +2,7 @@ import { WebStorageAdapter } from '@/storage/db/WebStorageAdapter';
 import { SaleRepository } from '@/storage/repositories/SaleRepository';
 import { CustomerRepository } from '@/storage/repositories/CustomerRepository';
 import { CartItem, Product } from '@/types';
+import { getPaymentBreakdown } from '@/utils/payment';
 
 // Enhanced WebStorageAdapter with transaction rollback snapshot support for unit testing
 class TestStorageAdapter extends WebStorageAdapter {
@@ -368,13 +369,109 @@ async function runTests() {
     assert(saleKtx?.amount === 700, `Test 6.7: Ledger entry amount is 700 (actual: ${saleKtx?.amount})`);
     assert(saleKtx?.type === 'credit', 'Test 6.8: Ledger entry is credit');
 
-    // 3. Receipt verification
-    const isSplit = saleInHistory?.paymentMethod === 'udhaar' && (saleInHistory?.amountPaid || 0) > 0;
-    assert(isSplit === true, 'Test 6.9: Receipt detects isSplit === true');
-    const receiptPaid = saleInHistory?.amountPaid || 0;
-    const receiptBaki = (saleInHistory?.grandTotal || 0) - receiptPaid;
-    assert(receiptPaid === 800, 'Test 6.10: Receipt Cash Paid is 800');
-    assert(receiptBaki === 700, 'Test 6.11: Receipt Balance Due (Khata) is 700');
+    // 3. Shared payment breakdown helper verification
+    const breakdown = getPaymentBreakdown(saleInHistory!);
+    assert(breakdown.isSplit === true, 'Test 6.9: getPaymentBreakdown detects isSplit === true');
+    assert(breakdown.cleanPaid === 800, `Test 6.10: getPaymentBreakdown cleanPaid is 800 (actual: ${breakdown.cleanPaid})`);
+    assert(breakdown.baki === 700, `Test 6.11: getPaymentBreakdown baki is 700 (actual: ${breakdown.baki})`);
+  }
+
+  // -------------------------------------------------------------------------
+  // TEST 7: Legacy cash sale clamping (amountPaid > grandTotal)
+  // -------------------------------------------------------------------------
+  console.log('\n--- TEST 7: Legacy sale clamping (amountPaid = 2000 on 1500 bill) ---');
+  {
+    const db = new TestStorageAdapter();
+    await db.init();
+
+    const legacySaleId = 'sale-legacy-1';
+    const now = Date.now();
+    // Simulate legacy sale inserted before clamping, storing tendered cash (2000) as amountPaid
+    await db.run(
+      `INSERT INTO sales (
+        id, invoiceNumber, subtotal, discount, discountType, total, totalProfit, paymentMethod,
+        customerId, customerName, customerPhone, amountPaid, change, status,
+        refundReason, refundedAt, notes, createdAt, updatedAt, syncStatus
+      ) VALUES (?, 'INV-999', 1500, 0, 'fixed', 1500, 300, 'cash', NULL, NULL, NULL, 2000, 500, 'completed', NULL, NULL, NULL, ?, ?, 'synced')`,
+      [legacySaleId, now, now]
+    );
+
+    const historySales = await SaleRepository.getAll(db);
+    const sale = historySales.find((s) => s.id === legacySaleId);
+    assert(sale !== undefined, 'Test 7.1: Legacy sale loaded');
+    assert(sale?.grandTotal === 1500, `Test 7.2: Grand total is 1500`);
+    assert(sale?.amountPaid === 1500, `Test 7.3: amountPaid capped at 1500 (actual: ${sale?.amountPaid})`);
+    const breakdown = getPaymentBreakdown(sale!);
+    assert(breakdown.cleanPaid === 1500, `Test 7.4: getPaymentBreakdown cleanPaid is 1500 (actual: ${breakdown.cleanPaid})`);
+    assert(breakdown.baki === 0, `Test 7.5: getPaymentBreakdown baki is 0 (never negative) (actual: ${breakdown.baki})`);
+    assert(sale?.change === 500, `Test 7.6: Change remains 500`);
+    assert(breakdown.isSplit === false, 'Test 7.7: getPaymentBreakdown not classified as split payment');
+  }
+
+  // -------------------------------------------------------------------------
+  // TEST 8: Refund of a split sale reverses khata and deletes payment row
+  // -------------------------------------------------------------------------
+  console.log('\n--- TEST 8: Refund of a split sale (reverses khata and deletes payment row) ---');
+  {
+    const db = new TestStorageAdapter();
+    await db.init();
+
+    await db.run(
+      `INSERT INTO products (id, name, price, costPrice, stock, category, unit, syncStatus, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'synced', ?, ?)`,
+      [sampleProduct.id, sampleProduct.name, sampleProduct.price, sampleProduct.costPrice, sampleProduct.stock, sampleProduct.category, sampleProduct.unit, Date.now(), Date.now()]
+    );
+
+    const custId = 'cust-refund-test';
+    await db.run(
+      `INSERT INTO customers (id, name, phone, balance, syncStatus, createdAt, updatedAt)
+       VALUES (?, 'Refund Customer', '03009998877', 500, 'synced', ?, ?)`,
+      [custId, Date.now(), Date.now()]
+    );
+
+    // Make 1500 sale: 800 cash + 700 udhaar
+    const saleRes = await SaleRepository.completeSaleTransaction(
+      {
+        items: [sampleCartItem],
+        paymentMethod: 'cash',
+        tenderedCash: 800,
+        customerId: custId,
+        customerName: 'Refund Customer',
+      },
+      db
+    );
+
+    const saleId = saleRes.sale?.id!;
+    // Balance was 500 + 700 = 1200
+    const custBeforeRefund = await db.get<any>(`SELECT * FROM customers WHERE id = ?`, [custId]);
+    assert(custBeforeRefund?.balance === 1200, `Test 8.1: Customer balance increased to 1200`);
+
+    const pmtBeforeRefund = await db.all<any>(`SELECT * FROM payments WHERE saleId = ?`, [saleId]);
+    assert(pmtBeforeRefund.length === 1 && pmtBeforeRefund[0].amount === 800, 'Test 8.2: 1 payment row of 800 exists before refund');
+
+    // Perform refund
+    const refundRes = await SaleRepository.refundSaleTransaction(saleId, 'Customer Returned Goods', db);
+    assert(refundRes.success === true, 'Test 8.3: Refund transaction succeeds');
+
+    // Customer balance should be reversed by 700: 1200 - 700 = 500
+    const custAfterRefund = await db.get<any>(`SELECT * FROM customers WHERE id = ?`, [custId]);
+    assert(custAfterRefund?.balance === 500, `Test 8.4: Customer balance reversed to original 500 (actual: ${custAfterRefund?.balance})`);
+
+    // Payments row for this sale must be DELETED so day-end cash drawer doesn't count returned money
+    const pmtAfterRefund = await db.all<any>(`SELECT * FROM payments WHERE saleId = ?`, [saleId]);
+    assert(pmtAfterRefund.length === 0, `Test 8.5: Payment row for refunded sale deleted from payments table (count: ${pmtAfterRefund.length})`);
+
+    // Sync queue must include payment deletion
+    const queue = await db.all<any>(`SELECT * FROM sync_queue WHERE entityType = 'payment' AND operation = 'delete'`);
+    assert(queue.length > 0, 'Test 8.6: Payment delete operation enqueued in sync_queue');
+
+    // Sale status must be 'refunded'
+    const saleRow = await db.get<any>(`SELECT * FROM sales WHERE id = ?`, [saleId]);
+    assert(saleRow?.status === 'refunded', 'Test 8.7: Sale status marked refunded');
+
+    // Stock must be restored: 20 - 1 + 1 = 20
+    const prodAfterRefund = await db.get<any>(`SELECT * FROM products WHERE id = ?`, [sampleProduct.id]);
+    assert(prodAfterRefund?.stock === 20, `Test 8.8: Stock restored back to 20`);
   }
 
   console.log('\n====================================================');

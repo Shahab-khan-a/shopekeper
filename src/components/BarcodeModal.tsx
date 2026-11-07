@@ -224,25 +224,32 @@ export const BarcodeModal: React.FC<BarcodeModalProps> = ({
                   styles.cameraBox,
                   {
                     borderColor: notFoundCode ? '#FCA5A5' : theme.border,
-                    backgroundColor: '#0F172A',
+                    backgroundColor: permission?.granted ? '#000000' : theme.surfaceSubtle,
                   },
                 ]}>
                 {!permission ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={theme.primary} />
                 ) : !permission.granted ? (
                   <View style={styles.permissionWrap}>
-                    <Ionicons name="camera-outline" size={36} color="#94A3B8" />
-                    <Text style={styles.permissionTitle}>
+                    <View style={[styles.permissionIconCircle, { backgroundColor: theme.primaryLight }]}>
+                      <Ionicons name="camera-outline" size={28} color={theme.primary} />
+                    </View>
+                    <Text style={[styles.permissionTitle, { color: theme.text }]}>
                       {isUrdu ? 'کیمرہ کی اجازت درکار ہے' : 'Camera permission needed'}
                     </Text>
-                    <Text style={styles.permissionSub}>
+                    <Text style={[styles.permissionSub, { color: theme.textSecondary }]}>
                       {isUrdu
                         ? 'پروڈکٹ بارکوڈ اسکین کرنے کے لیے کیمرہ آن کریں'
                         : 'Allow camera access to scan product barcodes'}
                     </Text>
                     <Pressable
                       onPress={requestPermission}
-                      style={[styles.permissionBtn, { backgroundColor: theme.primary }]}>
+                      style={({ pressed }) => [
+                        styles.permissionBtn,
+                        { backgroundColor: theme.primary },
+                        pressed && { opacity: 0.88 },
+                      ]}>
+                      <Ionicons name="shield-checkmark-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
                       <Text style={styles.permissionBtnText}>
                         {isUrdu ? 'اجازت دیں' : 'Allow camera'}
                       </Text>
@@ -491,26 +498,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
+  permissionIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
   permissionWrap: {
     alignItems: 'center',
     paddingHorizontal: 24,
     gap: 8,
   },
   permissionTitle: {
-    color: '#F8FAFC',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '800',
     textAlign: 'center',
   },
   permissionSub: {
-    color: '#94A3B8',
     fontSize: 12,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 18,
+    maxWidth: 260,
   },
   permissionBtn: {
-    marginTop: 6,
-    paddingHorizontal: 16,
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: BorderRadius.full,
   },

@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getPaymentBreakdown } from '@/utils/payment';
 
 export const DashboardScreen: React.FC = () => {
   const {
@@ -222,7 +223,7 @@ export const DashboardScreen: React.FC = () => {
                 style={styles.todayScrollBox}
                 contentContainerStyle={styles.todayScrollContent}>
                 {displayBills.map((s) => {
-                  const isSplit = s.paymentMethod === 'udhaar' && (s.amountPaid || 0) > 0;
+                  const { cleanPaid, baki, isSplit } = getPaymentBreakdown(s);
                   const isCash = s.paymentMethod === 'cash';
                   const isOnline = s.paymentMethod === 'online';
 

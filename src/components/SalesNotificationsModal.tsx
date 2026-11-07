@@ -16,6 +16,7 @@ import { Sale } from '@/types';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Shadows } from '@/constants/theme';
 import { formatCompactPrice } from '@/utils/formatters';
+import { getPaymentBreakdown } from '@/utils/payment';
 
 export const SALES_SEEN_AT_KEY = '@shopkeeper_sales_seen_at';
 
@@ -42,7 +43,8 @@ const formatSaleTime = (sale: Sale) => {
 };
 
 const paymentLabel = (sale: Sale, isUrdu: boolean) => {
-  if (sale.paymentMethod === 'udhaar' && (sale.amountPaid || 0) > 0) {
+  const { isSplit } = getPaymentBreakdown(sale);
+  if (isSplit) {
     return isUrdu ? 'نقد + ادھار' : 'Split';
   }
   if (sale.paymentMethod === 'cash') return isUrdu ? 'نقد' : 'Cash';

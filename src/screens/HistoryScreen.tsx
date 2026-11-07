@@ -15,6 +15,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatCompactPrice } from '@/utils/formatters';
 import { openWhatsAppReceipt, openWhatsAppWithMessage } from '@/utils/whatsapp';
+import { getPaymentBreakdown } from '@/utils/payment';
 
 type HistoryFilter = 'all' | 'today' | 'week' | 'month' | 'custom';
 type PaymentFilter = 'all' | PaymentMethod;
@@ -416,7 +417,7 @@ export const HistoryScreen: React.FC = () => {
       };
     }
     // Udhaar or Split
-    const isSplit = (sale?.amountPaid || 0) > 0 && (sale?.amountPaid || 0) < (sale?.grandTotal || 0);
+    const { cleanPaid, baki, isSplit } = getPaymentBreakdown(sale || { grandTotal: 0, amountPaid: 0, paymentMethod: method });
     if (isSplit) {
       return {
         icon: 'pie-chart-outline' as const,
@@ -424,7 +425,7 @@ export const HistoryScreen: React.FC = () => {
         iconColor: '#0284C7',
         badgeBg: settings.darkMode ? 'rgba(2, 132, 199, 0.18)' : '#E0F2FE',
         badgeColor: '#0284C7',
-        label: isUrdu ? `جزوی نقد + ادھار (${settings.currencySymbol}${sale?.amountPaid})` : `Split (Paid ${settings.currencySymbol}${sale?.amountPaid})`,
+        label: isUrdu ? `جزوی نقد + ادھار (${settings.currencySymbol}${cleanPaid})` : `Split (Paid ${settings.currencySymbol}${cleanPaid})`,
         border: softBorder,
       };
     }
@@ -903,20 +904,25 @@ export const HistoryScreen: React.FC = () => {
                         </Text>
                       </Pressable>
                     ) : null}
-                    {isUdhaar && !isRefunded ? (
-                      <View style={{ marginTop: 4 }}>
-                        {(sale.amountPaid || 0) > 0 ? (
-                          <Text style={{ fontSize: 11, fontWeight: '700', color: '#059669', marginBottom: 2 }}>
-                            {language === 'ur' ? 'نقد وصول:' : 'Cash Paid:'} {settings.currencySymbol}
-                            {(sale.amountPaid || 0).toLocaleString()}
-                          </Text>
-                        ) : null}
-                        <Text style={[styles.debtNoteText, { color: theme.danger }]}>
-                          {t('addedToKhata')} {settings.currencySymbol}
-                          {Math.max(0, sale.grandTotal - (sale.amountPaid || 0)).toLocaleString()}
-                        </Text>
-                      </View>
-                    ) : null}
+                    {isUdhaar && !isRefunded ? (() => {
+                      const { cleanPaid, baki } = getPaymentBreakdown(sale);
+                      return (
+                        <View style={{ marginTop: 4 }}>
+                          {cleanPaid > 0 ? (
+                            <Text style={{ fontSize: 11, fontWeight: '700', color: '#059669', marginBottom: 2 }}>
+                              {language === 'ur' ? 'نقد وصول:' : 'Cash Paid:'} {settings.currencySymbol}
+                              {cleanPaid.toLocaleString()}
+                            </Text>
+                          ) : null}
+                          {baki > 0 ? (
+                            <Text style={[styles.debtNoteText, { color: theme.danger }]}>
+                              {t('addedToKhata')} {settings.currencySymbol}
+                              {baki.toLocaleString()}
+                            </Text>
+                          ) : null}
+                        </View>
+                      );
+                    })() : null}
                   </View>
 
                   <View style={styles.billActions}>

@@ -23,6 +23,7 @@ import { captureRef } from 'react-native-view-shot';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProductImage } from '@/components/ProductImage';
 import { productIconFor } from '@/utils/productIcon';
+import { getPaymentBreakdown } from '@/utils/payment';
 
 interface ReceiptModalProps {
   sale: Sale | null;
@@ -71,10 +72,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
     }
   );
 
-  const isSplitSale =
-    sale.paymentMethod === 'udhaar' &&
-    (sale.amountPaid || 0) > 0 &&
-    (sale.amountPaid || 0) < sale.grandTotal;
+  const { cleanPaid, baki, isSplit: isSplitSale } = getPaymentBreakdown(sale);
 
   const paymentLabel = isSplitSale
     ? (language === 'ur' ? 'جزوی نقد + ادھار (Split)' : 'Split (Cash + Khata)')
@@ -739,8 +737,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
             <span>Payment / ادائیگی:</span>
             <span class="bold">${paymentLabel}</span>
           </div>
-          ${sale.amountPaid !== undefined && sale.amountPaid > 0 ? `<div class="row" style="color: #059669; font-weight: bold;"><span>Cash Paid / نقد وصول:</span><span>Rs.${sale.amountPaid}</span></div>` : ''}
-          ${sale.paymentMethod === 'udhaar' && (sale.grandTotal - (sale.amountPaid || 0)) > 0 ? `<div class="row" style="color: #dc2626; font-weight: bold;"><span>Baki / ادھار کھاتہ:</span><span>Rs.${sale.grandTotal - (sale.amountPaid || 0)}</span></div>` : ''}
+          ${cleanPaid > 0 ? `<div class="row" style="color: #059669; font-weight: bold;"><span>Cash Paid / نقد وصول:</span><span>Rs.${cleanPaid}</span></div>` : ''}
+          ${sale.paymentMethod === 'udhaar' && Math.max(0, sale.grandTotal - cleanPaid) > 0 ? `<div class="row" style="color: #dc2626; font-weight: bold;"><span>Baki / ادھار کھاتہ:</span><span>Rs.${Math.max(0, sale.grandTotal - cleanPaid)}</span></div>` : ''}
           ${sale.change ? `<div class="row"><span>Change / بقایا واپس:</span><span class="bold">Rs.${sale.change}</span></div>` : ''}
 
           <div class="divider"></div>
@@ -770,12 +768,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
       itemsList += '\n';
     });
 
-    const baki = Math.max(0, sale.grandTotal - (sale.amountPaid || 0));
-    const isSplit = sale.paymentMethod === 'udhaar' && (sale.amountPaid || 0) > 0 && baki > 0;
+    const isSplit = isSplitSale;
 
     let paymentBreakdown = '';
     if (isSplit) {
-      paymentBreakdown = `ادائیگی (Payment): جزوی نقد + ادھار (Split)\n• نقد ادا (Cash Paid): ${settings.currencySymbol}${sale.amountPaid}\n• *باقی ادھار کھاتہ (Baki / Khata): ${settings.currencySymbol}${baki}*`;
+      paymentBreakdown = `ادائیگی (Payment): جزوی نقد + ادھار (Split)\n• نقد ادا (Cash Paid): ${settings.currencySymbol}${cleanPaid}\n• *باقی ادھار کھاتہ (Baki / Khata): ${settings.currencySymbol}${baki}*`;
     } else {
       const paymentText =
         sale.paymentMethod === 'cash'
@@ -1637,24 +1634,24 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               </View>
 
               {/* Split / Cash / Udhaar breakdown */}
-              {sale.amountPaid !== undefined && sale.amountPaid > 0 ? (
+              {cleanPaid > 0 ? (
                 <View style={styles.calcRow}>
                   <Text style={[styles.calcLabel, { color: '#059669', fontWeight: '700' }]}>
                     {language === 'ur' ? 'نقد وصول (Cash Paid)' : 'Cash Paid'}
                   </Text>
                   <Text style={[styles.calcLabel, { color: '#059669', fontWeight: '800' }]}>
-                    {money(sale.amountPaid)}
+                    {money(cleanPaid)}
                   </Text>
                 </View>
               ) : null}
 
-              {sale.paymentMethod === 'udhaar' && (sale.grandTotal - (sale.amountPaid || 0)) > 0 ? (
+              {sale.paymentMethod === 'udhaar' && Math.max(0, sale.grandTotal - cleanPaid) > 0 ? (
                 <View style={styles.calcRow}>
                   <Text style={[styles.calcLabel, { color: '#DC2626', fontWeight: '700' }]}>
                     {language === 'ur' ? 'باقی ادھار کھاتہ (Baki / Udhaar)' : 'Baki (Khata)'}
                   </Text>
                   <Text style={[styles.calcLabel, { color: '#DC2626', fontWeight: '800' }]}>
-                    {money(sale.grandTotal - (sale.amountPaid || 0))}
+                    {money(Math.max(0, sale.grandTotal - cleanPaid))}
                   </Text>
                 </View>
               ) : null}
