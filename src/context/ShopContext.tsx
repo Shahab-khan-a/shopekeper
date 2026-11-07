@@ -165,12 +165,6 @@ interface ShopContextType {
   setIsAuthModalOpen: (open: boolean) => void;
   isEditShopOpen: boolean;
   setIsEditShopOpen: (open: boolean) => void;
-  isOnboardingOpen: boolean;
-  setIsOnboardingOpen: (open: boolean) => void;
-  tourStep: number;
-  setTourStep: (step: number) => void;
-  startHandsOnTour: () => Promise<void>;
-  endHandsOnTour: () => Promise<void>;
   isLoaded: boolean;
   alertConfig: AlertConfig | null;
   showAlert: (config: AlertConfig) => void;
@@ -229,34 +223,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isEditShopOpen, setIsEditShopOpen] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
-  const [tourStep, setTourStep] = useState<number>(0);
   const [alertConfig, setAlertConfig] = useState<AlertConfig | null>(null);
-
-  // Check if initial hands-on clickthrough tour should launch
-  useEffect(() => {
-    AsyncStorage.getItem('@shopkeeper_onboarding_completed')
-      .then((val) => {
-        if (!val) {
-          setIsOnboardingOpen(true);
-          setTourStep(1);
-          setActiveTab('sale');
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  const endHandsOnTour = useCallback(async () => {
-    setTourStep(0);
-    setIsOnboardingOpen(false);
-    await AsyncStorage.setItem('@shopkeeper_onboarding_completed', 'true').catch(() => {});
-  }, []);
-
-  const startHandsOnTour = useCallback(async () => {
-    setActiveTab('sale');
-    setTourStep(1);
-    setIsOnboardingOpen(true);
-  }, []);
 
   const showAlert = useCallback((config: AlertConfig) => {
     setAlertConfig(config);
@@ -1412,12 +1379,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthModalOpen,
       isEditShopOpen,
       setIsEditShopOpen,
-      isOnboardingOpen,
-      setIsOnboardingOpen,
-      tourStep,
-      setTourStep,
-      startHandsOnTour,
-      endHandsOnTour,
       user,
       authLoading,
       isOnline,
@@ -1491,10 +1452,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAddProductOpen,
       isAuthModalOpen,
       isEditShopOpen,
-      isOnboardingOpen,
-      tourStep,
-      startHandsOnTour,
-      endHandsOnTour,
       user,
       authLoading,
       isOnline,

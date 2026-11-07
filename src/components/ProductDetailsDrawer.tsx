@@ -327,24 +327,6 @@ export const ProductDetailsDrawer: React.FC<ProductDetailsDrawerProps> = ({
                 </Text>
               </Pressable>
 
-              {/* Category Tag overlay */}
-              <View
-                style={[
-                  styles.categoryPill,
-                  {
-                    backgroundColor: settings.darkMode
-                      ? 'rgba(0,0,0,0.65)'
-                      : 'rgba(255,255,255,0.92)',
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.categoryPillText,
-                    { color: settings.darkMode ? '#FFFFFF' : '#1E293B' },
-                  ]}>
-                  {product.category}
-                </Text>
-              </View>
             </View>
 
             {/* Product Identity */}

@@ -57,7 +57,6 @@ export const BottomNav: React.FC = () => {
       { key: 'dashboard', label: t('home'), icon: 'grid-outline', activeIcon: 'grid' },
       { key: 'products', label: t('products'), icon: 'layers-outline', activeIcon: 'layers' },
       { key: 'sale', label: t('sale'), icon: 'cart-outline', activeIcon: 'cart' },
-      { key: 'history', label: t('history'), icon: 'receipt-outline', activeIcon: 'receipt' },
       { key: 'khata', label: t('khata'), icon: 'book-outline', activeIcon: 'book' },
     ],
     [t]

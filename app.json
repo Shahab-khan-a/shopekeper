@@ -2,7 +2,7 @@
   "expo": {
     "name": "DigiShop",
     "slug": "shopkeeper",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "shopkeeperapp",
@@ -18,7 +18,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": [
         "android.permission.CAMERA"
       ],
@@ -84,6 +84,15 @@
           "photosPermission": "The app accesses your photos to allow adding product pictures.",
           "cameraPermission": "The app accesses your camera to take pictures of products.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow DigiShop to use the camera to scan product barcodes.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
         }
       ],
       "expo-sqlite"

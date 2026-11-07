@@ -106,10 +106,27 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
           .join('\n');
     }
 
-    const message =
-      msgLang === 'ur'
-        ? `السلام علیکم ${customerDisplayName} صاحب!\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopHeader}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${formattedAmount}* ہے۔${breakdownUr}\n\nبرائے مہربانی سہولت کے مطابق ادائیگی فرما دیں۔ شکریہ!\n*${settings.shopName}*\n📞 ${settings.phone}`
-        : `Dear ${customerDisplayName},\n\nGentle reminder from *${shopHeader}* regarding your pending balance:\n👉 *${formattedAmount}*${breakdownEn}\n\nPlease settle at your convenience. Thank you!\n*${settings.shopName}*\n📞 ${settings.phone}`;
+    const customTemplate = msgLang === 'ur'
+      ? settings.whatsappReminderCustomUr
+      : settings.whatsappReminderCustomEn;
+
+    let message = '';
+    if (customTemplate && customTemplate.trim()) {
+      message = customTemplate
+        .replace(/\{name\}/gi, customerDisplayName)
+        .replace(/احمد/g, customerDisplayName)
+        .replace(/Ahmed/gi, customerDisplayName)
+        .replace(/\{amount\}/gi, formattedAmount)
+        .replace(/2,500/g, Math.max(0, customer.totalDebt).toLocaleString())
+        .replace(/2500/g, Math.max(0, customer.totalDebt).toLocaleString())
+        .replace(/\{shop\}/gi, shopHeader)
+        .replace(/\{phone\}/gi, settings.phone || '');
+    } else {
+      message =
+        msgLang === 'ur'
+          ? `السلام علیکم ${customerDisplayName} صاحب!\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopHeader}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${formattedAmount}* ہے۔${breakdownUr}\n\nبرائے مہربانی سہولت کے مطابق ادائیگی فرما دیں۔ شکریہ!\n*${settings.shopName}*\n📞 ${settings.phone}`
+          : `Dear ${customerDisplayName},\n\nGentle reminder from *${shopHeader}* regarding your pending balance:\n👉 *${formattedAmount}*${breakdownEn}\n\nPlease settle at your convenience. Thank you!\n*${settings.shopName}*\n📞 ${settings.phone}`;
+    }
 
     openWhatsAppWithMessage(customer.phone, message);
   };
@@ -281,7 +298,6 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
                 },
                 pressed && { opacity: 0.8 },
               ]}>
-              <Ionicons name="add" size={15} color={theme.textSecondary} />
               <Text style={[styles.subtleActionText, { color: theme.textSecondary }]}>
                 {isUrdu ? '+ مال دیا' : '+ Credit'}
               </Text>

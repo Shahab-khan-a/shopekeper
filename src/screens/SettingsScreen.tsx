@@ -1,38 +1,33 @@
 import { CameraModal } from '@/components/CameraModal';
 import { CurrencyPickerModal } from '@/components/CurrencyPickerModal';
-import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
-import { MASTER_CATALOG } from '@/data/masterCatalog';
 import { ProductImage } from '@/components/ProductImage';
 import { findCurrency } from '@/constants/currencies';
 import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
-import { buildImportTemplateJSON } from '@/constants/sampleData';
 import { BorderRadius, Colors, Shadows, Spacing, ThemeColors, Typography } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { GoogleDriveAuth, googleDriveService } from '@/services/googleDriveService';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
 import * as Sharing from 'expo-sharing';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   BackHandler,
   Image,
   Keyboard,
   KeyboardAvoidingView,
   LayoutChangeEvent,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View,
+  View
 } from 'react-native';
 
 
@@ -254,7 +249,7 @@ const DarkToggle: React.FC<{ value: boolean; onChange: (v: boolean) => void; the
   const lightActive = !value;
   const darkActive = value;
   return (
-    <View style={[toggleStyles.track, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, width: DM_W}]}>
+    <View style={[toggleStyles.track, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, width: DM_W }]}>
       <Animated.View pointerEvents="none" style={[toggleStyles.pill, { backgroundColor: darkActive ? '#6366F1' : theme.primary, width: DM_PILL_W, height: DM_H - DM_PAD * 2, transform: [{ translateX: pillX }] }]} />
       <Pressable onPress={() => handlePress(false)} style={toggleStyles.option}>
         <Ionicons name="sunny" size={13} color={lightActive ? '#fff' : theme.textMuted} />
@@ -321,9 +316,6 @@ export const SettingsScreen: React.FC = () => {
     logout,
     deleteAccount,
     syncNow,
-    setIsAuthModalOpen,
-    setIsOnboardingOpen,
-    startHandsOnTour,
     showAlert,
   } = useShop();
 
@@ -349,7 +341,6 @@ export const SettingsScreen: React.FC = () => {
   };
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCurrencyPickerOpen, setIsCurrencyPickerOpen] = useState(false);
-  const [isShopTypePickerOpen, setIsShopTypePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -502,10 +493,6 @@ export const SettingsScreen: React.FC = () => {
         setIsCurrencyPickerOpen(false);
         return true;
       }
-      if (isShopTypePickerOpen) {
-        setIsShopTypePickerOpen(false);
-        return true;
-      }
       if (showImportBox) {
         setShowImportBox(false);
         return true;
@@ -519,7 +506,7 @@ export const SettingsScreen: React.FC = () => {
     };
     const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
     return () => sub.remove();
-  }, [isCameraOpen, isCurrencyPickerOpen, isShopTypePickerOpen, showImportBox, isFormDirty, setActiveTab]);
+  }, [isCameraOpen, isCurrencyPickerOpen, showImportBox, isFormDirty, setActiveTab]);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const pickImage = async () => {
@@ -587,6 +574,78 @@ export const SettingsScreen: React.FC = () => {
     } catch (e) {
       console.warn('[SettingsScreen] Logo select error:', e);
     }
+  };
+
+  const reminderLang = settings.whatsappReminderLanguage || 'en';
+  const isUrduReminder = reminderLang === 'ur';
+
+  const defaultReminderUrdu = useMemo(() => {
+    const shopUr = settings.shopNameUrdu || settings.shopName || 'دکان کا نام';
+    const phoneUr = settings.phone || '0300-1234567';
+    return `السلام علیکم احمد صاحب!\nامید ہے آپ بخیریت ہوں گے۔\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${shopUr}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${settings.currencySymbol} 2,500* ہے۔\n\nبرائے مہربانی سہولت کے مطابق تشریف لا کر رقم ادا فرما دیں۔\n\nشکریہ و جزاک اللہ!\n*${settings.shopName}*\n📞 ${phoneUr}`;
+  }, [settings.shopName, settings.shopNameUrdu, settings.phone, settings.currencySymbol]);
+
+  const defaultReminderEnglish = useMemo(() => {
+    const shopEn = settings.shopName || 'Shop Name';
+    const phoneEn = settings.phone || '0300-1234567';
+    return `Dear Ahmed,\n\nHope you are doing well.\n\nThis is a gentle reminder from *${shopEn}* regarding your pending balance:\n👉 *${settings.currencySymbol} 2,500*\n\nKindly arrange for the payment at your earliest convenience.\n\nThank you!\n*${shopEn}*\n📞 ${phoneEn}`;
+  }, [settings.shopName, settings.phone, settings.currencySymbol]);
+
+  const activeReminderText = isUrduReminder
+    ? (settings.whatsappReminderCustomUr ?? defaultReminderUrdu)
+    : (settings.whatsappReminderCustomEn ?? defaultReminderEnglish);
+
+  const isReminderCustomized = isUrduReminder
+    ? Boolean(settings.whatsappReminderCustomUr && settings.whatsappReminderCustomUr !== defaultReminderUrdu)
+    : Boolean(settings.whatsappReminderCustomEn && settings.whatsappReminderCustomEn !== defaultReminderEnglish);
+
+  const handleUpdateReminderText = (text: string) => {
+    if (isUrduReminder) {
+      updateSettings({ whatsappReminderCustomUr: text });
+    } else {
+      updateSettings({ whatsappReminderCustomEn: text });
+    }
+  };
+
+  const handleResetReminderText = () => {
+    if (isUrduReminder) {
+      updateSettings({ whatsappReminderCustomUr: undefined });
+    } else {
+      updateSettings({ whatsappReminderCustomEn: undefined });
+    }
+    showAlert({
+      type: 'info',
+      title: language === 'ur' ? 'اصل بحال ہو گیا' : 'Reset to Default',
+      message: language === 'ur'
+        ? 'واٹس ایپ یاد دہانی کا پیغام اصل ٹیمپلیٹ میں بحال کر دیا گیا۔'
+        : 'Reminder message has been restored to the original default template.',
+    });
+  };
+
+  const handleSyncGoogleProfile = () => {
+    if (!user) return;
+    if (user.displayName) {
+      setOwnerName(user.displayName);
+      if (!shopName || shopName === 'My Store' || shopName === 'Madina Super Store') {
+        setShopName(`${user.displayName}'s Store`);
+      }
+      if (!shopNameUrdu || shopNameUrdu === 'میری دکان' || shopNameUrdu === 'مدینہ سپر اسٹور اینڈ کریانہ') {
+        setShopNameUrdu(`${user.displayName} اسٹور`);
+      }
+    }
+    if (user.email) setEmail(user.email);
+    showAlert({
+      type: 'success',
+      title: language === 'ur' ? 'گوگل پروفائل سنک ہو گیا' : 'Google Info Synced',
+      message: language === 'ur'
+        ? 'نام اور ای میل کامیابی سے گوگل سے حاصل کر لیے گئے۔'
+        : 'Name and email have been synced from your Google account.',
+    });
+  };
+
+  const handleRemovePhoto = async () => {
+    setProfileImage('');
+    await updateSettings({ profileImage: undefined });
   };
 
   const handleSave = async () => {
@@ -908,7 +967,7 @@ export const SettingsScreen: React.FC = () => {
                 if (Platform.OS === 'web') {
                   window.open(consoleUrl, '_blank');
                 } else {
-                  Linking.openURL(consoleUrl).catch(() => {});
+                  Linking.openURL(consoleUrl).catch(() => { });
                 }
               },
             },
@@ -945,7 +1004,7 @@ export const SettingsScreen: React.FC = () => {
       if (Platform.OS === 'web') {
         window.open(folderUrl, '_blank');
       } else {
-        Linking.openURL(folderUrl).catch(() => {});
+        Linking.openURL(folderUrl).catch(() => { });
       }
     }
   };
@@ -997,947 +1056,1009 @@ export const SettingsScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
       >
 
-      {/* ── Google Cloud Quick Status Banner ─────────────────────────────── */}
-      <Pressable
-        onPress={() => setIsAuthModalOpen(true)}
-        style={({ pressed }) => [
-          styles.cloudTopBanner,
-          {
-            backgroundColor: user
-              ? (settings.darkMode ? '#064E3B22' : '#F0FDF4')
-              : (settings.darkMode ? '#1E293B' : '#F8FAFC'),
-            borderColor: user ? '#86EFAC' : theme.border,
-          },
-          pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
-        ]}
-      >
-        <View style={styles.cloudTopBannerLeft}>
-          <View style={[styles.cloudTopIcon, { backgroundColor: user ? '#DCFCE7' : theme.primaryLight }]}>
-            <Ionicons
-              name={user ? 'cloud-done' : 'cloud-upload'}
-              size={18}
-              color={user ? '#15803D' : theme.primary}
-            />
-          </View>
-          <View style={styles.cloudTopTextWrap}>
-            <Text style={[styles.cloudTopTitle, { color: theme.text }]} numberOfLines={1}>
-              {user ? (user.displayName || user.email) : (language === 'ur' ? 'گوگل کلاؤڈ بیک اپ' : 'Google Cloud Backup')}
-            </Text>
-            <Text style={[styles.cloudTopSub, { color: user ? '#16A34A' : theme.textMuted }]} numberOfLines={1}>
-              {user
-                ? (syncStatus === 'syncing' ? 'Syncing with cloud...' : syncStatus === 'synced' ? 'Connected & Backed Up to Firebase' : 'Connected to Firebase (Pending Sync)')
-                : (language === 'ur' ? 'ڈیٹا محفوظ کرنے کیلئے گوگل سے لاگ ان کریں' : 'Tap to connect & sync your store records')}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.cloudTopBannerRight}>
-          <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
-        </View>
-      </Pressable>
-
-      {/* ── Segment Switcher ─────────────────────────────────────────────── */}
-      <View
-        style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}
-        onLayout={(e: LayoutChangeEvent) => setSegContainerWidth(e.nativeEvent.layout.width)}
-      >
-        {/* Animated sliding pill */}
-        {segContainerWidth > 0 && (
-          <Animated.View
-            pointerEvents="none"
+        {/* ── Account / Guest status ───────────────────────────────────────── */}
+        {user ? (
+          <View
             style={[
-              styles.segPill,
+              styles.cloudTopBanner,
               {
-                backgroundColor: theme.primary,
-                width: (segContainerWidth - 10) / 2,
-                transform: [{
-                  translateX: segAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, (segContainerWidth - 10) / 2],
-                  }),
-                }],
+                backgroundColor: settings.darkMode ? '#064E3B22' : '#F0FDF4',
+                borderColor: '#86EFAC',
               },
             ]}
-          />
-        )}
-        {([
-          { key: 'profile', icon: 'storefront' as const, label: t('profileTab'), activeAt: 0 },
-          { key: 'settings', icon: 'options' as const, label: t('preferencesTab'), activeAt: 1 },
-        ] as const).map((seg) => {
-          const isActive = activeSegment === seg.key;
-          return (
-            <Pressable
-              key={seg.key}
-              onPress={() => handleSegmentPress(seg.key)}
-              style={styles.segBtn}
-            >
-              <Ionicons name={seg.icon} size={15} color={isActive ? '#FFFFFF' : theme.textMuted} />
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.82}
-                style={[
-                  styles.segBtnText,
-                  { color: isActive ? '#FFFFFF' : theme.textMuted },
-                  language === 'ur' && { fontFamily: Typography.urduFontFamily },
-                ]}
-              >
-                {seg.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+          >
+            <View style={styles.cloudTopBannerLeft}>
+              <View style={[styles.cloudTopIcon, { backgroundColor: '#DCFCE7' }]}>
+                <Ionicons name="cloud-done" size={18} color="#15803D" />
+              </View>
+              <View style={styles.cloudTopTextWrap}>
+                <Text style={[styles.cloudTopTitle, { color: theme.text }]} numberOfLines={1}>
+                  {user.displayName || user.email}
+                </Text>
+                <Text style={[styles.cloudTopSub, { color: '#16A34A' }]} numberOfLines={1}>
+                  {syncStatus === 'syncing'
+                    ? (language === 'ur' ? 'کلاؤڈ سے مطابقت ہو رہی ہے...' : 'Syncing with cloud...')
+                    : syncStatus === 'synced'
+                      ? (language === 'ur' ? 'منسلک اور بیک اپ محفوظ' : 'Connected & backed up')
+                      : (language === 'ur' ? 'منسلک — مطابقت زیر التوا' : 'Connected (pending sync)')}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.cloudTopBannerRight}>
+              <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
+            </View>
+          </View>
+        ) : (
+          <View
+            style={[
+              styles.guestAccountCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <View style={styles.guestAccountHeader}>
+              <View style={[styles.guestModeBadge, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                <Ionicons name="person-outline" size={14} color={theme.textSecondary} />
+                <Text style={[styles.guestModeBadgeText, { color: theme.textSecondary }]}>
+                  {language === 'ur' ? 'گیسٹ موڈ' : 'Guest Mode'}
+                </Text>
+              </View>
+            </View>
 
-      {/* ════════════════════════ PROFILE TAB ════════════════════════════════ */}
-      {activeSegment === 'profile' && (
-        <>
-          {/* Avatar Card */}
-          <View style={[styles.avatarCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            {/* Avatar */}
-            <View style={styles.avatarRow}>
-              <Pressable onPress={pickImage} style={styles.avatarTapArea}>
-                {profileImage && !isGoogleAvatar(profileImage) ? (
-                  <ProductImage
-                    uri={profileImage}
-                    style={[styles.avatar, { borderColor: theme.primary }]}
-                    fallbackIcon={
-                      <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
-                        <Image
-                          source={require('@/../assets/images/mainLogoImage.png')}
-                          style={styles.avatarLogoImg}
-                          resizeMode="contain"
-                        />
-                      </View>
-                    }
-                  />
-                ) : (
-                  <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
-                    <Image
-                      source={require('@/../assets/images/mainLogoImage.png')}
-                      style={styles.avatarLogoImg}
-                      resizeMode="contain"
-                    />
-                  </View>
-                )}
-                <View style={[styles.cameraBadge, { backgroundColor: theme.primary }]}>
-                  <Ionicons name="camera" size={13} color="#fff" />
+            <Text style={[styles.guestAccountTitle, { color: theme.text }]}>
+              {language === 'ur' ? 'اکاؤنٹ بنائیں یا سائن ان کریں' : 'Create an account or sign in'}
+            </Text>
+            <Text style={[styles.guestAccountSub, { color: theme.textMuted }]}>
+              {language === 'ur'
+                ? 'اپنے اسٹور کا ڈیٹا محفوظ کریں اور کسی بھی ڈیوائس پر مطابقت کریں۔ مقامی ڈیٹا اسی فون پر محفوظ رہتا ہے۔'
+                : 'Back up your store and sync across devices. Your local data stays safe on this phone until you sign in.'}
+            </Text>
+
+            <View style={styles.guestBenefitsRow}>
+              {[
+                { icon: 'shield-checkmark-outline' as const, label: language === 'ur' ? 'بیک اپ' : 'Backup' },
+                { icon: 'sync-outline' as const, label: language === 'ur' ? 'مطابقت' : 'Sync' },
+                { icon: 'phone-portrait-outline' as const, label: language === 'ur' ? 'ملٹی ڈیوائس' : 'Multi-device' },
+              ].map((b) => (
+                <View key={b.label} style={[styles.guestBenefitChip, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                  <Ionicons name={b.icon} size={13} color={theme.primary} />
+                  <Text style={[styles.guestBenefitChipText, { color: theme.textSecondary }]}>{b.label}</Text>
                 </View>
-              </Pressable>
+              ))}
+            </View>
 
-              <View style={styles.avatarInfo}>
-                <Text style={[styles.avatarName, { color: theme.text }]} numberOfLines={1}>
-                  {ownerName || user?.displayName || 'Proprietor Name'}
+            <Pressable
+              onPress={handleGoogleSignIn}
+              disabled={googleLoading || authLoading}
+              style={({ pressed }) => [
+                styles.guestSignInBtn,
+                (pressed || googleLoading || authLoading) && { opacity: 0.88 },
+              ]}
+            >
+              {googleLoading || authLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <View style={styles.guestGoogleIconBox}>
+                    <Ionicons name="logo-google" size={16} color="#EA4335" />
+                  </View>
+                  <Text style={styles.guestSignInBtnText}>
+                    {language === 'ur' ? 'گوگل سے اکاؤنٹ بنائیں / سائن ان' : 'Create account or sign in with Google'}
+                  </Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        )}
+
+        {/* ── Segment Switcher ─────────────────────────────────────────────── */}
+        <View
+          style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}
+          onLayout={(e: LayoutChangeEvent) => setSegContainerWidth(e.nativeEvent.layout.width)}
+        >
+          {/* Animated sliding pill */}
+          {segContainerWidth > 0 && (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.segPill,
+                {
+                  backgroundColor: theme.primary,
+                  width: (segContainerWidth - 10) / 2,
+                  transform: [{
+                    translateX: segAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, (segContainerWidth - 10) / 2],
+                    }),
+                  }],
+                },
+              ]}
+            />
+          )}
+          {([
+            { key: 'profile', icon: 'storefront' as const, label: t('profileTab'), activeAt: 0 },
+            { key: 'settings', icon: 'options' as const, label: t('preferencesTab'), activeAt: 1 },
+          ] as const).map((seg) => {
+            const isActive = activeSegment === seg.key;
+            return (
+              <Pressable
+                key={seg.key}
+                onPress={() => handleSegmentPress(seg.key)}
+                style={styles.segBtn}
+              >
+                <Ionicons name={seg.icon} size={15} color={isActive ? '#FFFFFF' : theme.textMuted} />
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.82}
+                  style={[
+                    styles.segBtnText,
+                    { color: isActive ? '#FFFFFF' : theme.textMuted },
+                    language === 'ur' && { fontFamily: Typography.urduFontFamily },
+                  ]}
+                >
+                  {seg.label}
                 </Text>
-                <Text style={[styles.avatarShop, { color: theme.primary }]} numberOfLines={1}>
-                  {(language === 'ur' && shopNameUrdu) ? shopNameUrdu : shopName || 'Store Name'}
-                </Text>
-                <Text style={[styles.avatarType, { color: theme.textMuted }]}>{businessType}</Text>
-                {user ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                    <Ionicons name="logo-google" size={12} color="#0284C7" />
-                    <Text style={{ fontSize: 11, color: '#0284C7', fontWeight: '600' }} numberOfLines={1}>
-                      {user.displayName ? `${user.displayName} • ${user.email}` : user.email}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* ════════════════════════ PROFILE TAB ════════════════════════════════ */}
+        {activeSegment === 'profile' && (
+          <>
+            {/* Avatar Card */}
+            <View style={[styles.avatarCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              {/* Avatar & Store Info */}
+              <View style={styles.avatarRow}>
+                <Pressable
+                  onPress={pickImage}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('chooseGallery')}
+                  style={styles.avatarTapArea}>
+                  {profileImage && !isGoogleAvatar(profileImage) ? (
+                    <ProductImage
+                      uri={profileImage}
+                      style={[styles.avatar, { borderColor: theme.primary }]}
+                      fallbackIcon={
+                        <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+                          <Image
+                            source={require('@/../assets/images/mainLogoImage.png')}
+                            style={styles.avatarLogoImg}
+                            resizeMode="contain"
+                          />
+                        </View>
+                      }
+                    />
+                  ) : (
+                    <View style={[styles.avatarFallback, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+                      <Image
+                        source={require('@/../assets/images/mainLogoImage.png')}
+                        style={styles.avatarLogoImg}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  )}
+                  <View style={[styles.cameraBadge, { backgroundColor: theme.primary }]}>
+                    <Ionicons name="camera" size={12} color="#fff" />
+                  </View>
+                </Pressable>
+
+                <View style={styles.avatarInfo}>
+                  <Text style={[styles.avatarShop, { color: theme.text }]} numberOfLines={1}>
+                    {(language === 'ur' && shopNameUrdu) ? shopNameUrdu : shopName || (language === 'ur' ? 'میری دکان' : 'My Store')}
+                  </Text>
+                  <Text style={[styles.avatarName, { color: theme.textSecondary }]} numberOfLines={1}>
+                    {ownerName || user?.displayName || (language === 'ur' ? 'دکاندار' : 'Proprietor')}
+                    {businessType ? ` · ${businessType}` : ''}
+                  </Text>
+
+                  <View style={[styles.accountPill, { backgroundColor: user ? (settings.darkMode ? 'rgba(2,132,199,0.15)' : '#E0F2FE') : (settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F1F5F9') }]}>
+                    <Ionicons
+                      name={user ? 'logo-google' : 'storefront-outline'}
+                      size={11}
+                      color={user ? '#0284C7' : theme.textMuted}
+                    />
+                    <Text style={[styles.accountPillText, { color: user ? '#0284C7' : theme.textMuted }]} numberOfLines={1}>
+                      {user ? (user.displayName ? `${user.displayName} • ${user.email}` : user.email) : (language === 'ur' ? 'مقامی اسٹور' : 'Local Store')}
                     </Text>
                   </View>
+                </View>
+              </View>
+
+              {/* Minimalist Action Buttons */}
+              <View style={styles.photoActions}>
+                <Pressable
+                  onPress={() => setIsCameraOpen(true)}
+                  style={({ pressed }) => [
+                    styles.photoBtn,
+                    { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                    pressed && { opacity: 0.7 },
+                  ]}>
+                  <Ionicons name="camera-outline" size={14} color={theme.text} />
+                  <Text style={[styles.photoBtnText, { color: theme.text }]}>
+                    {language === 'ur' ? 'کیمرہ' : 'Camera'}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={pickImage}
+                  style={({ pressed }) => [
+                    styles.photoBtn,
+                    { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                    pressed && { opacity: 0.7 },
+                  ]}>
+                  <Ionicons name="images-outline" size={14} color={theme.text} />
+                  <Text style={[styles.photoBtnText, { color: theme.text }]}>
+                    {language === 'ur' ? 'گیلری' : 'Gallery'}
+                  </Text>
+                </Pressable>
+
+                {user && (
+                  <Pressable
+                    onPress={handleSyncGoogleProfile}
+                    style={({ pressed }) => [
+                      styles.photoBtn,
+                      { backgroundColor: settings.darkMode ? 'rgba(2,132,199,0.18)' : '#E0F2FE', borderColor: '#7DD3FC' },
+                      pressed && { opacity: 0.7 },
+                    ]}>
+                    <Ionicons name="logo-google" size={13} color="#0284C7" />
+                    <Text style={[styles.photoBtnText, { color: '#0284C7', fontWeight: '700' }]}>
+                      {language === 'ur' ? 'گوگل سنک' : 'Sync Google'}
+                    </Text>
+                  </Pressable>
+                )}
+
+                {profileImage && !isGoogleAvatar(profileImage) ? (
+                  <Pressable
+                    onPress={handleRemovePhoto}
+                    accessibilityLabel="Remove photo"
+                    style={({ pressed }) => [
+                      styles.photoRemoveBtn,
+                      { backgroundColor: theme.dangerLight, borderColor: theme.border },
+                      pressed && { opacity: 0.7 },
+                    ]}>
+                    <Ionicons name="trash-outline" size={14} color={theme.danger} />
+                  </Pressable>
                 ) : null}
               </View>
             </View>
 
-            {/* Photo Action Buttons */}
-            <View style={styles.photoActions}>
-              {user && (
-                <Pressable
-                  onPress={() => {
-                    if (user.displayName) {
-                      setOwnerName(user.displayName);
-                      if (!shopName || shopName === 'My Store' || shopName === 'Madina Super Store') {
-                        setShopName(`${user.displayName}'s Store`);
-                      }
-                      if (!shopNameUrdu || shopNameUrdu === 'میری دکان' || shopNameUrdu === 'مدینہ سپر اسٹور اینڈ کریانہ') {
-                        setShopNameUrdu(`${user.displayName} اسٹور`);
-                      }
-                    }
-                    if (user.email) setEmail(user.email);
-                  }}
-                  style={[styles.photoBtn, { backgroundColor: '#E0F2FE', borderWidth: 1, borderColor: '#7DD3FC' }]}
-                >
-                  <Ionicons name="logo-google" size={14} color="#0284C7" />
-                  <Text style={[styles.photoBtnText, { color: '#0284C7', fontWeight: '700' }]}>
-                    {language === 'ur' ? 'گوگل پروفائل حاصل کریں' : 'Sync Google Info'}
+            {/* Store Info */}
+            <View style={styles.sectionWrap}>
+              <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('identitySection').toUpperCase()}</Text>
+              <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <StackedField
+                  icon="storefront-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                  label={t('ownerNameLabel')}
+                  value={ownerName} onChangeText={setOwnerName}
+                  placeholder={user?.displayName || 'e.g. Shop Owner'}
+                  theme={theme}
+                />
+                <StackedField
+                  icon="business-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                  label={t('shopNameLabel')}
+                  value={shopName} onChangeText={setShopName}
+                  placeholder={user?.displayName ? `${user.displayName}'s Store` : 'e.g. My Store'}
+                  theme={theme}
+                />
+                <StackedField
+                  icon="text-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
+                  label={t('shopNameUrduLabel')}
+                  value={shopNameUrdu} onChangeText={setShopNameUrdu}
+                  placeholder={user?.displayName ? `${user.displayName} اسٹور` : 'مثلاً: میری دکان'}
+                  theme={theme}
+                  last
+                />
+              </View>
+            </View>
+
+            {/* Contact */}
+            <View style={styles.sectionWrap}>
+              <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('contactSection').toUpperCase()}</Text>
+              <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <StackedField
+                  icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                  label={t('phoneLabel')}
+                  value={phone} onChangeText={setPhone}
+                  placeholder="0300-1234567" keyboardType="phone-pad"
+                  theme={theme}
+                />
+                <Pressable onPress={() => setShowMoreDetails((v) => !v)} style={styles.moreToggle}>
+                  <Text style={[styles.moreToggleText, { color: theme.primary }]}>
+                    {language === 'ur' ? 'مزید تفصیلات (اختیاری)' : 'More shop details (optional)'}
                   </Text>
+                  <Ionicons name={showMoreDetails ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
                 </Pressable>
-              )}
-              <Pressable
-                onPress={() => setIsCameraOpen(true)}
-                style={[styles.photoBtn, { backgroundColor: theme.primaryLight }]}
-              >
-                <Ionicons name="camera-outline" size={15} color={theme.primary} />
-                <Text style={[styles.photoBtnText, { color: theme.primary }]}>{t('takePhoto')}</Text>
-              </Pressable>
-              <Pressable
-                onPress={pickImage}
-                style={[styles.photoBtn, { backgroundColor: theme.surfaceSubtle, borderWidth: 1, borderColor: theme.border }]}
-              >
-                <Ionicons name="images-outline" size={15} color={theme.textSecondary} />
-                <Text style={[styles.photoBtnText, { color: theme.textSecondary }]}>{t('chooseGallery')}</Text>
-              </Pressable>
-              {profileImage && !isGoogleAvatar(profileImage) ? (
-                <Pressable
-                  onPress={async () => {
-                    setProfileImage('');
-                    await updateSettings({ profileImage: undefined });
-                  }}
-                  style={[styles.photoBtn, { backgroundColor: theme.dangerLight }]}
-                >
-                  <Ionicons name="trash-outline" size={14} color={theme.danger} />
-                  <Text style={[styles.photoBtnText, { color: theme.danger }]}>{t('removePhoto')}</Text>
-                </Pressable>
-              ) : null}
+                {showMoreDetails && (
+                  <>
+                    <StackedField
+                      icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                      label={t('altPhoneLabel')}
+                      value={alternatePhone} onChangeText={setAlternatePhone}
+                      placeholder="0321-9876543" keyboardType="phone-pad"
+                      theme={theme}
+                    />
+                    <StackedField
+                      icon="mail-outline" iconColor="#7C3AED" iconBg="#EDE9FE"
+                      label={t('emailLabel')}
+                      value={email} onChangeText={setEmail}
+                      placeholder="store@gmail.com" keyboardType="email-address"
+                      theme={theme}
+                      onFocus={() => {
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 150);
+                      }}
+                    />
+                    <StackedField
+                      icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                      label={t('cityLabel')}
+                      value={city} onChangeText={setCity}
+                      placeholder="e.g. Lahore"
+                      theme={theme}
+                      onFocus={() => {
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 150);
+                      }}
+                    />
+                    <StackedField
+                      icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                      label={t('addressLabel')}
+                      value={address} onChangeText={setAddress}
+                      placeholder="Shop #14, Main Market"
+                      multiline
+                      theme={theme}
+                      last
+                      onFocus={() => {
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 150);
+                      }}
+                    />
+                  </>
+                )}
+              </View>
             </View>
 
-            {/* Stats Strip */}
-            <View style={[styles.statsStrip, { borderTopColor: theme.border }]}>
-              {[
-                { label: t('statsProducts'), value: String(products.length), color: theme.primary },
-                { label: t('statsSales'), value: `${settings.currencySymbol} ${todaySalesTotal.toLocaleString()}`, color: theme.success },
-                { label: t('statsKhata'), value: String(khata.length), color: theme.accent },
-              ].map((s, i, arr) => (
-                <React.Fragment key={s.label}>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
-                    <Text style={[styles.statLabel, { color: theme.textMuted }]}>{s.label}</Text>
-                  </View>
-                  {i < arr.length - 1 && <View style={[styles.statDivider, { backgroundColor: theme.border }]} />}
-                </React.Fragment>
-              ))}
-            </View>
-          </View>
 
-          {/* Store Info */}
-          <View style={styles.sectionWrap}>
-            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('identitySection').toUpperCase()}</Text>
-            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <StackedField
-                icon="storefront-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
-                label={t('ownerNameLabel')}
-                value={ownerName} onChangeText={setOwnerName}
-                placeholder={user?.displayName || 'e.g. Shop Owner'}
-                theme={theme}
-              />
-              <StackedField
-                icon="business-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
-                label={t('shopNameLabel')}
-                value={shopName} onChangeText={setShopName}
-                placeholder={user?.displayName ? `${user.displayName}'s Store` : 'e.g. My Store'}
-                theme={theme}
-              />
-              <StackedField
-                icon="text-outline" iconColor={theme.primary} iconBg={theme.primaryLight}
-                label={t('shopNameUrduLabel')}
-                value={shopNameUrdu} onChangeText={setShopNameUrdu}
-                placeholder={user?.displayName ? `${user.displayName} اسٹور` : 'مثلاً: میری دکان'}
-                theme={theme}
-                last
-              />
-            </View>
-          </View>
-
-          {/* Contact */}
-          <View style={styles.sectionWrap}>
-            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('contactSection').toUpperCase()}</Text>
-            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <StackedField
-                icon="call-outline" iconColor="#0284C7" iconBg="#E0F2FE"
-                label={t('phoneLabel')}
-                value={phone} onChangeText={setPhone}
-                placeholder="0300-1234567" keyboardType="phone-pad"
-                theme={theme}
-              />
-              <Pressable onPress={() => setShowMoreDetails((v) => !v)} style={styles.moreToggle}>
-                <Text style={[styles.moreToggleText, { color: theme.primary }]}>
-                  {language === 'ur' ? 'مزید تفصیلات (اختیاری)' : 'More shop details (optional)'}
-                </Text>
-                <Ionicons name={showMoreDetails ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
-              </Pressable>
-              {showMoreDetails && (
+            {/* ── Save Profile Button ── */}
+            <Pressable
+              onPress={handleSave}
+              disabled={isSaving}
+              style={({ pressed }) => [
+                styles.fullSaveBtn,
+                { backgroundColor: theme.primary },
+                (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+              ]}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
                 <>
-              <StackedField
-                icon="phone-portrait-outline" iconColor="#0284C7" iconBg="#E0F2FE"
-                label={t('altPhoneLabel')}
-                value={alternatePhone} onChangeText={setAlternatePhone}
-                placeholder="0321-9876543" keyboardType="phone-pad"
-                theme={theme}
-              />
-              <StackedField
-                icon="mail-outline" iconColor="#7C3AED" iconBg="#EDE9FE"
-                label={t('emailLabel')}
-                value={email} onChangeText={setEmail}
-                placeholder="store@gmail.com" keyboardType="email-address"
-                theme={theme}
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                  }, 150);
-                }}
-              />
-              <StackedField
-                icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7"
-                label={t('cityLabel')}
-                value={city} onChangeText={setCity}
-                placeholder="e.g. Lahore"
-                theme={theme}
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                  }, 150);
-                }}
-              />
-              <StackedField
-                icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7"
-                label={t('addressLabel')}
-                value={address} onChangeText={setAddress}
-                placeholder="Shop #14, Main Market"
-                multiline
-                theme={theme}
-                last
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                  }, 150);
-                }}
-              />
+                  <Ionicons name="checkmark-circle" size={22} color="#fff" />
+                  <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
                 </>
               )}
-            </View>
-          </View>
+            </Pressable>
+          </>
+        )}
 
-
-          {/* ── Save Profile Button ── */}
-          <Pressable
-            onPress={handleSave}
-            disabled={isSaving}
-            style={({ pressed }) => [
-              styles.fullSaveBtn,
-              { backgroundColor: theme.primary },
-              (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
-            ]}
-          >
-            {isSaving ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <>
-                <Ionicons name="checkmark-circle" size={22} color="#fff" />
-                <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
-              </>
-            )}
-          </Pressable>
-        </>
-      )}
-
-      {/* ════════════════════════ SETTINGS TAB ═══════════════════════════════ */}
-      {activeSegment === 'settings' && (
-        <>
-          {/* Appearance */}
-          <Section title={t('appearanceSection')} theme={theme}>
-            {/* Language */}
-            <RowItem icon="language-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('languageLabel')} theme={theme}>
-              <LangToggle value={language} onChange={setLanguage} theme={theme} />
-            </RowItem>
-
-            {/* Dark Mode */}
-            <RowItem icon="moon-outline" iconColor="#6366F1" iconBg="#E0E7FF" label={t('darkModeLabel')} theme={theme} last>
-              <DarkToggle value={settings.darkMode} onChange={(val) => updateSettings({ darkMode: val })} theme={theme} />
-            </RowItem>
-          </Section>
-
-          {/* WhatsApp Udhaar Reminders */}
-          <Section title={t('whatsappReminderSection')} theme={theme}>
-            <RowItem
-              icon="logo-whatsapp"
-              iconColor="#25D366"
-              iconBg="#DCFCE7"
-              label={t('whatsappReminderLangLabel')}
-              sublabel={t('whatsappReminderLangSublabel')}
-              theme={theme}
-              last={false}
-            >
-              <LangToggle
-                value={settings.whatsappReminderLanguage || 'en'}
-                onChange={(l) => updateSettings({ whatsappReminderLanguage: l })}
-                theme={theme}
-              />
-            </RowItem>
-
-            {/* Live Message Preview Card */}
-            <View style={[styles.waPreviewContainer, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-              <View style={styles.waPreviewHeader}>
-                <Ionicons name="chatbubble-ellipses-outline" size={15} color="#25D366" />
-                <Text style={[styles.waPreviewTitle, { color: theme.textSecondary }]}>
-                  {t('whatsappReminderPreview')}
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.waPreviewBody,
-                  {
-                    color: theme.text,
-                    fontFamily: (settings.whatsappReminderLanguage === 'ur') ? Typography.urduFontFamily : undefined,
-                    textAlign: (settings.whatsappReminderLanguage === 'ur') ? 'right' : 'left',
-                  },
-                ]}
-              >
-                {(settings.whatsappReminderLanguage === 'ur')
-                  ? `السلام علیکم احمد صاحب!\nامید ہے آپ بخیریت ہوں گے۔\n\nیہ ایک شائستہ یاد دہانی ہے کہ *${settings.shopNameUrdu || settings.shopName}* پر آپ کا کل واجب الادا بقایا ادھار:\n👉 *${settings.currencySymbol} 2,500* ہے۔\n\nبرائے مہربانی سہولت کے مطابق تشریف لا کر رقم ادا فرما دیں۔\n\nشکریہ و جزاک اللہ!\n*${settings.shopName}*\n📞 ${settings.phone || '0300-1234567'}`
-                  : `Dear Ahmed,\n\nHope you are doing well.\n\nThis is a gentle reminder from *${settings.shopName}* regarding your pending balance:\n👉 *${settings.currencySymbol} 2,500*\n\nKindly arrange for the payment at your earliest convenience.\n\nThank you!\n*${settings.shopName}*\n📞 ${settings.phone || '0300-1234567'}`}
-              </Text>
-            </View>
-          </Section>
-
-          {/* Product Catalog — shop type drives what loads in the Products tab */}
-          <Section title={language === 'ur' ? 'پروڈکٹ کیٹلاگ' : 'Product Catalog'} theme={theme}>
-            <RowItem
-              icon="storefront-outline"
-              iconColor="#0D9488"
-              iconBg="#CCFBF1"
-              label={language === 'ur' ? 'دکان کی قسم' : 'Shop Type'}
-              sublabel={
-                settings.catalogShopType ||
-                (language === 'ur' ? 'منتخب نہیں — منتخب کرنے کے لیے دبائیں' : 'Not selected — tap to choose')
-              }
-              theme={theme}
-              onPress={() => setIsShopTypePickerOpen(true)}
-            />
-            <RowItem
-              icon="library-outline"
-              iconColor="#7C3AED"
-              iconBg="#EDE9FE"
-              label={language === 'ur' ? 'کیٹلاگ اشیاء' : 'Catalog Items'}
-              sublabel={
-                settings.catalogShopType
-                  ? `${MASTER_CATALOG.find((s) => s.shopType === settings.catalogShopType)?.categories.reduce((n, c) => n + c.items.length, 0) ?? 0} ${language === 'ur' ? 'اشیاء پروڈکٹس ٹیب میں دستیاب ہیں' : 'items available in Products tab'}`
-                  : language === 'ur'
-                    ? 'قسم منتخب کریں تاکہ اس کی اشیاء لوڈ ہوں'
-                    : 'Pick a shop type to load its items'
-              }
-              theme={theme}
-              last
-              onPress={() => setIsShopTypePickerOpen(true)}
-            />
-          </Section>
-
-          {/* Advanced toggle — billing + data tools live behind it */}
-          <Pressable onPress={() => setShowAdvanced((v) => !v)} style={styles.moreToggle}>
-            <Text style={[styles.moreToggleText, { color: theme.primary }]}>
-              {language === 'ur' ? '⚙ ایڈوانسڈ سیٹنگز' : '⚙ Advanced Settings'}
-            </Text>
-            <Ionicons name={showAdvanced ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
-          </Pressable>
-
-          {showAdvanced && (
-            <>
-          {/* Billing */}
-          <View style={styles.sectionWrap}>
-            <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('billingSection').toUpperCase()}</Text>
-            <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              {/* Currency — keep as RowItem (opens picker, not a text input) */}
-              <RowItem
-                icon="cash-outline"
-                iconColor="#059669"
-                iconBg="#D1FAE5"
-                label={t('currencyLabel')}
-                sublabel={
-                  selectedCurrency
-                    ? language === 'ur' ? selectedCurrency.nameUrdu : selectedCurrency.name
-                    : undefined
-                }
-                onPress={() => setIsCurrencyPickerOpen(true)}
-                theme={theme}
-              >
-                <View style={styles.currencyValueRow}>
-                  <Text style={[styles.currencyValueText, { color: theme.text }]} numberOfLines={1}>
-                    {selectedCurrency
-                      ? `${selectedCurrency.flag} ${selectedCurrency.code} · ${settings.currencySymbol}`
-                      : settings.currencySymbol}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
-                </View>
+        {/* ════════════════════════ SETTINGS TAB ═══════════════════════════════ */}
+        {activeSegment === 'settings' && (
+          <>
+            {/* Appearance */}
+            <Section title={t('appearanceSection')} theme={theme}>
+              {/* Language */}
+              <RowItem icon="language-outline" iconColor="#7C3AED" iconBg="#EDE9FE" label={t('languageLabel')} theme={theme}>
+                <LangToggle value={language} onChange={setLanguage} theme={theme} />
               </RowItem>
-              <StackedField
-                icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7"
-                label={t('lowStockThresholdLabel')}
-                value={lowStockThreshold} onChangeText={setLowStockThreshold}
-                keyboardType="numeric" placeholder="5"
-                theme={theme}
-              />
-              <StackedField
-                icon="receipt-outline" iconColor="#0284C7" iconBg="#E0F2FE"
-                label={t('billFooterLabel')}
-                value={footerNote} onChangeText={setFooterNote}
-                placeholder="Thank you for shopping!"
-                theme={theme}
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                  }, 150);
-                }}
-              />
-              <StackedField
-                icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE"
-                label={t('billFooterUrduLabel')}
-                value={footerNoteUrdu} onChangeText={setFooterNoteUrdu}
-                placeholder="خریداری کا شکریہ!"
-                theme={theme}
-                last
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                  }, 150);
-                }}
-              />
-            </View>
-          </View>
 
-            </>
-          )}
+              {/* Dark Mode */}
+              <RowItem icon="moon-outline" iconColor="#6366F1" iconBg="#E0E7FF" label={t('darkModeLabel')} theme={theme} last>
+                <DarkToggle value={settings.darkMode} onChange={(val) => updateSettings({ darkMode: val })} theme={theme} />
+              </RowItem>
+            </Section>
 
-          {/* ── Save Settings Button ── */}
-          <Pressable
-            onPress={handleSave}
-            disabled={isSaving}
-            style={({ pressed }) => [
-              styles.fullSaveBtn,
-              { backgroundColor: theme.primary },
-              (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
-            ]}
-          >
-            {isSaving ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <>
-                <Ionicons name="checkmark-circle" size={22} color="#fff" />
-                <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
-              </>
-            )}
-          </Pressable>
+            {/* WhatsApp Udhaar Reminders */}
+            <Section title={t('whatsappReminderSection')} theme={theme}>
+              <RowItem
+                icon="logo-whatsapp"
+                iconColor="#25D366"
+                iconBg="#DCFCE7"
+                label={t('whatsappReminderLangLabel')}
+                sublabel={t('whatsappReminderLangSublabel')}
+                theme={theme}
+                last={false}
+              >
+                <LangToggle
+                  value={settings.whatsappReminderLanguage || 'en'}
+                  onChange={(l) => updateSettings({ whatsappReminderLanguage: l })}
+                  theme={theme}
+                />
+              </RowItem>
 
-          {/* Google Cloud Backup & Account Section */}
-          <Section title={t('googleAccount')} theme={theme}>
-            {!user ? (
-              <View style={styles.googleAuthCard}>
-                <View style={styles.googleHeaderRow}>
-                  <View style={styles.googleIconCircle}>
-                    <Ionicons name="logo-google" size={22} color="#EA4335" />
+              {/* Live Message Preview & Custom Template Card */}
+              <View style={[styles.waPreviewContainer, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                <View style={styles.waPreviewHeader}>
+                  <View style={styles.waPreviewHeaderLeft}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={16} color="#25D366" />
+                    <Text style={[styles.waPreviewTitle, { color: theme.textSecondary }]}>
+                      {t('whatsappReminderPreview')}
+                    </Text>
+                    {isReminderCustomized && (
+                      <View style={[styles.customBadge, { backgroundColor: settings.darkMode ? 'rgba(37,211,102,0.18)' : '#DCFCE7' }]}>
+                        <Text style={[styles.customBadgeText, { color: '#16A34A' }]}>
+                          {language === 'ur' ? 'ترمیم شدہ' : 'Custom'}
+                        </Text>
+                      </View>
+                    )}
                   </View>
-                  <View style={styles.googleTextWrap}>
-                    <Text style={[styles.googleTitle, { color: theme.text }]}>
-                      {t('googleAccount')}
-                    </Text>
-                    <Text style={[styles.googleDesc, { color: theme.textMuted }]}>
-                      {t('googleSyncDesc')}
-                    </Text>
+
+                  {isReminderCustomized && (
+                    <Pressable
+                      onPress={handleResetReminderText}
+                      hitSlop={8}
+                      style={({ pressed }) => [
+                        styles.waResetBtn,
+                        { backgroundColor: theme.surface, borderColor: theme.border },
+                        pressed && { opacity: 0.7 },
+                      ]}>
+                      <Ionicons name="refresh-outline" size={13} color={theme.textMuted} />
+                      <Text style={[styles.waResetBtnText, { color: theme.textMuted }]}>
+                        {language === 'ur' ? 'اصل بحال کریں' : 'Reset'}
+                      </Text>
+                    </Pressable>
+                  )}
+                </View>
+
+                {/* Editable Message Box */}
+                <View style={[styles.waInputWrap, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                  <TextInput
+                    value={activeReminderText}
+                    onChangeText={handleUpdateReminderText}
+                    multiline
+                    placeholder={language === 'ur' ? 'یہاں اپنا پیغام لکھیں...' : 'Enter your custom message...'}
+                    placeholderTextColor={theme.textMuted}
+                    textAlign={isUrduReminder ? 'right' : 'left'}
+                    style={[
+                      styles.waTextInput,
+                      {
+                        color: theme.text,
+                        fontFamily: isUrduReminder ? Typography.urduFontFamily : undefined,
+                      },
+                    ]}
+                  />
+                </View>
+
+                <View style={styles.waPreviewFooter}>
+                  <Ionicons name="information-circle-outline" size={13} color={theme.textMuted} />
+                  <Text style={[styles.waPreviewHint, { color: theme.textMuted }]}>
+                    {language === 'ur'
+                      ? '💡 احمد اور 2,500 صرف نمونہ ہیں، اصل بل میں گاہک کا نام اور رقم خود درج ہوگی۔'
+                      : '💡 "Ahmed" and "2,500" will be automatically replaced with the actual customer name and balance.'}
+                  </Text>
+                </View>
+              </View>
+            </Section>
+
+            {/* Advanced toggle — billing + data tools live behind it */}
+            <Pressable onPress={() => setShowAdvanced((v) => !v)} style={styles.moreToggle}>
+              <Text style={[styles.moreToggleText, { color: theme.primary }]}>
+                {language === 'ur' ? '⚙ ایڈوانسڈ سیٹنگز' : '⚙ Advanced Settings'}
+              </Text>
+              <Ionicons name={showAdvanced ? 'chevron-up' : 'chevron-down'} size={16} color={theme.primary} />
+            </Pressable>
+
+            {showAdvanced && (
+              <>
+                {/* Billing */}
+                <View style={styles.sectionWrap}>
+                  <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('billingSection').toUpperCase()}</Text>
+                  <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                    {/* Currency — keep as RowItem (opens picker, not a text input) */}
+                    <RowItem
+                      icon="cash-outline"
+                      iconColor="#059669"
+                      iconBg="#D1FAE5"
+                      label={t('currencyLabel')}
+                      sublabel={
+                        selectedCurrency
+                          ? language === 'ur' ? selectedCurrency.nameUrdu : selectedCurrency.name
+                          : undefined
+                      }
+                      onPress={() => setIsCurrencyPickerOpen(true)}
+                      theme={theme}
+                    >
+                      <View style={styles.currencyValueRow}>
+                        <Text style={[styles.currencyValueText, { color: theme.text }]} numberOfLines={1}>
+                          {selectedCurrency
+                            ? `${selectedCurrency.flag} ${selectedCurrency.code} · ${settings.currencySymbol}`
+                            : settings.currencySymbol}
+                        </Text>
+                        <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+                      </View>
+                    </RowItem>
+                    <StackedField
+                      icon="alert-circle-outline" iconColor="#D97706" iconBg="#FEF3C7"
+                      label={t('lowStockThresholdLabel')}
+                      value={lowStockThreshold} onChangeText={setLowStockThreshold}
+                      keyboardType="numeric" placeholder="5"
+                      theme={theme}
+                    />
+                    <StackedField
+                      icon="receipt-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                      label={t('billFooterLabel')}
+                      value={footerNote} onChangeText={setFooterNote}
+                      placeholder="Thank you for shopping!"
+                      theme={theme}
+                      onFocus={() => {
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 150);
+                      }}
+                    />
+                    <StackedField
+                      icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE"
+                      label={t('billFooterUrduLabel')}
+                      value={footerNoteUrdu} onChangeText={setFooterNoteUrdu}
+                      placeholder="خریداری کا شکریہ!"
+                      theme={theme}
+                      last
+                      onFocus={() => {
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 150);
+                      }}
+                    />
                   </View>
                 </View>
 
-                <Pressable
-                  onPress={handleGoogleSignIn}
-                  disabled={googleLoading || authLoading}
-                  style={({ pressed }) => [
-                    styles.googleSignInBtn,
-                    (pressed || googleLoading) && { opacity: 0.85 },
-                  ]}
-                >
-                  <Ionicons name="logo-google" size={18} color="#fff" />
-                  <Text style={styles.googleSignInBtnText}>
-                    {googleLoading ? t('syncing') : t('continueWithGoogle')}
-                  </Text>
-                </Pressable>
-              </View>
-            ) : (
-              <View style={styles.googleProfileCard}>
-                <View style={styles.googleUserRow}>
-                  {user.photoURL ? (
-                    <Image source={{ uri: user.photoURL }} style={styles.googleAvatar} />
-                  ) : (
-                    <View style={[styles.googleAvatarFallback, { backgroundColor: theme.primaryLight }]}>
-                      <Text style={[styles.googleAvatarText, { color: theme.primary }]}>
-                        {(user.displayName || user.email || 'G')[0].toUpperCase()}
+              </>
+            )}
+
+            {/* ── Save Settings Button ── */}
+            <Pressable
+              onPress={handleSave}
+              disabled={isSaving}
+              style={({ pressed }) => [
+                styles.fullSaveBtn,
+                { backgroundColor: theme.primary },
+                (pressed || isSaving) && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+              ]}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Ionicons name="checkmark-circle" size={22} color="#fff" />
+                  <Text style={styles.fullSaveBtnText}>{t('saveSettings')}</Text>
+                </>
+              )}
+            </Pressable>
+
+            {/* Google Cloud Backup & Account Section */}
+            <Section title={t('googleAccount')} theme={theme}>
+              {!user ? (
+                <View style={styles.googleAuthCard}>
+                  <View style={styles.googleHeaderRow}>
+                    <View style={styles.googleIconCircle}>
+                      <Ionicons name="logo-google" size={22} color="#EA4335" />
+                    </View>
+                    <View style={styles.googleTextWrap}>
+                      <Text style={[styles.googleTitle, { color: theme.text }]}>
+                        {language === 'ur' ? 'اکاؤنٹ اور کلاؤڈ بیک اپ' : 'Account & cloud backup'}
+                      </Text>
+                      <Text style={[styles.googleDesc, { color: theme.textMuted }]}>
+                        {language === 'ur'
+                          ? 'گوگل سے اکاؤنٹ بنائیں یا سائن ان کریں تاکہ سامان، بلز اور کھاتہ کلاؤڈ پر محفوظ رہیں۔'
+                          : 'Create an account or sign in with Google to back up inventory, bills, and Khata to the cloud.'}
                       </Text>
                     </View>
-                  )}
-                  <View style={styles.googleUserInfo}>
-                    <Text style={[styles.googleUserName, { color: theme.text }]} numberOfLines={1}>
-                      {user.displayName || 'Google User'}
-                    </Text>
-                    <Text style={[styles.googleUserEmail, { color: theme.textMuted }]} numberOfLines={1}>
-                      {user.email}
-                    </Text>
                   </View>
 
-                  <View
-                    style={[
-                      styles.syncBadge,
-                      syncStatus === 'synced' && { backgroundColor: '#DCFCE7', borderColor: '#86EFAC' },
-                      syncStatus === 'syncing' && { backgroundColor: '#E0F2FE', borderColor: '#7DD3FC' },
-                      syncStatus === 'error' && { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5' },
-                      syncStatus === 'idle' && { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                  <Pressable
+                    onPress={handleGoogleSignIn}
+                    disabled={googleLoading || authLoading}
+                    style={({ pressed }) => [
+                      styles.googleSignInBtn,
+                      (pressed || googleLoading || authLoading) && { opacity: 0.85 },
                     ]}
                   >
-                    <Ionicons
-                      name={
-                        syncStatus === 'synced'
-                          ? 'cloud-done'
-                          : syncStatus === 'syncing'
-                          ? 'cloud-upload'
-                          : syncStatus === 'error'
-                          ? 'alert-circle'
-                          : 'cloud-outline'
-                      }
-                      size={13}
-                      color={
-                        syncStatus === 'synced'
-                          ? '#15803D'
-                          : syncStatus === 'syncing'
-                          ? '#0284C7'
-                          : syncStatus === 'error'
-                          ? '#B91C1C'
-                          : theme.textMuted
-                      }
-                    />
-                    <Text
+                    {googleLoading || authLoading ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Ionicons name="logo-google" size={18} color="#fff" />
+                    )}
+                    <Text style={styles.googleSignInBtnText}>
+                      {googleLoading || authLoading
+                        ? t('syncing')
+                        : language === 'ur'
+                          ? 'اکاؤنٹ بنائیں / سائن ان'
+                          : 'Create account or sign in'}
+                    </Text>
+                  </Pressable>
+
+                  <Text style={[styles.guestLocalNote, { color: theme.textMuted }]}>
+                    {language === 'ur'
+                      ? 'آپ ابھی گیسٹ موڈ میں ہیں۔ تمام سیٹنگز مقامی طور پر کام کرتی ہیں۔'
+                      : 'You’re in guest mode. All settings below work on this device.'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.googleProfileCard}>
+                  <View style={styles.googleUserRow}>
+                    {user.photoURL ? (
+                      <Image source={{ uri: user.photoURL }} style={styles.googleAvatar} />
+                    ) : (
+                      <View style={[styles.googleAvatarFallback, { backgroundColor: theme.primaryLight }]}>
+                        <Text style={[styles.googleAvatarText, { color: theme.primary }]}>
+                          {(user.displayName || user.email || 'G')[0].toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.googleUserInfo}>
+                      <Text style={[styles.googleUserName, { color: theme.text }]} numberOfLines={1}>
+                        {user.displayName || 'Google User'}
+                      </Text>
+                      <Text style={[styles.googleUserEmail, { color: theme.textMuted }]} numberOfLines={1}>
+                        {user.email}
+                      </Text>
+                    </View>
+
+                    <View
                       style={[
-                        styles.syncBadgeText,
-                        {
-                          color:
-                            syncStatus === 'synced'
-                              ? '#15803D'
-                              : syncStatus === 'syncing'
+                        styles.syncBadge,
+                        syncStatus === 'synced' && { backgroundColor: '#DCFCE7', borderColor: '#86EFAC' },
+                        syncStatus === 'syncing' && { backgroundColor: '#E0F2FE', borderColor: '#7DD3FC' },
+                        syncStatus === 'error' && { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5' },
+                        syncStatus === 'idle' && { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                      ]}
+                    >
+                      <Ionicons
+                        name={
+                          syncStatus === 'synced'
+                            ? 'cloud-done'
+                            : syncStatus === 'syncing'
+                              ? 'cloud-upload'
+                              : syncStatus === 'error'
+                                ? 'alert-circle'
+                                : 'cloud-outline'
+                        }
+                        size={13}
+                        color={
+                          syncStatus === 'synced'
+                            ? '#15803D'
+                            : syncStatus === 'syncing'
                               ? '#0284C7'
                               : syncStatus === 'error'
-                              ? '#B91C1C'
-                              : theme.textMuted,
-                        },
-                      ]}
-                    >
-                      {syncStatus === 'synced'
-                        ? t('synced')
-                        : syncStatus === 'syncing'
-                        ? t('syncing')
-                        : syncStatus === 'error'
-                        ? t('syncError')
-                        : 'Ready'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Cloud Action Buttons */}
-                <View style={styles.googleActionsRow}>
-                  <Pressable
-                    onPress={handleSyncNow}
-                    disabled={syncStatus === 'syncing'}
-                    style={({ pressed }) => [
-                      styles.syncActionBtn,
-                      { backgroundColor: theme.primaryLight },
-                      pressed && { opacity: 0.8 },
-                    ]}
-                  >
-                    <Ionicons name="sync-outline" size={15} color={theme.primary} />
-                    <Text style={[styles.syncActionBtnText, { color: theme.primary }]}>
-                      {t('syncNow')}
-                    </Text>
-                  </Pressable>
-
-                  {/* Sign Out */}
-                  <Pressable
-                    onPress={handleLogout}
-                    disabled={isLoggingOut || isDeletingAccount}
-                    style={({ pressed }) => [
-                      styles.signOutActionBtn,
-                      { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, borderWidth: 1 },
-                      (pressed || isLoggingOut) && { opacity: 0.8 },
-                    ]}
-                  >
-                    {isLoggingOut ? (
-                      <ActivityIndicator size="small" color={theme.text} />
-                    ) : (
-                      <Ionicons name="log-out-outline" size={15} color={theme.text} />
-                    )}
-                    <Text style={[styles.signOutActionBtnText, { color: theme.text }]}>
-                      {isLoggingOut ? t('signingOut') : t('signOut')}
-                    </Text>
-                  </Pressable>
-                </View>
-
-                {/* Account & Data Deletion */}
-                <Pressable
-                  onPress={handleDeleteAccount}
-                  disabled={isLoggingOut || isDeletingAccount}
-                  style={({ pressed }) => [
-                    styles.deleteAccountBtn,
-                    { backgroundColor: theme.dangerLight, borderColor: '#FCA5A5', borderWidth: 1 },
-                    (pressed || isDeletingAccount) && { opacity: 0.8 },
-                  ]}
-                >
-                  {isDeletingAccount ? (
-                    <ActivityIndicator size="small" color={theme.danger} />
-                  ) : (
-                    <Ionicons name="trash-outline" size={14} color={theme.danger} />
-                  )}
-                  <Text style={[styles.deleteAccountBtnText, { color: theme.danger }]}>
-                    {isDeletingAccount ? t('deletingAccount') : t('deleteAccount')}
-                  </Text>
-                </Pressable>
-
-              </View>
-            )}
-          </Section>
-
-          {/* Google Drive Backup Section */}
-          <Section title={t('googleDriveTitle')} theme={theme}>
-            <View style={styles.driveCard}>
-              <View style={styles.driveHeaderRow}>
-                <View style={styles.driveIconCircle}>
-                  <Ionicons name="logo-google" size={22} color="#0F9D58" />
-                </View>
-                <View style={styles.driveTextWrap}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={[styles.driveTitle, { color: theme.text }]}>
-                      {t('googleDriveTitle')}
-                    </Text>
-                  </View>
-                  <Text style={[styles.driveDesc, { color: theme.textMuted }]}>
-                    {driveAuth
-                      ? (language === 'ur'
-                          ? `منسلک: ${driveAuth.email || 'Google Drive'} — تصاویر اور بیک اپ ڈرائیو میں محفوظ ہو رہے ہیں`
-                          : `Connected: ${driveAuth.email || 'Google Drive'} — Photos & backups saving to Drive`)
-                      : t('googleDriveDesc')}
-                  </Text>
-                </View>
-              </View>
-
-              {driveAuth ? (
-                <View style={styles.driveConnectedContent}>
-                  {/* Folder Row */}
-                  <View style={[styles.driveFolderInfoRow, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
-                    <Ionicons name="folder" size={16} color="#0F9D58" />
-                    <Text style={[styles.driveFolderName, { color: theme.textSecondary }]} numberOfLines={1}>
-                      {language === 'ur' ? 'فولڈر: Shopkeeper_Store_Data' : 'Folder: Shopkeeper_Store_Data'}
-                    </Text>
-                    <Pressable
-                      onPress={handleOpenDriveFolder}
-                      style={styles.driveOpenLinkBtn}
-                    >
-                      <Text style={styles.driveOpenLinkText}>
-                        {language === 'ur' ? 'ڈرائیو کھولیں ↗' : 'Open in Drive ↗'}
-                      </Text>
-                    </Pressable>
-                  </View>
-
-                  {/* Backup Success Notice */}
-                  {driveBackupSuccess && (
-                    <View style={styles.backupSuccessNotice}>
-                      <Ionicons name="checkmark-circle" size={14} color="#15803D" />
-                      <Text style={styles.backupSuccessNoticeText}>
-                        {t('backupToDriveSuccess')} ({driveBackupSuccess})
+                                ? '#B91C1C'
+                                : theme.textMuted
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.syncBadgeText,
+                          {
+                            color:
+                              syncStatus === 'synced'
+                                ? '#15803D'
+                                : syncStatus === 'syncing'
+                                  ? '#0284C7'
+                                  : syncStatus === 'error'
+                                    ? '#B91C1C'
+                                    : theme.textMuted,
+                          },
+                        ]}
+                      >
+                        {syncStatus === 'synced'
+                          ? t('synced')
+                          : syncStatus === 'syncing'
+                            ? t('syncing')
+                            : syncStatus === 'error'
+                              ? t('syncError')
+                              : 'Ready'}
                       </Text>
                     </View>
-                  )}
+                  </View>
 
-                  {/* Actions Row */}
-                  <View style={styles.driveActionButtonsRow}>
+                  {/* Cloud Action Buttons */}
+                  <View style={styles.googleActionsRow}>
                     <Pressable
-                      onPress={handleBackupToDrive}
-                      disabled={driveBackupLoading}
+                      onPress={handleSyncNow}
+                      disabled={syncStatus === 'syncing'}
                       style={({ pressed }) => [
-                        styles.driveBackupBtn,
-                        { backgroundColor: '#0F9D58' },
-                        (pressed || driveBackupLoading) && { opacity: 0.85 },
-                      ]}
-                    >
-                      {driveBackupLoading ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                      ) : (
-                        <Ionicons name="cloud-upload" size={16} color="#fff" />
-                      )}
-                      <Text style={styles.driveBackupBtnText}>
-                        {driveBackupLoading ? t('backingUpToDrive') : t('backupToDrive')}
-                      </Text>
-                    </Pressable>
-
-                    <Pressable
-                      onPress={handleDisconnectDrive}
-                      style={({ pressed }) => [
-                        styles.driveDisconnectBtn,
-                        { borderColor: theme.border },
+                        styles.syncActionBtn,
+                        { backgroundColor: theme.primaryLight },
                         pressed && { opacity: 0.8 },
                       ]}
                     >
-                      <Text style={[styles.driveDisconnectText, { color: theme.danger }]}>
-                        {t('disconnectDrive')}
+                      <Ionicons name="sync-outline" size={15} color={theme.primary} />
+                      <Text style={[styles.syncActionBtnText, { color: theme.primary }]}>
+                        {t('syncNow')}
+                      </Text>
+                    </Pressable>
+
+                    {/* Sign Out */}
+                    <Pressable
+                      onPress={handleLogout}
+                      disabled={isLoggingOut || isDeletingAccount}
+                      style={({ pressed }) => [
+                        styles.signOutActionBtn,
+                        { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, borderWidth: 1 },
+                        (pressed || isLoggingOut) && { opacity: 0.8 },
+                      ]}
+                    >
+                      {isLoggingOut ? (
+                        <ActivityIndicator size="small" color={theme.text} />
+                      ) : (
+                        <Ionicons name="log-out-outline" size={15} color={theme.text} />
+                      )}
+                      <Text style={[styles.signOutActionBtnText, { color: theme.text }]}>
+                        {isLoggingOut ? t('signingOut') : t('signOut')}
                       </Text>
                     </Pressable>
                   </View>
+
+                  {/* Account & Data Deletion */}
+                  <Pressable
+                    onPress={handleDeleteAccount}
+                    disabled={isLoggingOut || isDeletingAccount}
+                    style={({ pressed }) => [
+                      styles.deleteAccountBtn,
+                      { backgroundColor: theme.dangerLight, borderColor: '#FCA5A5', borderWidth: 1 },
+                      (pressed || isDeletingAccount) && { opacity: 0.8 },
+                    ]}
+                  >
+                    {isDeletingAccount ? (
+                      <ActivityIndicator size="small" color={theme.danger} />
+                    ) : (
+                      <Ionicons name="trash-outline" size={14} color={theme.danger} />
+                    )}
+                    <Text style={[styles.deleteAccountBtnText, { color: theme.danger }]}>
+                      {isDeletingAccount ? t('deletingAccount') : t('deleteAccount')}
+                    </Text>
+                  </Pressable>
+
                 </View>
-              ) : (
-                <Pressable
-                  onPress={handleConnectDrive}
-                  disabled={driveLoading}
-                  style={({ pressed }) => [
-                    styles.driveConnectBtn,
-                    { backgroundColor: '#0F9D58' },
-                    (pressed || driveLoading) && { opacity: 0.85 },
-                  ]}
-                >
-                  {driveLoading ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <Ionicons name="cloud-upload-outline" size={18} color="#fff" />
-                  )}
-                  <Text style={styles.driveConnectBtnText}>
-                    {driveLoading ? 'Connecting...' : t('connectDrive')}
-                  </Text>
-                </Pressable>
               )}
-            </View>
-          </Section>
+            </Section>
 
-          {/* Data Management */}
-          {showAdvanced && (
-            <>
-          <Section title={t('dataManagement')} theme={theme}>
-            <RowItem
-              icon="download-outline"
-              iconColor="#059669"
-              iconBg="#D1FAE5"
-              label={t('backupBtn')}
-              sublabel={t('backupSublabel')}
-              onPress={handleExport}
-              theme={theme}
-            />
-            <RowItem
-              icon="cloud-upload-outline"
-              iconColor="#0284C7"
-              iconBg="#E0F2FE"
-              label={t('restoreBtn')}
-              sublabel={t('restoreSublabel')}
-              onPress={() => setShowImportBox(!showImportBox)}
-              theme={theme}
-            />
-            <RowItem
-              icon="trash-outline"
-              iconColor="#DC2626"
-              iconBg="#FEE2E2"
-              label={t('resetSampleBtn')}
-              sublabel={t('resetSublabel')}
-              onPress={handleReset}
-              theme={theme}
-              last
-            />
-          </Section>
+            {/* Google Drive Backup Section */}
+            <Section title={t('googleDriveTitle')} theme={theme}>
+              <View style={styles.driveCard}>
+                <View style={styles.driveHeaderRow}>
+                  <View style={styles.driveIconCircle}>
+                    <Ionicons name="logo-google" size={22} color="#0F9D58" />
+                  </View>
+                  <View style={styles.driveTextWrap}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={[styles.driveTitle, { color: theme.text }]}>
+                        {t('googleDriveTitle')}
+                      </Text>
+                    </View>
+                    <Text style={[styles.driveDesc, { color: theme.textMuted }]}>
+                      {driveAuth
+                        ? (language === 'ur'
+                          ? `منسلک: ${driveAuth.email || 'Google Drive'} — تصاویر اور بیک اپ ڈرائیو میں محفوظ ہو رہے ہیں`
+                          : `Connected: ${driveAuth.email || 'Google Drive'} — Photos & backups saving to Drive`)
+                        : t('googleDriveDesc')}
+                    </Text>
+                  </View>
+                </View>
 
-          {/* Import Box */}
-          {showImportBox && (
-            <View style={[styles.importBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <View style={styles.importBoxHeader}>
-                <Ionicons name="document-text-outline" size={20} color={theme.primary} />
-                <Text style={[styles.importBoxDesc, { color: theme.textMuted }]}>
-                  {language === 'ur'
-                    ? 'پہلے سے محفوظ شدہ بیک اپ فائل (.json) منتخب کر کے اپنا ڈیٹا بحال کریں۔'
-                    : 'Select a previously saved backup file (.json) to restore your products, sales, and ledger records.'}
-                </Text>
+                {driveAuth ? (
+                  <View style={styles.driveConnectedContent}>
+                    {/* Folder Row */}
+                    <View style={[styles.driveFolderInfoRow, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
+                      <Ionicons name="folder" size={16} color="#0F9D58" />
+                      <Text style={[styles.driveFolderName, { color: theme.textSecondary }]} numberOfLines={1}>
+                        {language === 'ur' ? 'فولڈر: Shopkeeper_Store_Data' : 'Folder: Shopkeeper_Store_Data'}
+                      </Text>
+                      <Pressable
+                        onPress={handleOpenDriveFolder}
+                        style={styles.driveOpenLinkBtn}
+                      >
+                        <Text style={styles.driveOpenLinkText}>
+                          {language === 'ur' ? 'ڈرائیو کھولیں ↗' : 'Open in Drive ↗'}
+                        </Text>
+                      </Pressable>
+                    </View>
+
+                    {/* Backup Success Notice */}
+                    {driveBackupSuccess && (
+                      <View style={styles.backupSuccessNotice}>
+                        <Ionicons name="checkmark-circle" size={14} color="#15803D" />
+                        <Text style={styles.backupSuccessNoticeText}>
+                          {t('backupToDriveSuccess')} ({driveBackupSuccess})
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* Actions Row */}
+                    <View style={styles.driveActionButtonsRow}>
+                      <Pressable
+                        onPress={handleBackupToDrive}
+                        disabled={driveBackupLoading}
+                        style={({ pressed }) => [
+                          styles.driveBackupBtn,
+                          { backgroundColor: '#0F9D58' },
+                          (pressed || driveBackupLoading) && { opacity: 0.85 },
+                        ]}
+                      >
+                        {driveBackupLoading ? (
+                          <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                          <Ionicons name="cloud-upload" size={16} color="#fff" />
+                        )}
+                        <Text style={styles.driveBackupBtnText}>
+                          {driveBackupLoading ? t('backingUpToDrive') : t('backupToDrive')}
+                        </Text>
+                      </Pressable>
+
+                      <Pressable
+                        onPress={handleDisconnectDrive}
+                        style={({ pressed }) => [
+                          styles.driveDisconnectBtn,
+                          { borderColor: theme.border },
+                          pressed && { opacity: 0.8 },
+                        ]}
+                      >
+                        <Text style={[styles.driveDisconnectText, { color: theme.danger }]}>
+                          {t('disconnectDrive')}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={handleConnectDrive}
+                    disabled={driveLoading}
+                    style={({ pressed }) => [
+                      styles.driveConnectBtn,
+                      { backgroundColor: '#0F9D58' },
+                      (pressed || driveLoading) && { opacity: 0.85 },
+                    ]}
+                  >
+                    {driveLoading ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Ionicons name="cloud-upload-outline" size={18} color="#fff" />
+                    )}
+                    <Text style={styles.driveConnectBtnText}>
+                      {driveLoading ? 'Connecting...' : t('connectDrive')}
+                    </Text>
+                  </Pressable>
+                )}
               </View>
+            </Section>
 
-              <Pressable
-                onPress={handleImportFromFile}
-                style={({ pressed }) => [
-                  styles.importFileBtn,
-                  { backgroundColor: theme.primary },
-                  pressed && { opacity: 0.85 },
-                ]}
-              >
-                <Ionicons name="folder-open-outline" size={18} color="#fff" />
-                <Text style={styles.importFileBtnText}>
-                  {t('chooseBackupFile')}
-                </Text>
-              </Pressable>
-            </View>
-          )}
-            </>
-          )}
+            {/* Data Management */}
+            {showAdvanced && (
+              <>
+                <Section title={t('dataManagement')} theme={theme}>
+                  <RowItem
+                    icon="download-outline"
+                    iconColor="#059669"
+                    iconBg="#D1FAE5"
+                    label={t('backupBtn')}
+                    sublabel={t('backupSublabel')}
+                    onPress={handleExport}
+                    theme={theme}
+                  />
+                  <RowItem
+                    icon="cloud-upload-outline"
+                    iconColor="#0284C7"
+                    iconBg="#E0F2FE"
+                    label={t('restoreBtn')}
+                    sublabel={t('restoreSublabel')}
+                    onPress={() => setShowImportBox(!showImportBox)}
+                    theme={theme}
+                  />
+                  <RowItem
+                    icon="trash-outline"
+                    iconColor="#DC2626"
+                    iconBg="#FEE2E2"
+                    label={t('resetSampleBtn')}
+                    sublabel={t('resetSublabel')}
+                    onPress={handleReset}
+                    theme={theme}
+                    last
+                  />
+                </Section>
 
-          {/* About & Legal Section */}
-          <Section title={t('aboutLegal')} theme={theme}>
-            <RowItem
-              icon="school-outline"
-              iconColor="#059669"
-              iconBg="#D1FAE5"
-              label={language === 'ur' ? 'ایپ کا تعارف اور گائیڈ' : 'App Tour & Interactive Guide'}
-              sublabel={language === 'ur' ? 'کاؤنٹر، کھاتہ اور گلہ کی پریکٹس دوبارہ کریں' : 'Replay interactive practice session anytime'}
-              onPress={startHandsOnTour}
-              theme={theme}
-            />
-            <RowItem
-              icon="shield-checkmark-outline"
-              iconColor="#2563EB"
-              iconBg="#DBEAFE"
-              label={t('privacyPolicy')}
-              sublabel={t('privacyPolicySublabel')}
-              onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}
-              theme={theme}
-            />
-            <RowItem
-              icon="document-text-outline"
-              iconColor="#0D9488"
-              iconBg="#CCFBF1"
-              label={t('termsOfService')}
-              sublabel={t('termsOfServiceSublabel')}
-              onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}
-              theme={theme}
-            />
-            <RowItem
-              icon="trash-bin-outline"
-              iconColor="#DC2626"
-              iconBg="#FEE2E2"
-              label={t('accountDeletionTitle')}
-              sublabel={t('accountDeletionSublabel')}
-              onPress={() => openLegalUrl(LEGAL_CONFIG.accountDeletionUrl)}
-              theme={theme}
-            />
-            <RowItem
-              icon="information-circle-outline"
-              iconColor="#64748B"
-              iconBg="#F1F5F9"
-              label={t('appVersionLabel')}
-              sublabel={`v${LEGAL_CONFIG.appVersion} (${LEGAL_CONFIG.packageName})`}
-              theme={theme}
-              last
-            />
-          </Section>
+                {/* Import Box */}
+                {showImportBox && (
+                  <View style={[styles.importBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                    <View style={styles.importBoxHeader}>
+                      <Ionicons name="document-text-outline" size={20} color={theme.primary} />
+                      <Text style={[styles.importBoxDesc, { color: theme.textMuted }]}>
+                        {language === 'ur'
+                          ? 'پہلے سے محفوظ شدہ بیک اپ فائل (.json) منتخب کر کے اپنا ڈیٹا بحال کریں۔'
+                          : 'Select a previously saved backup file (.json) to restore your products, sales, and ledger records.'}
+                      </Text>
+                    </View>
 
-        </>
-      )}
+                    <Pressable
+                      onPress={handleImportFromFile}
+                      style={({ pressed }) => [
+                        styles.importFileBtn,
+                        { backgroundColor: theme.primary },
+                        pressed && { opacity: 0.85 },
+                      ]}
+                    >
+                      <Ionicons name="folder-open-outline" size={18} color="#fff" />
+                      <Text style={styles.importFileBtnText}>
+                        {t('chooseBackupFile')}
+                      </Text>
+                    </Pressable>
+                  </View>
+                )}
+              </>
+            )}
 
-      {/* Bottom padding */}
-      <View style={{ height: 40 }} />
+            {/* About & Legal Section */}
+            <Section title={t('aboutLegal')} theme={theme}>
+              <RowItem
+                icon="shield-checkmark-outline"
+                iconColor="#2563EB"
+                iconBg="#DBEAFE"
+                label={t('privacyPolicy')}
+                sublabel={t('privacyPolicySublabel')}
+                onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}
+                theme={theme}
+              />
+              <RowItem
+                icon="document-text-outline"
+                iconColor="#0D9488"
+                iconBg="#CCFBF1"
+                label={t('termsOfService')}
+                sublabel={t('termsOfServiceSublabel')}
+                onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}
+                theme={theme}
+              />
+              <RowItem
+                icon="trash-bin-outline"
+                iconColor="#DC2626"
+                iconBg="#FEE2E2"
+                label={t('accountDeletionTitle')}
+                sublabel={t('accountDeletionSublabel')}
+                onPress={() => openLegalUrl(LEGAL_CONFIG.accountDeletionUrl)}
+                theme={theme}
+              />
+              <RowItem
+                icon="information-circle-outline"
+                iconColor="#64748B"
+                iconBg="#F1F5F9"
+                label={t('appVersionLabel')}
+                sublabel={`v${LEGAL_CONFIG.appVersion} (${LEGAL_CONFIG.packageName})`}
+                theme={theme}
+                last
+              />
+            </Section>
 
-      <CurrencyPickerModal
-        visible={isCurrencyPickerOpen}
-        onClose={() => setIsCurrencyPickerOpen(false)}
-        onSelect={({ code, symbol }) => updateSettings({ currencyCode: code, currencySymbol: symbol })}
-      />
+          </>
+        )}
 
-      {/* Camera Modal */}
-      <CameraModal
-        visible={isCameraOpen}
-        onClose={() => setIsCameraOpen(false)}
-        onCapture={(uri) => { handleLogoSelected(uri); setIsCameraOpen(false); }}
-        title={t('takePhoto')}
-      />
+        {/* Bottom padding */}
+        <View style={{ height: 40 }} />
 
-      {/* Shop Type Picker Modal */}
-      <ShopTypePickerModal
-        visible={isShopTypePickerOpen}
-        onClose={() => setIsShopTypePickerOpen(false)}
-      />
+        <CurrencyPickerModal
+          visible={isCurrencyPickerOpen}
+          onClose={() => setIsCurrencyPickerOpen(false)}
+          onSelect={({ code, symbol }) => updateSettings({ currencyCode: code, currencySymbol: symbol })}
+        />
+
+        {/* Camera Modal */}
+        <CameraModal
+          visible={isCameraOpen}
+          onClose={() => setIsCameraOpen(false)}
+          onCapture={(uri) => { handleLogoSelected(uri); setIsCameraOpen(false); }}
+          title={t('takePhoto')}
+        />
 
       </ScrollView>
     </KeyboardAvoidingView>
@@ -2053,66 +2174,89 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: Spacing.lg,
     overflow: 'hidden',
-    ...Shadows.md,
+    paddingBottom: Spacing.md,
+    ...Shadows.sm,
   },
   avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   avatarTapArea: {
     position: 'relative',
-    width: 80,
-    height: 80,
+    width: 68,
+    height: 68,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2.5,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    borderWidth: 2,
   },
   avatarFallback: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     overflow: 'hidden',
   },
   avatarLogoImg: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-  },
-  avatarInitials: {
-    fontSize: 26,
-    fontWeight: '900',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
   cameraBadge: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    bottom: -1,
+    right: -1,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#fff',
   },
-  avatarInfo: { flex: 1, gap: 2 },
-  avatarName: { fontSize: 17, fontWeight: '800', letterSpacing: -0.3 },
-  avatarShop: { fontSize: 14, fontWeight: '600' },
-  avatarType: { fontSize: 12 },
+  avatarInfo: {
+    flex: 1,
+    gap: 3,
+  },
+  avatarShop: {
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  avatarName: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  accountPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 10,
+    marginTop: 2,
+  },
+  accountPillText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
 
   // Photo actions
   photoActions: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingTop: 4,
     flexWrap: 'wrap',
   },
   photoBtn: {
@@ -2122,21 +2266,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
   },
-  photoBtnText: { fontSize: 12, fontWeight: '700' },
-
-  // Stats
-  statsStrip: {
-    flexDirection: 'row',
+  photoBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  photoRemoveBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    paddingVertical: Spacing.md,
+    justifyContent: 'center',
+    borderWidth: 1,
   },
-  statItem: { flex: 1, alignItems: 'center', gap: 2 },
-  statValue: { fontSize: 15, fontWeight: '900' },
-  statLabel: { fontSize: 11, fontWeight: '500' },
-  statDivider: { width: 1, height: 28 },
 
   // Section
   sectionWrap: { marginBottom: Spacing.lg },
@@ -2208,7 +2351,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-// Save button — single prominent CTA at bottom of each tab
+  // Save button — single prominent CTA at bottom of each tab
   moreToggle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2443,6 +2586,96 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
   },
 
+  guestAccountCard: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
+    ...Shadows.sm,
+  },
+  guestAccountHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  guestModeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  guestModeBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  guestAccountTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  guestAccountSub: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 2,
+  },
+  guestBenefitsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  guestBenefitChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  guestBenefitChipText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  guestSignInBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: '#1E293B',
+    paddingVertical: 13,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    marginTop: 4,
+    ...Shadows.sm,
+  },
+  guestGoogleIconBox: {
+    width: 24,
+    height: 24,
+    borderRadius: BorderRadius.full,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guestSignInBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    flexShrink: 1,
+  },
+  guestLocalNote: {
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+
   // Google Drive Styles
   driveCard: {
     padding: Spacing.lg,
@@ -2659,7 +2892,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  /* WhatsApp Reminder Preview */
+  /* WhatsApp Reminder Preview & Template */
   waPreviewContainer: {
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
@@ -2667,12 +2900,19 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
+    gap: 8,
   },
   waPreviewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  waPreviewHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
-    marginBottom: 8,
+    flex: 1,
   },
   waPreviewTitle: {
     fontSize: 11,
@@ -2680,9 +2920,50 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     textTransform: 'uppercase',
   },
-  waPreviewBody: {
+  customBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  customBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  waResetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  waResetBtnText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  waInputWrap: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 10,
+    minHeight: 110,
+  },
+  waTextInput: {
     fontSize: 12,
     lineHeight: 19,
-    opacity: 0.9,
+    padding: 0,
+    minHeight: 90,
+    textAlignVertical: 'top',
+  },
+  waPreviewFooter: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    paddingTop: 2,
+  },
+  waPreviewHint: {
+    fontSize: 11,
+    lineHeight: 16,
+    flex: 1,
   },
 });

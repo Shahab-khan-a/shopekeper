@@ -71,12 +71,18 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
     }
   );
 
-  const paymentLabel =
-    sale.paymentMethod === 'udhaar'
-      ? (language === 'ur' ? '(ادھار)' : '(Store Credit)')
-      : sale.paymentMethod === 'cash'
-        ? (language === 'ur' ? '(نقد)' : '(Cash)')
-        : (language === 'ur' ? '(آن لائن)' : '(Online)');
+  const isSplitSale =
+    sale.paymentMethod === 'udhaar' &&
+    (sale.amountPaid || 0) > 0 &&
+    (sale.amountPaid || 0) < sale.grandTotal;
+
+  const paymentLabel = isSplitSale
+    ? (language === 'ur' ? 'جزوی نقد + ادھار (Split)' : 'Split (Cash + Khata)')
+    : sale.paymentMethod === 'udhaar'
+    ? (language === 'ur' ? '(ادھار)' : '(Store Credit)')
+    : sale.paymentMethod === 'cash'
+    ? (language === 'ur' ? '(نقد)' : '(Cash)')
+    : (language === 'ur' ? '(آن لائن)' : '(Online)');
 
   // Helper to generate a realistic SVG Barcode for HTML printing
   const generateBarcodeSVG = (code: string) => {
@@ -733,7 +739,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
             <span>Payment / ادائیگی:</span>
             <span class="bold">${paymentLabel}</span>
           </div>
-          ${sale.amountPaid ? `<div class="row"><span>Cash Paid / وصول:</span><span>Rs.${sale.amountPaid}</span></div>` : ''}
+          ${sale.amountPaid !== undefined && sale.amountPaid > 0 ? `<div class="row" style="color: #059669; font-weight: bold;"><span>Cash Paid / نقد وصول:</span><span>Rs.${sale.amountPaid}</span></div>` : ''}
+          ${sale.paymentMethod === 'udhaar' && (sale.grandTotal - (sale.amountPaid || 0)) > 0 ? `<div class="row" style="color: #dc2626; font-weight: bold;"><span>Baki / ادھار کھاتہ:</span><span>Rs.${sale.grandTotal - (sale.amountPaid || 0)}</span></div>` : ''}
           ${sale.change ? `<div class="row"><span>Change / بقایا واپس:</span><span class="bold">Rs.${sale.change}</span></div>` : ''}
 
           <div class="divider"></div>
@@ -763,12 +770,21 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
       itemsList += '\n';
     });
 
-    const paymentText =
-      sale.paymentMethod === 'cash'
-        ? (language === 'ur' ? 'نقد (Cash)' : 'Cash')
-        : sale.paymentMethod === 'online'
-          ? (language === 'ur' ? 'آن لائن (Online)' : 'Online')
-          : (language === 'ur' ? 'ادھار (Credit)' : 'Store Credit');
+    const baki = Math.max(0, sale.grandTotal - (sale.amountPaid || 0));
+    const isSplit = sale.paymentMethod === 'udhaar' && (sale.amountPaid || 0) > 0 && baki > 0;
+
+    let paymentBreakdown = '';
+    if (isSplit) {
+      paymentBreakdown = `ادائیگی (Payment): جزوی نقد + ادھار (Split)\n• نقد ادا (Cash Paid): ${settings.currencySymbol}${sale.amountPaid}\n• *باقی ادھار کھاتہ (Baki / Khata): ${settings.currencySymbol}${baki}*`;
+    } else {
+      const paymentText =
+        sale.paymentMethod === 'cash'
+          ? (language === 'ur' ? 'نقد (Cash)' : 'Cash')
+          : sale.paymentMethod === 'online'
+            ? (language === 'ur' ? 'آن لائن (Online)' : 'Online')
+            : (language === 'ur' ? 'ادھار (Credit)' : 'Store Credit');
+      paymentBreakdown = `ادائیگی کا طریقہ (Payment): ${paymentText}`;
+    }
 
     return `
 🧾 ${shopHeader}
@@ -783,7 +799,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, visible, onClo
 ${itemsList}---------------------------------
 سب ٹوٹل (Subtotal): ${settings.currencySymbol}${sale.subtotal}
 ${sale.discount > 0 ? `ڈسکاؤنٹ (Discount): -${settings.currencySymbol}${sale.discount}\n` : ''}*کل رقم (Grand Total): ${settings.currencySymbol}${sale.grandTotal}*
-ادائیگی کا طریقہ (Payment): ${paymentText}
+${paymentBreakdown}
 ---------------------------------
 ${settings.footerNoteUrdu || 'خریداری کا شکریہ! دوبارہ تشریف لائیں۔'}
 ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
@@ -1619,6 +1635,40 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
                 </Text>
                 <Text style={styles.grandTotalVal}>{money(sale.grandTotal)}</Text>
               </View>
+
+              {/* Split / Cash / Udhaar breakdown */}
+              {sale.amountPaid !== undefined && sale.amountPaid > 0 ? (
+                <View style={styles.calcRow}>
+                  <Text style={[styles.calcLabel, { color: '#059669', fontWeight: '700' }]}>
+                    {language === 'ur' ? 'نقد وصول (Cash Paid)' : 'Cash Paid'}
+                  </Text>
+                  <Text style={[styles.calcLabel, { color: '#059669', fontWeight: '800' }]}>
+                    {money(sale.amountPaid)}
+                  </Text>
+                </View>
+              ) : null}
+
+              {sale.paymentMethod === 'udhaar' && (sale.grandTotal - (sale.amountPaid || 0)) > 0 ? (
+                <View style={styles.calcRow}>
+                  <Text style={[styles.calcLabel, { color: '#DC2626', fontWeight: '700' }]}>
+                    {language === 'ur' ? 'باقی ادھار کھاتہ (Baki / Udhaar)' : 'Baki (Khata)'}
+                  </Text>
+                  <Text style={[styles.calcLabel, { color: '#DC2626', fontWeight: '800' }]}>
+                    {money(sale.grandTotal - (sale.amountPaid || 0))}
+                  </Text>
+                </View>
+              ) : null}
+
+              {sale.change && sale.change > 0 ? (
+                <View style={styles.calcRow}>
+                  <Text style={[styles.calcLabel, { color: '#2563EB', fontWeight: '700' }]}>
+                    {language === 'ur' ? 'بقایا واپس (Change)' : 'Change'}
+                  </Text>
+                  <Text style={[styles.calcLabel, { color: '#2563EB', fontWeight: '800' }]}>
+                    {money(sale.change)}
+                  </Text>
+                </View>
+              ) : null}
 
               <Text style={styles.footerEngText}>
                 {language === 'ur'

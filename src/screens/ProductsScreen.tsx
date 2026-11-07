@@ -2,7 +2,6 @@ import { ProductCard } from '@/components/ProductCard';
 import { ProductDetailsDrawer } from '@/components/ProductDetailsDrawer';
 import { ProductImage } from '@/components/ProductImage';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { FilterChip } from '@/components/ui/FilterChip';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
@@ -11,8 +10,12 @@ import { formatCompactPrice } from '@/utils/formatters';
 import { productIconFor } from '@/utils/productIcon';
 import { ShopStoreLoader } from '@/components/ShopStoreLoader';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Animated,
+  Easing,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Platform,
   Pressable,
   RefreshControl,
@@ -21,9 +24,6 @@ import {
   Text,
   View,
 } from 'react-native';
-
-import { CatalogImportModal } from '@/components/CatalogImportModal';
-import { ShopTypePickerModal } from '@/components/ShopTypePickerModal';
 
 export const ProductsScreen: React.FC = () => {
   const {
@@ -44,14 +44,114 @@ export const ProductsScreen: React.FC = () => {
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.18)';
+  const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
+  const isUrdu = language === 'ur';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<ProductCategory | 'LowStock' | 'OutOfStock'>('All');
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [isMenuMounted, setIsMenuMounted] = useState(false);
+  const menuAnim = useRef(new Animated.Value(0)).current;
+
+
+
+  const openFilterMenu = () => {
+    setIsMenuMounted(true);
+    setIsFilterMenuOpen(true);
+    Animated.spring(menuAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 65,
+    }).start();
+  };
+
+  const closeFilterMenu = () => {
+    setIsFilterMenuOpen(false);
+    Animated.timing(menuAnim, {
+      toValue: 0,
+      duration: 140,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) {
+        setIsMenuMounted(false);
+      }
+    });
+  };
+
+  const toggleFilterMenu = () => {
+    if (isFilterMenuOpen) {
+      closeFilterMenu();
+    } else {
+      openFilterMenu();
+    }
+  };
+
+
+
+  const handleSelectFilter = (filter: ProductCategory | 'LowStock' | 'OutOfStock') => {
+    setSelectedFilter(filter);
+    closeFilterMenu();
+  };
+
+  const chevronRotate = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
+
+  const menuScale = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.92, 1],
+  });
+
+  const menuTranslateY = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-6, 0],
+  });
+
+  const activeFilterMeta = useMemo(() => {
+    if (selectedFilter === 'LowStock') {
+      return {
+        label: isUrdu ? `کم (${lowStockProducts.length})` : `Low (${lowStockProducts.length})`,
+        dotColor: '#F59E0B',
+        pillBg: settings.darkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7',
+        pillBorder: settings.darkMode ? 'rgba(245, 158, 11, 0.35)' : '#FDE68A',
+        textColor: settings.darkMode ? '#FBBF24' : '#B45309',
+      };
+    }
+    if (selectedFilter === 'OutOfStock') {
+      return {
+        label: isUrdu ? `ختم (${outOfStockProducts.length})` : `Out (${outOfStockProducts.length})`,
+        dotColor: '#EF4444',
+        pillBg: settings.darkMode ? 'rgba(239, 68, 68, 0.16)' : '#FEE2E2',
+        pillBorder: settings.darkMode ? 'rgba(239, 68, 68, 0.35)' : '#FECACA',
+        textColor: settings.darkMode ? '#F87171' : '#B91C1C',
+      };
+    }
+    const hasAlerts = outOfStockProducts.length > 0 || lowStockProducts.length > 0;
+    const alertDotColor = outOfStockProducts.length > 0 ? '#EF4444' : '#F59E0B';
+    return {
+      label: isUrdu ? 'تمام اسٹاک' : 'All stock',
+      dotColor: hasAlerts ? alertDotColor : theme.primary,
+      pillBg: cardBg,
+      pillBorder: softBorder,
+      textColor: theme.text,
+    };
+  }, [
+    selectedFilter,
+    isUrdu,
+    lowStockProducts.length,
+    outOfStockProducts.length,
+    settings.darkMode,
+    theme.primary,
+    theme.text,
+    cardBg,
+    softBorder,
+  ]);
   const viewMode = productsViewMode;
   const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-  const [isTypePickerOpen, setIsTypePickerOpen] = useState(false);
 
   // If products are not loaded or empty on mount, trigger fresh fetch
   useEffect(() => {
@@ -98,177 +198,227 @@ export const ProductsScreen: React.FC = () => {
     });
   }, [products, searchQuery, selectedFilter, settings.lowStockThreshold]);
 
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: products.length };
-    products.forEach((p) => {
-      counts[p.category] = (counts[p.category] || 0) + 1;
-    });
-    return counts;
-  }, [products]);
 
-  // Dynamic store departments/categories derived purely from products in stock
-  const dynamicCategories = useMemo(() => {
-    const set = new Set<string>();
-    products.forEach((p) => {
-      const cat = p.category?.trim();
-      if (cat) set.add(cat);
-    });
-    return Array.from(set).sort();
-  }, [products]);
-
-  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.18)';
-  const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
-  const isUrdu = language === 'ur';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.topSection}>
-        <View style={styles.titleRow}>
-          <Text style={[styles.screenTitleText, { color: theme.text }]}>
-            {isUrdu ? 'اسٹاک و سامان' : 'Products'}
-          </Text>
-          <Text style={[styles.countText, { color: theme.textMuted }]}>
-            {products.length} {isUrdu ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
-          </Text>
-        </View>
-
-        <View style={styles.actionRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={isUrdu ? 'نیا آئٹم' : t('addProductBtn')}
-            onPress={() => {
-              setEditingProduct(null);
-              setIsAddProductOpen(true);
-            }}
-            style={({ pressed }) => [
-              styles.actionTile,
-              { backgroundColor: theme.heroFill },
-              pressed && { opacity: 0.9 },
-            ]}>
-            <View style={styles.actionIconWrap}>
-              <Ionicons name="add" size={18} color="#FFFFFF" />
-            </View>
-            <Text style={styles.actionTileTitle}>
-              {isUrdu ? 'نیا آئٹم' : t('addProductBtn')}
-            </Text>
-            <Text style={styles.actionTileSub}>
-              {isUrdu ? 'اسٹاک میں شامل کریں' : 'Add to stock'}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={isUrdu ? 'کیٹلاگ' : 'Catalog'}
-            onPress={() => setIsCatalogOpen(true)}
-            style={({ pressed }) => [
-              styles.actionTile,
-              { backgroundColor: theme.secondary },
-              pressed && { opacity: 0.9 },
-            ]}>
-            <View style={styles.actionIconWrap}>
-              <Ionicons name="library-outline" size={16} color="#FFFFFF" />
-            </View>
-            <Text style={styles.actionTileTitle}>
-              {isUrdu ? 'کیٹلاگ' : 'Catalog'}
-            </Text>
-            <Text style={styles.actionTileSub}>
-              {isUrdu ? 'تیار فہرست' : 'Ready-made list'}
-            </Text>
-          </Pressable>
-        </View>
-
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder={
-            isUrdu
-              ? 'اشیاء کا نام یا بارکوڈ تلاش کریں...'
-              : 'Search by item name or barcode...'
-          }
-          height={42}
+      {isMenuMounted && (
+        <Pressable
+          style={styles.menuBackdrop}
+          onPress={closeFilterMenu}
+          accessibilityLabel="Close filter menu"
         />
+      )}
 
-        <View style={styles.metricRow}>
-          <Pressable
-            onPress={() => setSelectedFilter('All')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: selectedFilter === 'All' ? theme.primary : softBorder,
-              },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
-              {isUrdu ? 'تمام' : 'All'}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]}>{products.length}</Text>
-          </Pressable>
+      <ScrollView
+        style={styles.productsMainScroll}
+        stickyHeaderIndices={[1]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.productsScrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={[theme.primary]}
+            tintColor={theme.primary}
+          />
+        }>
+        {/* Index 0: Top Cards (Title row with filter pill + Action tiles: Add Product & Catalog) */}
+        <View style={styles.topSection}>
+          <View style={styles.topCardsWrap}>
+          <View style={styles.titleRow}>
+            <View style={styles.titleLeft}>
+              <Text style={[styles.screenTitleText, { color: theme.text }]}>
+                {isUrdu ? 'اسٹاک و سامان' : 'Products'}
+              </Text>
+              <Text style={[styles.countText, { color: theme.textMuted }]}>
+                {products.length} {isUrdu ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
+              </Text>
+            </View>
 
-          <Pressable
-            onPress={() => setSelectedFilter('LowStock')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: selectedFilter === 'LowStock' ? theme.warning : softBorder,
-              },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.warning }]}>
-              {isUrdu ? 'کم اسٹاک' : 'Low'}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.warning }]}>
-              {lowStockProducts.length}
-            </Text>
-          </Pressable>
+            <View style={styles.titleSpacer} />
 
-          <Pressable
-            onPress={() => setSelectedFilter('OutOfStock')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: selectedFilter === 'OutOfStock' ? theme.danger : softBorder,
-              },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.danger }]}>
-              {isUrdu ? 'ختم' : 'Out'}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.danger }]}>
-              {outOfStockProducts.length}
-            </Text>
-          </Pressable>
-        </View>
-
-        {dynamicCategories.length > 1 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.filterScroll}
-            contentContainerStyle={styles.filterScrollContent}>
-            <FilterChip
-              key="All"
-              label={isUrdu ? `تمام (${products.length})` : `All (${products.length})`}
-              isActive={selectedFilter === 'All'}
-              onPress={() => setSelectedFilter('All')}
-            />
-            {dynamicCategories.map((cat) => {
-              const count = categoryCounts[cat] || 0;
-              return (
-                <FilterChip
-                  key={cat}
-                  label={`${cat} (${count})`}
-                  isActive={selectedFilter === cat}
-                  onPress={() => setSelectedFilter(cat as ProductCategory)}
+            <Pressable
+              onPress={toggleFilterMenu}
+              accessibilityRole="button"
+              accessibilityLabel={isUrdu ? 'اسٹاک فلٹر مینو' : 'Stock filter menu'}
+              style={({ pressed }) => [
+                styles.stockFilterPill,
+                {
+                  backgroundColor: activeFilterMeta.pillBg,
+                  borderColor: activeFilterMeta.pillBorder,
+                },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <View
+                style={[
+                  styles.stockFilterDot,
+                  { backgroundColor: activeFilterMeta.dotColor },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.stockFilterPillText,
+                  { color: activeFilterMeta.textColor },
+                ]}>
+                {activeFilterMeta.label}
+              </Text>
+              <Animated.View style={{ transform: [{ rotate: chevronRotate }] }}>
+                <Ionicons
+                  name="chevron-down"
+                  size={13}
+                  color={activeFilterMeta.textColor}
                 />
-              );
-            })}
-          </ScrollView>
-        )}
+              </Animated.View>
+            </Pressable>
+
+            {isMenuMounted && (
+              <Animated.View
+                style={[
+                  styles.animatedFilterMenu,
+                  {
+                    backgroundColor: cardBg,
+                    borderColor: softBorder,
+                    opacity: menuAnim,
+                    transform: [
+                      { translateY: menuTranslateY },
+                      { scale: menuScale },
+                    ],
+                    right: isUrdu ? undefined : 0,
+                    left: isUrdu ? 0 : undefined,
+                  },
+                ]}>
+                <Pressable
+                  onPress={() => handleSelectFilter('All')}
+                  style={({ pressed }) => [
+                    styles.menuItem,
+                    selectedFilter === 'All' && {
+                      backgroundColor: settings.darkMode
+                        ? 'rgba(255, 255, 255, 0.06)'
+                        : '#F1F5F9',
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}>
+                  <View style={[styles.menuItemDot, { backgroundColor: theme.primary }]} />
+                  <View style={styles.menuItemTextWrap}>
+                    <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                      {isUrdu ? 'تمام اشیاء' : 'All products'}
+                    </Text>
+                    <Text style={[styles.menuItemSub, { color: theme.textMuted }]}>
+                      {products.length} {isUrdu ? 'کل اشیاء' : products.length === 1 ? 'item' : 'items'}
+                    </Text>
+                  </View>
+                  {selectedFilter === 'All' && (
+                    <Ionicons name="checkmark" size={16} color={theme.primary} />
+                  )}
+                </Pressable>
+
+                <View style={[styles.menuDivider, { backgroundColor: softBorder }]} />
+
+                <Pressable
+                  onPress={() => handleSelectFilter('LowStock')}
+                  style={({ pressed }) => [
+                    styles.menuItem,
+                    selectedFilter === 'LowStock' && {
+                      backgroundColor: settings.darkMode
+                        ? 'rgba(245, 158, 11, 0.12)'
+                        : '#FEF3C7',
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}>
+                  <View style={[styles.menuItemDot, { backgroundColor: '#F59E0B' }]} />
+                  <View style={styles.menuItemTextWrap}>
+                    <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                      {isUrdu ? 'کم اسٹاک' : 'Low stock'}
+                    </Text>
+                    <Text style={[styles.menuItemSub, { color: theme.warning }]}>
+                      {lowStockProducts.length} {isUrdu ? 'اشیاء کم ہیں' : 'items low'}
+                    </Text>
+                  </View>
+                  {selectedFilter === 'LowStock' && (
+                    <Ionicons name="checkmark" size={16} color="#D97706" />
+                  )}
+                </Pressable>
+
+                <View style={[styles.menuDivider, { backgroundColor: softBorder }]} />
+
+                <Pressable
+                  onPress={() => handleSelectFilter('OutOfStock')}
+                  style={({ pressed }) => [
+                    styles.menuItem,
+                    selectedFilter === 'OutOfStock' && {
+                      backgroundColor: settings.darkMode
+                        ? 'rgba(239, 68, 68, 0.12)'
+                        : '#FEE2E2',
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}>
+                  <View style={[styles.menuItemDot, { backgroundColor: '#EF4444' }]} />
+                  <View style={styles.menuItemTextWrap}>
+                    <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                      {isUrdu ? 'ختم شدہ اسٹاک' : 'Out of stock'}
+                    </Text>
+                    <Text style={[styles.menuItemSub, { color: theme.danger }]}>
+                      {outOfStockProducts.length} {isUrdu ? 'اشیاء ختم ہیں' : 'items empty'}
+                    </Text>
+                  </View>
+                  {selectedFilter === 'OutOfStock' && (
+                    <Ionicons name="checkmark" size={16} color="#DC2626" />
+                  )}
+                </Pressable>
+              </Animated.View>
+            )}
+          </View>
+
+          <View style={styles.actionRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={isUrdu ? 'نیا آئٹم' : t('addProductBtn')}
+              onPress={() => {
+                setEditingProduct(null);
+                setIsAddProductOpen(true);
+              }}
+              style={({ pressed }) => [
+                styles.actionTile,
+                { backgroundColor: theme.heroFill },
+                pressed && { opacity: 0.9 },
+              ]}>
+              <View style={styles.actionIconWrap}>
+                <Ionicons name="add" size={18} color="#FFFFFF" />
+              </View>
+              <Text style={styles.actionTileTitle}>
+                {isUrdu ? 'نیا آئٹم' : t('addProductBtn')}
+              </Text>
+              <Text style={styles.actionTileSub}>
+                {isUrdu ? 'اسٹاک میں شامل کریں' : 'Add to stock'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
 
+      {/* Index 1: Sticky Search Bar (Always remains pinned at the top on scroll) */}
+      <View
+        style={[
+          styles.stickySearchWrap,
+          { backgroundColor: theme.background },
+        ]}>
+        <View style={styles.stickySearchInner}>
+          <SearchBar
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder={
+              isUrdu
+                ? 'اشیاء کا نام یا بارکوڈ تلاش کریں...'
+                : 'Search by item name or barcode...'
+            }
+            height={42}
+          />
+        </View>
+      </View>
+
+      {/* Index 2: Products List / Grid or Empty State */}
       <View style={styles.contentWrap}>
         <View style={styles.gridHeader}>
           <Text style={[styles.showingText, { color: theme.textMuted }]}>
@@ -345,18 +495,7 @@ export const ProductsScreen: React.FC = () => {
             }}
           />
         ) : viewMode === 'list' ? (
-          <ScrollView
-            style={styles.productsScroll}
-            contentContainerStyle={styles.productsList}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={handleRefresh}
-                colors={[theme.primary]}
-                tintColor={theme.primary}
-              />
-            }>
+          <View style={styles.productsList}>
             {filteredProducts.map((product) => {
               const isOut = product.stock <= 0;
               const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
@@ -398,28 +537,17 @@ export const ProductsScreen: React.FC = () => {
                     <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
                       {language === 'ur' && product.nameUrdu ? product.nameUrdu : product.name}
                     </Text>
-                    <View style={styles.listRowBadgeRow}>
-                      <View
-                        style={[
-                          styles.listCategoryBadge,
-                          {
-                            backgroundColor: settings.darkMode
-                              ? 'rgba(255,255,255,0.08)'
-                              : '#F1F5F9',
-                          },
-                        ]}>
-                        <Text style={[styles.listCategoryText, { color: theme.textSecondary }]}>
-                          {product.category}
-                        </Text>
-                      </View>
-                    </View>
                     {product.barcode ? (
                       <Text
                         style={[styles.listBarcodeText, { color: theme.textMuted }]}
                         numberOfLines={1}>
                         # {product.barcode}
                       </Text>
-                    ) : null}
+                    ) : (
+                      <Text style={[styles.listBarcodeText, { color: theme.textMuted }]} numberOfLines={1}>
+                        {product.unit}
+                      </Text>
+                    )}
                   </View>
 
                   <View
@@ -514,20 +642,9 @@ export const ProductsScreen: React.FC = () => {
                 </Pressable>
               );
             })}
-          </ScrollView>
+          </View>
         ) : (
-          <ScrollView
-            style={styles.productsScroll}
-            contentContainerStyle={styles.productsGrid}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={handleRefresh}
-                colors={[theme.primary]}
-                tintColor={theme.primary}
-              />
-            }>
+          <View style={styles.productsGrid}>
             {filteredProducts.map((product) => (
               <View key={product.id} style={styles.cardContainer}>
                 <ProductCard
@@ -541,9 +658,10 @@ export const ProductsScreen: React.FC = () => {
                 />
               </View>
             ))}
-          </ScrollView>
+          </View>
         )}
       </View>
+    </ScrollView>
 
       <ProductDetailsDrawer
         visible={!!selectedProductDetails}
@@ -559,23 +677,19 @@ export const ProductsScreen: React.FC = () => {
           deleteProduct(p.id);
         }}
       />
-
-      {/* Ready-made catalog import (loaded shop type) + shop-type picker */}
-      <CatalogImportModal
-        visible={isCatalogOpen}
-        onClose={() => setIsCatalogOpen(false)}
-        onChooseType={() => {
-          setIsCatalogOpen(false);
-          setIsTypePickerOpen(true);
-        }}
-      />
-      <ShopTypePickerModal visible={isTypePickerOpen} onClose={() => setIsTypePickerOpen(false)} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  productsMainScroll: {
+    flex: 1,
+  },
+  productsScrollContent: {
+    flexGrow: 1,
+    paddingBottom: Spacing.xl,
+  },
   topSection: {
     paddingHorizontal: Spacing.lg,
     paddingTop: 8,
@@ -584,11 +698,37 @@ const styles = StyleSheet.create({
     marginHorizontal: 'auto',
     width: '100%',
     gap: 10,
+    zIndex: 30,
+  },
+  topCardsWrap: {
+    gap: 10,
+  },
+  stickySearchWrap: {
+    width: '100%',
+    zIndex: 10,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 4,
+    paddingBottom: 8,
+  },
+  stickySearchInner: {
+    width: '100%',
+    maxWidth: 720,
+    marginHorizontal: 'auto',
   },
   titleRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    position: 'relative',
+    zIndex: 40,
+  },
+  titleLeft: {
+    flexDirection: 'row',
     alignItems: 'baseline',
     gap: 8,
+  },
+  titleSpacer: {
+    flex: 1,
   },
   screenTitleText: {
     fontSize: 20,
@@ -598,6 +738,76 @@ const styles = StyleSheet.create({
   countText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  stockFilterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+  },
+  stockFilterDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  stockFilterPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  menuBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 25,
+  },
+  animatedFilterMenu: {
+    position: 'absolute',
+    top: 36,
+    minWidth: 200,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    padding: 6,
+    gap: 2,
+    zIndex: 100,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderCurve: 'continuous',
+  },
+  menuItemDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  menuItemTextWrap: {
+    flex: 1,
+    gap: 1,
+  },
+  menuItemTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  menuItemSub: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  menuDivider: {
+    height: 1,
+    marginHorizontal: 6,
+    marginVertical: 2,
   },
   actionRow: {
     flexDirection: 'row',
@@ -632,32 +842,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
   },
-  metricRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  metricCard: {
-    flex: 1,
-    borderRadius: 14,
-    borderCurve: 'continuous',
-    borderWidth: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    gap: 1,
-  },
-  metricLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  metricValue: {
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-    fontVariant: ['tabular-nums'],
-  },
-
-  filterScroll: { maxHeight: 38 },
-  filterScrollContent: { gap: 8, alignItems: 'center', paddingRight: 4 },
 
   contentWrap: {
     flex: 1,
@@ -736,20 +920,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     letterSpacing: -0.2,
-  },
-  listRowBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  listCategoryBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 1.5,
-    borderRadius: 5,
-  },
-  listCategoryText: {
-    fontSize: 10,
-    fontWeight: '600',
   },
   listBarcodeText: {
     fontSize: 9.5,

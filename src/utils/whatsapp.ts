@@ -69,12 +69,18 @@ export function buildWhatsAppReceiptText(
     itemsList += `${idx + 1}. ${name}${nameUrdu}\n   ${it.quantity} ${it.product.unit || 'pc'} × ${settings.currencySymbol}${it.unitPrice} = *${settings.currencySymbol}${it.total}*\n`;
   });
 
-  const paymentText =
-    sale.paymentMethod === 'cash'
-      ? (language === 'ur' ? 'نقد (Cash)' : 'Cash')
-      : sale.paymentMethod === 'online'
-      ? (language === 'ur' ? 'آن لائن (Online)' : 'Online')
-      : (language === 'ur' ? 'ادھار (Credit)' : 'Store Credit');
+  const isSplit = sale.paymentMethod === 'udhaar' && (sale.amountPaid || 0) > 0;
+  const baki = isSplit ? Math.max(0, sale.grandTotal - (sale.amountPaid || 0)) : 0;
+
+  const paymentText = isSplit
+    ? (language === 'ur'
+        ? `نقد + ادھار (نقد: ${settings.currencySymbol}${sale.amountPaid} | باقی ادھار: ${settings.currencySymbol}${baki})`
+        : `Split (Cash: ${settings.currencySymbol}${sale.amountPaid} | Balance Due: ${settings.currencySymbol}${baki})`)
+    : sale.paymentMethod === 'cash'
+    ? (language === 'ur' ? 'نقد (Cash)' : 'Cash')
+    : sale.paymentMethod === 'online'
+    ? (language === 'ur' ? 'آن لائن (Online)' : 'Online')
+    : (language === 'ur' ? 'ادھار (Credit)' : 'Store Credit');
 
   return `
 🧾 ${shopHeader}
@@ -89,7 +95,7 @@ export function buildWhatsAppReceiptText(
 ${itemsList}---------------------------------
 سب ٹوٹل (Subtotal): ${settings.currencySymbol}${sale.subtotal}
 ${sale.discount > 0 ? `ڈسکاؤنٹ (Discount): -${settings.currencySymbol}${sale.discount}\n` : ''}*کل بل (Grand Total): ${settings.currencySymbol}${sale.grandTotal}*
-ادائیگی کا طریقہ (Payment): ${paymentText}
+${isSplit ? `ادا شدہ نقد (Cash Paid): ${settings.currencySymbol}${sale.amountPaid}\nباقی ادھار کھاتہ (Balance Due): ${settings.currencySymbol}${baki}\n` : ''}ادائیگی کا طریقہ (Payment): ${paymentText}
 ---------------------------------
 ${settings.footerNoteUrdu || 'خریداری کا شکریہ! دوبارہ تشریف لائیں۔'}
 ${settings.footerNote || 'Thank you for shopping with us!'}

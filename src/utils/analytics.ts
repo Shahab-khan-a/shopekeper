@@ -299,9 +299,16 @@ export function computeTodayPaymentMix(sales: Sale[]): PaymentMixSummary {
   let udhaar = 0;
 
   todaySales.forEach((s) => {
-    if (s.paymentMethod === 'cash') cash += s.grandTotal;
-    else if (s.paymentMethod === 'online') online += s.grandTotal;
-    else if (s.paymentMethod === 'udhaar') udhaar += s.grandTotal;
+    if (s.paymentMethod === 'online') {
+      online += s.grandTotal;
+    } else if (s.paymentMethod === 'cash') {
+      cash += s.grandTotal;
+    } else if (s.paymentMethod === 'udhaar') {
+      const paid = Math.min(s.grandTotal, Math.max(0, s.amountPaid || 0));
+      const baki = Math.max(0, s.grandTotal - paid);
+      cash += paid;
+      udhaar += baki;
+    }
   });
 
   const total = cash + online + udhaar;

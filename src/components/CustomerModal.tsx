@@ -366,7 +366,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
               styles.footer,
               {
                 borderTopColor: theme.border,
-                paddingBottom: Spacing.lg + (keyboardOffset > 0 ? 0 : insets.bottom),
+                paddingBottom:
+                  Spacing.md +
+                  (keyboardOffset > 0
+                    ? 0
+                    : Math.max(insets.bottom, Platform.OS === 'android' ? 32 : 16)),
               },
             ]}>
             <Pressable

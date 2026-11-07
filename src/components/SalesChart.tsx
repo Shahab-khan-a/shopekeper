@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Sale } from '@/types';
@@ -22,9 +23,74 @@ interface SalesChartProps {
 export const SalesChart: React.FC<SalesChartProps> = ({ sales }) => {
   const { settings, language } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const isUrdu = language === 'ur';
+  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148, 163, 184, 0.2)';
 
   const [timeframe, setTimeframe] = useState<ChartTimeframe>('week');
   const [selectedBar, setSelectedBar] = useState<ChartBarItem | null>(null);
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuMounted, setIsMenuMounted] = useState(false);
+  const menuAnim = useRef(new Animated.Value(0)).current;
+
+  const openMenu = () => {
+    setIsMenuMounted(true);
+    setIsMenuOpen(true);
+    Animated.spring(menuAnim, {
+      toValue: 1,
+      damping: 20,
+      stiffness: 240,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+    Animated.timing(menuAnim, {
+      toValue: 0,
+      duration: 140,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) setIsMenuMounted(false);
+    });
+  };
+
+  const toggleMenu = () => {
+    if (isMenuOpen) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  };
+
+  const handleSelectTimeframe = (selected: ChartTimeframe) => {
+    setTimeframe(selected);
+    closeMenu();
+  };
+
+  const chevronRotate = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
+
+  const menuScale = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.92, 1],
+  });
+
+  const menuTranslateY = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-6, 0],
+  });
+
+  const timeframeOptions: {
+    key: ChartTimeframe;
+    label: string;
+  }[] = [
+    { key: 'day', label: isUrdu ? 'آج' : 'Today' },
+    { key: 'week', label: isUrdu ? 'ہفتہ' : 'Week' },
+    { key: 'month', label: isUrdu ? 'مہینہ' : 'Month' },
+  ];
 
   const analytics = useMemo(() => {
     return computeSalesAnalytics(sales, timeframe, language);
@@ -37,40 +103,109 @@ export const SalesChart: React.FC<SalesChartProps> = ({ sales }) => {
   }, [analytics.bars]);
 
   // Set default selected bar to peak or current
-  React.useEffect(() => {
+  useEffect(() => {
     const peak = analytics.bars.find((b) => b.isPeak);
     const current = analytics.bars.find((b) => b.isCurrent);
     setSelectedBar(peak || current || analytics.bars[analytics.bars.length - 1] || null);
   }, [timeframe, analytics]);
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.card }]}>
-      {/* ── Header: Title + Action pill ── */}
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.card,
+          borderColor: softBorder,
+          borderWidth: 1,
+          zIndex: isMenuMounted ? 100 : 1,
+        },
+      ]}>
+      {isMenuMounted && (
+        <Pressable
+          style={styles.menuBackdrop}
+          onPress={closeMenu}
+          accessibilityLabel="Close timeframe menu"
+        />
+      )}
+
+      {/* ── Header: Title + Action pill with dropdown ── */}
       <View style={styles.headerRow}>
         <Text style={[styles.cardTitle, { color: theme.text }]}>
-          {language === 'ur' ? 'سیلز گراف اور اینالیٹکس' : 'Sales Trends & Chart'}
+          {isUrdu ? 'سیلز گراف اور اینالیٹکس' : 'Sales Trends & Chart'}
         </Text>
 
-        <Pressable
-          onPress={() => {
-            const order: ChartTimeframe[] = ['day', 'week', 'month'];
-            const next = order[(order.indexOf(timeframe) + 1) % order.length];
-            setTimeframe(next);
-          }}
-          style={({ pressed }) => [
-            styles.actionPill,
-            { backgroundColor: theme.primaryLight },
-            pressed && { opacity: 0.8 },
-          ]}>
-          <Text style={[styles.actionPillText, { color: theme.primary }]}>
-            {timeframe === 'day'
-              ? (language === 'ur' ? 'آج' : 'Today')
-              : timeframe === 'week'
-              ? (language === 'ur' ? 'ہفتہ' : 'Week')
-              : (language === 'ur' ? 'مہینہ' : 'Month')}
-          </Text>
-          <Ionicons name="chevron-down" size={14} color={theme.primary} />
-        </Pressable>
+        <View style={[styles.pillAnchor, { zIndex: isMenuMounted ? 60 : 40 }]}>
+          <Pressable
+            onPress={toggleMenu}
+            accessibilityRole="button"
+            accessibilityLabel={isUrdu ? 'ٹائم فریم فلٹر مینو' : 'Timeframe filter menu'}
+            style={({ pressed }) => [
+              styles.actionPill,
+              { backgroundColor: theme.primaryLight },
+              pressed && { opacity: 0.8 },
+            ]}>
+            <Text style={[styles.actionPillText, { color: theme.primary }]}>
+              {timeframe === 'day'
+                ? (isUrdu ? 'آج' : 'Today')
+                : timeframe === 'week'
+                ? (isUrdu ? 'ہفتہ' : 'Week')
+                : (isUrdu ? 'مہینہ' : 'Month')}
+            </Text>
+            <Animated.View style={{ transform: [{ rotate: chevronRotate }] }}>
+              <Ionicons name="chevron-down" size={13} color={theme.primary} />
+            </Animated.View>
+          </Pressable>
+
+          {isMenuMounted && (
+            <Animated.View
+              style={[
+                styles.animatedDropdownMenu,
+                {
+                  backgroundColor: theme.card,
+                  borderColor: softBorder,
+                  opacity: menuAnim,
+                  transform: [
+                    { translateY: menuTranslateY },
+                    { scale: menuScale },
+                  ],
+                  right: isUrdu ? undefined : 0,
+                  left: isUrdu ? 0 : undefined,
+                },
+              ]}>
+              {timeframeOptions.map((opt) => {
+                const isSelected = timeframe === opt.key;
+                return (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => handleSelectTimeframe(opt.key)}
+                    style={({ pressed }) => [
+                      styles.menuItem,
+                      isSelected && {
+                        backgroundColor: settings.darkMode
+                          ? 'rgba(255, 255, 255, 0.08)'
+                          : theme.primaryLight,
+                      },
+                      pressed && { opacity: 0.7 },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.menuItemTitle,
+                        {
+                          color: isSelected ? theme.primary : theme.text,
+                          fontWeight: isSelected ? '700' : '500',
+                        },
+                      ]}>
+                      {opt.label}
+                    </Text>
+                    {isSelected && (
+                      <Ionicons name="checkmark" size={13} color={theme.primary} />
+                    )}
+                  </Pressable>
+                );
+              })}
+            </Animated.View>
+          )}
+        </View>
       </View>
 
       {/* ── The Visual Bars Chart Area ── */}
@@ -140,7 +275,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: Spacing.md,
-    ...Shadows.md,
   },
   headerRow: {
     flexDirection: 'row',
@@ -158,13 +292,48 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
     borderRadius: BorderRadius.full,
   },
   actionPillText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
+  },
+  pillAnchor: {
+    position: 'relative',
+    zIndex: 50,
+  },
+  menuBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 45,
+    borderRadius: 16,
+  },
+  animatedDropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    marginTop: 4,
+    minWidth: 104,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    padding: 3,
+    gap: 1,
+    zIndex: 60,
+    ...Shadows.sm,
+    elevation: 6,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+    gap: 6,
+  },
+  menuItemTitle: {
+    fontSize: 12,
   },
   chartArea: {
     height: 160,

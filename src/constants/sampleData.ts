@@ -6,7 +6,6 @@ export const INITIAL_SETTINGS: ShopSettings = {
   shopNameUrdu: 'میری دکان',
   ownerName: '',
   businessType: 'General Store',
-  catalogShopType: undefined,
   email: '',
   address: '',
   city: '',

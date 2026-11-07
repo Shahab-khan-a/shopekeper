@@ -1,10 +1,14 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Pressable,
+  Animated,
+  Easing,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomerKhata } from '@/types';
@@ -13,8 +17,6 @@ import { KhataModal } from '@/components/KhataModal';
 import { CustomerKhataCard } from '@/components/CustomerKhataCard';
 import { CustomerModal, CustomerModalMode } from '@/components/CustomerModal';
 import { Colors, Spacing } from '@/constants/theme';
-import { TourBeacon } from '@/components/TourBeacon';
-import { FloatingTourPrompt } from '@/components/FloatingTourPrompt';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { EmptyState } from '@/components/ui/EmptyState';
 
@@ -51,28 +53,13 @@ export const KhataScreen: React.FC = () => {
     settings,
     t,
     language,
-    setActiveTab,
     showAlert,
     addCustomer,
     addCustomerCredit,
-    tourStep,
-    setTourStep,
-    endHandsOnTour,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.18)';
   const isUrdu = language === 'ur';
-
-  useEffect(() => {
-    if (tourStep === 6 && khata.length === 0) {
-      addCustomer({
-        name: 'Aslam Bhai',
-        nameUrdu: 'اسلم بھائی',
-        phone: '03001234567',
-        totalDebt: 450,
-      }).catch(console.error);
-    }
-  }, [tourStep, khata.length, addCustomer]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<KhataFilter>('all');
@@ -81,6 +68,8 @@ export const KhataScreen: React.FC = () => {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [customerModalMode, setCustomerModalMode] = useState<CustomerModalMode>('add_customer');
   const [expandedCustId, setExpandedCustId] = useState<string | null>(null);
+
+
 
   const pendingCount = useMemo(() => khata.filter((c) => c.totalDebt > 0).length, [khata]);
   const settledCount = useMemo(() => khata.filter((c) => c.totalDebt <= 0).length, [khata]);
@@ -186,185 +175,195 @@ export const KhataScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.topSection}>
-        <View style={styles.titleRow}>
-          <Text style={[styles.screenTitleText, { color: theme.text }]}>
-            {isUrdu ? 'کھاتہ' : 'Khata'}
-          </Text>
-          <Text style={[styles.countText, { color: theme.textMuted }]}>
-            {khata.length}{' '}
-            {isUrdu ? 'گاہک' : khata.length === 1 ? 'customer' : 'customers'}
-          </Text>
-        </View>
+      <ScrollView
+        style={styles.khataMainScroll}
+        stickyHeaderIndices={[1]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.khataScrollContent}>
+        {/* Index 0: Top Cards (Khata Title & Hero "To collect" / Add customer cards) */}
+        <View style={styles.topSection}>
+          <View style={styles.topCardsWrap}>
+            <View style={styles.titleRow}>
+              <Text style={[styles.screenTitleText, { color: theme.text }]}>
+                {isUrdu ? 'کھاتہ' : 'Khata'}
+              </Text>
+              <Text style={[styles.countText, { color: theme.textMuted }]}>
+                {khata.length}{' '}
+                {isUrdu ? 'گاہک' : khata.length === 1 ? 'customer' : 'customers'}
+              </Text>
+            </View>
 
-        <View style={[styles.heroCard, { backgroundColor: theme.heroFill }]}>
-          <Text style={styles.heroLabel}>
-            {isUrdu ? 'کل وصول طلب ادھار' : 'To collect'}
-          </Text>
-          <Text style={styles.heroAmount}>
-            {settings.currencySymbol}
-            {totalUdhaarReceivable.toLocaleString()}
-          </Text>
-          {recoveredThisMonth > 0 ? (
-            <Text style={styles.heroSub}>
-              +{settings.currencySymbol}
-              {recoveredThisMonth.toLocaleString()}{' '}
-              {isUrdu ? 'اس مہینے وصول' : 'recovered this month'}
-            </Text>
-          ) : (
-            <Text style={styles.heroSub}>
-              {pendingCount}{' '}
-              {isUrdu ? 'گاہکوں کا ادھار باقی' : 'accounts with balance'}
-            </Text>
-          )}
-        </View>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={isUrdu ? 'نیا گاہک' : 'Add customer'}
-          onPress={handleOpenAddCustomer}
-          style={({ pressed }) => [
-            styles.actionTile,
-            { backgroundColor: theme.secondary },
-            pressed && { opacity: 0.9 },
-          ]}>
-          <View style={styles.actionIconWrap}>
-            <Ionicons name="person-add" size={16} color="#FFFFFF" />
-          </View>
-          <View style={styles.actionTileCopy}>
-            <Text style={styles.actionTileTitle}>
-              {isUrdu ? 'نیا گاہک' : 'Add customer'}
-            </Text>
-            <Text style={styles.actionTileSub}>
-              {isUrdu ? 'کھاتہ کھولیں' : 'Open a new ledger'}
-            </Text>
-          </View>
-        </Pressable>
-
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder={
-            isUrdu
-              ? 'گاہک کا نام یا نمبر تلاش کریں...'
-              : 'Search by name or phone...'
-          }
-          height={42}
-        />
-
-        <View style={styles.metricRow}>
-          <Pressable
-            onPress={() => setSelectedFilter('all')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: selectedFilter === 'all' ? theme.primary : softBorder,
-              },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
-              {isUrdu ? 'تمام' : 'All'}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]}>{khata.length}</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setSelectedFilter('pending')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: selectedFilter === 'pending' ? theme.primary : softBorder,
-              },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
-              {isUrdu ? 'ادھار' : 'Due'}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]}>{pendingCount}</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setSelectedFilter('overdue')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: selectedFilter === 'overdue' ? theme.danger : softBorder,
-              },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.danger }]}>
-              {isUrdu ? 'تاخیر' : 'Late'}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.danger }]}>
-              {overdueCustomers.length}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setSelectedFilter('settled')}
-            style={({ pressed }) => [
-              styles.metricCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: selectedFilter === 'settled' ? theme.success : softBorder,
-              },
-              pressed && { opacity: 0.88 },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.success }]}>
-              {isUrdu ? 'صاف' : 'Clear'}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.success }]}>{settledCount}</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.contentWrap}>
-        {filteredCustomers.length === 0 ? (
-          <EmptyState
-            icon="people-outline"
-            title={t('noKhataFound')}
-            subtitle={
-              searchQuery
-                ? isUrdu
-                  ? 'مختلف نام یا فون نمبر سے تلاش کریں'
-                  : 'Try a different name or phone number.'
-                : isUrdu
-                  ? 'ابھی کوئی اُدھار کھاتہ نہیں ہے'
-                  : 'No customers match the current filter.'
-            }
-            actionLabel={
-              !searchQuery && selectedFilter === 'all'
-                ? isUrdu
-                  ? '+ نیا گاہک درج کریں'
-                  : '+ Add customer'
-                : undefined
-            }
-            onAction={
-              !searchQuery && selectedFilter === 'all' ? handleOpenAddCustomer : undefined
-            }
-          />
-        ) : (
-          <ScrollView
-            style={styles.customersScroll}
-            contentContainerStyle={[
-              styles.customersList,
-              tourStep === 6 && { paddingBottom: 220 },
-            ]}
-            showsVerticalScrollIndicator={false}>
-            {filteredCustomers.map((customer, idx) => (
-              <View key={customer.id} style={{ position: 'relative' }}>
-                {tourStep === 6 && idx === 0 && (
-                  <TourBeacon
-                    textUrdu="1-ٹیپ واٹس ایپ بل کا بٹن دیکھیں"
-                    textEn="1-Tap WhatsApp Bill Reminder"
-                    position="top"
-                    onSkip={endHandsOnTour}
-                  />
+            <View style={styles.heroRow}>
+              <View style={[styles.heroCard, { backgroundColor: theme.heroFill }]}>
+                <Text style={styles.heroLabel} numberOfLines={1}>
+                  {isUrdu ? 'کل وصول طلب ادھار' : 'To collect'}
+                </Text>
+                <Text
+                  style={styles.heroAmount}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit>
+                  {settings.currencySymbol}
+                  {totalUdhaarReceivable.toLocaleString()}
+                </Text>
+                {recoveredThisMonth > 0 ? (
+                  <Text style={styles.heroSub} numberOfLines={1}>
+                    +{settings.currencySymbol}
+                    {recoveredThisMonth.toLocaleString()}{' '}
+                    {isUrdu ? 'اس مہینے وصول' : 'recovered'}
+                  </Text>
+                ) : (
+                  <Text style={styles.heroSub} numberOfLines={1}>
+                    {pendingCount}{' '}
+                    {isUrdu ? 'گاہکوں کا ادھار' : 'with balance'}
+                  </Text>
                 )}
+              </View>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={isUrdu ? 'نیا گاہک شامل کریں' : 'Add customer'}
+                onPress={handleOpenAddCustomer}
+                style={({ pressed }) => [
+                  styles.addCustomerCard,
+                  { backgroundColor: theme.secondary },
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                ]}>
+                <View style={styles.addCustomerIconWrap}>
+                  <Ionicons name="person-add" size={18} color="#FFFFFF" />
+                </View>
+                <View style={styles.addCustomerTextWrap}>
+                  <Text style={styles.addCustomerTitle} numberOfLines={1}>
+                    {isUrdu ? 'نیا گاہک' : 'Add Customer'}
+                  </Text>
+                  <Text style={styles.addCustomerSub} numberOfLines={1}>
+                    {isUrdu ? '+ نیا کھاتہ' : '+ New ledger'}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        {/* Index 1: Sticky Search Bar (Pins firmly to the top on scroll) */}
+        <View
+          style={[
+            styles.stickySearchWrap,
+            { backgroundColor: theme.background },
+          ]}>
+          <View style={styles.stickySearchInner}>
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={
+                isUrdu
+                  ? 'گاہک کا نام یا نمبر تلاش کریں...'
+                  : 'Search by name or phone...'
+              }
+              height={42}
+            />
+          </View>
+        </View>
+
+        {/* Index 2: Metric Filter Row & Customers List */}
+        <View style={styles.contentWrap}>
+          <View style={styles.metricRow}>
+            <Pressable
+              onPress={() => setSelectedFilter('all')}
+              style={({ pressed }) => [
+                styles.metricCard,
+                {
+                  backgroundColor: theme.card,
+                  borderColor: selectedFilter === 'all' ? theme.primary : softBorder,
+                },
+                pressed && { opacity: 0.88 },
+              ]}>
+              <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'تمام' : 'All'}
+              </Text>
+              <Text style={[styles.metricValue, { color: theme.text }]}>{khata.length}</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setSelectedFilter('pending')}
+              style={({ pressed }) => [
+                styles.metricCard,
+                {
+                  backgroundColor: theme.card,
+                  borderColor: selectedFilter === 'pending' ? theme.primary : softBorder,
+                },
+                pressed && { opacity: 0.88 },
+              ]}>
+              <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'ادھار' : 'Due'}
+              </Text>
+              <Text style={[styles.metricValue, { color: theme.text }]}>{pendingCount}</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setSelectedFilter('overdue')}
+              style={({ pressed }) => [
+                styles.metricCard,
+                {
+                  backgroundColor: theme.card,
+                  borderColor: selectedFilter === 'overdue' ? theme.danger : softBorder,
+                },
+                pressed && { opacity: 0.88 },
+              ]}>
+              <Text style={[styles.metricLabel, { color: theme.danger }]}>
+                {isUrdu ? 'تاخیر' : 'Late'}
+              </Text>
+              <Text style={[styles.metricValue, { color: theme.danger }]}>
+                {overdueCustomers.length}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setSelectedFilter('settled')}
+              style={({ pressed }) => [
+                styles.metricCard,
+                {
+                  backgroundColor: theme.card,
+                  borderColor: selectedFilter === 'settled' ? theme.success : softBorder,
+                },
+                pressed && { opacity: 0.88 },
+              ]}>
+              <Text style={[styles.metricLabel, { color: theme.success }]}>
+                {isUrdu ? 'صاف' : 'Clear'}
+              </Text>
+              <Text style={[styles.metricValue, { color: theme.success }]}>{settledCount}</Text>
+            </Pressable>
+          </View>
+
+          {filteredCustomers.length === 0 ? (
+            <EmptyState
+              icon="people-outline"
+              title={t('noKhataFound')}
+              subtitle={
+                searchQuery
+                  ? isUrdu
+                    ? 'مختلف نام یا فون نمبر سے تلاش کریں'
+                    : 'Try a different name or phone number.'
+                  : isUrdu
+                    ? 'ابھی کوئی اُدھار کھاتہ نہیں ہے'
+                    : 'No customers match the current filter.'
+              }
+              actionLabel={
+                !searchQuery && selectedFilter === 'all'
+                  ? isUrdu
+                    ? '+ نیا گاہک درج کریں'
+                    : '+ Add customer'
+                  : undefined
+              }
+              onAction={
+                !searchQuery && selectedFilter === 'all' ? handleOpenAddCustomer : undefined
+              }
+            />
+          ) : (
+            <View style={styles.customersList}>
+              {filteredCustomers.map((customer) => (
                 <CustomerKhataCard
+                  key={customer.id}
                   customer={customer}
                   isExpanded={expandedCustId === customer.id}
                   onToggleExpand={() =>
@@ -380,11 +379,11 @@ export const KhataScreen: React.FC = () => {
                       : 0
                   }
                 />
-              </View>
-            ))}
-          </ScrollView>
-        )}
-      </View>
+              ))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
 
       <KhataModal
         customer={selectedCustomer}
@@ -409,23 +408,6 @@ export const KhataScreen: React.FC = () => {
         onSaveCustomer={handleSaveCustomer}
         onSaveCredit={handleSaveCredit}
       />
-
-      {tourStep === 6 && (
-        <FloatingTourPrompt
-          bottom={10}
-          badgeUrdu="مرحلہ 2 مکمل ✓"
-          badgeEn="Step 2 Complete ✓"
-          messageUrdu="گاہکوں کا ادھار اور 1-کلک واٹس ایپ یاددہانی۔ اب گلہ اور منافع دیکھیں۔"
-          messageEn="Customer ledger with 1-click WhatsApp bills. Next, see cash in drawer."
-          buttonUrdu="گلہ اور منافع دیکھیں ➔"
-          buttonEn="Next: See Cash in Drawer ➔"
-          onPressButton={() => {
-            setActiveTab('dashboard');
-            setTourStep(7);
-          }}
-          onSkip={endHandsOnTour}
-        />
-      )}
     </View>
   );
 };
@@ -433,6 +415,13 @@ export const KhataScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  khataMainScroll: {
+    flex: 1,
+  },
+  khataScrollContent: {
+    flexGrow: 1,
+    paddingBottom: Spacing.xl,
   },
   topSection: {
     paddingHorizontal: Spacing.lg,
@@ -442,6 +431,21 @@ const styles = StyleSheet.create({
     marginHorizontal: 'auto',
     width: '100%',
     gap: 10,
+  },
+  topCardsWrap: {
+    gap: 10,
+  },
+  stickySearchWrap: {
+    width: '100%',
+    zIndex: 10,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 4,
+    paddingBottom: 8,
+  },
+  stickySearchInner: {
+    width: '100%',
+    maxWidth: 720,
+    marginHorizontal: 'auto',
   },
   titleRow: {
     flexDirection: 'row',
@@ -457,66 +461,74 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  heroRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 10,
+  },
   heroCard: {
+    flex: 1.6,
     borderRadius: 18,
     borderCurve: 'continuous',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 14,
+    justifyContent: 'space-between',
+    minHeight: 108,
     gap: 4,
   },
   heroLabel: {
     color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   heroAmount: {
     color: '#FFFFFF',
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '800',
-    letterSpacing: -0.6,
+    letterSpacing: -0.5,
     fontVariant: ['tabular-nums'],
   },
   heroSub: {
     color: 'rgba(255, 255, 255, 0.78)',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
-    marginTop: 2,
   },
-  actionTile: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  addCustomerCard: {
+    flex: 1,
     borderRadius: 18,
     borderCurve: 'continuous',
     padding: 12,
-    minHeight: 64,
+    justifyContent: 'space-between',
+    minHeight: 108,
+    gap: 8,
   },
-  actionIconWrap: {
-    width: 30,
-    height: 30,
+  addCustomerIconWrap: {
+    width: 32,
+    height: 32,
     borderRadius: 10,
     borderCurve: 'continuous',
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionTileCopy: {
-    flex: 1,
-    gap: 1,
+  addCustomerTextWrap: {
+    gap: 2,
   },
-  actionTileTitle: {
+  addCustomerTitle: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
+    letterSpacing: -0.2,
   },
-  actionTileSub: {
+  addCustomerSub: {
     color: 'rgba(255, 255, 255, 0.82)',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
   },
   metricRow: {
     flexDirection: 'row',
     gap: 8,
+    marginBottom: 12,
   },
   metricCard: {
     flex: 1,

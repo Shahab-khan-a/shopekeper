@@ -1,13 +1,9 @@
-import { CASH_OUT_STORAGE_KEY, CashOutEntry, CashOutModal } from '@/components/CashOutModal';
-import { DayEndClosingModal } from '@/components/DayEndClosingModal';
 import { SalesChart } from '@/components/SalesChart';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { Colors, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -37,67 +33,13 @@ export const DashboardScreen: React.FC = () => {
     t,
     language,
     showAlert,
-    loadStapleProducts,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const isUrdu = language === 'ur';
 
-  const [isLoadingStaples, setIsLoadingStaples] = useState(false);
-  const [isSetupCardDismissed, setIsSetupCardDismissed] = useState(false);
-
-  useEffect(() => {
-    AsyncStorage.getItem('@shopkeeper_setup_card_dismissed')
-      .then((val) => {
-        if (val === 'true') {
-          setIsSetupCardDismissed(true);
-        }
-      })
-      .catch(() => { });
-  }, []);
-
-  const handleDismissSetupCard = async () => {
-    setIsSetupCardDismissed(true);
-    await AsyncStorage.setItem('@shopkeeper_setup_card_dismissed', 'true').catch(() => { });
-  };
-
-  const hasProducts = products.length > 0;
-  const hasCustomers = khata.length > 0;
-  const hasSales = sales.length > 0;
-  const isStoreSetupComplete = hasProducts && hasCustomers && hasSales;
-  const completedStepsCount = (hasProducts ? 1 : 0) + (hasCustomers ? 1 : 0) + (hasSales ? 1 : 0);
-  const showSetupCard = !isSetupCardDismissed && !isStoreSetupComplete;
-
-  const handleLoadStaples = async () => {
-    setIsLoadingStaples(true);
-    try {
-      await loadStapleProducts(20);
-      showAlert({
-        type: 'success',
-        title: isUrdu ? '20 اشیاء لوڈ ہو گئیں!' : 'Top 20 Staples Loaded!',
-        message: isUrdu
-          ? 'چینی، آٹا، گھی، دالیں شامل ہو گئیں۔ اب گاہک کھاتہ درج کریں یا پہلی سیل بنائیں۔'
-          : '20 essential staples added. Proceed to Customer Ledger or First Sale.',
-      });
-    } catch (e: any) {
-      console.error('[Dashboard] Error loading staples:', e);
-    } finally {
-      setIsLoadingStaples(false);
-    }
-  };
-
-  const MAX_HOME_RECENT_SALES = 4;
-  const recentSales = useMemo(() => {
-    return [...sales]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, MAX_HOME_RECENT_SALES);
-  }, [sales]);
-
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
-  const [showDayEnd, setShowDayEnd] = useState(false);
   const [showReports, setShowReports] = useState(false);
-  const [isCashOutModalOpen, setIsCashOutModalOpen] = useState(false);
-  const [todayCashOutTotal, setTodayCashOutTotal] = useState(0);
 
   const todayStart = useMemo(() => {
     const d = new Date();
@@ -105,50 +47,21 @@ export const DashboardScreen: React.FC = () => {
     return d;
   }, []);
 
-  const refreshCashOut = useCallback(async () => {
-    try {
-      const data = await AsyncStorage.getItem(CASH_OUT_STORAGE_KEY);
-      if (data) {
-        const parsed: CashOutEntry[] = JSON.parse(data);
-        const startMs = todayStart.getTime();
-        const total = parsed
-          .filter((e) => e.createdAt >= startMs)
-          .reduce((sum, e) => sum + e.amount, 0);
-        setTodayCashOutTotal(total);
-      } else {
-        setTodayCashOutTotal(0);
-      }
-    } catch {
-      setTodayCashOutTotal(0);
-    }
-  }, [todayStart]);
-
-  useEffect(() => {
-    refreshCashOut();
-  }, [refreshCashOut]);
-
   const todaySales = sales.filter((s) => new Date(s.date) >= todayStart && !s.refundedAt);
-  const todayCash = todaySales.filter((s) => s.paymentMethod === 'cash').reduce((a, b) => a + b.grandTotal, 0);
-  const todayOnline = todaySales.filter((s) => s.paymentMethod === 'online').reduce((a, b) => a + b.grandTotal, 0);
-  const todayUdhaar = todaySales.filter((s) => s.paymentMethod === 'udhaar').reduce((a, b) => a + b.grandTotal, 0);
 
-  const todayVasooli = useMemo(() => {
-    let sum = 0;
-    const startMs = todayStart.getTime();
-    (khata || []).forEach((c: any) => {
-      c.transactions?.forEach((tx: any) => {
-        if (tx.type === 'payment' || tx.type === 'payment_received') {
-          const txTime = typeof tx.createdAt === 'number' ? tx.createdAt : new Date(tx.date || 0).getTime();
-          if (txTime >= startMs) {
-            sum += tx.amount || 0;
-          }
-        }
-      });
-    });
-    return sum;
-  }, [khata, todayStart]);
+  const MAX_TODAY_BILLS = 6;
+  const todaySalesList = useMemo(() => {
+    return sales
+      .filter((s) => new Date(s.date) >= todayStart && !s.refundedAt)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [sales, todayStart]);
 
-  const todayNetCashInDrawer = Math.max(0, todayCash + todayVasooli - todayCashOutTotal);
+  const displayBills = useMemo(() => {
+    const source = todaySalesList.length > 0 ? todaySalesList : sales;
+    return [...source]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, MAX_TODAY_BILLS);
+  }, [todaySalesList, sales]);
 
   const todayGrossProfit = todaySales.reduce((a, s) => {
     const cost = s.items.reduce((c: number, it: any) => c + ((it.costPrice || 0) * it.quantity), 0);
@@ -261,89 +174,108 @@ export const DashboardScreen: React.FC = () => {
           </Pressable>
         </View>
 
+        {/* Graph: SalesChart positioned under the three top cards */}
+        <SalesChart sales={sales} />
+
+        {/* Today's bills section */}
         <View style={styles.feedHeaderRow}>
-          <View style={styles.feedTitleBlock}>
+          <View style={styles.feedTitleWrap}>
             <Text style={[styles.feedTitle, { color: theme.text }]}>
-              {isUrdu ? 'آج کے بلز' : 'Today'}
+              {todaySalesList.length > 0
+                ? (isUrdu ? 'آج کے بلز' : "Today's Bills")
+                : sales.length > 0
+                  ? (isUrdu ? 'حالیہ بلز' : 'Recent Bills')
+                  : (isUrdu ? 'آج کے بلز' : "Today's Bills")}
             </Text>
-            <Pressable
-              onPress={() => setShowDayEnd(true)}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={isUrdu ? 'گلہ کا حساب' : 'Tally cash drawer'}
-              style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
-              <Text style={[styles.tallyLink, { color: theme.textMuted }]}>
-                {isUrdu ? 'گلہ کا حساب' : 'Tally drawer'}
-              </Text>
-            </Pressable>
+            {displayBills.length > 0 && (
+              <View style={[styles.feedCountBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
+                <Text style={[styles.feedCountText, { color: theme.textSecondary }]}>
+                  {todaySalesList.length > 0 ? todaySalesList.length : displayBills.length}
+                </Text>
+              </View>
+            )}
           </View>
 
           {sales.length > 0 && (
             <Pressable
               onPress={() => setActiveTab('history')}
               hitSlop={8}
-              style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
+              style={({ pressed }) => [styles.seeAllBtn, pressed && { opacity: 0.7 }]}>
               <Text style={[styles.seeAllLink, { color: theme.primary }]}>
                 {isUrdu ? 'سب دیکھیں' : 'See all'}
               </Text>
+              <Ionicons
+                name={isUrdu ? 'chevron-back' : 'chevron-forward'}
+                size={14}
+                color={theme.primary}
+              />
             </Pressable>
           )}
         </View>
 
         <View style={styles.salesFeedList}>
-          {recentSales.length > 0 ? (
+          {displayBills.length > 0 ? (
             <>
-              {recentSales.map((s) => {
-                const isCash = s.paymentMethod === 'cash';
-                const isOnline = s.paymentMethod === 'online';
+              <ScrollView
+                nestedScrollEnabled={true}
+                showsVerticalScrollIndicator={true}
+                style={styles.todayScrollBox}
+                contentContainerStyle={styles.todayScrollContent}>
+                {displayBills.map((s) => {
+                  const isSplit = s.paymentMethod === 'udhaar' && (s.amountPaid || 0) > 0;
+                  const isCash = s.paymentMethod === 'cash';
+                  const isOnline = s.paymentMethod === 'online';
 
-                const badgeBg = isCash
-                  ? (settings.darkMode ? 'rgba(0, 201, 167, 0.16)' : '#D1FAE5')
-                  : isOnline
-                    ? (settings.darkMode ? 'rgba(47, 159, 248, 0.16)' : '#DBEAFE')
-                    : (settings.darkMode ? 'rgba(243, 112, 90, 0.16)' : '#FEE2E2');
+                  const badgeBg = isSplit
+                    ? (settings.darkMode ? 'rgba(2, 132, 199, 0.16)' : '#E0F2FE')
+                    : isCash
+                    ? (settings.darkMode ? 'rgba(0, 201, 167, 0.16)' : '#D1FAE5')
+                    : isOnline
+                      ? (settings.darkMode ? 'rgba(47, 159, 248, 0.16)' : '#DBEAFE')
+                      : (settings.darkMode ? 'rgba(243, 112, 90, 0.16)' : '#FEE2E2');
 
-                const badgeColor = isCash ? '#059669' : isOnline ? '#0284C7' : '#DC2626';
+                  const badgeColor = isSplit ? '#0284C7' : isCash ? '#059669' : isOnline ? '#0284C7' : '#DC2626';
 
-                return (
-                  <Pressable
-                    key={s.id}
-                    onPress={() => setActiveReceipt(s)}
-                    style={({ pressed }) => [
-                      styles.transactionCard,
-                      { backgroundColor: theme.card, borderColor: softBorder },
-                      pressed && { opacity: 0.88 },
-                    ]}>
-                    <View style={[styles.transactionBadge, { backgroundColor: badgeBg }]}>
-                      <Ionicons
-                        name={isCash ? 'cash-outline' : isOnline ? 'phone-portrait-outline' : 'book-outline'}
-                        size={20}
-                        color={badgeColor}
-                      />
-                    </View>
+                  return (
+                    <Pressable
+                      key={s.id}
+                      onPress={() => setActiveReceipt(s)}
+                      style={({ pressed }) => [
+                        styles.transactionCard,
+                        { backgroundColor: theme.card, borderColor: softBorder },
+                        pressed && { opacity: 0.88 },
+                      ]}>
+                      <View style={[styles.transactionBadge, { backgroundColor: badgeBg }]}>
+                        <Ionicons
+                          name={isSplit ? 'swap-horizontal-outline' : isCash ? 'cash-outline' : isOnline ? 'phone-portrait-outline' : 'book-outline'}
+                          size={20}
+                          color={badgeColor}
+                        />
+                      </View>
 
-                    <View style={styles.transactionMiddle}>
-                      <Text style={[styles.transactionTitle, { color: theme.text }]} numberOfLines={1}>
-                        {s.customerName || (isUrdu ? 'نقد کاؤنٹر سیل' : 'Walk-in cash sale')}
-                      </Text>
-                      <Text style={[styles.transactionTime, { color: theme.textMuted }]} numberOfLines={1}>
-                        {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {s.items ? s.items.length : 0} {t('itemsCount')}
-                      </Text>
-                    </View>
+                      <View style={styles.transactionMiddle}>
+                        <Text style={[styles.transactionTitle, { color: theme.text }]} numberOfLines={1}>
+                          {s.customerName || (isUrdu ? 'نقد کاؤنٹر سیل' : 'Walk-in cash sale')}
+                        </Text>
+                        <Text style={[styles.transactionTime, { color: theme.textMuted }]} numberOfLines={1}>
+                          {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {s.items ? s.items.length : 0} {t('itemsCount')}
+                        </Text>
+                      </View>
 
-                    <View style={styles.transactionRight}>
-                      <Text style={[styles.transactionAmount, { color: theme.text }]}>
-                        +{settings.currencySymbol}{s.grandTotal.toLocaleString()}
-                      </Text>
-                      <Text style={[styles.transactionMethod, { color: badgeColor }]}>
-                        {s.paymentMethod}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
+                      <View style={styles.transactionRight}>
+                        <Text style={[styles.transactionAmount, { color: theme.text }]}>
+                          +{settings.currencySymbol}{s.grandTotal.toLocaleString()}
+                        </Text>
+                        <Text style={[styles.transactionMethod, { color: badgeColor }]}>
+                          {isSplit ? (isUrdu ? 'نقد + ادھار' : 'Split') : s.paymentMethod}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
 
-              {sales.length > MAX_HOME_RECENT_SALES && (
+              {sales.length > 0 && (
                 <Pressable
                   onPress={() => setActiveTab('history')}
                   style={({ pressed }) => [
@@ -353,81 +285,35 @@ export const DashboardScreen: React.FC = () => {
                   ]}>
                   <Text style={[styles.viewMoreSalesText, { color: theme.primary }]}>
                     {isUrdu
-                      ? `تمام ${sales.length} بلز دیکھیں`
-                      : `View all ${sales.length} bills`}
+                      ? `تمام ${sales.length} بلز ہسٹری میں دیکھیں`
+                      : `View all ${sales.length} bills in History`}
                   </Text>
+                  <Ionicons
+                    name={isUrdu ? 'arrow-back' : 'arrow-forward'}
+                    size={14}
+                    color={theme.primary}
+                  />
                 </Pressable>
               )}
             </>
           ) : (
-            <EmptyState
-              icon="receipt-outline"
-              title={t('noRecentSales')}
-              subtitle={isUrdu ? 'پہلی سیل کے لیے "نیا بل" دبائیں' : 'Tap New Bill to record today\'s first sale.'}
-              actionLabel={isUrdu ? 'نیا بل' : 'New Bill'}
-              onAction={() => setIsSaleModalOpen(true)}
-              compact
-            />
+            <View style={styles.salesEmpty}>
+              <Text style={[styles.salesEmptyTitle, { color: theme.textMuted }]}>
+                {isUrdu ? 'آج ابھی کوئی بل نہیں' : 'No bills yet today'}
+              </Text>
+              <Pressable
+                onPress={() => setIsSaleModalOpen(true)}
+                hitSlop={6}
+                style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
+                <Text style={[styles.salesEmptyLink, { color: theme.primary }]}>
+                  {isUrdu ? 'نیا بل بنائیں' : 'New Bill'}
+                </Text>
+              </Pressable>
+            </View>
           )}
         </View>
 
-        {showSetupCard && (
-          <View style={[styles.setupCard, { backgroundColor: theme.card, borderColor: softBorder }]}>
-            <View style={styles.setupCardHeader}>
-              <View style={[styles.setupIconWrap, { backgroundColor: theme.successLight }]}>
-                <Ionicons name="storefront-outline" size={17} color={theme.primary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.setupTitle, { color: theme.text }]}>
-                  {isUrdu ? 'دکان شروع کرنے کے آسان مراحل' : 'Quick store setup'}
-                </Text>
-                <Text style={[styles.setupSubtitle, { color: theme.textSecondary }]}>
-                  {completedStepsCount}/3 {isUrdu ? 'مراحل مکمل' : 'completed'}
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={handleDismissSetupCard}
-                hitSlop={8}
-                style={({ pressed }) => [styles.dismissBtn, pressed && { opacity: 0.6 }]}>
-                <Ionicons name="close" size={18} color={theme.textMuted} />
-              </Pressable>
-            </View>
-
-            <View style={[styles.progressBarTrack, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#E2E8F0' }]}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    backgroundColor: theme.primary,
-                    width: `${Math.max(12, Math.round((completedStepsCount / 3) * 100))}%`,
-                  },
-                ]}
-              />
-            </View>
-
-            {!hasProducts && (
-              <View style={styles.setupActionRow}>
-                <Pressable
-                  onPress={handleLoadStaples}
-                  disabled={isLoadingStaples}
-                  style={({ pressed }) => [
-                    styles.setupPrimaryBtn,
-                    { backgroundColor: theme.primary },
-                    pressed && { opacity: 0.9 },
-                  ]}>
-                  <Ionicons name="flash-outline" size={14} color="#FFFFFF" />
-                  <Text style={styles.setupPrimaryBtnText}>
-                    {isLoadingStaples
-                      ? (isUrdu ? 'لوڈ ہو رہا ہے...' : 'Loading...')
-                      : (isUrdu ? '20 بنیادی اشیاء شامل کریں' : 'Load top 20 staples')}
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-          </View>
-        )}
-
+        {/* Reports collapsible at the very end */}
         <Pressable
           onPress={() => setShowReports((v) => !v)}
           style={({ pressed }) => [
@@ -438,7 +324,7 @@ export const DashboardScreen: React.FC = () => {
           <View style={styles.reportsPillLeft}>
             <Ionicons name="bar-chart-outline" size={17} color={theme.primary} />
             <Text style={[styles.reportsPillTitle, { color: theme.text }]}>
-              {isUrdu ? 'رپورٹس اور منافع' : 'Reports'}
+              {isUrdu ? 'رپورٹس اور منافع' : 'Reports & Analytics'}
             </Text>
           </View>
           <Ionicons name={showReports ? 'chevron-up' : 'chevron-down'} size={16} color={theme.textMuted} />
@@ -446,8 +332,6 @@ export const DashboardScreen: React.FC = () => {
 
         {showReports && (
           <View style={styles.reportsDrawerArea}>
-            <SalesChart sales={sales} />
-
             <View style={styles.financeGrid}>
               <Pressable
                 onPress={() => setActiveTab('products')}
@@ -537,26 +421,6 @@ export const DashboardScreen: React.FC = () => {
             </View>
           </View>
         )}
-
-        <DayEndClosingModal
-          visible={showDayEnd}
-          onClose={() => setShowDayEnd(false)}
-          todaySales={todaySales}
-          todaySalesTotal={todaySalesTotal}
-          todayCash={todayCash}
-          todayOnline={todayOnline}
-          todayUdhaar={todayUdhaar}
-          todayVasooli={todayVasooli}
-          todayCashOutTotal={todayCashOutTotal}
-          todayNetCashInDrawer={todayNetCashInDrawer}
-          todayGrossProfit={todayGrossProfit}
-        />
-
-        <CashOutModal
-          visible={isCashOutModalOpen}
-          onClose={() => setIsCashOutModalOpen(false)}
-          onCashOutSaved={refreshCashOut}
-        />
 
       </ScrollView>
 
@@ -680,23 +544,34 @@ const styles = StyleSheet.create({
 
   feedHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: 4,
   },
-  feedTitleBlock: {
+  feedTitleWrap: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 10,
+    alignItems: 'center',
+    gap: 8,
   },
   feedTitle: {
     fontSize: 20,
     fontWeight: '800',
     letterSpacing: -0.4,
   },
-  tallyLink: {
-    fontSize: 13,
-    fontWeight: '600',
+  feedCountBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  feedCountText: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  seeAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
   },
   seeAllLink: {
     fontSize: 14,
@@ -704,6 +579,28 @@ const styles = StyleSheet.create({
   },
   salesFeedList: {
     gap: 10,
+  },
+  todayScrollBox: {
+    maxHeight: 230,
+  },
+  todayScrollContent: {
+    gap: 10,
+    paddingVertical: 2,
+  },
+  salesEmpty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 18,
+  },
+  salesEmptyTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  salesEmptyLink: {
+    fontSize: 13,
+    fontWeight: '800',
   },
   transactionCard: {
     flexDirection: 'row',
@@ -716,12 +613,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   viewMoreSalesBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     paddingVertical: 12,
     borderRadius: 16,
     borderCurve: 'continuous',
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   viewMoreSalesText: {
     fontSize: 13,
@@ -763,66 +662,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'capitalize',
-  },
-
-  setupCard: {
-    borderRadius: 22,
-    borderCurve: 'continuous',
-    borderWidth: 1,
-    padding: Spacing.md,
-    gap: 10,
-  },
-  setupCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  setupIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  setupTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  setupSubtitle: {
-    fontSize: 12,
-    marginTop: 1,
-  },
-  dismissBtn: {
-    padding: 4,
-  },
-  progressBarTrack: {
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  setupActionRow: {
-    paddingTop: 4,
-  },
-  setupPrimaryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    minHeight: 44,
-    borderRadius: 12,
-    borderCurve: 'continuous',
-  },
-  setupPrimaryBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
   },
 
   reportsPillBtn: {

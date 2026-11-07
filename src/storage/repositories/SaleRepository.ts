@@ -5,6 +5,7 @@ import {
   CompleteSaleInput,
   SaleResult,
   RefundResult,
+  PaymentMethod,
 } from '@/types';
 import { SettingsRepository } from './SettingsRepository';
 import { SyncQueueRepository } from './SyncQueueRepository';
@@ -37,6 +38,9 @@ function mapRowToSale(row: any, items: CartItem[] = []): Sale {
     syncStatus: row.syncStatus,
   };
 }
+
+const generateUniqueId = (prefix: string) =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 export const SaleRepository = {
   async getAll(db: IDatabaseAdapter = getDatabase()): Promise<Sale[]> {
@@ -137,34 +141,54 @@ export const SaleRepository = {
       discountType === 'percent' ? Math.round((subtotal * discount) / 100) : discount;
     const grandTotal = Math.max(0, subtotal - discountAmount);
 
-    // Validate payment
-    if (paymentMethod === 'cash') {
-      if (tenderedCash !== undefined && tenderedCash < grandTotal) {
-        return {
-          success: false,
-          error: `Insufficient cash tendered. Total: Rs. ${grandTotal.toLocaleString()}, Tendered: Rs. ${tenderedCash.toLocaleString()}.`,
-        };
-      }
-    } else if (paymentMethod === 'udhaar') {
-      if (!customerName?.trim() && !customerPhone?.trim() && !customerId) {
-        return {
-          success: false,
-          error: 'Customer name or phone number is required for a Credit sale.',
-        };
+    // Calculate actual cash received, change, and remaining baki (credit balance)
+    let amountPaid = 0;
+    let change = 0;
+    let baki = 0;
+
+    if (paymentMethod === 'online') {
+      amountPaid = grandTotal;
+      change = 0;
+      baki = 0;
+    } else {
+      // Cash, Udhaar, or Split
+      const tendered =
+        tenderedCash !== undefined
+          ? Math.max(0, tenderedCash)
+          : paymentMethod === 'cash'
+          ? grandTotal
+          : 0;
+
+      if (tendered >= grandTotal) {
+        amountPaid = grandTotal;
+        change = tendered - grandTotal;
+        baki = 0;
+      } else {
+        // Split sale or pure udhaar
+        amountPaid = tendered;
+        change = 0;
+        baki = grandTotal - amountPaid;
       }
     }
 
-    const change =
-      paymentMethod === 'cash' && tenderedCash !== undefined && tenderedCash > grandTotal
-        ? tenderedCash - grandTotal
-        : 0;
+    // Per user decision:
+    // Store paymentMethod = 'udhaar' when baki > 0, amountPaid = cash actually received (capped at grandTotal, so change is never counted as paid). Fully paid cash sales stay 'cash' exactly as now.
+    const finalPaymentMethod: PaymentMethod =
+      paymentMethod === 'online'
+        ? 'online'
+        : baki > 0
+        ? 'udhaar'
+        : 'cash';
 
-    const amountPaid =
-      paymentMethod === 'cash'
-        ? (tenderedCash ?? grandTotal)
-        : paymentMethod === 'online'
-        ? grandTotal
-        : 0;
+    // If baki > 0 (part or full udhaar), customer selection/name/phone is strictly required
+    if (baki > 0) {
+      if (!customerName?.trim() && !customerPhone?.trim() && !customerId) {
+        return {
+          success: false,
+          error: 'Customer selection or name/phone is required for Credit / Split sales.',
+        };
+      }
+    }
 
     // Profit calculation: only compute profit when cost price is explicitly known (> 0)
     const totalProfit =
@@ -216,16 +240,16 @@ export const SaleRepository = {
           );
         }
 
-        // 4. Generate invoice number
+        // 4. Generate invoice number and collision-proof unique IDs
         const { invoiceNumber } = await SettingsRepository.getNextInvoiceNumber(tx);
-        const saleId = `sale-${now}-${Math.floor(Math.random() * 1000)}`;
+        const saleId = generateUniqueId('sale');
 
-        // 5. Customer & Khata management if Udhaar
+        // 5. Customer & Khata management if baki > 0
         let finalCustomerId: string | null = customerId || null;
         let customerObj: any = null;
-        const khataTxId = `ktx-${now}`;
+        const khataTxId = generateUniqueId('ktx');
 
-        if (paymentMethod === 'udhaar') {
+        if (baki > 0) {
           const cName = customerName?.trim() || 'Walk-in Customer';
           const cPhone = customerPhone?.trim() || null;
 
@@ -239,7 +263,7 @@ export const SaleRepository = {
 
           if (existingCustomer) {
             finalCustomerId = existingCustomer.id;
-            const newBalance = (existingCustomer.balance || 0) + grandTotal;
+            const newBalance = (existingCustomer.balance || 0) + baki;
             await tx.run(
               `UPDATE customers SET balance = ?, phone = COALESCE(?, phone), updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
               [newBalance, cPhone, now, finalCustomerId]
@@ -252,38 +276,43 @@ export const SaleRepository = {
               updatedAt: now,
             };
           } else {
-            finalCustomerId = `cust-${now}`;
+            finalCustomerId = generateUniqueId('cust');
             await tx.run(
               `INSERT INTO customers (id, name, nameUrdu, phone, address, balance, createdAt, updatedAt, syncStatus)
                VALUES (?, ?, NULL, ?, NULL, ?, ?, ?, 'pending')`,
-              [finalCustomerId, cName, cPhone, grandTotal, now, now]
+              [finalCustomerId, cName, cPhone, baki, now, now]
             );
             customerObj = {
               id: finalCustomerId,
               name: cName,
               phone: cPhone || '',
-              balance: grandTotal,
-              totalDebt: grandTotal,
+              balance: baki,
+              totalDebt: baki,
               createdAt: now,
               updatedAt: now,
             };
           }
 
-          // Create Khata transaction
+          // Create Khata transaction for baki only
+          const khataNote =
+            baki === grandTotal
+              ? `Credit sale - Bill #${invoiceNumber}`
+              : `Split sale (Baki) - Bill #${invoiceNumber} (Total: Rs. ${grandTotal.toLocaleString()}, Cash: Rs. ${amountPaid.toLocaleString()})`;
+
           await tx.run(
             `INSERT INTO khata_transactions (id, customerId, saleId, type, amount, note, createdAt, syncStatus)
              VALUES (?, ?, ?, 'credit', ?, ?, ?, 'pending')`,
-            [khataTxId, finalCustomerId, saleId, grandTotal, `Credit sale - Bill #${invoiceNumber}`, now]
+            [khataTxId, finalCustomerId, saleId, baki, khataNote, now]
           );
         }
 
-        // 6. Record Cash or Online payment
-        const paymentId = `pmt-${now}`;
-        if (paymentMethod === 'cash' || paymentMethod === 'online') {
+        // 6. Record Cash or Online payment only when amountPaid > 0
+        const paymentId = generateUniqueId('pmt');
+        if (amountPaid > 0) {
           await tx.run(
             `INSERT INTO payments (id, customerId, saleId, amount, paymentMethod, createdAt, syncStatus)
              VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
-            [paymentId, finalCustomerId || 'walk-in', saleId, grandTotal, paymentMethod, now]
+            [paymentId, finalCustomerId || 'walk-in', saleId, amountPaid, paymentMethod === 'online' ? 'online' : 'cash', now]
           );
         }
 
@@ -302,7 +331,7 @@ export const SaleRepository = {
             discountType,
             grandTotal,
             Math.round(totalProfit),
-            paymentMethod,
+            finalPaymentMethod,
             finalCustomerId,
             customerName?.trim() || null,
             customerPhone?.trim() || null,
@@ -317,7 +346,7 @@ export const SaleRepository = {
         // 8. Insert Sale Items
         for (let i = 0; i < items.length; i++) {
           const it = items[i];
-          const itemId = `item-${now}-${i}`;
+          const itemId = generateUniqueId(`item-${i}`);
           const pId = it.productId || it.product.id;
           const cost = it.costPrice ?? it.product.costPrice ?? 0;
           await tx.run(
@@ -353,7 +382,7 @@ export const SaleRepository = {
           grandTotal,
           total: grandTotal,
           totalProfit: Math.round(totalProfit),
-          paymentMethod,
+          paymentMethod: finalPaymentMethod,
           amountPaid,
           change,
           status: 'completed',
@@ -392,13 +421,18 @@ export const SaleRepository = {
         }
 
         // Enqueue customer & khata update if applicable
-        if (customerObj) {
+        if (customerObj && baki > 0) {
           syncOps.push({
             entityType: 'customer',
             entityId: customerObj.id,
             operation: 'update',
             payload: customerObj,
           });
+
+          const khataNote =
+            baki === grandTotal
+              ? `Credit sale - Bill #${invoiceNumber}`
+              : `Split sale (Baki) - Bill #${invoiceNumber} (Total: Rs. ${grandTotal.toLocaleString()}, Cash: Rs. ${amountPaid.toLocaleString()})`;
 
           syncOps.push({
             entityType: 'khata_transaction',
@@ -409,14 +443,14 @@ export const SaleRepository = {
               customerId: finalCustomerId,
               saleId,
               type: 'credit',
-              amount: grandTotal,
-              note: `Credit sale - Bill #${invoiceNumber}`,
+              amount: baki,
+              note: khataNote,
               createdAt: now,
             },
           });
         }
 
-        if (paymentMethod === 'cash') {
+        if (amountPaid > 0) {
           syncOps.push({
             entityType: 'payment',
             entityId: paymentId,
@@ -425,8 +459,8 @@ export const SaleRepository = {
               id: paymentId,
               customerId: finalCustomerId || 'walk-in',
               saleId,
-              amount: grandTotal,
-              paymentMethod: 'cash',
+              amount: amountPaid,
+              paymentMethod: paymentMethod === 'online' ? 'online' : 'cash',
               createdAt: now,
             },
           });
@@ -489,32 +523,35 @@ export const SaleRepository = {
           }
         }
 
-        // 4. Reverse Khata if Udhaar
+        // 4. Reverse Khata if Udhaar (reverse baki debt only)
         let customerObj: any = null;
         let reversalTxId: string | null = null;
 
         if (sRow.paymentMethod === 'udhaar' && sRow.customerId) {
-          const cust = await tx.get<any>(`SELECT * FROM customers WHERE id = ?`, [sRow.customerId]);
-          if (cust) {
-            const newBalance = Math.max(0, (cust.balance || 0) - sRow.total);
-            await tx.run(
-              `UPDATE customers SET balance = ?, updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
-              [newBalance, now, cust.id]
-            );
+          const bakiRecorded = Math.max(0, (sRow.total || 0) - (sRow.amountPaid || 0));
+          if (bakiRecorded > 0) {
+            const cust = await tx.get<any>(`SELECT * FROM customers WHERE id = ?`, [sRow.customerId]);
+            if (cust) {
+              const newBalance = Math.max(0, (cust.balance || 0) - bakiRecorded);
+              await tx.run(
+                `UPDATE customers SET balance = ?, updatedAt = ?, syncStatus = 'pending' WHERE id = ?`,
+                [newBalance, now, cust.id]
+              );
 
-            reversalTxId = `ktx-rev-${now}`;
-            await tx.run(
-              `INSERT INTO khata_transactions (id, customerId, saleId, type, amount, note, createdAt, syncStatus)
-               VALUES (?, ?, ?, 'reversal', ?, ?, ?, 'pending')`,
-              [reversalTxId, cust.id, saleId, sRow.total, `Refund reversal for Bill #${sRow.invoiceNumber}: ${reason}`, now]
-            );
+              reversalTxId = generateUniqueId('ktx-rev');
+              await tx.run(
+                `INSERT INTO khata_transactions (id, customerId, saleId, type, amount, note, createdAt, syncStatus)
+                 VALUES (?, ?, ?, 'reversal', ?, ?, ?, 'pending')`,
+                [reversalTxId, cust.id, saleId, bakiRecorded, `Refund reversal for Bill #${sRow.invoiceNumber}: ${reason}`, now]
+              );
 
-            customerObj = {
-              ...cust,
-              balance: newBalance,
-              totalDebt: newBalance,
-              updatedAt: now,
-            };
+              customerObj = {
+                ...cust,
+                balance: newBalance,
+                totalDebt: newBalance,
+                updatedAt: now,
+              };
+            }
           }
         }
 
@@ -553,6 +590,7 @@ export const SaleRepository = {
             payload: customerObj,
           });
 
+          const bakiRecorded = Math.max(0, (sRow.total || 0) - (sRow.amountPaid || 0));
           syncOps.push({
             entityType: 'khata_transaction',
             entityId: reversalTxId,
@@ -562,7 +600,7 @@ export const SaleRepository = {
               customerId: customerObj.id,
               saleId,
               type: 'reversal',
-              amount: sRow.total,
+              amount: bakiRecorded,
               note: `Refund reversal for Bill #${sRow.invoiceNumber}: ${reason}`,
               createdAt: now,
             },

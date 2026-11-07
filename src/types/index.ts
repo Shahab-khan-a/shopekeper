@@ -159,6 +159,8 @@ export interface ShopSettings {
   darkMode: boolean;
   enableSound: boolean;
   whatsappReminderLanguage?: 'en' | 'ur';
+  whatsappReminderCustomUr?: string;
+  whatsappReminderCustomEn?: string;
 }
 
 export type ActiveTab = 'dashboard' | 'sale' | 'products' | 'history' | 'khata' | 'settings';

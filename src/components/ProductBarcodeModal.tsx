@@ -1,14 +1,20 @@
 import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  Easing,
+  CameraView,
+  useCameraPermissions,
+  type BarcodeScanningResult,
+  type BarcodeType,
+} from 'expo-camera';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -23,6 +29,19 @@ interface ProductBarcodeModalProps {
   productIdToExclude?: string;
 }
 
+const RETAIL_BARCODE_TYPES: BarcodeType[] = [
+  'ean13',
+  'ean8',
+  'upc_a',
+  'upc_e',
+  'code128',
+  'code39',
+  'code93',
+  'itf14',
+  'codabar',
+  'qr',
+];
+
 export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
   visible,
   onClose,
@@ -34,94 +53,93 @@ export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const isUrdu = language === 'ur';
 
+  const [permission, requestPermission] = useCameraPermissions();
   const [inputCode, setInputCode] = useState(currentBarcode);
+  const [useCamera, setUseCamera] = useState(Platform.OS !== 'web');
+  const [torchOn, setTorchOn] = useState(false);
+  const scannedLock = useRef(false);
   const inputRef = useRef<TextInput>(null);
 
-  // Animated Laser Scanner Line
-  const laserAnim = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
-    if (visible) {
-      setInputCode(currentBarcode || '');
-      // Start looping laser animation
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(laserAnim, {
-            toValue: 1,
-            duration: 1800,
-            easing: Easing.inOut(Easing.quad),
-            useNativeDriver: true,
-          }),
-          Animated.timing(laserAnim, {
-            toValue: 0,
-            duration: 1800,
-            easing: Easing.inOut(Easing.quad),
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-
-      // Auto-focus input after modal renders
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 200);
-    } else {
-      laserAnim.stopAnimation();
+    if (!visible) {
+      scannedLock.current = false;
+      setTorchOn(false);
+      return;
     }
-  }, [visible, currentBarcode, laserAnim]);
+    setInputCode(currentBarcode || '');
+    scannedLock.current = false;
+    setUseCamera(Platform.OS !== 'web');
+  }, [visible, currentBarcode]);
 
-  // Check for duplicate barcode in other products
   const trimmed = inputCode.trim();
   const duplicateProduct = trimmed
     ? products.find(
-      (p) =>
-        p.barcode?.toLowerCase() === trimmed.toLowerCase() &&
-        p.id !== productIdToExclude
-    )
+        (p) =>
+          p.barcode?.toLowerCase() === trimmed.toLowerCase() &&
+          p.id !== productIdToExclude
+      )
     : null;
 
-  const handleApply = () => {
-    if (!trimmed) return;
-    onApplyBarcode(trimmed);
-    onClose();
-  };
+  const handleApply = useCallback(
+    (code?: string) => {
+      const value = (code ?? inputCode).trim();
+      if (!value) return;
+      onApplyBarcode(value);
+      onClose();
+    },
+    [inputCode, onApplyBarcode, onClose]
+  );
+
+  const handleBarcodeScanned = useCallback(
+    (result: BarcodeScanningResult) => {
+      if (scannedLock.current) return;
+      const data = (result?.data || '').trim();
+      if (!data) return;
+      scannedLock.current = true;
+      setInputCode(data);
+      // Auto-apply when not a duplicate of another product
+      const dup = products.find(
+        (p) =>
+          p.barcode?.toLowerCase() === data.toLowerCase() &&
+          p.id !== productIdToExclude
+      );
+      if (!dup) {
+        onApplyBarcode(data);
+        onClose();
+      } else {
+        scannedLock.current = false;
+      }
+    },
+    [products, productIdToExclude, onApplyBarcode, onClose]
+  );
 
   const handleGenerateSku = () => {
     const randomDigits = Math.floor(10000000 + Math.random() * 90000000).toString();
-    const generated = `8964${randomDigits}`;
-    setInputCode(generated);
+    setInputCode(`8964${randomDigits}`);
   };
 
-  const laserTranslateY = laserAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 96],
-  });
+  const cameraReady =
+    Platform.OS !== 'web' && useCamera && permission?.granted === true;
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.modalOverlay}
-      >
+        style={styles.modalOverlay}>
         <Pressable style={styles.backdropPress} onPress={onClose} />
-        <View style={[styles.modalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          {/* Header */}
+        <View
+          style={[styles.modalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
             <View style={styles.headerTitleWrap}>
               <View style={[styles.headerIconWrap, { backgroundColor: theme.primaryLight }]}>
                 <Ionicons name="barcode-outline" size={20} color={theme.primary} />
               </View>
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={[styles.modalTitle, { color: theme.text }]}>
-                  {isUrdu ? 'بارکوڈ سکین یا درج کریں' : 'Scan or Enter Barcode'}
+                  {isUrdu ? 'بارکوڈ سکین یا درج کریں' : 'Scan or enter barcode'}
                 </Text>
                 <Text style={[styles.modalSub, { color: theme.textMuted }]}>
-                  {isUrdu ? 'اسکینر گن سے پڑھیں یا مینوئل لکھیں' : 'Compatible with Bluetooth / USB scanners'}
+                  {isUrdu ? 'کیمرہ، گن، یا دستی' : 'Camera, gun, or type'}
                 </Text>
               </View>
             </View>
@@ -130,50 +148,112 @@ export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
             </Pressable>
           </View>
 
-          {/* Body */}
-          <View style={styles.body}>
-            {/* Visual Viewfinder Frame */}
-            <View
-              style={[
-                styles.scannerBox,
-                {
-                  backgroundColor: settings.darkMode ? '#0B1120' : '#F1F5F9',
-                  borderColor: duplicateProduct ? '#FCA5A5' : theme.border,
-                },
-              ]}
-            >
-              {/* Corner guide markers */}
-              <View style={[styles.corner, styles.cornerTL, { borderColor: theme.primary }]} />
-              <View style={[styles.corner, styles.cornerTR, { borderColor: theme.primary }]} />
-              <View style={[styles.corner, styles.cornerBL, { borderColor: theme.primary }]} />
-              <View style={[styles.corner, styles.cornerBR, { borderColor: theme.primary }]} />
-
-              {/* Animated Laser Beam */}
-              <Animated.View
+          <ScrollView
+            contentContainerStyle={styles.body}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+            {Platform.OS !== 'web' ? (
+              <View
                 style={[
-                  styles.laserLine,
+                  styles.modeSeg,
+                  { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                ]}>
+                <Pressable
+                  onPress={() => setUseCamera(true)}
+                  style={[styles.modeBtn, useCamera && { backgroundColor: theme.primary }]}>
+                  <Ionicons
+                    name="camera-outline"
+                    size={15}
+                    color={useCamera ? '#FFFFFF' : theme.textSecondary}
+                  />
+                  <Text
+                    style={[styles.modeBtnText, { color: useCamera ? '#FFFFFF' : theme.text }]}>
+                    {isUrdu ? 'کیمرہ' : 'Camera'}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setUseCamera(false);
+                    setTorchOn(false);
+                    setTimeout(() => inputRef.current?.focus(), 120);
+                  }}
+                  style={[styles.modeBtn, !useCamera && { backgroundColor: theme.primary }]}>
+                  <Ionicons
+                    name="keypad-outline"
+                    size={15}
+                    color={!useCamera ? '#FFFFFF' : theme.textSecondary}
+                  />
+                  <Text
+                    style={[styles.modeBtnText, { color: !useCamera ? '#FFFFFF' : theme.text }]}>
+                    {isUrdu ? 'دستی / گن' : 'Manual / Gun'}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
+
+            {useCamera && Platform.OS !== 'web' ? (
+              <View
+                style={[
+                  styles.cameraBox,
                   {
-                    transform: [{ translateY: laserTranslateY }],
+                    borderColor: duplicateProduct ? '#FCA5A5' : theme.border,
+                    backgroundColor: '#0F172A',
                   },
-                ]}
-              />
+                ]}>
+                {!permission ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : !permission.granted ? (
+                  <View style={styles.permissionWrap}>
+                    <Ionicons name="camera-outline" size={36} color="#94A3B8" />
+                    <Text style={styles.permissionTitle}>
+                      {isUrdu ? 'کیمرہ کی اجازت درکار ہے' : 'Camera permission needed'}
+                    </Text>
+                    <Pressable
+                      onPress={requestPermission}
+                      style={[styles.permissionBtn, { backgroundColor: theme.primary }]}>
+                      <Text style={styles.permissionBtnText}>
+                        {isUrdu ? 'اجازت دیں' : 'Allow camera'}
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <>
+                    <CameraView
+                      style={StyleSheet.absoluteFillObject}
+                      facing="back"
+                      enableTorch={torchOn}
+                      barcodeScannerSettings={{ barcodeTypes: RETAIL_BARCODE_TYPES }}
+                      onBarcodeScanned={cameraReady ? handleBarcodeScanned : undefined}
+                    />
+                    <View style={styles.viewfinderFrame} pointerEvents="none">
+                      <View style={[styles.corner, styles.cornerTL]} />
+                      <View style={[styles.corner, styles.cornerTR]} />
+                      <View style={[styles.corner, styles.cornerBL]} />
+                      <View style={[styles.corner, styles.cornerBR]} />
+                    </View>
+                    <Text style={styles.cameraHint}>
+                      {isUrdu ? 'بارکوڈ فریم میں رکھیں' : 'Align barcode in the frame'}
+                    </Text>
+                    <Pressable
+                      onPress={() => setTorchOn((v) => !v)}
+                      style={[
+                        styles.torchBtn,
+                        { backgroundColor: torchOn ? theme.primary : 'rgba(15,23,42,0.7)' },
+                      ]}>
+                      <Ionicons
+                        name={torchOn ? 'flash' : 'flash-outline'}
+                        size={18}
+                        color="#FFFFFF"
+                      />
+                    </Pressable>
+                  </>
+                )}
+              </View>
+            ) : null}
 
-              <Ionicons
-                name="barcode-outline"
-                size={48}
-                color={settings.darkMode ? '#334155' : '#CBD5E1'}
-              />
-              <Text style={[styles.scannerPrompt, { color: theme.textMuted }]}>
-                {isUrdu
-                  ? 'بارکوڈ گن سے اسکین کریں — کوڈ خودکار درج ہو جائے گا'
-                  : 'Point hardware scanner gun or type barcode below'}
-              </Text>
-            </View>
-
-            {/* Input Row */}
             <View style={styles.inputWrap}>
               <Text style={[styles.inputLabel, { color: theme.text }]}>
-                {isUrdu ? 'بارکوڈ / SKU نمبر' : 'Barcode / SKU Number'}
+                {isUrdu ? 'بارکوڈ / SKU نمبر' : 'Barcode / SKU'}
               </Text>
               <View
                 style={[
@@ -182,8 +262,7 @@ export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
                     backgroundColor: theme.surfaceSubtle,
                     borderColor: duplicateProduct ? theme.danger : theme.border,
                   },
-                ]}
-              >
+                ]}>
                 <Ionicons name="barcode" size={20} color={theme.primary} style={{ marginLeft: 12 }} />
                 <TextInput
                   ref={inputRef}
@@ -192,7 +271,7 @@ export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
                   placeholderTextColor={theme.textMuted}
                   value={inputCode}
                   onChangeText={setInputCode}
-                  onSubmitEditing={handleApply}
+                  onSubmitEditing={() => handleApply()}
                   keyboardType="numeric"
                   returnKeyType="done"
                   autoCapitalize="none"
@@ -206,36 +285,30 @@ export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
               </View>
             </View>
 
-            {/* Duplicate Warning */}
-            {duplicateProduct && (
+            {duplicateProduct ? (
               <View style={[styles.warningBox, { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5' }]}>
                 <Ionicons name="alert-circle" size={18} color="#DC2626" />
                 <Text style={styles.warningText}>
                   {isUrdu
-                    ? `⚠️ یہ بارکوڈ پہلے سے "${duplicateProduct.name}" کے لیے استعمال ہو رہا ہے!`
-                    : `⚠️ Already used by: "${duplicateProduct.name}" (${settings.currencySymbol}${duplicateProduct.price})`}
+                    ? `یہ بارکوڈ پہلے سے "${duplicateProduct.name}" پر ہے`
+                    : `Already used by "${duplicateProduct.name}"`}
                 </Text>
               </View>
-            )}
+            ) : null}
 
-            {/* Helper Actions: Auto SKU */}
-            <View style={styles.quickActionsRow}>
-              <Pressable
-                onPress={handleGenerateSku}
-                style={({ pressed }) => [
-                  styles.quickSkuBtn,
-                  { backgroundColor: theme.primaryLight },
-                  pressed && { opacity: 0.8 },
-                ]}
-              >
-                <Ionicons name="sparkles" size={15} color={theme.primary} />
-                <Text style={[styles.quickSkuText, { color: theme.primaryDark }]}>
-                  {isUrdu ? 'خودکار اندرونی SKU جنریٹ کریں' : 'Generate Internal SKU (8964...)'}
-                </Text>
-              </Pressable>
-            </View>
+            <Pressable
+              onPress={handleGenerateSku}
+              style={({ pressed }) => [
+                styles.quickSkuBtn,
+                { backgroundColor: theme.primaryLight },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <Ionicons name="sparkles" size={15} color={theme.primary} />
+              <Text style={[styles.quickSkuText, { color: theme.primaryDark }]}>
+                {isUrdu ? 'خودکار SKU بنائیں' : 'Generate internal SKU'}
+              </Text>
+            </Pressable>
 
-            {/* Modal Actions */}
             <View style={styles.actionButtonsRow}>
               <Pressable
                 onPress={onClose}
@@ -243,29 +316,28 @@ export const ProductBarcodeModal: React.FC<ProductBarcodeModalProps> = ({
                   styles.cancelBtn,
                   { borderColor: theme.border, backgroundColor: theme.surfaceSubtle },
                   pressed && { opacity: 0.7 },
-                ]}
-              >
-                <Text style={[styles.cancelBtnText, { color: theme.text }]}>
-                  {t('cancel')}
-                </Text>
+                ]}>
+                <Text style={[styles.cancelBtnText, { color: theme.text }]}>{t('cancel')}</Text>
               </Pressable>
 
               <Pressable
-                onPress={handleApply}
-                disabled={!trimmed}
+                onPress={() => handleApply()}
+                disabled={!trimmed || !!duplicateProduct}
                 style={({ pressed }) => [
                   styles.applyBtn,
-                  { backgroundColor: trimmed ? theme.primary : theme.border },
-                  pressed && trimmed && { opacity: 0.85 },
-                ]}
-              >
+                  {
+                    backgroundColor:
+                      trimmed && !duplicateProduct ? theme.primary : theme.border,
+                  },
+                  pressed && trimmed && !duplicateProduct && { opacity: 0.85 },
+                ]}>
                 <Ionicons name="checkmark-circle-outline" size={18} color="#FFFFFF" />
                 <Text style={styles.applyBtnText}>
-                  {isUrdu ? 'بارکوڈ محفوظ کریں' : 'Apply Barcode'}
+                  {isUrdu ? 'بارکوڈ محفوظ کریں' : 'Apply barcode'}
                 </Text>
               </Pressable>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -286,6 +358,7 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 440,
+    maxHeight: '92%',
     borderRadius: BorderRadius.xxl,
     borderWidth: 1,
     overflow: 'hidden',
@@ -327,71 +400,118 @@ const styles = StyleSheet.create({
   },
   body: {
     padding: Spacing.lg,
-    gap: 14,
+    gap: 12,
   },
-  scannerBox: {
-    height: 120,
+  modeSeg: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 4,
+    gap: 4,
+  },
+  modeBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  modeBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  cameraBox: {
+    height: 220,
     borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    borderWidth: 1,
-    overflow: 'hidden',
+  },
+  permissionWrap: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    gap: 10,
+  },
+  permissionTitle: {
+    color: '#F8FAFC',
+    fontSize: 14,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  permissionBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.full,
+  },
+  permissionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  viewfinderFrame: {
+    ...StyleSheet.absoluteFillObject,
+    margin: 28,
   },
   corner: {
     position: 'absolute',
-    width: 16,
-    height: 16,
+    width: 22,
+    height: 22,
+    borderColor: '#34D399',
     borderWidth: 3,
   },
   cornerTL: {
-    top: 10,
-    left: 10,
+    top: 0,
+    left: 0,
     borderRightWidth: 0,
     borderBottomWidth: 0,
     borderTopLeftRadius: 4,
   },
   cornerTR: {
-    top: 10,
-    right: 10,
+    top: 0,
+    right: 0,
     borderLeftWidth: 0,
     borderBottomWidth: 0,
     borderTopRightRadius: 4,
   },
   cornerBL: {
-    bottom: 10,
-    left: 10,
+    bottom: 0,
+    left: 0,
     borderRightWidth: 0,
     borderTopWidth: 0,
     borderBottomLeftRadius: 4,
   },
   cornerBR: {
-    bottom: 10,
-    right: 10,
+    bottom: 0,
+    right: 0,
     borderLeftWidth: 0,
     borderTopWidth: 0,
     borderBottomRightRadius: 4,
   },
-  laserLine: {
+  cameraHint: {
     position: 'absolute',
-    left: '12%',
-    right: '12%',
-    top: 12,
-    height: 2.5,
-    backgroundColor: '#10B981',
-    borderRadius: 2,
-    shadowColor: '#10B981',
-    shadowOpacity: 0.9,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 4,
+    bottom: 12,
+    color: '#E2E8F0',
+    fontSize: 11,
+    fontWeight: '700',
+    backgroundColor: 'rgba(15,23,42,0.65)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+    overflow: 'hidden',
   },
-  scannerPrompt: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    marginTop: 6,
-    textAlign: 'center',
-    paddingHorizontal: 16,
+  torchBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   inputWrap: {
     gap: 6,
@@ -433,9 +553,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flex: 1,
   },
-  quickActionsRow: {
-    flexDirection: 'row',
-  },
   quickSkuBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -443,6 +560,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: BorderRadius.md,
+    alignSelf: 'flex-start',
   },
   quickSkuText: {
     fontSize: 12,
@@ -451,7 +569,7 @@ const styles = StyleSheet.create({
   actionButtonsRow: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 6,
+    marginTop: 4,
   },
   cancelBtn: {
     flex: 1,

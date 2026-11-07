@@ -317,7 +317,10 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
               styles.footer,
               {
                 borderTopColor: theme.border,
-                paddingBottom: keyboardOffset > 0 ? Spacing.sm : Math.max(insets.bottom, Spacing.md),
+                paddingBottom:
+                  keyboardOffset > 0
+                    ? Spacing.sm
+                    : Math.max(insets.bottom, Platform.OS === 'android' ? 32 : Spacing.md),
               },
             ]}>
             <Pressable

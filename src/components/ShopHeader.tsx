@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { Colors, Spacing, Shadows } from '@/constants/theme';
 import { ProductImage } from '@/components/ProductImage';
+import {
+  SalesNotificationsModal,
+  SALES_SEEN_AT_KEY,
+} from '@/components/SalesNotificationsModal';
 
 export const ShopHeader: React.FC = () => {
   const {
@@ -16,17 +21,39 @@ export const ShopHeader: React.FC = () => {
     setIsAuthModalOpen,
     setIsEditShopOpen,
     user,
-    isGuestMode,
     isOnline,
-    syncStatus,
     pendingSyncCount,
     syncNow,
     showAlert,
+    sales,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const isUrdu = language === 'ur';
-  const totalAlerts = lowStockProducts.length + outOfStockProducts.length;
+  const stockAlerts = lowStockProducts.length + outOfStockProducts.length;
+
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [salesSeenAt, setSalesSeenAt] = useState<number>(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    AsyncStorage.getItem(SALES_SEEN_AT_KEY)
+      .then((val) => {
+        if (!cancelled) setSalesSeenAt(val ? Number(val) || 0 : 0);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [notifOpen, sales.length]);
+
+  const unreadSalesCount = useMemo(() => {
+    return sales.filter((s) => {
+      if (s.status === 'cancelled') return false;
+      const ts = s.createdAt || Date.parse(s.date) || 0;
+      return ts > salesSeenAt;
+    }).length;
+  }, [sales, salesSeenAt]);
 
   const handleSyncPillPress = async () => {
     if (!isOnline) {
@@ -49,12 +76,26 @@ export const ShopHeader: React.FC = () => {
     await syncNow();
   };
 
+  const openNotifications = useCallback(() => {
+    setNotifOpen(true);
+  }, []);
+
+  const closeNotifications = useCallback(() => {
+    setNotifOpen(false);
+    setSalesSeenAt(Date.now());
+  }, []);
+
+  const handleViewAllBills = useCallback(() => {
+    setNotifOpen(false);
+    setSalesSeenAt(Date.now());
+    setActiveTab('history');
+  }, [setActiveTab]);
+
   const storeDisplayName =
     (isUrdu && settings.shopNameUrdu)
       ? settings.shopNameUrdu
       : (settings.shopName || (user?.displayName ? `${user.displayName}'s Store` : (isUrdu ? 'میری دکان' : 'My Store')));
 
-  // Initials for avatar pod (e.g. "DS" or shop initials)
   const storeInitials = (storeDisplayName || 'DS')
     .split(' ')
     .map((w: string) => w[0])
@@ -66,117 +107,121 @@ export const ShopHeader: React.FC = () => {
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148, 163, 184, 0.2)';
   const headerBg = settings.darkMode ? '#0A0F1E' : '#F8FAFC';
 
+  // Hide bell when already on History — user is viewing all bills
+  const showNotifBell = activeTab !== 'history';
+
   return (
-    <View
-      style={[
-        styles.headerContainer,
-        {
-          backgroundColor: headerBg,
-        },
-      ]}>
-      {/* ── Left: Avatar pod with green online dot + DIGISHOP • Online + Store Name ── */}
-      <Pressable
-        onPress={() => setIsEditShopOpen(true)}
-        style={({ pressed }) => [
-          styles.leftSection,
-          pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+    <>
+      <View
+        style={[
+          styles.headerContainer,
+          {
+            backgroundColor: headerBg,
+          },
         ]}>
-        {/* Avatar with small green online indicator */}
-        <View style={styles.avatarWrap}>
-          {settings.profileImage && !settings.profileImage.includes('googleusercontent.com/a/') ? (
-            <ProductImage
-              uri={settings.profileImage}
-              style={styles.avatarImg}
-              fallbackIcon={
-                <View style={[styles.avatarInitialsPod, { backgroundColor: '#A7F3D0' }]}>
-                  <Text style={styles.avatarInitialsText}>{storeInitials}</Text>
-                </View>
-              }
-            />
-          ) : (
-            <View style={[styles.avatarInitialsPod, { backgroundColor: '#A7F3D0' }]}>
-              <Text style={styles.avatarInitialsText}>{storeInitials}</Text>
-            </View>
-          )}
+        <Pressable
+          onPress={() => setIsEditShopOpen(true)}
+          style={({ pressed }) => [
+            styles.leftSection,
+            pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+          ]}>
+          <View style={styles.avatarWrap}>
+            {user?.photoURL ? (
+              <Image source={{ uri: user.photoURL }} style={styles.avatarImg} />
+            ) : settings.profileImage ? (
+              <ProductImage
+                uri={settings.profileImage}
+                style={styles.avatarImg}
+                fallbackIcon={
+                  <View style={[styles.avatarInitialsPod, { backgroundColor: '#A7F3D0' }]}>
+                    <Text style={styles.avatarInitialsText}>{storeInitials}</Text>
+                  </View>
+                }
+              />
+            ) : (
+              <View style={[styles.avatarInitialsPod, { backgroundColor: '#A7F3D0' }]}>
+                <Text style={styles.avatarInitialsText}>{storeInitials}</Text>
+              </View>
+            )}
 
-          {/* Green Online Dot on bottom-right of avatar */}
-          <View style={[styles.onlineDot, { backgroundColor: isOnline ? '#10B981' : '#F87171' }]} />
-        </View>
-
-        {/* Text Block */}
-        <View style={styles.titleWrap}>
-          <View style={styles.badgeRow}>
-            <Text style={[styles.posBadgeText, { color: theme.textMuted }]}>
-              {isUrdu ? '⚡ ڈیجی شاپ' : '⚡ DIGISHOP'}
-            </Text>
-            <View style={styles.bulletDot} />
-            <Text style={[styles.onlineStatusText, { color: isOnline ? '#059669' : '#EF4444' }]}>
-              {isOnline ? (isUrdu ? 'آن لائن' : 'Online') : (isUrdu ? 'آف لائن' : 'Offline')}
-            </Text>
+            <View style={[styles.onlineDot, { backgroundColor: isOnline ? '#10B981' : '#F87171' }]} />
           </View>
 
-          <Text style={[styles.shopTitle, { color: theme.text }]} numberOfLines={1}>
-            {storeDisplayName}
-          </Text>
-          {settings.ownerName ? (
-            <Text style={[styles.ownerSubtitle, { color: theme.textMuted }]} numberOfLines={1}>
-              {settings.ownerName}
+          <View style={styles.titleWrap}>
+            <View style={styles.badgeRow}>
+              <Text style={[styles.posBadgeText, { color: theme.textMuted }]}>
+                {isUrdu ? '⚡ ڈیجی شاپ' : '⚡ DIGISHOP'}
+              </Text>
+              <View style={styles.bulletDot} />
+              <Text style={[styles.onlineStatusText, { color: isOnline ? '#059669' : '#EF4444' }]}>
+                {isOnline ? (isUrdu ? 'آن لائن' : 'Online') : (isUrdu ? 'آف لائن' : 'Offline')}
+              </Text>
+            </View>
+
+            <Text style={[styles.shopTitle, { color: theme.text }]} numberOfLines={1}>
+              {storeDisplayName}
             </Text>
+            {settings.ownerName ? (
+              <Text style={[styles.ownerSubtitle, { color: theme.textMuted }]} numberOfLines={1}>
+                {settings.ownerName}
+              </Text>
+            ) : null}
+          </View>
+        </Pressable>
+
+        <View style={styles.rightSection}>
+          {showNotifBell ? (
+            <Pressable
+              onPress={openNotifications}
+              onLongPress={handleSyncPillPress}
+              accessibilityLabel="Sales notifications"
+              style={({ pressed }) => [
+                styles.roundCircleBtn,
+                { backgroundColor: theme.card, borderColor: softBorder },
+                pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
+              ]}>
+              <Ionicons name="notifications-outline" size={18} color={theme.text} />
+              {unreadSalesCount > 0 && (
+                <View style={[styles.bellCountBadge, { backgroundColor: theme.primary }]}>
+                  <Text style={styles.bellCountText}>
+                    {unreadSalesCount > 9 ? '9+' : unreadSalesCount}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
           ) : null}
-        </View>
-      </Pressable>
 
-      {/* ── Right: Notification Bell in soft circle + Profile in soft circle ── */}
-      <View style={styles.rightSection}>
-        {/* Notification Bell Circle */}
-        <Pressable
-          onPress={() => {
-            if (totalAlerts > 0) {
-              setActiveTab('products');
-            } else if (!isOnline || pendingSyncCount > 0) {
-              handleSyncPillPress();
-            } else {
-              showAlert({
-                type: 'info',
-                title: isUrdu ? 'اطلاعات' : 'Notifications',
-                message: isUrdu ? 'تمام سسٹمز فعال اور ہم آہنگ ہیں۔' : 'All systems normal. 0 pending alerts.',
-              });
-            }
-          }}
-          accessibilityLabel="Notifications"
-          style={({ pressed }) => [
-            styles.roundCircleBtn,
-            { backgroundColor: theme.card, borderColor: softBorder },
-            pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
-          ]}>
-          <Ionicons name="notifications-outline" size={18} color={theme.text} />
-          {/* Orange alert dot */}
-          {(totalAlerts > 0 || pendingSyncCount > 0 || !isOnline) && (
-            <View style={styles.bellAlertDot} />
-          )}
-        </Pressable>
-
-        {/* User Profile Avatar / Settings Circle */}
-        <Pressable
-          onPress={() => (user ? setActiveTab('settings') : setIsAuthModalOpen(true))}
-          accessibilityLabel="Account & Settings"
-          style={({ pressed }) => [
-            styles.roundCircleBtn,
-            { backgroundColor: theme.card, borderColor: softBorder },
-            pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
-          ]}>
-          {user?.photoURL ? (
-            <Image source={{ uri: user.photoURL }} style={styles.profileAvatarImg} />
-          ) : (
+          <Pressable
+            onPress={() => setActiveTab('settings')}
+            accessibilityLabel={isUrdu ? 'سیٹنگز' : 'Settings'}
+            style={({ pressed }) => [
+              styles.roundCircleBtn,
+              {
+                backgroundColor:
+                  activeTab === 'settings'
+                    ? settings.darkMode
+                      ? 'rgba(0, 201, 167, 0.16)'
+                      : '#D1FAE5'
+                    : theme.card,
+                borderColor: activeTab === 'settings' ? theme.primary : softBorder,
+              },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
+            ]}>
             <Ionicons
-              name={user ? 'person' : 'person-outline'}
+              name={activeTab === 'settings' ? 'settings' : 'settings-outline'}
               size={18}
-              color={theme.text}
+              color={activeTab === 'settings' ? theme.primary : theme.text}
             />
-          )}
-        </Pressable>
+          </Pressable>
+        </View>
       </View>
-    </View>
+
+      <SalesNotificationsModal
+        visible={notifOpen}
+        onClose={closeNotifications}
+        onViewAllBills={handleViewAllBills}
+      />
+    </>
   );
 };
 
@@ -280,20 +325,22 @@ const styles = StyleSheet.create({
     position: 'relative',
     ...Shadows.sm,
   },
-  bellAlertDot: {
+  bellCountBadge: {
     position: 'absolute',
-    top: 9,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#F97316',
+    top: 4,
+    right: 4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    paddingHorizontal: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },
-  profileAvatarImg: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  bellCountText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
   },
 });
