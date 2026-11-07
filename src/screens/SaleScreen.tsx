@@ -1,4 +1,4 @@
-import { BarcodeModal } from '@/components/BarcodeModal';
+import { SaleBarcodeScannerSection } from '@/components/SaleBarcodeScannerSection';
 import { HeldCart, HeldCartsModal } from '@/components/HeldCartsModal';
 import { LooseWeightModal } from '@/components/LooseWeightModal';
 import { QuickItemModal } from '@/components/QuickItemModal';
@@ -68,6 +68,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     language,
     setActiveReceipt,
     setIsAddProductOpen,
+    setEditingProduct,
     showAlert,
     hideAlert,
     saleViewMode,
@@ -100,7 +101,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   };
 
   // Modals & Drawers
-  const [isBarcodeOpen, setIsBarcodeOpen] = useState(false);
+  const [isBarcodeScannerActive, setIsBarcodeScannerActive] = useState(false);
   const [isQuickItemOpen, setIsQuickItemOpen] = useState(false);
   const [isCheckoutDrawerOpen, setIsCheckoutDrawerOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -1788,13 +1789,197 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       <View style={styles.mainLayout}>
         {/* ================= Catalog Section (Full Screen on Mobile) ================= */}
         <View style={styles.catalogSection}>
+          {isBarcodeScannerActive ? (
+            <SaleBarcodeScannerSection
+              onClose={() => setIsBarcodeScannerActive(false)}
+              onAddToCart={(p, q) => addToCart(p, q || 1)}
+              onUpdateQuantity={updateQuantity}
+              onRemoveFromCart={removeFromCart}
+              cart={cart}
+              grandTotal={grandTotal}
+              totalItemsCount={totalItemsCount}
+              onOpenCurrentBill={openCheckoutDrawer}
+              onHoldCart={handleHoldCart}
+              onClearCart={clearCart}
+              onAddNewProductWithBarcode={(barcode) => {
+                setEditingProduct({
+                  id: 'prod-' + Date.now(),
+                  name: '',
+                  price: 0,
+                  stock: 0,
+                  category: 'Others',
+                  unit: 'piece',
+                  barcode,
+                  createdAt: Date.now(),
+                  updatedAt: Date.now(),
+                });
+                setIsAddProductOpen(true);
+              }}
+            />
+          ) : (
+            <>
+              {/* ── Modern Top Active Bill & Pay Section (Mobile) ── */}
+          {!isWideScreen && cart.length > 0 && (
+            <View
+              style={[
+                styles.topActiveBillCard,
+                {
+                  backgroundColor: settings.darkMode ? '#1E293B' : '#FFFFFF',
+                  borderColor: settings.darkMode ? 'rgba(0, 201, 167, 0.4)' : 'rgba(0, 201, 167, 0.5)',
+                },
+              ]}>
+              {/* Row 1: Active bill badge, items counter, and order tools (Hold & Cancel) */}
+              <View style={styles.topBillMetaRow}>
+                <View style={styles.topBillBadgeWrap}>
+                  <View style={[styles.topBillLiveDot, { backgroundColor: theme.primary }]} />
+                  <Text style={[styles.topBillBadgeText, { color: theme.primary }]}>
+                    {language === 'ur' ? 'جاری بل' : 'Active Bill'}
+                  </Text>
+                  <Text style={[styles.topBillCountText, { color: theme.textSecondary }]}>
+                    • {totalItemsCount} {totalItemsCount === 1 ? (language === 'ur' ? 'آئٹم' : 'item') : (language === 'ur' ? 'اشیاء' : 'items')}
+                  </Text>
+                </View>
+
+                {/* Right-side quick tools */}
+                <View style={styles.topBillControlsRow}>
+                  {/* Hold Button */}
+                  <Pressable
+                    onPress={handleHoldCart}
+                    hitSlop={6}
+                    style={({ pressed }) => [
+                      styles.topBillHoldBtn,
+                      {
+                        backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7',
+                        borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.45)' : '#FDE68A',
+                      },
+                      pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
+                    ]}
+                    accessibilityLabel="Hold current order"
+                    accessibilityRole="button">
+                    <Ionicons name="pause-circle" size={13} color={settings.darkMode ? '#FBBF24' : '#D97706'} />
+                    <Text style={[styles.topBillHoldText, { color: settings.darkMode ? '#FDE68A' : '#B45309' }]}>
+                      {language === 'ur' ? 'ہولڈ' : 'Hold'}
+                    </Text>
+                  </Pressable>
+
+                  {/* Cancel Order Button */}
+                  <Pressable
+                    onPress={() => {
+                      showAlert({
+                        type: 'warning',
+                        title: language === 'ur' ? 'بل منسوخ کریں؟' : 'Cancel Current Order?',
+                        message: language === 'ur'
+                          ? `بل میں ${totalItemsCount} اشیاء شامل ہیں، کیا آپ پورا بل منسوخ اور خالی کرنا چاہتے ہیں؟`
+                          : `Discard all ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} and clear the active bill?`,
+                        buttons: [
+                          {
+                            text: language === 'ur' ? 'ہاں، منسوخ کریں' : 'Cancel Order',
+                            style: 'destructive',
+                            icon: 'trash-outline',
+                            onPress: clearCart,
+                          },
+                          { text: language === 'ur' ? 'واپس' : 'Keep Order', style: 'cancel' },
+                        ],
+                      });
+                    }}
+                    hitSlop={6}
+                    style={({ pressed }) => [
+                      styles.topBillCancelBtn,
+                      {
+                        backgroundColor: settings.darkMode ? 'rgba(239, 68, 68, 0.16)' : '#FEE2E2',
+                        borderColor: settings.darkMode ? 'rgba(239, 68, 68, 0.45)' : '#FECDD3',
+                      },
+                      pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
+                    ]}
+                    accessibilityLabel="Cancel order and clear cart"
+                    accessibilityRole="button">
+                    <Ionicons name="trash-outline" size={13} color={settings.darkMode ? '#F87171' : '#DC2626'} />
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Row 2: Total Amount & Primary "View Bill & Pay" CTA */}
+              <View style={styles.topBillActionRow}>
+                <Pressable
+                  onPress={openCheckoutDrawer}
+                  style={styles.topBillAmountPressable}
+                  hitSlop={6}>
+                  <Text style={[styles.topBillTotalLabel, { color: theme.textMuted }]}>
+                    {language === 'ur' ? 'کل رقم' : 'Total Amount'}
+                  </Text>
+                  <Text style={[styles.topBillTotalValue, { color: theme.text }]} numberOfLines={1}>
+                    <Text style={[styles.topBillCurrency, { color: theme.primary }]}>{settings.currencySymbol} </Text>
+                    {grandTotal.toLocaleString()}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={openCheckoutDrawer}
+                  style={({ pressed }) => [
+                    styles.topBillPayBtn,
+                    { backgroundColor: theme.primary },
+                    pressed && { opacity: 0.92, transform: [{ scale: 0.985 }] },
+                  ]}
+                  accessibilityLabel="View bill and proceed to payment"
+                  accessibilityRole="button">
+                  <Ionicons name="receipt-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.topBillPayBtnText}>
+                    {language === 'ur' ? 'بل اور ادائیگی' : 'View Bill & Pay'}
+                  </Text>
+                  <Ionicons
+                    name={language === 'ur' ? 'arrow-back' : 'arrow-forward'}
+                    size={16}
+                    color="#FFFFFF"
+                    style={{ marginLeft: 6 }}
+                  />
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {/* ── Optional Top Held Carts Banner (When Cart is Empty & Parked Carts Exist) ── */}
+          {!isWideScreen && cart.length === 0 && heldCarts.length > 0 && (
+            <Pressable
+              onPress={() => setIsHeldCartsModalOpen(true)}
+              style={({ pressed }) => [
+                styles.topHeldBanner,
+                {
+                  backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7',
+                  borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.45)' : '#F59E0B',
+                },
+                pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+              ]}>
+              <View style={styles.topHeldBannerLeft}>
+                <View style={styles.topHeldBadge}>
+                  <Ionicons name="pause-circle" size={15} color="#FFFFFF" />
+                  <Text style={styles.topHeldBadgeCount}>{heldCarts.length}</Text>
+                </View>
+                <Text style={[styles.topHeldBannerText, { color: settings.darkMode ? '#FDE68A' : '#92400E' }]}>
+                  {heldCarts.length === 1
+                    ? (language === 'ur' ? '1 ہولڈ بل محفوظ ہے' : '1 Parked bill waiting')
+                    : (language === 'ur' ? `${heldCarts.length} ہولڈ بلز محفوظ ہیں` : `${heldCarts.length} Parked bills waiting`)}
+                </Text>
+              </View>
+              <View style={styles.topHeldResumePill}>
+                <Text style={styles.topHeldResumeText}>
+                  {language === 'ur' ? 'دیکھیں' : 'Resume'}
+                </Text>
+                <Ionicons
+                  name={language === 'ur' ? 'arrow-back' : 'arrow-forward'}
+                  size={13}
+                  color="#D97706"
+                />
+              </View>
+            </Pressable>
+          )}
+
           <ScrollView
             style={styles.catalogScroll}
             stickyHeaderIndices={[1]}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={[
               styles.catalogScrollContent,
-              !isWideScreen && cart.length > 0 && { paddingBottom: 160 },
+              !isWideScreen && { paddingBottom: 85 },
             ]}>
             {/* Index 0: Top Cards (New Sale title + Held cart pill + Scan Barcode & Quick Item tiles) */}
             <View style={styles.topSection}>
@@ -1831,7 +2016,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={language === 'ur' ? 'بارکوڈ اسکین' : 'Scan barcode'}
-                    onPress={() => setIsBarcodeOpen(true)}
+                    onPress={() => setIsBarcodeScannerActive(true)}
                     style={({ pressed }) => [
                       styles.actionTile,
                       { backgroundColor: theme.heroFill },
@@ -2420,216 +2605,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               )}
             </View>
           </ScrollView>
-
-          {/* ================= Mobile Sticky Unified POS Cart Dock ================= */}
-          {!isWideScreen && cart.length > 0 && (
-            <View
-              style={[
-                styles.unifiedCartDock,
-                {
-                  backgroundColor: settings.darkMode ? '#1E293B' : '#FFFFFF',
-                  borderColor: settings.darkMode ? 'rgba(255, 255, 255, 0.14)' : '#E2E8F0',
-                },
-              ]}>
-              {/* AI-02: Associative Basket Companion Row (Mobile Dock) */}
-              {companionSuggestions.length > 0 && (
-                <View
-                  style={[
-                    styles.dockCompanionWrap,
-                    {
-                      borderBottomColor: settings.darkMode ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
-                    },
-                  ]}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingTop: 4 }}>
-                    <Ionicons name="sparkles" size={12} color="#6366F1" />
-                    <Text style={{ fontSize: 10.5, fontWeight: '700', color: settings.darkMode ? '#A5B4FC' : '#4F46E5' }}>
-                      {language === 'ur' ? 'بھائی کے ساتھ اور کیا؟' : 'Frequently Bought Together:'}
-                    </Text>
-                  </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 5, gap: 6 }}>
-                    {companionSuggestions.map((prod) => (
-                      <Pressable
-                        key={prod.id}
-                        onPress={() => addToCart(prod, 1)}
-                        style={({ pressed }) => [
-                          styles.dockCompanionChip,
-                          {
-                            backgroundColor: settings.darkMode ? 'rgba(99, 102, 241, 0.18)' : '#EEF2FF',
-                            borderColor: settings.darkMode ? '#6366F1' : '#C7D2FE',
-                          },
-                          pressed && { opacity: 0.75, transform: [{ scale: 0.96 }] },
-                        ]}>
-                        <Ionicons name="add" size={13} color="#6366F1" />
-                        <Text style={[styles.dockCompanionText, { color: settings.darkMode ? '#E0E7FF' : '#312E81' }]}>
-                          {getProductName(prod)}
-                        </Text>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#6366F1' }}>
-                          +{settings.currencySymbol}{prod.price}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
-
-              {/* Row 1: High-Contrast, Prominent POS Order Action Buttons */}
-              <View style={styles.dockActionsRow}>
-                {/* Hold Order Button (Distinct Warm Amber) */}
-                <Pressable
-                  onPress={handleHoldCart}
-                  style={({ pressed }) => [
-                    styles.dockActionBtn,
-                    {
-                      backgroundColor: settings.darkMode
-                        ? 'rgba(245, 158, 11, 0.16)'
-                        : '#FEF3C7',
-                      borderColor: settings.darkMode
-                        ? 'rgba(245, 158, 11, 0.5)'
-                        : '#F59E0B',
-                    },
-                    pressed && { opacity: 0.82, transform: [{ scale: 0.98 }] },
-                  ]}
-                  accessibilityLabel="Hold current order to serve next customer"
-                  accessibilityRole="button">
-                  <Ionicons
-                    name="pause-circle"
-                    size={17}
-                    color={settings.darkMode ? '#FBBF24' : '#D97706'}
-                  />
-                  <Text
-                    style={[
-                      styles.dockActionText,
-                      { color: settings.darkMode ? '#FDE68A' : '#92400E' },
-                    ]}>
-                    {language === 'ur' ? 'بل ہولڈ کریں' : 'Hold Order'}
-                  </Text>
-                </Pressable>
-
-                {/* Cancel Order Button (Distinct Clean Rose / Red) */}
-                <Pressable
-                  onPress={() => {
-                    showAlert({
-                      type: 'warning',
-                      title: language === 'ur' ? 'بل منسوخ کریں؟' : 'Cancel Current Order?',
-                      message: language === 'ur'
-                        ? `بل میں ${totalItemsCount} اشیاء شامل ہیں، کیا آپ پورا بل منسوخ اور خالی کرنا چاہتے ہیں؟`
-                        : `Discard all ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} and clear the active bill?`,
-                      buttons: [
-                        {
-                          text: language === 'ur' ? 'ہاں، منسوخ کریں' : 'Cancel Order',
-                          style: 'destructive',
-                          icon: 'trash-outline',
-                          onPress: clearCart,
-                        },
-                        { text: language === 'ur' ? 'واپس' : 'Keep Order', style: 'cancel' },
-                      ],
-                    });
-                  }}
-                  style={({ pressed }) => [
-                    styles.dockActionBtn,
-                    {
-                      backgroundColor: settings.darkMode
-                        ? 'rgba(239, 68, 68, 0.16)'
-                        : '#FEE2E2',
-                      borderColor: settings.darkMode
-                        ? 'rgba(239, 68, 68, 0.5)'
-                        : '#FCA5A5',
-                    },
-                    pressed && { opacity: 0.82, transform: [{ scale: 0.98 }] },
-                  ]}
-                  accessibilityLabel="Cancel order and clear cart"
-                  accessibilityRole="button">
-                  <Ionicons
-                    name="trash-outline"
-                    size={16}
-                    color={settings.darkMode ? '#F87171' : '#DC2626'}
-                  />
-                  <Text
-                    style={[
-                      styles.dockActionText,
-                      { color: settings.darkMode ? '#FECDD3' : '#B91C1C' },
-                    ]}>
-                    {language === 'ur' ? 'منسوخ کریں' : 'Cancel Order'}
-                  </Text>
-                </Pressable>
-              </View>
-
-              {/* Row 2: Full-Width Primary Checkout Hero Button */}
-              <View style={{ position: 'relative' }}>
-                <Pressable
-                  onPress={openCheckoutDrawer}
-                  style={({ pressed }) => [
-                    styles.dockHeroCheckoutBtn,
-                    {
-                      backgroundColor: theme.primary,
-                    },
-                    pressed && { opacity: 0.94, transform: [{ scale: 0.985 }] },
-                  ]}
-                  accessibilityLabel="View bill and proceed to payment"
-                  accessibilityRole="button">
-                  <View style={styles.dockHeroLeft}>
-                    <View style={styles.dockBadge}>
-                      <Ionicons name="cart" size={18} color={theme.primary} />
-                      <Text style={styles.dockBadgeCount}>{totalItemsCount}</Text>
-                    </View>
-                    <View style={styles.dockPriceCol}>
-                      <Text style={styles.dockItemsLabel}>
-                        {totalItemsCount} {t('itemsInCart')}
-                      </Text>
-                      <Text style={styles.dockGrandTotal} numberOfLines={1}>
-                        {settings.currencySymbol} {formatCompactPrice(grandTotal)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.dockHeroRightPill}>
-                    <Text style={styles.dockHeroActionText}>{t('viewBill')}</Text>
-                    <Ionicons name="arrow-forward" size={17} color="#FFFFFF" />
-                  </View>
-                </Pressable>
-              </View>
-            </View>
-          )}
-
-          {/* ================= Mobile Sticky Resume Parked Carts Banner ================= */}
-          {!isWideScreen && cart.length === 0 && heldCarts.length > 0 && (
-            <View style={styles.floatingHeldBarContainer}>
-              <Pressable
-                onPress={() => setIsHeldCartsModalOpen(true)}
-                style={({ pressed }) => [
-                  styles.floatingHeldBar,
-                  {
-                    backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.22)' : '#FEF3C7',
-                    borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.5)' : '#F59E0B',
-                  },
-                  pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-                ]}>
-                <View style={styles.dockHeroLeft}>
-                  <View style={[styles.dockBadge, { backgroundColor: '#F59E0B' }]}>
-                    <Ionicons name="pause-circle" size={18} color="#FFFFFF" />
-                    <Text style={[styles.dockBadgeCount, { color: '#FFFFFF' }]}>{heldCarts.length}</Text>
-                  </View>
-                  <View>
-                    <Text style={[styles.floatingHeldTitle, { color: settings.darkMode ? '#FDE68A' : '#92400E' }]}>
-                      {language === 'ur' ? 'پارک شدہ بلز محفوظ ہیں' : 'Parked Bills Waiting'}
-                    </Text>
-                    <Text style={[styles.floatingHeldSub, { color: settings.darkMode ? '#FCD34D' : '#B45309' }]}>
-                      {language === 'ur' ? 'بحال کرنے کے لیے ٹیپ کریں' : 'Tap to review & resume'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.dockHeroRightPill}>
-                  <Text style={[styles.floatingHeldActionText, { color: settings.darkMode ? '#FDE68A' : '#92400E' }]}>
-                    {language === 'ur' ? 'دیکھیں' : 'Resume'}
-                  </Text>
-                  <Ionicons name="arrow-forward" size={16} color={settings.darkMode ? '#FDE68A' : '#92400E'} />
-                </View>
-              </Pressable>
-            </View>
+            </>
           )}
         </View>
 
@@ -2667,14 +2643,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         </Modal>
       )}
 
-      {/* Barcode Scanner Modal */}
-      <BarcodeModal
-        visible={isBarcodeOpen}
-        onClose={() => setIsBarcodeOpen(false)}
-        onSelectProduct={(p) => {
-          addToCart(p);
-        }}
-      />
 
       {/* Rush-Hour Counter: Held Carts Modal */}
       <HeldCartsModal
@@ -3331,114 +3299,159 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // Unified Mobile POS Dock
-  unifiedCartDock: {
-    position: 'absolute',
-    bottom: Spacing.sm,
-    left: Spacing.md,
-    right: Spacing.md,
-    zIndex: 10,
-    borderRadius: BorderRadius.xxl,
+  // Top Modern Active POS Bill Card
+  topActiveBillCard: {
+    marginHorizontal: Spacing.md,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1.5,
-    padding: 10,
-    gap: 8,
-    ...Shadows.xl,
+    ...Shadows.md,
   },
-  floatingHeldBarContainer: {
-    position: 'absolute',
-    bottom: Spacing.sm,
-    left: Spacing.md,
-    right: Spacing.md,
-    zIndex: 10,
-  },
-  dockActionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  dockActionBtn: {
-    flex: 1,
-    height: 38,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1.2,
-  },
-  dockActionText: {
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.1,
-  },
-  dockHeroCheckoutBtn: {
-    width: '100%',
-    height: 52,
+  topBillMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    borderRadius: BorderRadius.xl,
-    ...Shadows.md,
+    marginBottom: 6,
   },
-  dockHeroLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-    paddingRight: 6,
-  },
-  dockBadge: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: BorderRadius.full,
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  dockBadgeCount: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#DC2626',
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '900',
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    overflow: 'hidden',
-  },
-  dockPriceCol: {
-    justifyContent: 'center',
-  },
-  dockItemsLabel: {
-    color: 'rgba(255,255,255,0.88)',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  dockGrandTotal: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: -0.3,
-  },
-  dockHeroRightPill: {
+  topBillBadgeWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.full,
-    flexShrink: 0,
   },
-  dockHeroActionText: {
-    color: '#FFFFFF',
+  topBillLiveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  topBillBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.1,
+  },
+  topBillCountText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  topBillControlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  topBillHoldBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  topBillHoldText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  topBillCancelBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  topBillActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  topBillAmountPressable: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  topBillTotalLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  topBillTotalValue: {
+    fontSize: 20,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+  },
+  topBillCurrency: {
     fontSize: 13,
     fontWeight: '800',
-    letterSpacing: 0.2,
+  },
+  topBillPayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.full,
+    ...Shadows.sm,
+  },
+  topBillPayBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+
+  // Top Parked / Held Carts Banner
+  topHeldBanner: {
+    marginHorizontal: Spacing.md,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  topHeldBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  topHeldBadge: {
+    backgroundColor: '#F59E0B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  topHeldBadgeCount: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  topHeldBannerText: {
+    fontSize: 12,
+    fontWeight: '700',
+    flex: 1,
+  },
+  topHeldResumePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+  },
+  topHeldResumeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#D97706',
   },
 
 

@@ -9,12 +9,15 @@ import {
 } from '@/types';
 import { SettingsRepository } from './SettingsRepository';
 import { SyncQueueRepository } from './SyncQueueRepository';
+import { getPaymentBreakdown } from '@/utils/payment';
 
 function mapRowToSale(row: any, items: CartItem[] = []): Sale {
   const grandTotal = Number(row.total || 0);
-  // Cap amountPaid at grandTotal so change on legacy cash sales is never counted as paid or resulting in negative baki
-  const rawPaid = row.amountPaid !== undefined && row.amountPaid !== null ? Number(row.amountPaid) : grandTotal;
-  const amountPaid = Math.min(grandTotal, Math.max(0, rawPaid));
+  const breakdown = getPaymentBreakdown({
+    grandTotal,
+    amountPaid: row.amountPaid,
+    paymentMethod: row.paymentMethod,
+  });
 
   return {
     id: row.id,
@@ -32,7 +35,7 @@ function mapRowToSale(row: any, items: CartItem[] = []): Sale {
     total: grandTotal,
     totalProfit: row.totalProfit,
     paymentMethod: row.paymentMethod,
-    amountPaid: amountPaid,
+    amountPaid: breakdown.cleanPaid,
     change: Math.max(0, Number(row.change || 0)),
     status: row.status,
     refundReason: row.refundReason || undefined,
@@ -534,10 +537,12 @@ export const SaleRepository = {
         let bakiRecorded = 0;
 
         if (sRow.paymentMethod === 'udhaar' && sRow.customerId) {
-          const grandTotal = Number(sRow.total || 0);
-          const rawPaid = Number(sRow.amountPaid || 0);
-          const cleanPaid = Math.min(grandTotal, Math.max(0, rawPaid));
-          bakiRecorded = Math.max(0, grandTotal - cleanPaid);
+          const breakdown = getPaymentBreakdown({
+            grandTotal: Number(sRow.total || 0),
+            amountPaid: sRow.amountPaid,
+            paymentMethod: sRow.paymentMethod,
+          });
+          bakiRecorded = breakdown.baki;
 
           if (bakiRecorded > 0) {
             const cust = await tx.get<any>(`SELECT * FROM customers WHERE id = ?`, [sRow.customerId]);
