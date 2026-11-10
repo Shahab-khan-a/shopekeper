@@ -112,15 +112,16 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
 
     let message = '';
     if (customTemplate && customTemplate.trim()) {
-      message = customTemplate
-        .replace(/\{name\}/gi, customerDisplayName)
-        .replace(/احمد/g, customerDisplayName)
-        .replace(/Ahmed/gi, customerDisplayName)
-        .replace(/\{amount\}/gi, formattedAmount)
-        .replace(/2,500/g, Math.max(0, customer.totalDebt).toLocaleString())
-        .replace(/2500/g, Math.max(0, customer.totalDebt).toLocaleString())
-        .replace(/\{shop\}/gi, shopHeader)
-        .replace(/\{phone\}/gi, settings.phone || '');
+      const values: Record<string, string> = {
+        name: customerDisplayName,
+        amount: formattedAmount,
+        shop: shopHeader,
+        phone: settings.phone || '',
+      };
+      message = customTemplate.replace(
+        /\{(name|amount|shop|phone)\}/gi,
+        (_m, key: string) => values[key.toLowerCase()] ?? _m
+      );
     } else {
       message =
         msgLang === 'ur'

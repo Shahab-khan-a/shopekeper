@@ -87,7 +87,7 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
   };
 
   const handleSaveCashOut = async () => {
-    const parsedAmount = parseFloat(amount);
+    const parsedAmount = Math.round(parseFloat(amount));
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       showAlert({
         type: 'warning',
@@ -101,7 +101,7 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
     try {
       const newEntry: CashOutEntry = {
         id: 'cout_' + Date.now(),
-        amount: Math.round(parsedAmount),
+        amount: parsedAmount,
         reason: isUrdu ? selectedReason.labelUrdu : selectedReason.labelEn,
         note: note.trim() || undefined,
         createdAt: Date.now(),
@@ -117,6 +117,13 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
       onClose();
     } catch (e) {
       console.error('Error saving cash out:', e);
+      showAlert({
+        type: 'warning',
+        title: isUrdu ? 'خرابی' : 'Error',
+        message: isUrdu
+          ? 'اخراجات کا اندراج محفوظ کرنے میں خرابی پیش آگئی۔ دوبارہ کوشش کریں۔'
+          : 'Failed to record cash out. Please try again.',
+      });
     } finally {
       setIsSubmitting(false);
     }

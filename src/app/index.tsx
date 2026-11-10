@@ -39,6 +39,7 @@ export default function App() {
     authLoading,
     isLoaded,
     isGuestMode,
+    isOnline,
     continueAsGuest,
     alertConfig,
     hideAlert,
@@ -152,7 +153,8 @@ export default function App() {
 
     // 2. When Not Authenticated and Not in Guest Mode -> Show Login Screen
     if (!user && !isGuestMode) {
-      if (authLoading) {
+      // Only show checking account splash if online; if offline, immediately present LoginScreen
+      if (authLoading && isOnline) {
         return (
           <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
             <StatusBar

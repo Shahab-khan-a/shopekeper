@@ -155,6 +155,11 @@ export const KhataScreen: React.FC = () => {
       });
     } catch (err) {
       console.error('[KhataScreen] Error saving customer:', err);
+      showAlert({
+        type: 'warning',
+        title: isUrdu ? 'محفوظ نہیں ہو سکا' : 'Could Not Save Customer',
+        message: isUrdu ? 'گاہک محفوظ کرنے میں خرابی پیش آگئی۔ دوبارہ کوشش کریں۔' : 'Failed to save customer. Please try again.',
+      });
     }
   };
 
@@ -170,6 +175,11 @@ export const KhataScreen: React.FC = () => {
       });
     } catch (err) {
       console.error('[KhataScreen] Error recording credit:', err);
+      showAlert({
+        type: 'warning',
+        title: isUrdu ? 'ادھار درج نہیں ہو سکا' : 'Could Not Record Credit',
+        message: isUrdu ? 'ادھار کی انٹری محفوظ کرنے میں خرابی پیش آگئی۔ دوبارہ کوشش کریں۔' : 'Failed to record credit entry. Please try again.',
+      });
     }
   };
 

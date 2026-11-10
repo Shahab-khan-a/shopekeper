@@ -40,10 +40,22 @@ export const SupplierCard: React.FC<SupplierCardProps> = ({
     if (!supplier.phone) return;
     const clean = supplier.phone.replace(/[^0-9]/g, '');
     const isUrdu = language === 'ur';
-    const amountText = `${currencySymbol} ${Math.abs(supplier.totalPayable).toLocaleString()}`;
-    const message = isUrdu
-      ? `محترم ${supplier.name}!\nآپ کے کھاتے کا اسٹیٹس: واجب الادا رقم ${amountText} ہے۔`
-      : `Dear ${supplier.name},\nKhata status update: Pending balance ${amountText}.`;
+    let message = '';
+    if (supplier.totalPayable > 0) {
+      const amountText = `${currencySymbol} ${supplier.totalPayable.toLocaleString()}`;
+      message = isUrdu
+        ? `محترم ${supplier.name}!\nکھاتے کا اسٹیٹس: واجب الادا بقایا رقم ${amountText} ہے۔`
+        : `Dear ${supplier.name},\nKhata status update: Pending payable balance is ${amountText}.`;
+    } else if (supplier.totalPayable < 0) {
+      const amountText = `${currencySymbol} ${Math.abs(supplier.totalPayable).toLocaleString()}`;
+      message = isUrdu
+        ? `محترم ${supplier.name}!\nکھاتے کا اسٹیٹس: آپ کے پاس ہمارا ایڈوانس بیلنس ${amountText} موجود ہے۔`
+        : `Dear ${supplier.name},\nKhata status update: We have an advance balance of ${amountText} with you.`;
+    } else {
+      message = isUrdu
+        ? `محترم ${supplier.name}!\nکھاتے کا اسٹیٹس: کھاتہ مکمل طور پر بے باق (0) ہے۔`
+        : `Dear ${supplier.name},\nKhata status update: Account is completely settled (0).`;
+    }
     const encoded = encodeURIComponent(message);
     const url = clean
       ? `https://wa.me/${clean.startsWith('92') ? clean : '92' + clean.replace(/^0/, '')}?text=${encoded}`

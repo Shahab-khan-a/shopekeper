@@ -305,30 +305,59 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // 1. Initial boot: Network init -> Migration -> Load from local SQLite/IndexedDB
+  // 1. Initial boot: Network init -> Migration -> Load from local SQLite/IndexedDB + Cached User
   useEffect(() => {
+    let isMounted = true;
+    const bootSafetyTimer = setTimeout(() => {
+      if (isMounted) {
+        console.warn('[ShopContext] Boot safety timeout fired (2500ms). Forcing isLoaded = true.');
+        setIsLoaded(true);
+        setIsProductsLoading(false);
+      }
+    }, 2500);
+
     async function bootApp() {
       try {
-        // Initialize network listener
-        await NetworkService.init();
-        const initialOnline = await NetworkService.isOnline();
-        setIsOnline(initialOnline);
+        // Initialize network listener non-blockingly so offline devices never halt boot
+        NetworkService.init()
+          .then(() => NetworkService.isOnline())
+          .then((online) => {
+            if (isMounted) setIsOnline(online);
+          })
+          .catch(() => {});
 
         // Run local DB migration from legacy AsyncStorage if needed
         await MigrationService.runMigrationIfNeeded();
         await MigrationService.purgeDummyDataIfNeeded();
 
-        // Load all entities from primary SQLite database
-        const [prods, sList, kList, setts, pCount, savedGuest, savedSaleView, savedProdView] = await Promise.all([
-          ProductRepository.getAll(),
-          SaleRepository.getAll(),
-          CustomerRepository.getAll(),
-          SettingsRepository.getSettings(),
-          SyncQueueRepository.getPendingCount(),
-          SettingsRepository.getGuestMode(),
-          AsyncStorage.getItem(SALE_VIEW_MODE_KEY),
-          AsyncStorage.getItem(PRODUCTS_VIEW_MODE_KEY),
-        ]);
+        // Load all entities from primary SQLite database + cached user session
+        const [prods, sList, kList, setts, pCount, savedGuest, savedCachedUser, savedSaleView, savedProdView] =
+          await Promise.all([
+            ProductRepository.getAll(),
+            SaleRepository.getAll(),
+            CustomerRepository.getAll(),
+            SettingsRepository.getSettings(),
+            SyncQueueRepository.getPendingCount(),
+            SettingsRepository.getGuestMode(),
+            AsyncStorage.getItem('@shopkeeper_cached_user'),
+            AsyncStorage.getItem(SALE_VIEW_MODE_KEY),
+            AsyncStorage.getItem(PRODUCTS_VIEW_MODE_KEY),
+          ]);
+
+        if (!isMounted) return;
+
+        // Restore cached user immediately for seamless offline access
+        if (savedCachedUser) {
+          try {
+            const parsedUser = JSON.parse(savedCachedUser);
+            if (parsedUser && parsedUser.uid) {
+              setUser(parsedUser as any);
+              setAuthLoading(false);
+            }
+          } catch (e) {
+            console.warn('[ShopContext] Failed to parse cached user:', e);
+          }
+        }
 
         if (savedSaleView === 'grid' || savedSaleView === 'list') {
           cachedSaleViewMode = savedSaleView;
@@ -365,6 +394,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Restore guest mode if user previously chose to continue as guest
         setIsGuestMode(savedGuest);
 
+        const initialOnline = NetworkService.isCurrentlyOnline();
         if (!initialOnline) {
           setSyncStatus('offline');
         } else if (pCount > 0) {
@@ -373,12 +403,19 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (err) {
         console.error('[ShopContext] Error during local boot:', err);
       } finally {
-        setIsLoaded(true);
-        setIsProductsLoading(false);
+        clearTimeout(bootSafetyTimer);
+        if (isMounted) {
+          setIsLoaded(true);
+          setIsProductsLoading(false);
+        }
       }
     }
 
     bootApp();
+    return () => {
+      isMounted = false;
+      clearTimeout(bootSafetyTimer);
+    };
   }, []);
 
   const setSaleViewMode = useCallback((mode: 'grid' | 'list') => {
@@ -425,13 +462,29 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!isLoaded) return;
 
+    // Safety timeout: Ensure authLoading never remains true indefinitely when offline or network stalls
+    const authTimeout = setTimeout(() => {
+      console.log('[ShopContext] Auth loading safety timeout reached. Unblocking UI for offline use.');
+      setAuthLoading(false);
+    }, 1800);
+
     checkRedirectAuth().catch((err) => console.warn('[ShopContext] checkRedirectAuth error:', err));
 
     const unsubscribe = subscribeToAuth(async (currentUser) => {
-      setUser(currentUser);
+      clearTimeout(authTimeout);
       setAuthLoading(false);
 
       if (currentUser) {
+        // Cache user profile for instant offline startup next time
+        const userPayload = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL,
+        };
+        AsyncStorage.setItem('@shopkeeper_cached_user', JSON.stringify(userPayload)).catch(() => {});
+
+        setUser(currentUser);
         setActiveTab('dashboard');
 
         // Check if device is currently online before attempting cloud operations
@@ -482,11 +535,21 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } else {
+        // If Firebase says currentUser is null, ONLY clear our cached user if device is confirmed ONLINE
+        // (meaning user actually signed out). If offline, retain the cached user session so shopkeeper can continue offline.
+        const isOnline = await NetworkService.isOnline();
+        if (isOnline) {
+          AsyncStorage.removeItem('@shopkeeper_cached_user').catch(() => {});
+          setUser(null);
+        }
         setSyncStatus('idle');
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(authTimeout);
+      unsubscribe();
+    };
   }, [isLoaded, refreshProducts, refreshSales, refreshKhata, refreshSettings, refreshPendingCount]);
 
   // ==================== PRODUCT CRUD ====================
@@ -900,6 +963,14 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (result.success && result.user) {
       setActiveTab('dashboard');
       const gUser = result.user;
+      const userPayload = {
+        uid: gUser.uid,
+        email: gUser.email,
+        displayName: gUser.displayName,
+        photoURL: gUser.photoURL,
+      };
+      AsyncStorage.setItem('@shopkeeper_cached_user', JSON.stringify(userPayload)).catch(() => {});
+
       setUser(gUser);
       setIsGuestMode(false);
       setSyncStatus('syncing');
@@ -919,6 +990,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('[ShopContext] Error clearing drive onboarding flag:', e);
       }
     }
+    await AsyncStorage.removeItem('@shopkeeper_cached_user').catch(() => {});
     await SettingsRepository.setGuestMode(false).catch(() => {});
     await signOutUser();
     await googleDriveService.disconnect();
@@ -982,6 +1054,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('[ShopContext] Error clearing drive onboarding flag:', e);
       }
     }
+    await AsyncStorage.removeItem('@shopkeeper_cached_user').catch(() => {});
     await AsyncStorage.removeItem('@sk_held_carts').catch(() => {});
     await clearStoreData();
     await SettingsRepository.saveSettings(INITIAL_SETTINGS);

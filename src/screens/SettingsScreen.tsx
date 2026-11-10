@@ -12,7 +12,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
 import * as Sharing from 'expo-sharing';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -399,26 +399,6 @@ export const SettingsScreen: React.FC = () => {
   const [footerNoteUrdu, setFooterNoteUrdu] = useState(settings.footerNoteUrdu);
   const [lowStockThreshold, setLowStockThreshold] = useState(settings.lowStockThreshold.toString());
 
-  // Synchronize form fields whenever settings or user updates (e.g. from Firebase sync)
-  useEffect(() => {
-    setProfileImage(settings.profileImage && !isGoogleAvatar(settings.profileImage) ? settings.profileImage : '');
-    setShopName(settings.shopName);
-    setShopNameUrdu(settings.shopNameUrdu);
-    setOwnerName(settings.ownerName || user?.displayName || '');
-    setBusinessType(settings.businessType || 'Kiryana & General Store');
-    setPhone(settings.phone);
-    setAlternatePhone(settings.alternatePhone || '');
-    setEmail(settings.email || user?.email || '');
-    setAddress(settings.address);
-    setCity(settings.city || '');
-    setTaxNumber(settings.taxNumber || '');
-    setPaymentDetails(settings.paymentDetails || '');
-    setBusinessHours(settings.businessHours || '');
-    setFooterNote(settings.footerNote);
-    setFooterNoteUrdu(settings.footerNoteUrdu);
-    setLowStockThreshold(settings.lowStockThreshold.toString());
-  }, [settings, user]);
-
   // Detect whether user has modified any form field compared to current saved settings
   const isFormDirty =
     shopName.trim() !== (settings.shopName || '').trim() ||
@@ -437,6 +417,27 @@ export const SettingsScreen: React.FC = () => {
     footerNoteUrdu.trim() !== (settings.footerNoteUrdu || '').trim() ||
     lowStockThreshold.trim() !== (settings.lowStockThreshold || 5).toString().trim() ||
     profileImage.trim() !== (settings.profileImage && !isGoogleAvatar(settings.profileImage) ? settings.profileImage : '').trim();
+
+  // Synchronize form fields whenever settings or user updates (e.g. from Firebase sync), protecting active user edits
+  useEffect(() => {
+    if (isFormDirty) return;
+    setProfileImage(settings.profileImage && !isGoogleAvatar(settings.profileImage) ? settings.profileImage : '');
+    setShopName(settings.shopName);
+    setShopNameUrdu(settings.shopNameUrdu);
+    setOwnerName(settings.ownerName || user?.displayName || '');
+    setBusinessType(settings.businessType || 'Kiryana & General Store');
+    setPhone(settings.phone);
+    setAlternatePhone(settings.alternatePhone || '');
+    setEmail(settings.email || user?.email || '');
+    setAddress(settings.address);
+    setCity(settings.city || '');
+    setTaxNumber(settings.taxNumber || '');
+    setPaymentDetails(settings.paymentDetails || '');
+    setBusinessHours(settings.businessHours || '');
+    setFooterNote(settings.footerNote);
+    setFooterNoteUrdu(settings.footerNoteUrdu);
+    setLowStockThreshold(settings.lowStockThreshold.toString());
+  }, [settings, user, isFormDirty]);
 
   // Prompt unsaved changes warning using reusable AlertModal
   const promptUnsavedChanges = () => {
@@ -591,27 +592,58 @@ export const SettingsScreen: React.FC = () => {
     return `Dear Ahmed,\n\nHope you are doing well.\n\nThis is a gentle reminder from *${shopEn}* regarding your pending balance:\n👉 *${settings.currencySymbol} 2,500*\n\nKindly arrange for the payment at your earliest convenience.\n\nThank you!\n*${shopEn}*\n📞 ${phoneEn}`;
   }, [settings.shopName, settings.phone, settings.currencySymbol]);
 
+  const customUr = settings.whatsappReminderCustomUr?.trim() ? settings.whatsappReminderCustomUr : undefined;
+  const customEn = settings.whatsappReminderCustomEn?.trim() ? settings.whatsappReminderCustomEn : undefined;
+
+  const defaultTemplate = isUrduReminder ? defaultReminderUrdu : defaultReminderEnglish;
+
   const activeReminderText = isUrduReminder
-    ? (settings.whatsappReminderCustomUr ?? defaultReminderUrdu)
-    : (settings.whatsappReminderCustomEn ?? defaultReminderEnglish);
+    ? (customUr ?? defaultReminderUrdu)
+    : (customEn ?? defaultReminderEnglish);
 
-  const isReminderCustomized = isUrduReminder
-    ? Boolean(settings.whatsappReminderCustomUr && settings.whatsappReminderCustomUr !== defaultReminderUrdu)
-    : Boolean(settings.whatsappReminderCustomEn && settings.whatsappReminderCustomEn !== defaultReminderEnglish);
+  const [reminderDraft, setReminderDraft] = useState(activeReminderText);
+  const isReminderFocusedRef = useRef(false);
 
-  const handleUpdateReminderText = (text: string) => {
-    if (isUrduReminder) {
-      updateSettings({ whatsappReminderCustomUr: text });
-    } else {
-      updateSettings({ whatsappReminderCustomEn: text });
+  // Synchronize draft when active template/language changes, but NEVER while the user is actively typing/focused
+  useEffect(() => {
+    if (!isReminderFocusedRef.current) {
+      setReminderDraft(activeReminderText);
     }
+  }, [activeReminderText]);
+
+  // Live customization indicator: matches either the active draft or saved setting compared against default
+  const isReminderCustomized = Boolean(
+    (reminderDraft.trim() && reminderDraft.trim() !== defaultTemplate.trim()) ||
+    (isUrduReminder
+      ? (customUr && customUr.trim() !== defaultTemplate.trim())
+      : (customEn && customEn.trim() !== defaultTemplate.trim()))
+  );
+
+  const commitReminderText = useCallback(() => {
+    const trimmed = reminderDraft.trim();
+    const isDefault = !trimmed || trimmed === defaultTemplate.trim();
+    if (isUrduReminder) {
+      updateSettings({ whatsappReminderCustomUr: isDefault ? undefined : reminderDraft });
+    } else {
+      updateSettings({ whatsappReminderCustomEn: isDefault ? undefined : reminderDraft });
+    }
+  }, [reminderDraft, defaultTemplate, isUrduReminder, updateSettings]);
+
+  const handleReminderLangChange = (newLang: 'en' | 'ur') => {
+    // Before switching language, commit current draft to its current language so edits aren't lost
+    commitReminderText();
+    isReminderFocusedRef.current = false;
+    updateSettings({ whatsappReminderLanguage: newLang });
   };
 
   const handleResetReminderText = () => {
+    isReminderFocusedRef.current = false;
     if (isUrduReminder) {
       updateSettings({ whatsappReminderCustomUr: undefined });
+      setReminderDraft(defaultReminderUrdu);
     } else {
       updateSettings({ whatsappReminderCustomEn: undefined });
+      setReminderDraft(defaultReminderEnglish);
     }
     showAlert({
       type: 'info',
@@ -649,6 +681,7 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleSave = async () => {
+    commitReminderText();
     setIsSaving(true);
     try {
       await updateSettings({
@@ -848,6 +881,12 @@ export const SettingsScreen: React.FC = () => {
                   title: t('error'),
                   message: res.error || 'Failed to delete account',
                 });
+              } else {
+                showAlert({
+                  type: 'success',
+                  title: t('success'),
+                  message: t('deleteAccountSuccess'),
+                });
               }
             } catch (err: any) {
               showAlert({
@@ -953,22 +992,19 @@ export const SettingsScreen: React.FC = () => {
       console.error('[SettingsScreen] Drive backup error:', e);
       const err = e?.message || 'Failed to backup to Google Drive.';
       if (err.includes('Google Drive API has not been used') || err.includes('disabled')) {
-        const consoleUrl = 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=65013515513';
         showAlert({
           type: 'warning',
-          title: 'Google Drive Setup Required',
-          message: 'Google Drive API must be enabled. Click below to open Google Cloud Console, enable it, and retry after 1 minute.',
+          title: language === 'ur' ? 'گوگل ڈرائیو سروس دستیاب نہیں' : 'Google Drive Service Temporarily Unavailable',
+          message: language === 'ur'
+            ? 'گوگل ڈرائیو سروس کلاؤڈ پر زیرِ ترتیب ہے۔ براہ کرم کچھ دیر بعد کوشش کریں یا سپورٹ سے رابطہ کریں۔'
+            : 'Google Drive backup is currently being configured on the cloud server. Please try again shortly or contact support.',
           buttons: [
             {
-              text: 'Open Google Console',
+              text: language === 'ur' ? 'سپورٹ سے رابطہ' : 'Contact Support',
               style: 'primary',
-              icon: 'open-outline',
+              icon: 'mail-outline',
               onPress: () => {
-                if (Platform.OS === 'web') {
-                  window.open(consoleUrl, '_blank');
-                } else {
-                  Linking.openURL(consoleUrl).catch(() => { });
-                }
+                Linking.openURL('mailto:techflow0500@gmail.com?subject=Google%20Drive%20Backup%20Issue').catch(() => {});
               },
             },
             { text: t('cancel'), style: 'cancel' },
@@ -1050,10 +1086,13 @@ export const SettingsScreen: React.FC = () => {
         style={[styles.container, { backgroundColor: theme.background }]}
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 120 : 80 },
+          { flexGrow: 1, paddingBottom: keyboardHeight > 0 ? keyboardHeight + 40 : 80 },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        nestedScrollEnabled={true}
+        scrollEventThrottle={16}
       >
 
         {/* ── Account / Guest status ───────────────────────────────────────── */}
@@ -1156,7 +1195,12 @@ export const SettingsScreen: React.FC = () => {
         {/* ── Segment Switcher ─────────────────────────────────────────────── */}
         <View
           style={[styles.segmentWrap, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}
-          onLayout={(e: LayoutChangeEvent) => setSegContainerWidth(e.nativeEvent.layout.width)}
+          onLayout={(e: LayoutChangeEvent) => {
+            const w = Math.round(e.nativeEvent.layout.width);
+            if (w > 0 && Math.abs(w - segContainerWidth) > 1) {
+              setSegContainerWidth(w);
+            }
+          }}
         >
           {/* Animated sliding pill */}
           {segContainerWidth > 0 && (
@@ -1387,11 +1431,6 @@ export const SettingsScreen: React.FC = () => {
                       value={email} onChangeText={setEmail}
                       placeholder="store@gmail.com" keyboardType="email-address"
                       theme={theme}
-                      onFocus={() => {
-                        setTimeout(() => {
-                          scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 150);
-                      }}
                     />
                     <StackedField
                       icon="location-outline" iconColor="#D97706" iconBg="#FEF3C7"
@@ -1399,11 +1438,6 @@ export const SettingsScreen: React.FC = () => {
                       value={city} onChangeText={setCity}
                       placeholder="e.g. Lahore"
                       theme={theme}
-                      onFocus={() => {
-                        setTimeout(() => {
-                          scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 150);
-                      }}
                     />
                     <StackedField
                       icon="map-outline" iconColor="#D97706" iconBg="#FEF3C7"
@@ -1413,11 +1447,6 @@ export const SettingsScreen: React.FC = () => {
                       multiline
                       theme={theme}
                       last
-                      onFocus={() => {
-                        setTimeout(() => {
-                          scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 150);
-                      }}
                     />
                   </>
                 )}
@@ -1476,7 +1505,7 @@ export const SettingsScreen: React.FC = () => {
               >
                 <LangToggle
                   value={settings.whatsappReminderLanguage || 'en'}
-                  onChange={(l) => updateSettings({ whatsappReminderLanguage: l })}
+                  onChange={handleReminderLangChange}
                   theme={theme}
                 />
               </RowItem>
@@ -1518,8 +1547,15 @@ export const SettingsScreen: React.FC = () => {
                 {/* Editable Message Box */}
                 <View style={[styles.waInputWrap, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                   <TextInput
-                    value={activeReminderText}
-                    onChangeText={handleUpdateReminderText}
+                    value={reminderDraft}
+                    onChangeText={setReminderDraft}
+                    onFocus={() => {
+                      isReminderFocusedRef.current = true;
+                    }}
+                    onBlur={() => {
+                      isReminderFocusedRef.current = false;
+                      commitReminderText();
+                    }}
                     multiline
                     placeholder={language === 'ur' ? 'یہاں اپنا پیغام لکھیں...' : 'Enter your custom message...'}
                     placeholderTextColor={theme.textMuted}
@@ -1595,11 +1631,6 @@ export const SettingsScreen: React.FC = () => {
                       value={footerNote} onChangeText={setFooterNote}
                       placeholder="Thank you for shopping!"
                       theme={theme}
-                      onFocus={() => {
-                        setTimeout(() => {
-                          scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 150);
-                      }}
                     />
                     <StackedField
                       icon="language-outline" iconColor="#0284C7" iconBg="#E0F2FE"
@@ -1608,11 +1639,6 @@ export const SettingsScreen: React.FC = () => {
                       placeholder="خریداری کا شکریہ!"
                       theme={theme}
                       last
-                      onFocus={() => {
-                        setTimeout(() => {
-                          scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 150);
-                      }}
                     />
                   </View>
                 </View>
@@ -2084,11 +2110,18 @@ const styles = StyleSheet.create({
   },
   heroInner: {
     maxWidth: 720,
-    marginHorizontal: 'auto',
     width: '100%',
+    alignSelf: 'center',
     paddingHorizontal: Spacing.lg,
   },
-  content: { paddingHorizontal: Spacing.lg, paddingTop: 12, paddingBottom: 80 },
+  content: {
+    maxWidth: 720,
+    width: '100%',
+    alignSelf: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 12,
+    paddingBottom: 80,
+  },
 
   // Header
   header: {

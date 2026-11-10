@@ -7,4 +7,5 @@ export { IconButton } from './IconButton';
 export { SectionHeader } from './SectionHeader';
 export { StatCard } from './StatCard';
 export { ThemedInput } from './ThemedInput';
-export { AlertModal, AlertModalButton, AlertModalType } from './AlertModal';
+export { AlertModal } from './AlertModal';
+export type { AlertModalButton, AlertModalType } from './AlertModal';

@@ -14,6 +14,27 @@ try {
   // Graceful fallback if native module is loading
 }
 
+/**
+ * Safely queries ExpoNetwork.getNetworkStateAsync with a 1000ms timeout
+ * to prevent blocking/hanging when the device is completely offline or in transition.
+ */
+async function getSafeNetworkState(): Promise<any> {
+  if (!ExpoNetwork?.getNetworkStateAsync) return null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      ExpoNetwork.getNetworkStateAsync(),
+      new Promise<null>((resolve) => {
+        timer = setTimeout(() => resolve(null), 1000);
+      }),
+    ]);
+  } catch {
+    return null;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export const NetworkService = {
   /**
    * Initializes network monitoring
@@ -39,8 +60,10 @@ export const NetworkService = {
       });
     } else if (ExpoNetwork?.addNetworkStateListener) {
       try {
-        const state = await ExpoNetwork.getNetworkStateAsync();
-        lastKnownOnlineState = !!(state.isConnected && state.isInternetReachable !== false);
+        const state = await getSafeNetworkState();
+        if (state) {
+          lastKnownOnlineState = !!(state.isConnected && state.isInternetReachable !== false);
+        }
 
         ExpoNetwork.addNetworkStateListener((state: any) => {
           const isOnline = !!(state.isConnected && state.isInternetReachable !== false);
@@ -66,10 +89,13 @@ export const NetworkService = {
 
     if (ExpoNetwork?.getNetworkStateAsync) {
       try {
-        const state = await ExpoNetwork.getNetworkStateAsync();
-        const online = !!(state.isConnected && state.isInternetReachable !== false);
-        lastKnownOnlineState = online;
-        return online;
+        const state = await getSafeNetworkState();
+        if (state) {
+          const online = !!(state.isConnected && state.isInternetReachable !== false);
+          lastKnownOnlineState = online;
+          return online;
+        }
+        return lastKnownOnlineState;
       } catch {
         return lastKnownOnlineState;
       }

@@ -70,6 +70,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
   const priceInputRef = useRef<TextInput>(null);
   const stockInputRef = useRef<TextInput>(null);
+  const barcodeInputRef = useRef<TextInput>(null);
   const scrollRef = useRef<ScrollView>(null);
 
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.1)' : '#E2E8F0';
@@ -545,6 +546,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       scrollFieldIntoView();
                     }}
                     onBlur={() => setFocusedField(null)}
+                    returnKeyType="next"
+                    onSubmitEditing={() => barcodeInputRef.current?.focus()}
                   />
                 </View>
                 {hasValidCost && parsedPrice > 0 ? (
@@ -562,33 +565,59 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   {isUrdu ? 'بارکوڈ (اختیاری)' : 'Barcode (Optional)'}
                 </Text>
                 <View style={styles.barcodeRow}>
-                  <TextInput
+                  <View
                     style={[
-                      styles.input,
+                      styles.barcodeInputWrap,
                       {
-                        flex: 1,
                         backgroundColor: inputBg,
-                        color: theme.text,
                         borderColor: focusedField === 'barcode' ? theme.primary : softBorder,
                       },
-                    ]}
-                    placeholder={isUrdu ? '8964… یا بارکوڈ سکین کریں' : '8964… or scan barcode'}
-                    placeholderTextColor={theme.textMuted}
-                    value={barcode}
-                    onChangeText={setBarcode}
-                    onFocus={() => {
-                      setFocusedField('barcode');
-                      scrollFieldIntoView();
-                    }}
-                    onBlur={() => setFocusedField(null)}
-                  />
+                    ]}>
+                    <Ionicons
+                      name="barcode-outline"
+                      size={18}
+                      color={barcode ? theme.primary : theme.textMuted}
+                      style={styles.barcodeIcon}
+                    />
+                    <TextInput
+                      ref={barcodeInputRef}
+                      style={[styles.barcodeInput, { color: theme.text }]}
+                      placeholder={isUrdu ? 'بارکوڈ سکین یا درج کریں' : 'Scan or enter barcode'}
+                      placeholderTextColor={theme.textMuted}
+                      value={barcode}
+                      onChangeText={setBarcode}
+                      onFocus={() => {
+                        setFocusedField('barcode');
+                        scrollFieldIntoView();
+                      }}
+                      onBlur={() => setFocusedField(null)}
+                      keyboardType="default"
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit}
+                    />
+                    {barcode ? (
+                      <Pressable
+                        onPress={() => setBarcode('')}
+                        hitSlop={8}
+                        style={styles.barcodeClearBtn}
+                        accessibilityLabel="Clear barcode">
+                        <Ionicons name="close-circle" size={17} color={theme.textMuted} />
+                      </Pressable>
+                    ) : null}
+                  </View>
+
                   <Pressable
                     onPress={() => setIsBarcodeScannerOpen(true)}
-                    style={[
+                    style={({ pressed }) => [
                       styles.scanBtn,
-                      { backgroundColor: theme.primaryLight },
-                    ]}>
-                    <Ionicons name="barcode-outline" size={18} color={theme.primary} />
+                      { backgroundColor: theme.primary },
+                      pressed && { opacity: 0.88 },
+                    ]}
+                    accessibilityLabel={isUrdu ? 'بارکوڈ سکین کریں' : 'Scan barcode'}>
+                    <Ionicons name="scan-outline" size={17} color="#FFFFFF" />
+                    <Text style={styles.scanBtnText}>
+                      {isUrdu ? 'سکین' : 'Scan'}
+                    </Text>
                   </Pressable>
                 </View>
               </View>
@@ -826,15 +855,47 @@ const styles = StyleSheet.create({
   },
   barcodeRow: {
     flexDirection: 'row',
-    gap: 8,
     alignItems: 'center',
+    gap: 8,
   },
-  scanBtn: {
-    width: 46,
+  barcodeInputWrap: {
+    flex: 1,
     height: 46,
     borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  barcodeIcon: {
+    marginLeft: 12,
+    marginRight: 6,
+  },
+  barcodeInput: {
+    flex: 1,
+    height: '100%',
+    fontSize: 15,
+    fontWeight: '600',
+    paddingRight: 6,
+  },
+  barcodeClearBtn: {
+    paddingHorizontal: 8,
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  scanBtn: {
+    height: 46,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  scanBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',

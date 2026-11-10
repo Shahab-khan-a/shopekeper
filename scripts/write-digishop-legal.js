@@ -28,7 +28,7 @@ const privacy = `<!DOCTYPE html>
     <h1>Privacy Policy</h1>
     <div class="badge">App: DigiShop (com.techflowstudio.shopkeeper)</div>
     <p><strong>Effective Date:</strong> January 1, 2026</p>
-    <p><strong>Last Updated:</strong> October 2, 2026</p>
+    <p><strong>Last Updated:</strong> November 2026</p>
     <div class="highlight-box">
       <strong>Summary:</strong> DigiShop ("we", "us", or "our") is an offline-first Point of Sale and bookkeeping tool designed for retail storekeepers. Your business data belongs solely to you. We do not sell your personal data or your customers' transaction data to third parties.
     </div>
@@ -42,7 +42,7 @@ const privacy = `<!DOCTYPE html>
     <h3>C. Inventory &amp; Transaction Records</h3>
     <p>To provide core POS register capabilities, the app stores:</p>
     <ul>
-      <li>Product catalog (product names, barcodes, purchase cost, retail selling prices, stock quantities, and product photos).</li>
+      <li>Product inventory (product names, barcodes, purchase cost, retail selling prices, stock quantities, and product photos created and managed by you).</li>
       <li>Sales receipts and transaction histories.</li>
     </ul>
     <h3>D. Customer Khata (Credit Ledger) &amp; Phone Numbers</h3>
@@ -56,7 +56,7 @@ const privacy = `<!DOCTYPE html>
     <p><strong>Important:</strong></p>
     <ul>
       <li>This customer information is entered <em>by you (the shopkeeper)</em> for your own bookkeeping, reminders, and collections. We do not scrape or buy customer contacts.</li>
-      <li>Phone numbers may be used inside the app only to help you call the customer or open a WhatsApp reminder that <em>you</em> choose to send.</li>
+      <li>Phone numbers may be used inside the app only to help you call the customer or open a WhatsApp reminder using your customizable reminder template that <em>you</em> choose to send. No background automated messaging or spam is performed.</li>
       <li>We do <strong>not</strong> sell, rent, advertise with, or share customer Khata phone numbers with third parties for marketing.</li>
       <li>If cloud sync / backup is enabled, this ledger data (including phone numbers you entered) is stored under your merchant account in Firebase and/or in your personal Google Drive backup, solely so you can restore your shop records.</li>
       <li>You are responsible for entering accurate customer details and for complying with any local rules about how you store or contact your customers.</li>
@@ -134,21 +134,22 @@ const terms = `<!DOCTYPE html>
   <div class="container">
     <h1>Terms of Service</h1>
     <p><strong>Effective Date:</strong> January 1, 2026</p>
+    <p><strong>Last Updated:</strong> November 2026</p>
     <h2>1. Acceptance of Terms</h2>
     <p>By downloading or using DigiShop (the "App"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the application.</p>
     <h2>2. Purpose of the Application</h2>
     <p>DigiShop is designed as an offline-first inventory management, point-of-sale, and customer credit ledger (Khata) tool for retail shopkeepers. The app provides calculation and bookkeeping features. You are solely responsible for verifying the accuracy of all recorded transactions, prices, taxes, and customer balances.</p>
-    <h2>3. Cloud Synchronization &amp; Google Drive</h2>
+    <h2>3. Cloud Synchronization &amp; Google Drive Backup</h2>
     <p>Cloud backup functionality requires a valid Google account. You remain the sole owner of your business data. We make reasonable efforts to maintain cloud synchronization uptime via Google Firebase and Google Drive, but we do not guarantee uninterrupted availability.</p>
-    <h2>4. Merchant Responsibility</h2>
-    <p>You agree not to use the App for any unlawful purpose, fraud, or violation of applicable commercial and taxation laws in your jurisdiction.</p>
+    <h2>4. Merchant Responsibility &amp; Customer Communications</h2>
+    <p>You agree not to use the App for any unlawful purpose, fraud, or violation of applicable commercial or taxation laws. Any customer communications (such as WhatsApp payment reminders or invoices) initiated from the App are sent directly through your own third-party messaging apps under your own discretion and responsibility. The App does not send automated background spam.</p>
     <h2>5. Termination &amp; Deletion</h2>
-    <p>You may terminate your account at any time using the in-app deletion option under Settings or via our online deletion portal. We reserve the right to suspend accounts that violate Google Play or applicable policies.</p>
-    <h2>6. Product Catalog, Media &amp; Third-Party Trademarks</h2>
-    <p>The optional starter product catalog contains sample item imagery sourced under open licenses from Wikimedia Commons (licensed under CC0, CC BY, and CC BY-SA) and Unsplash (under the Unsplash License). All product brand names, trademarks, and trade dress referenced in the catalog belong to their respective owners and are used purely for retail inventory identification and bookkeeping calculation purposes (nominative fair use). DigiShop is not affiliated with, sponsored by, or endorsed by any product brand or manufacturer.</p>
+    <p>You may terminate your account at any time using the in-app deletion option under Settings or via our online deletion portal. We reserve the right to suspend accounts that violate Google Play, App Store, or applicable platform policies.</p>
+    <h2>6. Merchant Inventory &amp; User-Created Items</h2>
+    <p>Merchants create, name, price, and manage their own product inventory items within the App. Any product names, barcodes, photographs, or pricing entered or photographed by you belong to and remain the responsibility of the merchant. All third-party product brand names, trademarks, or trade dress entered into inventory records are the property of their respective owners and are used purely for retail inventory identification and bookkeeping calculation purposes (nominative fair use). DigiShop is not affiliated with, sponsored by, or endorsed by any product brand or manufacturer.</p>
     <h2>7. Contact Us</h2>
     <p>For questions regarding these Terms, contact us at <a href="mailto:techflow0500@gmail.com">techflow0500@gmail.com</a>.</p>
-    <div class="footer"><a href="privacy-policy.html">Privacy Policy</a> &bull; &copy; 2026 DigiShop. All rights reserved.</div>
+    <div class="footer"><a href="privacy-policy.html">Privacy Policy</a> &bull; <a href="delete-account.html">Account Deletion</a> &bull; &copy; 2026 DigiShop. All rights reserved.</div>
   </div>
 </body>
 </html>

@@ -101,7 +101,7 @@ export const DayEndClosingModal: React.FC<DayEndClosingModalProps> = ({
       dateStyle: 'medium',
       timeStyle: 'short',
     });
-  }, [language]);
+  }, [language, visible]);
 
   // Update denomination count helper
   const updateDenom = (field: keyof DenominationCounts, delta: number) => {
@@ -217,7 +217,11 @@ ${closingNotes ? `\n📝 نوٹ: ${closingNotes}` : ''}
       window.open(url, '_blank');
     } else {
       Linking.openURL(url).catch(() => {
-        Alert.alert(t('error'), 'Could not open WhatsApp.');
+        showAlert({
+          type: 'warning',
+          title: t('warningAlert'),
+          message: language === 'ur' ? 'واٹس ایپ نہیں کھولا جا سکا۔' : 'Could not open WhatsApp.',
+        });
       });
     }
   };
@@ -382,7 +386,11 @@ ${closingNotes ? `\n📝 نوٹ: ${closingNotes}` : ''}
       });
     } catch (e) {
       console.error('Failed to save closing:', e);
-      Alert.alert(t('error'), 'Could not save day-end closing record.');
+      showAlert({
+        type: 'warning',
+        title: t('warningAlert'),
+        message: language === 'ur' ? 'روزنامچہ ریکارڈ محفوظ نہیں ہو سکا۔' : 'Could not save day-end closing record.',
+      });
     } finally {
       setIsSaving(false);
     }

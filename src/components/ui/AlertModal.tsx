@@ -92,14 +92,18 @@ export const AlertModal: React.FC<AlertModalProps> = ({
         {
           text: isUrdu ? 'ٹھیک ہے' : 'OK',
           style: 'primary',
-          onPress: onClose,
+          onPress: undefined,
         },
       ];
 
   const handleButtonPress = async (btn: AlertModalButton) => {
     onClose();
     if (btn.onPress) {
-      await btn.onPress();
+      try {
+        await btn.onPress();
+      } catch (e) {
+        console.warn('[AlertModal] Button handler failed:', e);
+      }
     }
   };
 
