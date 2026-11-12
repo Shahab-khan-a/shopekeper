@@ -1,6 +1,7 @@
 import { ProductCard } from '@/components/ProductCard';
 import { ProductDetailsDrawer } from '@/components/ProductDetailsDrawer';
 import { ProductImage } from '@/components/ProductImage';
+import { SubScreenHeader } from '@/components/SubScreenHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
@@ -41,6 +42,7 @@ export const ProductsScreen: React.FC = () => {
     outOfStockProducts,
     productsViewMode,
     setProductsViewMode,
+    setActiveTab,
   } = useShop();
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -202,6 +204,11 @@ export const ProductsScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SubScreenHeader
+        title={isUrdu ? 'سامان و اسٹاک' : 'Items'}
+        subtitle={`${products.length} ${isUrdu ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}`}
+        onBack={() => setActiveTab('dashboard')}
+      />
       {isMenuMounted && (
         <Pressable
           style={styles.menuBackdrop}
@@ -228,15 +235,6 @@ export const ProductsScreen: React.FC = () => {
         <View style={styles.topSection}>
           <View style={styles.topCardsWrap}>
           <View style={styles.titleRow}>
-            <View style={styles.titleLeft}>
-              <Text style={[styles.screenTitleText, { color: theme.text }]}>
-                {isUrdu ? 'اسٹاک و سامان' : 'Products'}
-              </Text>
-              <Text style={[styles.countText, { color: theme.textMuted }]}>
-                {products.length} {isUrdu ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
-              </Text>
-            </View>
-
             <View style={styles.titleSpacer} />
 
             <Pressable

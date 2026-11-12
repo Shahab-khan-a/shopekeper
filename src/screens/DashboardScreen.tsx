@@ -1,9 +1,4 @@
-import { SalesChart } from '@/components/SalesChart';
-import { Colors, Spacing } from '@/constants/theme';
-import { useShop } from '@/context/ShopContext';
-import { SaleScreen } from '@/screens/SaleScreen';
-import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -12,16 +7,48 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Spacing } from '@/constants/theme';
+import { useShop } from '@/context/ShopContext';
+import { triggerCloudBackupFlow } from '@/utils/backupAction';
 import { getPaymentBreakdown } from '@/utils/payment';
+import {
+  FeatureCarousel,
+  FeatureSlideAction,
+} from '@/components/FeatureCarousel';
+import { SalesChart } from '@/components/SalesChart';
 
+interface QuickTileConfig {
+  id: string;
+  title: string;
+  subtitle: string;
+  subtitleColor: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  iconBg: string;
+  accessibilityLabel: string;
+  onPress: () => void;
+}
+
+/**
+ * Clean Home Hub tailored for small shopkeepers:
+ * 1. Read-Only Emerald Summary Info Card (Today's Sales + Bill count)
+ * 2. Hero Action Duo Row (Big New Bill + Khata)
+ * 3. Symmetric 3-Card Quick Action Row (Items, All Bills, Reports)
+ * 4. Animated 4-slide Feature Highlights Carousel
+ */
 export const DashboardScreen: React.FC = () => {
   const {
     todaySalesTotal,
+    todayProfit,
     products,
     sales,
     khata,
     totalUdhaarReceivable,
+    lowStockProducts,
+    outOfStockProducts,
     totalInventoryInvestment,
     totalInventoryRetailValue,
     totalExpectedStockProfit,
@@ -30,7 +57,11 @@ export const DashboardScreen: React.FC = () => {
     totalInventoryUnits,
     settings,
     setActiveTab,
-    setActiveReceipt,
+    setIsAuthModalOpen,
+    user,
+    isOnline,
+    pendingSyncCount,
+    syncNow,
     t,
     language,
     showAlert,
@@ -38,400 +69,507 @@ export const DashboardScreen: React.FC = () => {
 
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const isUrdu = language === 'ur';
+  const softBorder = settings.darkMode
+    ? 'rgba(255,255,255,0.09)'
+    : 'rgba(148, 163, 184, 0.22)';
 
-  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
-  const [showReports, setShowReports] = useState(false);
+  const [isReportsOpen, setIsReportsOpen] = useState(false);
 
-  const todayStart = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
+  const { todaySalesCount, todayCashTotal, todayUdhaarTotal } = useMemo(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    let count = 0;
+    let cashSum = 0;
+    let udhaarSum = 0;
 
-  const todaySales = sales.filter((s) => new Date(s.date) >= todayStart && !s.refundedAt);
+    for (const s of sales) {
+      if (s.status === 'refunded' || s.status === 'cancelled') continue;
+      if (new Date(s.date) < start) continue;
+      count += 1;
+      const { cleanPaid, baki } = getPaymentBreakdown(s);
+      cashSum += cleanPaid;
+      udhaarSum += baki;
+    }
 
-  const MAX_TODAY_BILLS = 6;
-  const todaySalesList = useMemo(() => {
-    return sales
-      .filter((s) => new Date(s.date) >= todayStart && !s.refundedAt)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [sales, todayStart]);
+    return {
+      todaySalesCount: count,
+      todayCashTotal: cashSum,
+      todayUdhaarTotal: udhaarSum,
+    };
+  }, [sales]);
 
-  const displayBills = useMemo(() => {
-    const source = todaySalesList.length > 0 ? todaySalesList : sales;
-    return [...source]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, MAX_TODAY_BILLS);
-  }, [todaySalesList, sales]);
+  const todayDateLabel = useMemo(() => {
+    return new Date().toLocaleDateString(isUrdu ? 'ur-PK' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+    });
+  }, [isUrdu]);
 
-  const todayGrossProfit = todaySales.reduce((a, s) => {
-    const cost = s.items.reduce((c: number, it: any) => c + ((it.costPrice || 0) * it.quantity), 0);
-    return a + (s.grandTotal - cost);
-  }, 0);
-
-  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148, 163, 184, 0.18)';
   const pendingKhataCount = useMemo(() => {
-    return (khata || []).filter((c: any) => (c.currentBalance || c.balance || 0) > 0).length;
+    return (khata || []).filter((c) => (c.totalDebt ?? c.balance ?? 0) > 0).length;
   }, [khata]);
 
-  const hasUdhaar = totalUdhaarReceivable > 0;
-  const heroSubtitle = todayGrossProfit > 0
-    ? `+${settings.currencySymbol}${todayGrossProfit.toLocaleString()} ${isUrdu ? 'متوقع منافع' : 'estimated profit'}`
-    : todaySales.length > 0
-      ? (isUrdu ? 'تمام بلز درج ہیں' : 'All bills recorded')
-      : (isUrdu ? 'کاؤنٹر تیار ہے' : 'Ready for customers');
+  const stockAlertsCount = lowStockProducts.length + outOfStockProducts.length;
+
+  const handleBackupPress = useCallback(() => {
+    void triggerCloudBackupFlow({
+      user,
+      isOnline,
+      pendingSyncCount,
+      isUrdu,
+      setIsAuthModalOpen,
+      syncNow,
+      showAlert,
+    });
+  }, [user, isOnline, isUrdu, pendingSyncCount, syncNow, showAlert, setIsAuthModalOpen]);
+
+  const infoCardBg = settings.darkMode ? '#111827' : '#FFFFFF';
+  const infoCardBorder = settings.darkMode
+    ? 'rgba(52, 211, 153, 0.2)'
+    : 'rgba(5, 150, 105, 0.2)';
+  const primarySaleBg = settings.darkMode ? '#046C4E' : '#045E44';
+  const khataHeroBg = settings.darkMode ? '#9F1239' : '#BE123C';
+  const khataHeroBorder = settings.darkMode
+    ? 'rgba(251, 113, 133, 0.36)'
+    : 'rgba(253, 164, 175, 0.48)';
+
+  const quickTiles: QuickTileConfig[] = useMemo(
+    () => [
+      {
+        id: 'items',
+        title: isUrdu ? 'سامان' : 'Items',
+        subtitle:
+          stockAlertsCount > 0
+            ? isUrdu
+              ? `${stockAlertsCount} کم اسٹاک`
+              : `${stockAlertsCount} low stock`
+            : `${products.length} ${isUrdu ? 'اسٹاک' : 'stock'}`,
+        subtitleColor: stockAlertsCount > 0 ? '#D97706' : theme.textMuted,
+        icon: 'cube-outline',
+        iconColor: settings.darkMode ? '#38BDF8' : '#0284C7',
+        iconBg: settings.darkMode ? 'rgba(56, 189, 248, 0.16)' : '#E0F2FE',
+        accessibilityLabel: isUrdu ? 'سامان و اسٹاک' : 'Items and stock',
+        onPress: () => setActiveTab('products'),
+      },
+      {
+        id: 'bills',
+        title: isUrdu ? 'تمام بلز' : 'All Bills',
+        subtitle: `${sales.length} ${isUrdu ? 'محفوظ' : 'saved'}`,
+        subtitleColor: theme.textMuted,
+        icon: 'receipt-outline',
+        iconColor: settings.darkMode ? '#A5B4FC' : '#4F46E5',
+        iconBg: settings.darkMode ? 'rgba(129, 140, 248, 0.16)' : '#EEF2FF',
+        accessibilityLabel: isUrdu ? 'تمام بلز' : 'All bills',
+        onPress: () => setActiveTab('history'),
+      },
+      {
+        id: 'reports',
+        title: isUrdu ? 'رپورٹس' : 'Reports',
+        subtitle:
+          totalLifetimeEarnings > 0
+            ? `+${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}% ${isUrdu ? 'منافع' : 'net'}`
+            : isUrdu
+              ? 'منافع و گراف'
+              : 'Profit',
+        subtitleColor: totalLifetimeEarnings > 0 ? theme.success : theme.textMuted,
+        icon: 'bar-chart-outline',
+        iconColor: settings.darkMode ? '#2DD4BF' : '#0F766E',
+        iconBg: settings.darkMode ? 'rgba(13, 148, 136, 0.18)' : '#CCFBF1',
+        accessibilityLabel: isUrdu ? 'رپورٹس اور منافع' : 'Profit and reports',
+        onPress: () => setIsReportsOpen(true),
+      },
+    ],
+    [
+      isUrdu,
+      stockAlertsCount,
+      products.length,
+      sales.length,
+      totalLifetimeEarnings,
+      totalLifetimeProfit,
+      settings.darkMode,
+      theme.textMuted,
+      theme.success,
+      setActiveTab,
+    ]
+  );
 
   return (
-    <View style={[styles.rootContainer, { backgroundColor: theme.background }]}>
+    <View style={[styles.root, { backgroundColor: theme.background }]}>
       <ScrollView
-        style={styles.container}
+        style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={isUrdu ? 'آج کی کل سیل' : "Today's sales"}
-          onPress={() => setActiveTab('history')}
-          style={({ pressed }) => [
-            styles.heroCard,
-            { backgroundColor: theme.heroFill },
-            pressed && { opacity: 0.94 },
+        {/* 1. Read-Only Today's Sales KPI Info Banner (calm airy header card, ~140px height) */}
+        <View
+          style={[
+            styles.salesInfoCard,
+            { backgroundColor: infoCardBg, borderColor: infoCardBorder },
           ]}>
-          <Text style={styles.heroLabel}>
-            {isUrdu ? 'آج کی کل سیل' : "Today's sales"}
-          </Text>
+          {/* Subtle decorative corner glow (non-interactive architectural polish) */}
+          <View
+            pointerEvents="none"
+            style={[
+              styles.infoCardGlowCircle,
+              {
+                backgroundColor: settings.darkMode
+                  ? 'rgba(16, 185, 129, 0.08)'
+                  : 'rgba(16, 185, 129, 0.09)',
+              },
+            ]}
+          />
+
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroLabelGroup}>
+              <View style={styles.heroLiveDot} />
+              <Text
+                style={[
+                  styles.heroEyebrow,
+                  { color: settings.darkMode ? '#6EE7B7' : '#047857' },
+                ]}>
+                {isUrdu ? 'آج کی سیل' : "TODAY'S SALES"}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.heroBillsPill,
+                {
+                  backgroundColor: settings.darkMode
+                    ? 'rgba(16, 185, 129, 0.14)'
+                    : '#ECFDF5',
+                  borderColor: settings.darkMode
+                    ? 'rgba(52, 211, 153, 0.25)'
+                    : 'rgba(5, 150, 105, 0.18)',
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.heroBillsText,
+                  { color: settings.darkMode ? '#A7F3D0' : '#065F46' },
+                ]}>
+                {todayDateLabel} · {todaySalesCount}{' '}
+                {isUrdu
+                  ? 'بلز'
+                  : todaySalesCount === 1
+                    ? 'bill'
+                    : 'bills'}
+              </Text>
+            </View>
+          </View>
+
           <View style={styles.heroAmountRow}>
-            <Text style={styles.heroCurrency}>{settings.currencySymbol}</Text>
             <Text
-              style={styles.heroAmount}
+              style={[
+                styles.heroCurrency,
+                { color: settings.darkMode ? '#34D399' : '#059669' },
+              ]}>
+              {settings.currencySymbol}
+            </Text>
+            <Text
+              style={[
+                styles.heroAmount,
+                { color: settings.darkMode ? '#F8FAFC' : '#064E3B' },
+              ]}
               numberOfLines={1}
               adjustsFontSizeToFit
-              selectable>
+              minimumFontScale={0.65}>
               {todaySalesTotal.toLocaleString()}
             </Text>
           </View>
-          <Text style={styles.heroSubtitle}>{heroSubtitle}</Text>
-          <Text style={styles.heroMeta}>
-            {todaySales.length} {isUrdu ? 'بلز' : todaySales.length === 1 ? 'bill' : 'bills'}
-          </Text>
-        </Pressable>
 
-        <View style={styles.actionRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={isUrdu ? 'نیا بل' : 'New Bill'}
-            onPress={() => setIsSaleModalOpen(true)}
-            style={({ pressed }) => [
-              styles.actionTile,
-              { backgroundColor: theme.secondary },
-              pressed && { opacity: 0.9 },
-            ]}>
-            <View style={styles.actionIconWrap}>
-              <Ionicons name="add" size={22} color="#FFFFFF" />
-            </View>
-            <Text style={styles.actionTileTitle}>
-              {isUrdu ? 'نیا بل' : 'New Bill'}
-            </Text>
-            <Text style={styles.actionTileSub}>
-              {isUrdu ? 'سیل درج کریں' : 'Start a sale'}
-            </Text>
-          </Pressable>
+          <View
+            style={[
+              styles.infoDivider,
+              {
+                backgroundColor: settings.darkMode
+                  ? 'rgba(255, 255, 255, 0.08)'
+                  : 'rgba(5, 150, 105, 0.12)',
+              },
+            ]}
+          />
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={isUrdu ? 'کھاتہ' : 'Khata'}
-            onPress={() => setActiveTab('khata')}
-            style={({ pressed }) => [
-              styles.actionTile,
-              hasUdhaar
-                ? { backgroundColor: theme.coral }
-                : { backgroundColor: theme.card, borderWidth: 1, borderColor: softBorder },
-              pressed && { opacity: 0.9 },
-            ]}>
-            <View style={[
-              styles.actionIconWrap,
-              !hasUdhaar && { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : theme.dangerLight },
-            ]}>
-              <Ionicons
-                name="book-outline"
-                size={20}
-                color={hasUdhaar ? '#FFFFFF' : theme.danger}
-              />
+          {/* Compact Cash / Udhaar / Profit summary strip to preserve balanced height */}
+          <View style={styles.infoMetricsRow}>
+            <View style={styles.infoMetricItem}>
+              <Text style={[styles.infoMetricLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'نقد وصول' : 'Cash'}
+              </Text>
+              <Text style={[styles.infoMetricValue, { color: theme.text }]} numberOfLines={1}>
+                {settings.currencySymbol} {todayCashTotal.toLocaleString()}
+              </Text>
             </View>
-            <Text style={[styles.actionTileTitle, !hasUdhaar && { color: theme.text }]}>
-              {isUrdu ? 'کھاتہ' : 'Khata'}
-            </Text>
-            <Text
-              style={[styles.actionTileAmount, !hasUdhaar && { color: theme.text }]}
-              numberOfLines={1}
-              selectable>
-              {settings.currencySymbol}{totalUdhaarReceivable.toLocaleString()}
-            </Text>
-            <Text style={[styles.actionTileSub, !hasUdhaar && { color: theme.textMuted }]}>
-              {hasUdhaar
-                ? `${pendingKhataCount} ${isUrdu ? 'بقایا' : 'pending'}`
-                : (isUrdu ? 'کوئی ادھار نہیں' : 'No udhaar due')}
-            </Text>
-          </Pressable>
+
+            <View style={[styles.infoMetricSep, { backgroundColor: softBorder }]} />
+
+            <View style={styles.infoMetricItem}>
+              <Text style={[styles.infoMetricLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'ادھار' : 'On Udhaar'}
+              </Text>
+              <Text
+                style={[
+                  styles.infoMetricValue,
+                  { color: todayUdhaarTotal > 0 ? theme.danger : theme.text },
+                ]}
+                numberOfLines={1}>
+                {settings.currencySymbol} {todayUdhaarTotal.toLocaleString()}
+              </Text>
+            </View>
+
+            <View style={[styles.infoMetricSep, { backgroundColor: softBorder }]} />
+
+            <View style={styles.infoMetricItem}>
+              <Text style={[styles.infoMetricLabel, { color: theme.textMuted }]}>
+                {isUrdu ? 'منافع' : 'Profit'}
+              </Text>
+              <Text
+                style={[
+                  styles.infoMetricValue,
+                  { color: todayProfit > 0 ? theme.success : theme.text },
+                ]}
+                numberOfLines={1}>
+                {settings.currencySymbol} {todayProfit.toLocaleString()}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        {/* Graph: SalesChart positioned under the three top cards */}
-        <SalesChart sales={sales} />
+        {/* 2. Dominant Hero Action Duo: #1 New Bill (larger emerald artwork) | #2 Khata (rich coral artwork) */}
+        <View style={styles.heroDuoRow}>
+          <Pressable
+            onPress={() => setActiveTab('sale')}
+            accessibilityRole="button"
+            accessibilityLabel={isUrdu ? 'نیا بل بنائیں' : 'Start a new bill'}
+            style={({ pressed }) => [
+              styles.duoCard,
+              styles.newBillDuoCard,
+              { backgroundColor: primarySaleBg },
+              pressed && styles.cardPressed,
+            ]}>
+            <Image
+              source={require('../../assets/images/new-bill-card-bg.jpg')}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+            />
+            {settings.darkMode ? (
+              <View pointerEvents="none" style={styles.heroCardDarkGlaze} />
+            ) : null}
 
-        {/* Today's bills section */}
-        <View style={styles.feedHeaderRow}>
-          <View style={styles.feedTitleWrap}>
-            <Text style={[styles.feedTitle, { color: theme.text }]}>
-              {todaySalesList.length > 0
-                ? (isUrdu ? 'آج کے بلز' : "Today's Bills")
-                : sales.length > 0
-                  ? (isUrdu ? 'حالیہ بلز' : 'Recent Bills')
-                  : (isUrdu ? 'آج کے بلز' : "Today's Bills")}
-            </Text>
-            {displayBills.length > 0 && (
-              <View style={[styles.feedCountBadge, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.08)' : '#F1F5F9' }]}>
-                <Text style={[styles.feedCountText, { color: theme.textSecondary }]}>
-                  {todaySalesList.length > 0 ? todaySalesList.length : displayBills.length}
-                </Text>
+            <View style={styles.duoTopRow}>
+              <View style={styles.newBillIconBox}>
+                <Ionicons name="calculator" size={22} color="#FFFFFF" />
               </View>
-            )}
-          </View>
-
-          {sales.length > 0 && (
-            <Pressable
-              onPress={() => setActiveTab('history')}
-              hitSlop={8}
-              style={({ pressed }) => [styles.seeAllBtn, pressed && { opacity: 0.7 }]}>
-              <Text style={[styles.seeAllLink, { color: theme.primary }]}>
-                {isUrdu ? 'سب دیکھیں' : 'See all'}
+              <View style={styles.newBillArrowCircle}>
+                <Ionicons
+                  name={isUrdu ? 'arrow-back' : 'arrow-forward'}
+                  size={16}
+                  color="#064E3B"
+                />
+              </View>
+            </View>
+            <View style={styles.duoTextCol}>
+              <Text style={styles.newBillTitle} numberOfLines={1}>
+                {isUrdu ? 'نیا بل' : 'New Bill'}
               </Text>
-              <Ionicons
-                name={isUrdu ? 'chevron-back' : 'chevron-forward'}
-                size={14}
-                color={theme.primary}
-              />
-            </Pressable>
-          )}
-        </View>
+              <Text style={styles.newBillSub} numberOfLines={1}>
+                {isUrdu ? 'تیز نقد یا ادھار' : 'Fast cash & udhaar'}
+              </Text>
+            </View>
+          </Pressable>
 
-        <View style={styles.salesFeedList}>
-          {displayBills.length > 0 ? (
-            <>
-              <ScrollView
-                nestedScrollEnabled={true}
-                showsVerticalScrollIndicator={true}
-                style={styles.todayScrollBox}
-                contentContainerStyle={styles.todayScrollContent}>
-                {displayBills.map((s) => {
-                  const { cleanPaid, baki, isSplit } = getPaymentBreakdown(s);
-                  const isCash = s.paymentMethod === 'cash';
-                  const isOnline = s.paymentMethod === 'online';
+          <Pressable
+            onPress={() => setActiveTab('khata')}
+            accessibilityRole="button"
+            accessibilityLabel={isUrdu ? 'ادھار کھاتہ' : 'Open Khata'}
+            style={({ pressed }) => [
+              styles.duoCard,
+              styles.khataDuoCard,
+              {
+                backgroundColor: khataHeroBg,
+                borderColor: khataHeroBorder,
+              },
+              pressed && styles.cardPressed,
+            ]}>
+            <Image
+              source={require('../../assets/images/khata-card-bg.jpg')}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+            />
+            {settings.darkMode ? (
+              <View pointerEvents="none" style={styles.heroCardDarkGlaze} />
+            ) : null}
 
-                  const badgeBg = isSplit
-                    ? (settings.darkMode ? 'rgba(2, 132, 199, 0.16)' : '#E0F2FE')
-                    : isCash
-                    ? (settings.darkMode ? 'rgba(0, 201, 167, 0.16)' : '#D1FAE5')
-                    : isOnline
-                      ? (settings.darkMode ? 'rgba(47, 159, 248, 0.16)' : '#DBEAFE')
-                      : (settings.darkMode ? 'rgba(243, 112, 90, 0.16)' : '#FEE2E2');
-
-                  const badgeColor = isSplit ? '#0284C7' : isCash ? '#059669' : isOnline ? '#0284C7' : '#DC2626';
-
-                  return (
-                    <Pressable
-                      key={s.id}
-                      onPress={() => setActiveReceipt(s)}
-                      style={({ pressed }) => [
-                        styles.transactionCard,
-                        { backgroundColor: theme.card, borderColor: softBorder },
-                        pressed && { opacity: 0.88 },
-                      ]}>
-                      <View style={[styles.transactionBadge, { backgroundColor: badgeBg }]}>
-                        <Ionicons
-                          name={isSplit ? 'swap-horizontal-outline' : isCash ? 'cash-outline' : isOnline ? 'phone-portrait-outline' : 'book-outline'}
-                          size={20}
-                          color={badgeColor}
-                        />
-                      </View>
-
-                      <View style={styles.transactionMiddle}>
-                        <Text style={[styles.transactionTitle, { color: theme.text }]} numberOfLines={1}>
-                          {s.customerName || (isUrdu ? 'نقد کاؤنٹر سیل' : 'Walk-in cash sale')}
-                        </Text>
-                        <Text style={[styles.transactionTime, { color: theme.textMuted }]} numberOfLines={1}>
-                          {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {s.items ? s.items.length : 0} {t('itemsCount')}
-                        </Text>
-                      </View>
-
-                      <View style={styles.transactionRight}>
-                        <Text style={[styles.transactionAmount, { color: theme.text }]}>
-                          +{settings.currencySymbol}{s.grandTotal.toLocaleString()}
-                        </Text>
-                        <Text style={[styles.transactionMethod, { color: badgeColor }]}>
-                          {isSplit ? (isUrdu ? 'نقد + ادھار' : 'Split') : s.paymentMethod}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-
-              {sales.length > 0 && (
-                <Pressable
-                  onPress={() => setActiveTab('history')}
-                  style={({ pressed }) => [
-                    styles.viewMoreSalesBtn,
-                    { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.04)' : '#F1F5F9', borderColor: softBorder },
-                    pressed && { opacity: 0.8 },
-                  ]}>
-                  <Text style={[styles.viewMoreSalesText, { color: theme.primary }]}>
-                    {isUrdu
-                      ? `تمام ${sales.length} بلز ہسٹری میں دیکھیں`
-                      : `View all ${sales.length} bills in History`}
+            <View style={styles.duoTopRow}>
+              <View style={styles.khataDuoIconBox}>
+                <Ionicons name="book" size={21} color="#FFFFFF" />
+              </View>
+              {pendingKhataCount > 0 ? (
+                <View style={styles.khataDueBadge}>
+                  <Text style={styles.khataDueText}>
+                    {pendingKhataCount} {isUrdu ? 'باقی' : 'due'}
                   </Text>
+                </View>
+              ) : (
+                <View style={styles.khataArrowCircle}>
                   <Ionicons
-                    name={isUrdu ? 'arrow-back' : 'arrow-forward'}
-                    size={14}
-                    color={theme.primary}
+                    name={isUrdu ? 'chevron-back' : 'chevron-forward'}
+                    size={15}
+                    color="#FFFFFF"
                   />
-                </Pressable>
+                </View>
               )}
-            </>
-          ) : (
-            <View style={styles.salesEmpty}>
-              <Text style={[styles.salesEmptyTitle, { color: theme.textMuted }]}>
-                {isUrdu ? 'آج ابھی کوئی بل نہیں' : 'No bills yet today'}
-              </Text>
-              <Pressable
-                onPress={() => setIsSaleModalOpen(true)}
-                hitSlop={6}
-                style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
-                <Text style={[styles.salesEmptyLink, { color: theme.primary }]}>
-                  {isUrdu ? 'نیا بل بنائیں' : 'New Bill'}
-                </Text>
-              </Pressable>
             </View>
-          )}
+            <View style={styles.duoTextCol}>
+              <Text style={styles.khataDuoTitle} numberOfLines={1}>
+                {isUrdu ? 'ادھار کھاتہ' : 'Khata'}
+              </Text>
+              <Text style={styles.khataDuoSub} numberOfLines={1}>
+                {totalUdhaarReceivable > 0
+                  ? `${settings.currencySymbol} ${totalUdhaarReceivable.toLocaleString()}`
+                  : isUrdu
+                    ? 'سب حساب صاف'
+                    : 'All settled'}
+              </Text>
+            </View>
+          </Pressable>
         </View>
 
-        {/* Reports collapsible at the very end */}
-        <Pressable
-          onPress={() => setShowReports((v) => !v)}
-          style={({ pressed }) => [
-            styles.reportsPillBtn,
-            { backgroundColor: theme.card, borderColor: softBorder },
-            pressed && { opacity: 0.85 },
-          ]}>
-          <View style={styles.reportsPillLeft}>
-            <Ionicons name="bar-chart-outline" size={17} color={theme.primary} />
-            <Text style={[styles.reportsPillTitle, { color: theme.text }]}>
-              {isUrdu ? 'رپورٹس اور منافع' : 'Reports & Analytics'}
-            </Text>
-          </View>
-          <Ionicons name={showReports ? 'chevron-up' : 'chevron-down'} size={16} color={theme.textMuted} />
-        </Pressable>
+        {/* 3. Clean 3-Card Horizontal Quick Action Row */}
+        <View style={styles.quickRow3}>
+          {quickTiles.map((tile) => (
+            <Pressable
+              key={tile.id}
+              onPress={tile.onPress}
+              accessibilityRole="button"
+              accessibilityLabel={tile.accessibilityLabel}
+              style={({ pressed }) => [
+                styles.quickRow3Card,
+                { backgroundColor: theme.card, borderColor: softBorder },
+                pressed && styles.cardPressed,
+              ]}>
+              <View style={[styles.quickRow3IconBox, { backgroundColor: tile.iconBg }]}>
+                <Ionicons name={tile.icon} size={20} color={tile.iconColor} />
+              </View>
+              <Text style={[styles.quickRow3Title, { color: theme.text }]} numberOfLines={1}>
+                {tile.title}
+              </Text>
+              <Text
+                style={[styles.quickRow3Sub, { color: tile.subtitleColor }]}
+                numberOfLines={1}>
+                {tile.subtitle}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
 
-        {showReports && (
-          <View style={styles.reportsDrawerArea}>
-            <View style={styles.financeGrid}>
-              <Pressable
-                onPress={() => setActiveTab('products')}
-                style={({ pressed }) => [
-                  styles.financeCard,
-                  { backgroundColor: theme.card, borderColor: softBorder },
-                  pressed && { opacity: 0.9 },
-                ]}>
-                <View style={styles.financeCardHeader}>
-                  <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-                    {t('totalInvestment')}
-                  </Text>
-                  <Text style={[styles.financeBadgeText, { color: theme.primary }]}>
-                    {totalInventoryUnits} {isUrdu ? 'اشیاء' : 'units'}
-                  </Text>
-                </View>
-
-                <Text style={[styles.financeMainAmount, { color: theme.text }]}>
-                  {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
-                </Text>
-
-                <View style={[styles.financeDivider, { backgroundColor: softBorder }]} />
-
-                <View style={styles.financeSubStatsRow}>
-                  <View style={styles.financeSubStat}>
-                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                      {t('stockRetailValue')}
-                    </Text>
-                    <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                      {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
-                    </Text>
-                  </View>
-                  <View style={styles.financeSubStat}>
-                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                      {t('expectedStockProfit')}
-                    </Text>
-                    <Text style={[styles.financeSubStatValue, { color: theme.primary, fontWeight: '800' }]}>
-                      +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setActiveTab('history')}
-                style={({ pressed }) => [
-                  styles.financeCard,
-                  { backgroundColor: theme.card, borderColor: softBorder },
-                  pressed && { opacity: 0.9 },
-                ]}>
-                <View style={styles.financeCardHeader}>
-                  <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
-                    {t('totalStoreEarnings')}
-                  </Text>
-                  <Text style={[styles.financeBadgeText, { color: theme.secondary }]}>
-                    {sales.filter(s => s.status !== 'refunded' && s.status !== 'cancelled').length} {isUrdu ? 'بلز' : 'sales'}
-                  </Text>
-                </View>
-
-                <Text style={[styles.financeMainAmount, { color: theme.text }]}>
-                  {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
-                </Text>
-
-                <View style={[styles.financeDivider, { backgroundColor: softBorder }]} />
-
-                <View style={styles.financeSubStatsRow}>
-                  <View style={styles.financeSubStat}>
-                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                      {t('totalProfitEarned')}
-                    </Text>
-                    <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
-                      +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
-                    </Text>
-                  </View>
-                  <View style={styles.financeSubStat}>
-                    <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
-                      {t('profitMargin')}
-                    </Text>
-                    <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
-                      {totalLifetimeEarnings > 0
-                        ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
-                        : '0%'}
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            </View>
-          </View>
-        )}
-
+        {/* 5. Animated App Feature Highlights Carousel */}
+        <FeatureCarousel
+          isDark={settings.darkMode}
+          isUrdu={isUrdu}
+          onSelectAction={(action: FeatureSlideAction) => {
+            if (action.type === 'backup') {
+              handleBackupPress();
+            } else {
+              setActiveTab(action.tab);
+            }
+          }}
+        />
       </ScrollView>
 
+      {/* Profit & Stock Reports Modal */}
       <Modal
-        visible={isSaleModalOpen}
+        visible={isReportsOpen}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setIsSaleModalOpen(false)}>
-        <SafeAreaView style={[styles.saleModalContainer, { backgroundColor: theme.background }]}>
-          <SaleScreen isModal onClose={() => setIsSaleModalOpen(false)} />
+        onRequestClose={() => setIsReportsOpen(false)}>
+        <SafeAreaView style={[styles.modalRoot, { backgroundColor: theme.background }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: softBorder, backgroundColor: theme.card }]}>
+            <Pressable
+              onPress={() => setIsReportsOpen(false)}
+              hitSlop={8}
+              style={[styles.modalBackBtn, { backgroundColor: theme.surfaceSubtle, borderColor: softBorder }]}>
+              <Ionicons name={isUrdu ? 'arrow-forward' : 'arrow-back'} size={18} color={theme.text} />
+              <Text style={[styles.modalBackText, { color: theme.text }]}>
+                {isUrdu ? 'بند کریں' : 'Close'}
+              </Text>
+            </Pressable>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              {isUrdu ? 'رپورٹس اور منافع' : 'Profit & Stock Report'}
+            </Text>
+            <View style={{ width: 72 }} />
+          </View>
+
+          <ScrollView contentContainerStyle={styles.reportsModalContent}>
+            <SalesChart sales={sales} />
+
+            <View style={[styles.financeCard, { backgroundColor: theme.card, borderColor: softBorder }]}>
+              <View style={styles.financeCardHeader}>
+                <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+                  {t('totalInvestment')}
+                </Text>
+                <Text style={[styles.financeBadgeText, { color: theme.primary }]}>
+                  {totalInventoryUnits} {isUrdu ? 'اشیاء' : 'units'}
+                </Text>
+              </View>
+              <Text style={[styles.financeMainAmount, { color: theme.text }]}>
+                {settings.currencySymbol} {totalInventoryInvestment.toLocaleString()}
+              </Text>
+              <View style={[styles.financeDivider, { backgroundColor: softBorder }]} />
+              <View style={styles.financeSubStatsRow}>
+                <View style={styles.financeSubStat}>
+                  <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                    {t('stockRetailValue')}
+                  </Text>
+                  <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                    {settings.currencySymbol} {totalInventoryRetailValue.toLocaleString()}
+                  </Text>
+                </View>
+                <View style={styles.financeSubStat}>
+                  <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                    {t('expectedStockProfit')}
+                  </Text>
+                  <Text style={[styles.financeSubStatValue, { color: theme.primary, fontWeight: '800' }]}>
+                    +{settings.currencySymbol} {totalExpectedStockProfit.toLocaleString()}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={[styles.financeCard, { backgroundColor: theme.card, borderColor: softBorder }]}>
+              <View style={styles.financeCardHeader}>
+                <Text style={[styles.financeCardTitle, { color: theme.textSecondary }]}>
+                  {t('totalStoreEarnings')}
+                </Text>
+                <Text style={[styles.financeBadgeText, { color: '#0284C7' }]}>
+                  {sales.filter((s) => s.status !== 'refunded' && s.status !== 'cancelled').length}{' '}
+                  {isUrdu ? 'بلز' : 'sales'}
+                </Text>
+              </View>
+              <Text style={[styles.financeMainAmount, { color: theme.text }]}>
+                {settings.currencySymbol} {totalLifetimeEarnings.toLocaleString()}
+              </Text>
+              <View style={[styles.financeDivider, { backgroundColor: softBorder }]} />
+              <View style={styles.financeSubStatsRow}>
+                <View style={styles.financeSubStat}>
+                  <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                    {t('totalProfitEarned')}
+                  </Text>
+                  <Text style={[styles.financeSubStatValue, { color: theme.success, fontWeight: '800' }]}>
+                    +{settings.currencySymbol} {totalLifetimeProfit.toLocaleString()}
+                  </Text>
+                </View>
+                <View style={styles.financeSubStat}>
+                  <Text style={[styles.financeSubStatLabel, { color: theme.textMuted }]}>
+                    {t('profitMargin')}
+                  </Text>
+                  <Text style={[styles.financeSubStatValue, { color: theme.text }]}>
+                    {totalLifetimeEarnings > 0
+                      ? `${Math.round((totalLifetimeProfit / totalLifetimeEarnings) * 100)}%`
+                      : '0%'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
         </SafeAreaView>
       </Modal>
     </View>
@@ -439,260 +577,305 @@ export const DashboardScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  rootContainer: {
+  root: {
     flex: 1,
   },
-  container: {
+  scroll: {
     flex: 1,
   },
   content: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
-    paddingBottom: 110,
+    paddingTop: 4,
+    paddingBottom: Spacing.lg,
     maxWidth: 720,
-    marginHorizontal: 'auto',
     width: '100%',
-    gap: 16,
+    marginHorizontal: 'auto',
+    gap: 12,
   },
-  saleModalContainer: {
-    flex: 1,
+  cardPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.975 }],
   },
 
-  heroCard: {
-    borderRadius: 24,
+  // 1. Read-Only Today's Sales KPI Info Banner (~140px balanced height)
+  salesInfoCard: {
+    borderRadius: 22,
     borderCurve: 'continuous',
-    paddingHorizontal: 20,
-    paddingVertical: 22,
+    borderWidth: 1,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    overflow: 'hidden',
+    position: 'relative',
+    minHeight: 138,
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  infoCardGlowCircle: {
+    position: 'absolute',
+    right: -28,
+    top: -36,
+    width: 136,
+    height: 136,
+    borderRadius: 68,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  heroLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
-  heroLabel: {
-    color: 'rgba(255, 255, 255, 0.86)',
-    fontSize: 15,
-    fontWeight: '600',
+  heroLiveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+  },
+  heroEyebrow: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    letterSpacing: 0.8,
   },
   heroAmountRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 4,
+    alignItems: 'baseline',
+    gap: 6,
   },
   heroCurrency: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: 10,
+    fontSize: 20,
+    fontWeight: '800',
   },
   heroAmount: {
-    color: '#FFFFFF',
-    fontSize: 40,
-    fontWeight: '800',
+    fontSize: 34,
+    fontWeight: '900',
     letterSpacing: -1,
-    lineHeight: 46,
     fontVariant: ['tabular-nums'],
+    flexShrink: 1,
+  },
+  heroBillsPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  heroBillsText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  infoDivider: {
+    height: 1,
+    width: '100%',
+  },
+  infoMetricsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoMetricItem: {
     flex: 1,
+    gap: 2,
   },
-  heroSubtitle: {
-    color: 'rgba(255, 255, 255, 0.88)',
-    fontSize: 14,
-    fontWeight: '500',
+  infoMetricLabel: {
+    fontSize: 10.5,
+    fontWeight: '600',
   },
-  heroMeta: {
-    color: 'rgba(255, 255, 255, 0.72)',
+  infoMetricValue: {
     fontSize: 13,
-    fontWeight: '500',
-    marginTop: 2,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  infoMetricSep: {
+    width: 1,
+    height: 24,
+    marginHorizontal: 10,
   },
 
-  actionRow: {
+  // 2. Hero Duo Row: #1 Dominant New Bill (emerald artwork) + #2 Khata (coral artwork)
+  heroDuoRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
-  actionTile: {
-    flex: 1,
+  duoCard: {
+    minHeight: 136,
     borderRadius: 22,
     borderCurve: 'continuous',
-    padding: 16,
-    gap: 6,
-    minHeight: 112,
-    justifyContent: 'flex-end',
+    borderWidth: 1,
+    padding: 15,
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+    position: 'relative',
   },
-  actionIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+  newBillDuoCard: {
+    flex: 1.18,
+    borderColor: 'rgba(52, 211, 153, 0.45)',
+  },
+  khataDuoCard: {
+    flex: 0.96,
+  },
+  heroCardDarkGlaze: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(2, 16, 12, 0.22)',
+  },
+  duoTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 6,
+  },
+  newBillIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
     borderCurve: 'continuous',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  newBillArrowCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  duoTextCol: {
+    gap: 2,
+  },
+  newBillTitle: {
+    color: '#FFFFFF',
+    fontSize: 19,
+    fontWeight: '900',
+    letterSpacing: -0.4,
+  },
+  newBillSub: {
+    color: '#D1FAE5',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  khataDuoIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  khataDueBadge: {
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+  },
+  khataDueText: {
+    color: '#BE123C',
+    fontSize: 11,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  khataArrowCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
   },
-  actionTileTitle: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  actionTileAmount: {
+  khataDuoTitle: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-    fontVariant: ['tabular-nums'],
+    fontWeight: '900',
+    letterSpacing: -0.3,
   },
-  actionTileSub: {
-    color: 'rgba(255, 255, 255, 0.82)',
-    fontSize: 13,
-    fontWeight: '500',
+  khataDuoSub: {
+    color: '#FFE4E6',
+    fontSize: 12.5,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
 
-  feedHeaderRow: {
+  // 3. Clean 3-Card Horizontal Quick Action Row
+  quickRow3: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 4,
-  },
-  feedTitleWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  feedTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-  },
-  feedCountBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  feedCountText: {
-    fontSize: 12,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-  seeAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  seeAllLink: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  salesFeedList: {
     gap: 10,
   },
-  todayScrollBox: {
-    maxHeight: 230,
-  },
-  todayScrollContent: {
-    gap: 10,
-    paddingVertical: 2,
-  },
-  salesEmpty: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 18,
-  },
-  salesEmptyTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  salesEmptyLink: {
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  transactionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 22,
-    borderCurve: 'continuous',
-    borderWidth: 1,
-  },
-  viewMoreSalesBtn: {
-    flexDirection: 'row',
+  quickRow3Card: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 18,
     borderCurve: 'continuous',
     borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 13,
+    minHeight: 96,
   },
-  viewMoreSalesText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  transactionBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 15,
+  quickRow3IconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  transactionMiddle: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  transactionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: -0.3,
-  },
-  transactionTime: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  transactionRight: {
-    alignItems: 'flex-end',
-    gap: 2,
-  },
-  transactionAmount: {
-    fontSize: 15,
+  quickRow3Title: {
+    fontSize: 13.5,
     fontWeight: '800',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
+  },
+  quickRow3Sub: {
+    fontSize: 11.5,
+    fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
-  transactionMethod: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
 
-  reportsPillBtn: {
+  modalRoot: {
+    flex: 1,
+  },
+  modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 18,
-    borderCurve: 'continuous',
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    minHeight: 48,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
-  reportsPillLeft: {
+  modalBackBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 9,
+    gap: 5,
+    paddingHorizontal: 12,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
   },
-  reportsPillTitle: {
-    fontSize: 14,
+  modalBackText: {
+    fontSize: 13.5,
     fontWeight: '700',
   },
-  reportsDrawerArea: {
-    gap: 12,
+  modalTitle: {
+    fontSize: 16.5,
+    fontWeight: '800',
   },
-  financeGrid: {
-    gap: 10,
+  reportsModalContent: {
+    padding: Spacing.lg,
+    gap: 14,
+    maxWidth: 720,
+    width: '100%',
+    marginHorizontal: 'auto',
   },
   financeCard: {
-    padding: 14,
+    padding: 16,
     borderRadius: 20,
     borderCurve: 'continuous',
     borderWidth: 1,
@@ -702,25 +885,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  financeCardTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
   financeBadgeText: {
     fontSize: 12,
     fontWeight: '700',
   },
-  financeCardTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   financeMainAmount: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
     letterSpacing: -0.5,
-    marginTop: 4,
+    marginTop: 6,
     fontVariant: ['tabular-nums'],
   },
   financeDivider: {
     height: 1,
     width: '100%',
-    marginVertical: 8,
+    marginVertical: 10,
   },
   financeSubStatsRow: {
     flexDirection: 'row',
@@ -735,7 +918,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   financeSubStatValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },

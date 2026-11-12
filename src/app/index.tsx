@@ -1,23 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, StatusBar, ActivityIndicator, Text, Image, Platform, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { ShopHeader } from '@/components/ShopHeader';
-import { BottomNav } from '@/components/BottomNav';
 import { ProductModal } from '@/components/ProductModal';
 import { ReceiptModal } from '@/components/ReceiptModal';
 import { AuthModal } from '@/components/AuthModal';
 import { EditShopModal } from '@/components/EditShopModal';
-import { LoginScreen } from '@/screens/LoginScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { SaleScreen } from '@/screens/SaleScreen';
 import { ProductsScreen } from '@/screens/ProductsScreen';
 import { HistoryScreen } from '@/screens/HistoryScreen';
 import { KhataScreen } from '@/screens/KhataScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
-import { Colors, BorderRadius, Shadows } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 import { AlertModal } from '@/components/ui';
 
 export default function App() {
@@ -35,12 +31,7 @@ export default function App() {
     setIsAuthModalOpen,
     isEditShopOpen,
     setIsEditShopOpen,
-    user,
-    authLoading,
     isLoaded,
-    isGuestMode,
-    isOnline,
-    continueAsGuest,
     alertConfig,
     hideAlert,
   } = useShop();
@@ -151,61 +142,26 @@ export default function App() {
       );
     }
 
-    // 2. When Not Authenticated and Not in Guest Mode -> Show Login Screen
-    if (!user && !isGuestMode) {
-      // Only show checking account splash if online; if offline, immediately present LoginScreen
-      if (authLoading && isOnline) {
-        return (
-          <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.surface }]}>
-            <StatusBar
-              barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-              backgroundColor={theme.surface}
-            />
-            <View style={styles.loadingLogoOuter}>
-              <Image
-                source={require('@/../assets/images/mainLogoImage.png')}
-                style={styles.loadingLogoImg}
-                resizeMode="contain"
-              />
-            </View>
-            <Text style={[styles.loadingTitle, { color: theme.text }]}>DigiShop</Text>
-            <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
-            <Text style={[styles.loadingSub, { color: theme.textMuted }]}>
-              Checking your account...
-            </Text>
-          </SafeAreaView>
-        );
-      }
+    const isSettingsScreen = activeTab === 'settings';
+    const topCanvasBg = isSettingsScreen ? theme.heroBg : theme.background;
+    const statusBarStyle = isSettingsScreen
+      ? 'light-content'
+      : settings.darkMode
+        ? 'light-content'
+        : 'dark-content';
 
-      return (
-        <SafeAreaView style={[styles.rootSafeArea, { backgroundColor: theme.background }]}>
-          <StatusBar
-            barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={theme.surface}
-          />
-          <LoginScreen onContinueAsGuest={continueAsGuest} />
-        </SafeAreaView>
-      );
-    }
-
-    const topCanvasBg = settings.darkMode ? '#0A0F1E' : '#F8FAFC';
-
-    // 3. Authenticated or Guest Mode -> Show Main Store POS App
+    // 2. Immediately open Main Store App (No startup auth barrier)
     return (
-      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.rootSafeArea, { backgroundColor: topCanvasBg }]}>
-        <StatusBar
-          barStyle={settings.darkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={topCanvasBg}
-        />
+      <SafeAreaView
+        edges={['top', 'bottom', 'left', 'right']}
+        style={[styles.rootSafeArea, { backgroundColor: topCanvasBg }]}>
+        <StatusBar barStyle={statusBarStyle} backgroundColor={topCanvasBg} />
         <View style={[styles.appContainer, { backgroundColor: theme.background }]}>
-          {/* Top Shop Brand & Settings Header */}
-          <ShopHeader />
+          {/* Home Hub top header — sub-screens provide their own explicit Back header */}
+          {activeTab === 'dashboard' && <ShopHeader />}
 
           {/* Dynamic Screen Component */}
           <View style={styles.screenWrapper}>{renderActiveScreen()}</View>
-
-          {/* Bottom Navigation (Hidden on Settings / History — History opens from header) */}
-          {activeTab !== 'settings' && activeTab !== 'history' && <BottomNav />}
 
           {/* Global Product Add / Edit Modal */}
           <ProductModal

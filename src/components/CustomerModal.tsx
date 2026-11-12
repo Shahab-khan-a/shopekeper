@@ -58,6 +58,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [initialBalance, setInitialBalance] = useState('');
+  const [showMoreCustomerFields, setShowMoreCustomerFields] = useState(false);
 
   const phoneInputRef = useRef<TextInput>(null);
   const balanceInputRef = useRef<TextInput>(null);
@@ -73,6 +74,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
       setPhone('');
       setAddress('');
       setInitialBalance('');
+      setShowMoreCustomerFields(false);
       setCreditAmount('');
       setCreditNote('');
     }
@@ -177,27 +179,6 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                   </View>
                 </View>
 
-                {/* Customer Urdu / Nickname */}
-                <View style={styles.fieldGroup}>
-                  <Text style={[styles.fieldLabel, { color: theme.text }]}>
-                    {isUrdu ? 'عرفیت / مقامی نام (اختیاری)' : 'Urdu / Local Nickname (Optional)'}
-                  </Text>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                    ]}>
-                    <Ionicons name="pricetag-outline" size={18} color={theme.textMuted} style={styles.inputIcon} />
-                    <TextInput
-                      style={[styles.input, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}
-                      placeholder={isUrdu ? 'مثلاً: حاجی صاحب، ماسٹر جی' : 'e.g., Haji Sahab, Master Ji'}
-                      placeholderTextColor={theme.textMuted}
-                      value={nameUrdu}
-                      onChangeText={setNameUrdu}
-                    />
-                  </View>
-                </View>
-
                 {/* Phone / WhatsApp */}
                 <View style={styles.fieldGroup}>
                   <Text style={[styles.fieldLabel, { color: theme.text }]}>
@@ -217,69 +198,123 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                       value={phone}
                       onChangeText={setPhone}
                       keyboardType="phone-pad"
-                      returnKeyType="next"
-                      onSubmitEditing={() => balanceInputRef.current?.focus()}
+                      returnKeyType={showMoreCustomerFields ? 'next' : 'done'}
+                      onSubmitEditing={() => {
+                        if (showMoreCustomerFields) {
+                          balanceInputRef.current?.focus();
+                        } else {
+                          handleSubmit();
+                        }
+                      }}
                     />
                   </View>
                 </View>
 
-                {/* Address / Street */}
-                <View style={styles.fieldGroup}>
-                  <Text style={[styles.fieldLabel, { color: theme.text }]}>
-                    {isUrdu ? 'پتہ / گلی محلہ (اختیاری)' : 'Address / Street (Optional)'}
+                {/* Optional Extra Customer Fields Toggle */}
+                <Pressable
+                  onPress={() => setShowMoreCustomerFields((v) => !v)}
+                  style={[
+                    styles.moreToggleBtn,
+                    { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                  ]}>
+                  <Ionicons
+                    name={showMoreCustomerFields ? 'chevron-up' : 'options-outline'}
+                    size={16}
+                    color={theme.primary}
+                  />
+                  <Text style={[styles.moreToggleText, { color: theme.text }]}>
+                    {showMoreCustomerFields
+                      ? isUrdu
+                        ? 'کم تفصیلات دکھائیں'
+                        : 'Hide extra details'
+                      : isUrdu
+                        ? 'مزید تفصیلات (پرانا ادھار، پتہ، نام اردو)'
+                        : 'More details (Opening balance, Address)'}
                   </Text>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                    ]}>
-                    <Ionicons name="location-outline" size={18} color={theme.textMuted} style={styles.inputIcon} />
-                    <TextInput
-                      style={[styles.input, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}
-                      placeholder={isUrdu ? 'مثلاً: گلی نمبر 4، مکان 12' : 'e.g., Street 4, House 12'}
-                      placeholderTextColor={theme.textMuted}
-                      value={address}
-                      onChangeText={setAddress}
-                    />
-                  </View>
-                </View>
+                </Pressable>
 
-                {/* Opening Udhaar Balance */}
-                <View style={styles.fieldGroup}>
-                  <View style={styles.labelWithBadge}>
-                    <Text style={[styles.fieldLabel, { color: theme.text }]}>
-                      {isUrdu ? 'سابقہ بقایا رقم / پرانا ادھار' : 'Opening Debt Balance'}
-                    </Text>
-                    <View style={[styles.optionalBadge, { backgroundColor: theme.surfaceSubtle }]}>
-                      <Text style={[styles.optionalText, { color: theme.textSecondary }]}>
-                        {isUrdu ? 'بہی کھاتہ' : 'Paper Ledger'}
+                {showMoreCustomerFields && (
+                  <>
+                    {/* Opening Udhaar Balance */}
+                    <View style={styles.fieldGroup}>
+                      <View style={styles.labelWithBadge}>
+                        <Text style={[styles.fieldLabel, { color: theme.text }]}>
+                          {isUrdu ? 'سابقہ بقایا رقم / پرانا ادھار' : 'Opening Debt Balance'}
+                        </Text>
+                        <View style={[styles.optionalBadge, { backgroundColor: theme.surfaceSubtle }]}>
+                          <Text style={[styles.optionalText, { color: theme.textSecondary }]}>
+                            {isUrdu ? 'بہی کھاتہ' : 'Paper Ledger'}
+                          </Text>
+                        </View>
+                      </View>
+                      <View
+                        style={[
+                          styles.inputWrapper,
+                          { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                        ]}>
+                        <Text style={[styles.currencyPrefix, { color: theme.primary }]}>{currencySymbol}</Text>
+                        <TextInput
+                          ref={balanceInputRef}
+                          style={[styles.input, { color: theme.text, fontWeight: '700', fontSize: 16 }]}
+                          placeholder="0"
+                          placeholderTextColor={theme.textMuted}
+                          value={initialBalance}
+                          onChangeText={setInitialBalance}
+                          keyboardType="numeric"
+                          returnKeyType="done"
+                          onSubmitEditing={handleSubmit}
+                        />
+                      </View>
+                      <Text style={[styles.helpText, { color: theme.textMuted, textAlign: isUrdu ? 'right' : 'left' }]}>
+                        {isUrdu
+                          ? 'اگر گاہک پر دکان کا پہلے سے ادھار ہے تو درج کریں تاکہ کھاتہ برابر رہے'
+                          : 'Enter existing debt if transferring from your previous paper notebook'}
                       </Text>
                     </View>
-                  </View>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                    ]}>
-                    <Text style={[styles.currencyPrefix, { color: theme.primary }]}>{currencySymbol}</Text>
-                    <TextInput
-                      ref={balanceInputRef}
-                      style={[styles.input, { color: theme.text, fontWeight: '700', fontSize: 16 }]}
-                      placeholder="0"
-                      placeholderTextColor={theme.textMuted}
-                      value={initialBalance}
-                      onChangeText={setInitialBalance}
-                      keyboardType="numeric"
-                      returnKeyType="done"
-                      onSubmitEditing={handleSubmit}
-                    />
-                  </View>
-                  <Text style={[styles.helpText, { color: theme.textMuted, textAlign: isUrdu ? 'right' : 'left' }]}>
-                    {isUrdu
-                      ? 'اگر گاہک پر دکان کا پہلے سے ادھار ہے تو درج کریں تاکہ کھاتہ برابر رہے'
-                      : 'Enter existing debt if transferring from your previous paper notebook'}
-                  </Text>
-                </View>
+
+                    {/* Customer Urdu / Nickname */}
+                    <View style={styles.fieldGroup}>
+                      <Text style={[styles.fieldLabel, { color: theme.text }]}>
+                        {isUrdu ? 'عرفیت / مقامی نام (اختیاری)' : 'Urdu / Local Nickname (Optional)'}
+                      </Text>
+                      <View
+                        style={[
+                          styles.inputWrapper,
+                          { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                        ]}>
+                        <Ionicons name="pricetag-outline" size={18} color={theme.textMuted} style={styles.inputIcon} />
+                        <TextInput
+                          style={[styles.input, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}
+                          placeholder={isUrdu ? 'مثلاً: حاجی صاحب، ماسٹر جی' : 'e.g., Haji Sahab, Master Ji'}
+                          placeholderTextColor={theme.textMuted}
+                          value={nameUrdu}
+                          onChangeText={setNameUrdu}
+                        />
+                      </View>
+                    </View>
+
+                    {/* Address / Street */}
+                    <View style={styles.fieldGroup}>
+                      <Text style={[styles.fieldLabel, { color: theme.text }]}>
+                        {isUrdu ? 'پتہ / گلی محلہ (اختیاری)' : 'Address / Street (Optional)'}
+                      </Text>
+                      <View
+                        style={[
+                          styles.inputWrapper,
+                          { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                        ]}>
+                        <Ionicons name="location-outline" size={18} color={theme.textMuted} style={styles.inputIcon} />
+                        <TextInput
+                          style={[styles.input, { color: theme.text, textAlign: isUrdu ? 'right' : 'left' }]}
+                          placeholder={isUrdu ? 'مثلاً: گلی نمبر 4، مکان 12' : 'e.g., Street 4, House 12'}
+                          placeholderTextColor={theme.textMuted}
+                          value={address}
+                          onChangeText={setAddress}
+                        />
+                      </View>
+                    </View>
+                  </>
+                )}
               </>
             )}
 
@@ -552,6 +587,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
     marginTop: 2,
+  },
+  moreToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  moreToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    flex: 1,
   },
   footer: {
     flexDirection: 'row',

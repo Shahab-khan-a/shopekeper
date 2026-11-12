@@ -485,7 +485,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         AsyncStorage.setItem('@shopkeeper_cached_user', JSON.stringify(userPayload)).catch(() => {});
 
         setUser(currentUser);
-        setActiveTab('dashboard');
 
         // Check if device is currently online before attempting cloud operations
         const isOnline = await NetworkService.isOnline();

@@ -48,10 +48,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [costPrice, setCostPrice] = useState('');
-  const [stock, setStock] = useState('10');
+  const [stock, setStock] = useState('50');
   const [unit, setUnit] = useState<ProductUnit>('piece');
   const [barcode, setBarcode] = useState('');
   const [image, setImage] = useState('');
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
@@ -95,10 +96,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setName('');
     setPrice('');
     setCostPrice('');
-    setStock('10');
+    setStock('50');
     setUnit('piece');
     setBarcode('');
     setImage('');
+    setShowMoreDetails(false);
     setIsSubmitting(false);
     setIsCameraOpen(false);
     setIsUploadingToDrive(false);
@@ -107,13 +109,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   useEffect(() => {
     if (!visible) return;
     if (productToEdit) {
+      const isNewFromScan = !productToEdit.name && Boolean(productToEdit.barcode);
       setName(productToEdit.name);
-      setPrice(productToEdit.price.toString());
+      setPrice(productToEdit.price > 0 ? productToEdit.price.toString() : '');
       setCostPrice(productToEdit.costPrice ? productToEdit.costPrice.toString() : '');
-      setStock(productToEdit.stock.toString());
+      setStock(isNewFromScan ? '50' : productToEdit.stock.toString());
       setUnit(productToEdit.unit);
       setBarcode(productToEdit.barcode || '');
       setImage(productToEdit.image || productToEdit.imageUri || '');
+      setShowMoreDetails(isNewFromScan);
     } else {
       resetForm();
     }
@@ -318,7 +322,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       : 'New product'}
                 </Text>
                 <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-                  {isUrdu ? 'نام، قیمت اور اسٹاک' : 'Name, price, and stock'}
+                  {isUrdu ? 'بس نام اور قیمت لکھیں' : 'Just enter name and price'}
                 </Text>
               </View>
               <Pressable
@@ -339,59 +343,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="interactive"
               showsVerticalScrollIndicator={false}>
-              {/* Photo */}
-              <View style={styles.photoRow}>
-                <View style={[styles.photoThumb, { backgroundColor: theme.surfaceSubtle, borderColor: softBorder }]}>
-                  {image ? (
-                    <ProductImage uri={image} style={styles.photoImg} resizeMode="cover" />
-                  ) : (
-                    <Ionicons name="image-outline" size={22} color={theme.textMuted} />
-                  )}
-                  {isUploadingToDrive ? (
-                    <View style={styles.photoUploading}>
-                      <ActivityIndicator size="small" color="#FFFFFF" />
-                    </View>
-                  ) : null}
-                </View>
-                <View style={styles.photoActions}>
-                  <Pressable
-                    onPress={takePhoto}
-                    style={({ pressed }) => [
-                      styles.photoBtn,
-                      { backgroundColor: theme.primaryLight },
-                      pressed && { opacity: 0.85 },
-                    ]}>
-                    <Ionicons name="camera" size={15} color={theme.primary} />
-                    <Text style={[styles.photoBtnText, { color: theme.primaryDark }]}>
-                      {isUrdu ? 'کیمرہ' : 'Camera'}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={pickImage}
-                    style={({ pressed }) => [
-                      styles.photoBtn,
-                      { backgroundColor: theme.surfaceSubtle, borderColor: softBorder, borderWidth: 1 },
-                      pressed && { opacity: 0.85 },
-                    ]}>
-                    <Ionicons name="images-outline" size={15} color={theme.textSecondary} />
-                    <Text style={[styles.photoBtnText, { color: theme.text }]}>
-                      {isUrdu ? 'گیلری' : 'Gallery'}
-                    </Text>
-                  </Pressable>
-                  {image ? (
-                    <Pressable onPress={() => setImage('')} hitSlop={8}>
-                      <Text style={{ color: theme.danger, fontSize: 12, fontWeight: '700' }}>
-                        {isUrdu ? 'ہٹائیں' : 'Remove'}
-                      </Text>
-                    </Pressable>
-                  ) : null}
-                </View>
-              </View>
-
-              {/* Name */}
+              {/* 1. Core Essential: Item Name */}
               <View style={styles.field}>
                 <Text style={[styles.label, { color: theme.text }]}>
-                  {isUrdu ? 'نام *' : 'Name *'}
+                  {isUrdu ? 'آئٹم کا نام *' : 'Item Name *'}
                 </Text>
                 <TextInput
                   style={[
@@ -406,221 +361,304 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   placeholderTextColor={theme.textMuted}
                   value={name}
                   onChangeText={setName}
-                  onFocus={() => {
-                    setFocusedField('name');
-                    scrollFieldIntoView();
-                  }}
+                  autoFocus={!productToEdit || !productToEdit.name}
+                  onFocus={() => setFocusedField('name')}
                   onBlur={() => setFocusedField(null)}
                   returnKeyType="next"
                   onSubmitEditing={() => priceInputRef.current?.focus()}
                 />
               </View>
 
-              {/* Price + Stock */}
-              <View style={styles.twoCol}>
-                <View style={[styles.field, { flex: 1 }]}>
-                  <Text style={[styles.label, { color: theme.text }]}>
-                    {isUrdu ? 'قیمت *' : 'Price *'}
-                  </Text>
-                  <View
-                    style={[
-                      styles.prefixInput,
-                      {
-                        backgroundColor: inputBg,
-                        borderColor: focusedField === 'price' ? theme.primary : softBorder,
-                      },
-                    ]}>
-                    <Text style={[styles.prefix, { color: theme.primaryDark }]}>
-                      {settings.currencySymbol}
-                    </Text>
-                    <TextInput
-                      ref={priceInputRef}
-                      style={[styles.prefixField, { color: theme.text }]}
-                      placeholder="0"
-                      placeholderTextColor={theme.textMuted}
-                      keyboardType="numeric"
-                      value={price}
-                      onChangeText={setPrice}
-                      onFocus={() => {
-                        setFocusedField('price');
-                        scrollFieldIntoView();
-                      }}
-                      onBlur={() => setFocusedField(null)}
-                      returnKeyType="next"
-                      onSubmitEditing={() => stockInputRef.current?.focus()}
-                    />
-                  </View>
-                </View>
-
-                <View style={[styles.field, { flex: 1 }]}>
-                  <Text style={[styles.label, { color: theme.text }]}>
-                    {isUrdu ? 'اسٹاک *' : 'Stock *'}
-                  </Text>
-                  <TextInput
-                    ref={stockInputRef}
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: inputBg,
-                        color: theme.text,
-                        borderColor: focusedField === 'stock' ? theme.primary : softBorder,
-                      },
-                    ]}
-                    placeholder="10"
-                    placeholderTextColor={theme.textMuted}
-                    keyboardType="numeric"
-                    value={stock}
-                    onChangeText={setStock}
-                    onFocus={() => {
-                      setFocusedField('stock');
-                      scrollFieldIntoView();
-                    }}
-                    onBlur={() => setFocusedField(null)}
-                    returnKeyType="done"
-                    onSubmitEditing={handleSubmit}
-                  />
-                </View>
-              </View>
-
-              {/* Unit pills */}
+              {/* 2. Core Essential: Sale Price */}
               <View style={styles.field}>
                 <Text style={[styles.label, { color: theme.text }]}>
-                  {isUrdu ? 'اکائی' : 'Unit'}
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.unitRow}>
-                  {UNIT_OPTIONS.map((opt) => {
-                    const active = unit === opt.key;
-                    return (
-                      <Pressable
-                        key={opt.key}
-                        onPress={() => setUnit(opt.key)}
-                        style={[
-                          styles.unitPill,
-                          {
-                            backgroundColor: active ? theme.primaryLight : theme.surfaceSubtle,
-                            borderColor: active ? theme.primary : softBorder,
-                          },
-                        ]}>
-                        <Text
-                          style={{
-                            color: active ? theme.primaryDark : theme.textSecondary,
-                            fontSize: 12,
-                            fontWeight: '700',
-                          }}>
-                          {isUrdu ? opt.labelUrdu : opt.shortCode}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-
-              {/* Cost price (Optional) */}
-              <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>
-                  {isUrdu ? 'خرید قیمت (اختیاری)' : 'Cost price (Optional)'}
+                  {isUrdu ? 'قیمت *' : 'Sale Price *'}
                 </Text>
                 <View
                   style={[
                     styles.prefixInput,
                     {
                       backgroundColor: inputBg,
-                      borderColor: focusedField === 'cost' ? theme.primary : softBorder,
+                      borderColor: focusedField === 'price' ? theme.primary : softBorder,
                     },
                   ]}>
-                  <Text style={[styles.prefix, { color: theme.textMuted }]}>
+                  <Text style={[styles.prefix, { color: theme.primaryDark }]}>
                     {settings.currencySymbol}
                   </Text>
                   <TextInput
+                    ref={priceInputRef}
                     style={[styles.prefixField, { color: theme.text }]}
                     placeholder="0"
                     placeholderTextColor={theme.textMuted}
                     keyboardType="numeric"
-                    value={costPrice}
-                    onChangeText={setCostPrice}
-                    onFocus={() => {
-                      setFocusedField('cost');
-                      scrollFieldIntoView();
-                    }}
+                    value={price}
+                    onChangeText={setPrice}
+                    onFocus={() => setFocusedField('price')}
                     onBlur={() => setFocusedField(null)}
-                    returnKeyType="next"
-                    onSubmitEditing={() => barcodeInputRef.current?.focus()}
+                    returnKeyType={showMoreDetails ? 'next' : 'done'}
+                    onSubmitEditing={() => {
+                      if (showMoreDetails) {
+                        stockInputRef.current?.focus();
+                      } else {
+                        handleSubmit();
+                      }
+                    }}
                   />
                 </View>
-                {hasValidCost && parsedPrice > 0 ? (
-                  <Text style={[styles.profitHint, { color: theme.success }]}>
-                    {isUrdu
-                      ? `منافع ${settings.currencySymbol}${unitProfit} / ${activeUnit.shortCode}`
-                      : `Profit ${settings.currencySymbol}${unitProfit} / ${activeUnit.shortCode}`}
-                  </Text>
-                ) : null}
               </View>
 
-              {/* Barcode (Optional) */}
-              <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>
-                  {isUrdu ? 'بارکوڈ (اختیاری)' : 'Barcode (Optional)'}
+              {/* Expandable Optional Details Toggle */}
+              <Pressable
+                onPress={() => setShowMoreDetails((v) => !v)}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.moreToggleBtn,
+                  {
+                    backgroundColor: theme.surfaceSubtle,
+                    borderColor: softBorder,
+                  },
+                  pressed && { opacity: 0.8 },
+                ]}>
+                <Ionicons
+                  name={showMoreDetails ? 'chevron-up' : 'options-outline'}
+                  size={16}
+                  color={theme.primary}
+                />
+                <Text style={[styles.moreToggleText, { color: theme.text }]} numberOfLines={1}>
+                  {showMoreDetails
+                    ? isUrdu
+                      ? 'کم تفصیلات دکھائیں'
+                      : 'Hide extra details'
+                    : isUrdu
+                      ? `مزید تفصیلات (اسٹاک: ${stock || '50'}, تصویر، بارکوڈ)`
+                      : `More details (Stock: ${stock || '50'}, Photo, Barcode)`}
                 </Text>
-                <View style={styles.barcodeRow}>
-                  <View
-                    style={[
-                      styles.barcodeInputWrap,
-                      {
-                        backgroundColor: inputBg,
-                        borderColor: focusedField === 'barcode' ? theme.primary : softBorder,
-                      },
-                    ]}>
-                    <Ionicons
-                      name="barcode-outline"
-                      size={18}
-                      color={barcode ? theme.primary : theme.textMuted}
-                      style={styles.barcodeIcon}
-                    />
-                    <TextInput
-                      ref={barcodeInputRef}
-                      style={[styles.barcodeInput, { color: theme.text }]}
-                      placeholder={isUrdu ? 'بارکوڈ سکین یا درج کریں' : 'Scan or enter barcode'}
-                      placeholderTextColor={theme.textMuted}
-                      value={barcode}
-                      onChangeText={setBarcode}
-                      onFocus={() => {
-                        setFocusedField('barcode');
-                        scrollFieldIntoView();
-                      }}
-                      onBlur={() => setFocusedField(null)}
-                      keyboardType="default"
-                      returnKeyType="done"
-                      onSubmitEditing={handleSubmit}
-                    />
-                    {barcode ? (
+              </Pressable>
+
+              {showMoreDetails && (
+                <View style={styles.moreSection}>
+                  {/* Photo */}
+                  <View style={styles.photoRow}>
+                    <View style={[styles.photoThumb, { backgroundColor: theme.surfaceSubtle, borderColor: softBorder }]}>
+                      {image ? (
+                        <ProductImage uri={image} style={styles.photoImg} resizeMode="cover" />
+                      ) : (
+                        <Ionicons name="image-outline" size={22} color={theme.textMuted} />
+                      )}
+                      {isUploadingToDrive ? (
+                        <View style={styles.photoUploading}>
+                          <ActivityIndicator size="small" color="#FFFFFF" />
+                        </View>
+                      ) : null}
+                    </View>
+                    <View style={styles.photoActions}>
                       <Pressable
-                        onPress={() => setBarcode('')}
-                        hitSlop={8}
-                        style={styles.barcodeClearBtn}
-                        accessibilityLabel="Clear barcode">
-                        <Ionicons name="close-circle" size={17} color={theme.textMuted} />
+                        onPress={takePhoto}
+                        style={({ pressed }) => [
+                          styles.photoBtn,
+                          { backgroundColor: theme.primaryLight },
+                          pressed && { opacity: 0.85 },
+                        ]}>
+                        <Ionicons name="camera" size={15} color={theme.primary} />
+                        <Text style={[styles.photoBtnText, { color: theme.primaryDark }]}>
+                          {isUrdu ? 'کیمرہ' : 'Camera'}
+                        </Text>
                       </Pressable>
-                    ) : null}
+                      <Pressable
+                        onPress={pickImage}
+                        style={({ pressed }) => [
+                          styles.photoBtn,
+                          { backgroundColor: theme.surfaceSubtle, borderColor: softBorder, borderWidth: 1 },
+                          pressed && { opacity: 0.85 },
+                        ]}>
+                        <Ionicons name="images-outline" size={15} color={theme.textSecondary} />
+                        <Text style={[styles.photoBtnText, { color: theme.text }]}>
+                          {isUrdu ? 'گیلری' : 'Gallery'}
+                        </Text>
+                      </Pressable>
+                      {image ? (
+                        <Pressable onPress={() => setImage('')} hitSlop={8}>
+                          <Text style={{ color: theme.danger, fontSize: 12, fontWeight: '700' }}>
+                            {isUrdu ? 'ہٹائیں' : 'Remove'}
+                          </Text>
+                        </Pressable>
+                      ) : null}
+                    </View>
                   </View>
 
-                  <Pressable
-                    onPress={() => setIsBarcodeScannerOpen(true)}
-                    style={({ pressed }) => [
-                      styles.scanBtn,
-                      { backgroundColor: theme.primary },
-                      pressed && { opacity: 0.88 },
-                    ]}
-                    accessibilityLabel={isUrdu ? 'بارکوڈ سکین کریں' : 'Scan barcode'}>
-                    <Ionicons name="scan-outline" size={17} color="#FFFFFF" />
-                    <Text style={styles.scanBtnText}>
-                      {isUrdu ? 'سکین' : 'Scan'}
+                  {/* Stock + Cost Price */}
+                  <View style={styles.twoCol}>
+                    <View style={[styles.field, { flex: 1 }]}>
+                      <Text style={[styles.label, { color: theme.text }]}>
+                        {isUrdu ? 'اسٹاک' : 'Stock'}
+                      </Text>
+                      <TextInput
+                        ref={stockInputRef}
+                        style={[
+                          styles.input,
+                          {
+                            backgroundColor: inputBg,
+                            color: theme.text,
+                            borderColor: focusedField === 'stock' ? theme.primary : softBorder,
+                          },
+                        ]}
+                        placeholder="50"
+                        placeholderTextColor={theme.textMuted}
+                        keyboardType="numeric"
+                        value={stock}
+                        onChangeText={setStock}
+                        onFocus={() => {
+                          setFocusedField('stock');
+                          scrollFieldIntoView();
+                        }}
+                        onBlur={() => setFocusedField(null)}
+                        returnKeyType="next"
+                        onSubmitEditing={() => barcodeInputRef.current?.focus()}
+                      />
+                    </View>
+
+                    <View style={[styles.field, { flex: 1 }]}>
+                      <Text style={[styles.label, { color: theme.text }]}>
+                        {isUrdu ? 'خرید قیمت' : 'Cost price'}
+                      </Text>
+                      <View
+                        style={[
+                          styles.prefixInput,
+                          {
+                            backgroundColor: inputBg,
+                            borderColor: focusedField === 'cost' ? theme.primary : softBorder,
+                          },
+                        ]}>
+                        <Text style={[styles.prefix, { color: theme.textMuted }]}>
+                          {settings.currencySymbol}
+                        </Text>
+                        <TextInput
+                          style={[styles.prefixField, { color: theme.text }]}
+                          placeholder="0"
+                          placeholderTextColor={theme.textMuted}
+                          keyboardType="numeric"
+                          value={costPrice}
+                          onChangeText={setCostPrice}
+                          onFocus={() => {
+                            setFocusedField('cost');
+                            scrollFieldIntoView();
+                          }}
+                          onBlur={() => setFocusedField(null)}
+                          returnKeyType="next"
+                          onSubmitEditing={() => barcodeInputRef.current?.focus()}
+                        />
+                      </View>
+                    </View>
+                  </View>
+
+                  {hasValidCost && parsedPrice > 0 ? (
+                    <Text style={[styles.profitHint, { color: theme.success }]}>
+                      {isUrdu
+                        ? `منافع ${settings.currencySymbol}${unitProfit} / ${activeUnit.shortCode}`
+                        : `Profit ${settings.currencySymbol}${unitProfit} / ${activeUnit.shortCode}`}
                     </Text>
-                  </Pressable>
+                  ) : null}
+
+                  {/* Unit pills */}
+                  <View style={styles.field}>
+                    <Text style={[styles.label, { color: theme.text }]}>
+                      {isUrdu ? 'اکائی' : 'Unit'}
+                    </Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.unitRow}>
+                      {UNIT_OPTIONS.map((opt) => {
+                        const active = unit === opt.key;
+                        return (
+                          <Pressable
+                            key={opt.key}
+                            onPress={() => setUnit(opt.key)}
+                            style={[
+                              styles.unitPill,
+                              {
+                                backgroundColor: active ? theme.primaryLight : theme.surfaceSubtle,
+                                borderColor: active ? theme.primary : softBorder,
+                              },
+                            ]}>
+                            <Text
+                              style={{
+                                color: active ? theme.primaryDark : theme.textSecondary,
+                                fontSize: 12,
+                                fontWeight: '700',
+                              }}>
+                              {isUrdu ? opt.labelUrdu : opt.shortCode}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+
+                  {/* Barcode (Optional) */}
+                  <View style={styles.field}>
+                    <Text style={[styles.label, { color: theme.text }]}>
+                      {isUrdu ? 'بارکوڈ (اختیاری)' : 'Barcode (Optional)'}
+                    </Text>
+                    <View style={styles.barcodeRow}>
+                      <View
+                        style={[
+                          styles.barcodeInputWrap,
+                          {
+                            backgroundColor: inputBg,
+                            borderColor: focusedField === 'barcode' ? theme.primary : softBorder,
+                          },
+                        ]}>
+                        <Ionicons
+                          name="barcode-outline"
+                          size={18}
+                          color={barcode ? theme.primary : theme.textMuted}
+                          style={styles.barcodeIcon}
+                        />
+                        <TextInput
+                          ref={barcodeInputRef}
+                          style={[styles.barcodeInput, { color: theme.text }]}
+                          placeholder={isUrdu ? 'بارکوڈ سکین یا درج کریں' : 'Scan or enter barcode'}
+                          placeholderTextColor={theme.textMuted}
+                          value={barcode}
+                          onChangeText={setBarcode}
+                          onFocus={() => {
+                            setFocusedField('barcode');
+                            scrollFieldIntoView();
+                          }}
+                          onBlur={() => setFocusedField(null)}
+                          keyboardType="default"
+                          returnKeyType="done"
+                          onSubmitEditing={handleSubmit}
+                        />
+                        {barcode ? (
+                          <Pressable
+                            onPress={() => setBarcode('')}
+                            hitSlop={8}
+                            style={styles.barcodeClearBtn}
+                            accessibilityLabel="Clear barcode">
+                            <Ionicons name="close-circle" size={17} color={theme.textMuted} />
+                          </Pressable>
+                        ) : null}
+                      </View>
+
+                      <Pressable
+                        onPress={() => setIsBarcodeScannerOpen(true)}
+                        style={({ pressed }) => [
+                          styles.scanBtn,
+                          { backgroundColor: theme.primary },
+                          pressed && { opacity: 0.88 },
+                        ]}
+                        accessibilityLabel={isUrdu ? 'بارکوڈ سکین کریں' : 'Scan barcode'}>
+                        <Ionicons name="scan-outline" size={17} color="#FFFFFF" />
+                        <Text style={styles.scanBtnText}>
+                          {isUrdu ? 'سکین' : 'Scan'}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
                 </View>
-              </View>
+              )}
             </ScrollView>
 
             <View
@@ -896,6 +934,25 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
+  },
+  moreToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 2,
+  },
+  moreToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    flex: 1,
+  },
+  moreSection: {
+    gap: 12,
+    paddingTop: 4,
   },
   footer: {
     flexDirection: 'row',

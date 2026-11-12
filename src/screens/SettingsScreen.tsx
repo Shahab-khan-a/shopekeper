@@ -1062,9 +1062,10 @@ export const SettingsScreen: React.FC = () => {
                 pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
               ]}
               hitSlop={8}
-              accessibilityLabel="Back to Dashboard"
+              accessibilityLabel={language === 'ur' ? 'واپس ہوم پر جائیں' : 'Back to Home'}
             >
-              <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+              <Ionicons name={language === 'ur' ? 'arrow-forward' : 'arrow-back'} size={18} color="#FFFFFF" />
+              <Text style={styles.backBtnText}>{language === 'ur' ? 'واپس' : 'Back'}</Text>
             </Pressable>
 
             <Text
@@ -2130,7 +2131,9 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   backBtn: {
-    width: 38,
+    flexDirection: 'row',
+    gap: 5,
+    paddingHorizontal: 12,
     height: 38,
     borderRadius: 19,
     alignItems: 'center',
@@ -2138,6 +2141,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.18)',
     borderColor: 'rgba(255, 255, 255, 0.28)',
     borderWidth: 1,
+  },
+  backBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
   headerTitle: {
     flex: 1,
@@ -2164,7 +2172,7 @@ const styles = StyleSheet.create({
 
   // Spacer matching backBtn width to keep title centred
   headerSpacer: {
-    width: 38,
+    width: 72,
   },
 
   // Segment

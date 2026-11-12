@@ -3,6 +3,8 @@ import { HeldCart, HeldCartsModal } from '@/components/HeldCartsModal';
 import { LooseWeightModal } from '@/components/LooseWeightModal';
 import { QuickItemModal } from '@/components/QuickItemModal';
 import { ProductImage } from '@/components/ProductImage';
+import { QuickBillPad } from '@/components/QuickBillPad';
+import { SubScreenHeader } from '@/components/SubScreenHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
@@ -73,6 +75,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     hideAlert,
     saleViewMode,
     setSaleViewMode,
+    setActiveTab,
     user,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
@@ -90,6 +93,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [selectedKhataCustomer, setSelectedKhataCustomer] = useState<CustomerKhata | null>(null);
   const [customerSearchQuery, setCustomerSearchQuery] = useState<string>('');
   const [isAddingNewCustomer, setIsAddingNewCustomer] = useState<boolean>(false);
+
+  // Calculator-first vs Catalog Items mode
+  const [billMode, setBillMode] = useState<'quick' | 'items'>('quick');
+  const [calcEntry, setCalcEntry] = useState<string>('');
 
   // Search, Filters & View Mode
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -457,6 +464,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
 
   const clearCart = () => {
     setCart([]);
+    setCalcEntry('');
     setDiscount('');
     setCustomerName('');
     setCustomerPhone('');
@@ -872,6 +880,152 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     };
   };
 
+  const finalizeSuccessFeedback = (
+    sale: any,
+    finalAmount: number,
+    method: 'cash' | 'udhaar',
+    cName?: string
+  ) => {
+    const wasBohani = isFirstSaleOfDay;
+    const completedSaleObj = sale ? { ...sale, isBohani: wasBohani } : null;
+
+    setLastCompletedSale(completedSaleObj);
+    setShowSuccessToast(true);
+
+    if (settings.enableSound !== false) {
+      announceBoltaGalla({
+        amount: finalAmount,
+        method,
+        customerName: cName,
+        language: language === 'ur' ? 'ur' : 'en',
+      });
+    }
+
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => {
+      setShowSuccessToast(false);
+    }, wasBohani ? 14000 : 8000);
+  };
+
+  const buildCounterCartItem = (
+    amount: number,
+    label?: { en: string; ur: string }
+  ): CartItem => {
+    const itemId = 'custom-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+    return {
+      product: {
+        id: itemId,
+        name: label?.en || 'Counter Item',
+        nameUrdu: label?.ur || 'کاؤنٹر آئٹم',
+        price: amount,
+        costPrice: undefined,
+        stock: 9999,
+        category: 'Others',
+        unit: 'piece',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+      quantity: 1,
+      unitPrice: amount,
+      total: amount,
+    };
+  };
+
+  const handleAddQuickAmount = (
+    amount: number,
+    label?: { en: string; ur: string }
+  ) => {
+    if (amount <= 0) return;
+    setCart((prev) => [...prev, buildCounterCartItem(amount, label)]);
+  };
+
+  const commitPendingEntryToCart = (
+    pendingAmount: number,
+    label?: { en: string; ur: string }
+  ): CartItem[] => {
+    if (pendingAmount <= 0) return cart;
+    const nextItem = buildCounterCartItem(pendingAmount, label);
+    const nextCart = [...cart, nextItem];
+    setCart(nextCart);
+    setCalcEntry('');
+    return nextCart;
+  };
+
+  const handleInstantCashFromPad = async (
+    pendingAmount: number,
+    label?: { en: string; ur: string }
+  ) => {
+    if (isProcessing) return;
+    const finalItems =
+      pendingAmount > 0
+        ? [...cart, buildCounterCartItem(pendingAmount, label)]
+        : [...cart];
+    if (finalItems.length === 0) return;
+
+    const finalSubtotal = finalItems.reduce((sum, it) => sum + it.total, 0);
+    const rawDisc = parseFloat(discount) || 0;
+    const finalDisc =
+      discountType === 'percent'
+        ? Math.round((finalSubtotal * rawDisc) / 100)
+        : rawDisc;
+    const finalGrandTotal = Math.max(0, finalSubtotal - finalDisc);
+
+    setIsProcessing(true);
+    try {
+      const result = await completeSale({
+        items: finalItems,
+        discount: rawDisc,
+        discountType,
+        paymentMethod: 'cash',
+        tenderedCash: finalGrandTotal,
+      });
+      if (!result.success) {
+        showAlert({
+          type: 'error',
+          title: t('warningAlert'),
+          message: result.error || 'Failed to complete sale',
+        });
+        return;
+      }
+      finalizeSuccessFeedback(result.sale, finalGrandTotal, 'cash');
+      clearCart();
+    } catch (e: any) {
+      console.error(e);
+      showAlert({
+        type: 'error',
+        title: t('warningAlert'),
+        message: e?.message || 'Failed to complete sale',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleStartUdhaarFromPad = (
+    pendingAmount: number,
+    label?: { en: string; ur: string }
+  ) => {
+    commitPendingEntryToCart(pendingAmount, label);
+    setSaleAsUdhaar();
+    if (!isWideScreen) {
+      setIsCheckoutDrawerOpen(true);
+    }
+  };
+
+  const handleOpenOptionsFromPad = (
+    pendingAmount: number,
+    label?: { en: string; ur: string }
+  ) => {
+    const nextCart = commitPendingEntryToCart(pendingAmount, label);
+    const nextSub = nextCart.reduce((sum, it) => sum + it.total, 0);
+    if (!tenderedCash || tenderedCash === '0') {
+      setTenderedCash(nextSub.toString());
+    }
+    if (!isWideScreen) {
+      setIsCheckoutDrawerOpen(true);
+    }
+  };
+
   // Complete Sale and Generate Bill
   const handleGenerateBill = async () => {
     if (cart.length === 0) {
@@ -932,29 +1086,12 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         return;
       }
 
-      // VU-01: Detect Pehli Bohani (day's first sale)
-      const wasBohani = isFirstSaleOfDay;
-      const completedSaleObj = result.sale ? { ...result.sale, isBohani: wasBohani } : null;
-
-      // W1-3: Store the completed sale for manual receipt viewing & Bohani celebration
-      setLastCompletedSale(completedSaleObj);
-      setShowSuccessToast(true);
-
-      // VU-03: "Bolta Galla" Urdu/English Voice & Audio Box Confirmation (if sound enabled in settings)
-      if (settings.enableSound !== false) {
-        announceBoltaGalla({
-          amount: grandTotal,
-          method: paymentMethod === 'udhaar' ? 'udhaar' : 'cash',
-          customerName: selectedKhataCustomer?.name || customerName.trim(),
-          language: language === 'ur' ? 'ur' : 'en',
-        });
-      }
-
-      // Auto-dismiss toast (14s if auspicious Bohani celebration so shopkeeper can share on status)
-      if (toastTimer.current) clearTimeout(toastTimer.current);
-      toastTimer.current = setTimeout(() => {
-        setShowSuccessToast(false);
-      }, wasBohani ? 14000 : 8000);
+      finalizeSuccessFeedback(
+        result.sale,
+        grandTotal,
+        paymentMethod === 'udhaar' ? 'udhaar' : 'cash',
+        selectedKhataCustomer?.name || customerName.trim()
+      );
 
       // Clear cart and close drawer
       clearCart();
@@ -1755,6 +1892,32 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: theme.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {!isModal && !isBarcodeScannerActive && (
+        <SubScreenHeader
+          title={language === 'ur' ? 'نیا بل' : 'New Bill'}
+          subtitle={`${products.length} ${language === 'ur' ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}`}
+          onBack={() => setActiveTab('dashboard')}
+          rightElement={
+            heldCarts.length > 0 ? (
+              <Pressable
+                onPress={() => setIsHeldCartsModalOpen(true)}
+                style={({ pressed }) => [
+                  styles.heldPillBtn,
+                  {
+                    backgroundColor: theme.warningLight,
+                    borderColor: theme.warning,
+                  },
+                  pressed && { opacity: 0.8 },
+                ]}>
+                <Ionicons name="pause-circle" size={15} color={theme.warning} />
+                <Text style={[styles.heldPillText, { color: theme.warning }]}>
+                  {heldCarts.length}
+                </Text>
+              </Pressable>
+            ) : undefined
+          }
+        />
+      )}
       {isModal && (
         <View style={[styles.modalTopHeader, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
           <Pressable
@@ -1818,6 +1981,76 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             />
           ) : (
             <>
+              {/* ── 2-Mode Segmented Switcher: Quick Bill (Calculator) vs Items (Catalog) ── */}
+              <View style={styles.modeSwitchWrap}>
+                <View
+                  style={[
+                    styles.modeSwitchTrack,
+                    { backgroundColor: theme.surfaceSubtle, borderColor: softBorder },
+                  ]}>
+                  <Pressable
+                    onPress={() => setBillMode('quick')}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: billMode === 'quick' }}
+                    style={[
+                      styles.modeSwitchBtn,
+                      billMode === 'quick' && { backgroundColor: theme.primary },
+                    ]}>
+                    <Ionicons
+                      name="calculator-outline"
+                      size={16}
+                      color={billMode === 'quick' ? '#FFFFFF' : theme.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.modeSwitchText,
+                        { color: billMode === 'quick' ? '#FFFFFF' : theme.textSecondary },
+                      ]}>
+                      {language === 'ur' ? 'تیز بل' : 'Quick Bill'}
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setBillMode('items')}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: billMode === 'items' }}
+                    style={[
+                      styles.modeSwitchBtn,
+                      billMode === 'items' && { backgroundColor: theme.primary },
+                    ]}>
+                    <Ionicons
+                      name="grid-outline"
+                      size={15}
+                      color={billMode === 'items' ? '#FFFFFF' : theme.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.modeSwitchText,
+                        { color: billMode === 'items' ? '#FFFFFF' : theme.textSecondary },
+                      ]}>
+                      {language === 'ur' ? `سامان (${products.length})` : `Items (${products.length})`}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              {billMode === 'quick' ? (
+                <QuickBillPad
+                  cart={cart}
+                  cartTotal={subtotal}
+                  entry={calcEntry}
+                  onChangeEntry={setCalcEntry}
+                  onAddAmount={handleAddQuickAmount}
+                  onRemoveCartItem={removeFromCart}
+                  onInstantCash={handleInstantCashFromPad}
+                  onStartUdhaar={handleStartUdhaarFromPad}
+                  onOpenOptions={handleOpenOptionsFromPad}
+                  onOpenScanner={() => setIsBarcodeScannerActive(true)}
+                  onClearAll={clearCart}
+                  isProcessing={isProcessing}
+                />
+              ) : (
+                <>
               {/* ── Modern Top Active Bill & Pay Section (Mobile) ── */}
           {!isWideScreen && cart.length > 0 && (
             <View
@@ -1979,38 +2212,40 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={[
               styles.catalogScrollContent,
-              !isWideScreen && { paddingBottom: 85 },
+              !isWideScreen && { paddingBottom: 24 },
             ]}>
-            {/* Index 0: Top Cards (New Sale title + Held cart pill + Scan Barcode & Quick Item tiles) */}
+            {/* Index 0: Top Cards (Scan Barcode & Quick Item tiles) */}
             <View style={styles.topSection}>
               <View style={styles.collapsibleTopCards}>
-                <View style={styles.titleRow}>
-                  <Text style={[styles.screenTitleText, { color: theme.text }]}>
-                    {language === 'ur' ? 'نئی سیل' : 'New sale'}
-                  </Text>
-                  <Text style={[styles.countText, { color: theme.textMuted }]}>
-                    {products.length}{' '}
-                    {language === 'ur' ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
-                  </Text>
-                  <View style={styles.titleSpacer} />
-                  {heldCarts.length > 0 && (
-                    <Pressable
-                      onPress={() => setIsHeldCartsModalOpen(true)}
-                      style={({ pressed }) => [
-                        styles.heldPillBtn,
-                        {
-                          backgroundColor: theme.warningLight,
-                          borderColor: theme.warning,
-                        },
-                        pressed && { opacity: 0.8 },
-                      ]}>
-                      <Ionicons name="pause-circle" size={15} color={theme.warning} />
-                      <Text style={[styles.heldPillText, { color: theme.warning }]}>
-                        {heldCarts.length}
-                      </Text>
-                    </Pressable>
-                  )}
-                </View>
+                {isModal && (
+                  <View style={styles.titleRow}>
+                    <Text style={[styles.screenTitleText, { color: theme.text }]}>
+                      {language === 'ur' ? 'نئی سیل' : 'New sale'}
+                    </Text>
+                    <Text style={[styles.countText, { color: theme.textMuted }]}>
+                      {products.length}{' '}
+                      {language === 'ur' ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
+                    </Text>
+                    <View style={styles.titleSpacer} />
+                    {heldCarts.length > 0 && (
+                      <Pressable
+                        onPress={() => setIsHeldCartsModalOpen(true)}
+                        style={({ pressed }) => [
+                          styles.heldPillBtn,
+                          {
+                            backgroundColor: theme.warningLight,
+                            borderColor: theme.warning,
+                          },
+                          pressed && { opacity: 0.8 },
+                        ]}>
+                        <Ionicons name="pause-circle" size={15} color={theme.warning} />
+                        <Text style={[styles.heldPillText, { color: theme.warning }]}>
+                          {heldCarts.length}
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+                )}
 
                 <View style={styles.actionRow}>
                   <Pressable
@@ -2605,6 +2840,8 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
               )}
             </View>
           </ScrollView>
+                </>
+              )}
             </>
           )}
         </View>
@@ -2678,6 +2915,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         <View
           style={[
             styles.heldToast,
+            billMode === 'quick' && !isWideScreen && { top: 112, bottom: undefined },
             {
               backgroundColor: settings.darkMode ? '#78350F' : '#FEF3C7',
               borderColor: settings.darkMode ? '#F59E0B' : '#F59E0B',
@@ -2744,6 +2982,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         <View
           style={[
             styles.postSaleToast,
+            billMode === 'quick' && !isWideScreen && { top: 112, bottom: undefined },
             lastCompletedSale.isBohani
               ? {
                   backgroundColor: '#064E3B',
@@ -4766,6 +5005,34 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 6,
     borderWidth: 1,
+  },
+  modeSwitchWrap: {
+    width: '100%',
+    maxWidth: 640,
+    marginHorizontal: 'auto',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  modeSwitchTrack: {
+    flexDirection: 'row',
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 4,
+    gap: 4,
+  },
+  modeSwitchBtn: {
+    flex: 1,
+    height: 38,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  modeSwitchText: {
+    fontSize: 13.5,
+    fontWeight: '800',
   },
   usualItemChipText: {
     fontSize: 11,

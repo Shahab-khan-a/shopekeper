@@ -244,125 +244,109 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
               : Math.max(0, customer.totalDebt).toLocaleString()}
           </Text>
 
-          {/* Soft Capsule Pill */}
-          {hasAdvance ? (
-            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.16)' : '#DCFCE7' }]}>
-              <Text style={[styles.capsulePillText, { color: '#059669' }]}>
-                {isUrdu ? 'پیشگی رقم' : 'Advance'}
-              </Text>
-            </View>
-          ) : isOverdue ? (
-            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(239,68,68,0.18)' : '#FEE2E2' }]}>
-              <Text style={[styles.capsulePillText, { color: theme.danger }]}>
-                {overdueDays}d {t('daysOverdue')}
-              </Text>
-            </View>
-          ) : isSettled ? (
-            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }]}>
-              <Text style={[styles.capsulePillText, { color: theme.textSecondary }]}>
-                {t('settled')} ✓
-              </Text>
-            </View>
-          ) : (
-            <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }]}>
-              <Text style={[styles.capsulePillText, { color: theme.textSecondary }]}>
-                {billCount} {isUrdu ? 'بلز' : 'bills'}
-              </Text>
-            </View>
-          )}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            {/* Soft Capsule Pill */}
+            {hasAdvance ? (
+              <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.16)' : '#DCFCE7' }]}>
+                <Text style={[styles.capsulePillText, { color: '#059669' }]}>
+                  {isUrdu ? 'پیشگی رقم' : 'Advance'}
+                </Text>
+              </View>
+            ) : isOverdue ? (
+              <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(239,68,68,0.18)' : '#FEE2E2' }]}>
+                <Text style={[styles.capsulePillText, { color: theme.danger }]}>
+                  {overdueDays}d {t('daysOverdue')}
+                </Text>
+              </View>
+            ) : isSettled ? (
+              <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }]}>
+                <Text style={[styles.capsulePillText, { color: theme.textSecondary }]}>
+                  {t('settled')} ✓
+                </Text>
+              </View>
+            ) : (
+              <View style={[styles.capsulePill, { backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }]}>
+                <Text style={[styles.capsulePillText, { color: theme.textSecondary }]}>
+                  {billCount} {isUrdu ? 'بلز' : 'bills'}
+                </Text>
+              </View>
+            )}
+            <Ionicons
+              name={isExpanded ? 'chevron-up' : 'chevron-down'}
+              size={14}
+              color={theme.textMuted}
+            />
+          </View>
         </View>
       </Pressable>
 
-      {/* ── Soft Clean Actions Row (Rule of Two: Vasooli + WhatsApp) ── */}
+      {/* ── Clear 2-Button Action Row: Red Gave (Diya) + Green Got (Liya) + WhatsApp ── */}
       <View style={styles.actionsRow}>
-        {isSettled ? (
-          /* Settled State: Clean Cleared State + Gave Goods Option */
-          <>
-            <View
-              style={[
-                styles.settledBanner,
-                { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.1)' : '#F0FDF4' },
-              ]}>
-              <Ionicons name="checkmark-circle" size={15} color={theme.success} />
-              <Text style={[styles.settledBannerText, { color: theme.success }]}>
-                {isUrdu ? 'حساب صاف ہے' : 'Account clear'}
-              </Text>
-            </View>
+        {/* Red Action: Gave Udhaar / Diya */}
+        <Pressable
+          onPress={() => (onAddCredit ? onAddCredit(customer) : onToggleExpand())}
+          style={({ pressed }) => [
+            styles.gavePillBtn,
+            {
+              backgroundColor: settings.darkMode ? 'rgba(239, 68, 68, 0.16)' : '#FEE2E2',
+              borderColor: settings.darkMode ? 'rgba(239, 68, 68, 0.4)' : '#FECACA',
+            },
+            pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
+          ]}>
+          <Ionicons name="add-circle-outline" size={16} color={theme.danger} />
+          <Text style={[styles.gavePillText, { color: theme.danger }]} numberOfLines={1}>
+            {isUrdu ? 'دیا (ادھار)' : 'Gave'}
+          </Text>
+        </Pressable>
 
-            <Pressable
-              onPress={() => (onAddCredit ? onAddCredit(customer) : onToggleExpand())}
-              style={({ pressed }) => [
-                styles.subtleActionBtn,
-                {
-                  backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F8FAFC',
-                  borderColor: softBorder,
-                },
-                pressed && { opacity: 0.8 },
-              ]}>
-              <Text style={[styles.subtleActionText, { color: theme.textSecondary }]}>
-                {isUrdu ? '+ مال دیا' : '+ Credit'}
-              </Text>
-            </Pressable>
-          </>
+        {/* Green Action: Got Cash / Vasooli */}
+        {!isSettled ? (
+          <Pressable
+            onPress={() => onRecordPayment(customer)}
+            style={({ pressed }) => [
+              styles.vasooliPillBtn,
+              { backgroundColor: theme.primary },
+              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+            ]}>
+            <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
+            <Text style={styles.vasooliPillText} numberOfLines={1}>
+              {isUrdu ? 'لیا (وصولی)' : 'Got Cash'}
+            </Text>
+          </Pressable>
         ) : (
-          /* Pending Debt State: Primary Vasooli Pill + 1-Tap WhatsApp */
-          <>
-            {/* Primary Action: Vasooli (وصولی کی) */}
-            <Pressable
-              onPress={() => onRecordPayment(customer)}
-              style={({ pressed }) => [
-                styles.vasooliPillBtn,
-                { backgroundColor: theme.primary },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-              ]}>
-              <Ionicons name="cash" size={16} color="#FFFFFF" />
-              <Text style={styles.vasooliPillText}>
-                {isUrdu ? 'وصولی کی' : t('vasooliCash')}
-              </Text>
-            </Pressable>
-
-            {/* WhatsApp Reminder (1-Tap) */}
-            {customer.phone ? (
-              <Pressable
-                onPress={sendWhatsAppReminder}
-                hitSlop={6}
-                accessibilityLabel="Send WhatsApp bill reminder"
-                style={({ pressed }) => [
-                  styles.whatsappPillBtn,
-                  {
-                    backgroundColor: settings.darkMode ? '#064E3B' : '#DCFCE7',
-                    borderColor: settings.darkMode ? '#059669' : '#86EFAC',
-                  },
-                  pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
-                ]}>
-                <Ionicons
-                  name="logo-whatsapp"
-                  size={18}
-                  color={settings.darkMode ? '#34D399' : '#15803D'}
-                />
-              </Pressable>
-            ) : null}
-
-            {/* Expand / More Details */}
-            <Pressable
-              onPress={onToggleExpand}
-              hitSlop={6}
-              style={({ pressed }) => [
-                styles.expandToggleBtn,
-                {
-                  backgroundColor: settings.darkMode ? 'rgba(255,255,255,0.06)' : '#F8FAFC',
-                  borderColor: softBorder,
-                },
-                pressed && { opacity: 0.8 },
-              ]}>
-              <Ionicons
-                name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                size={16}
-                color={theme.textMuted}
-              />
-            </Pressable>
-          </>
+          <View
+            style={[
+              styles.settledBanner,
+              { backgroundColor: settings.darkMode ? 'rgba(16,185,129,0.1)' : '#F0FDF4' },
+            ]}>
+            <Ionicons name="checkmark-circle" size={15} color={theme.success} />
+            <Text style={[styles.settledBannerText, { color: theme.success }]} numberOfLines={1}>
+              {isUrdu ? 'حساب صاف' : 'Clear'}
+            </Text>
+          </View>
         )}
+
+        {/* WhatsApp Reminder (1-Tap when pending balance + phone exist) */}
+        {!isSettled && customer.phone ? (
+          <Pressable
+            onPress={sendWhatsAppReminder}
+            hitSlop={6}
+            accessibilityLabel="Send WhatsApp bill reminder"
+            style={({ pressed }) => [
+              styles.whatsappPillBtn,
+              {
+                backgroundColor: settings.darkMode ? '#064E3B' : '#DCFCE7',
+                borderColor: settings.darkMode ? '#059669' : '#86EFAC',
+              },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+            ]}>
+            <Ionicons
+              name="logo-whatsapp"
+              size={18}
+              color={settings.darkMode ? '#34D399' : '#15803D'}
+            />
+          </Pressable>
+        ) : null}
       </View>
 
       {/* ── Expanded Drawer: Quick Actions & Transaction History ── */}
@@ -560,6 +544,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     paddingTop: 2,
+  },
+  gavePillBtn: {
+    flex: 1,
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+  },
+  gavePillText: {
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
   vasooliPillBtn: {
     flex: 1,

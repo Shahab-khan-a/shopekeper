@@ -13,6 +13,7 @@ import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SubScreenHeader } from '@/components/SubScreenHeader';
 import { formatCompactPrice } from '@/utils/formatters';
 import { openWhatsAppReceipt, openWhatsAppWithMessage } from '@/utils/whatsapp';
 import { getPaymentBreakdown } from '@/utils/payment';
@@ -483,6 +484,11 @@ export const HistoryScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SubScreenHeader
+        title={isUrdu ? 'آج کا حساب و بلز' : 'Hisaab & Bills'}
+        subtitle={`${filteredSales.length} ${isUrdu ? 'بل' : filteredSales.length === 1 ? 'bill' : 'bills'}`}
+        onBack={() => setActiveTab('dashboard')}
+      />
       {isAnyMenuMounted && (
         <Pressable
           style={styles.menuBackdrop}
@@ -492,31 +498,6 @@ export const HistoryScreen: React.FC = () => {
       )}
       <View style={styles.topSection}>
         <View style={styles.titleRow}>
-          <View style={styles.titleLeft}>
-            <Pressable
-              onPress={() => setActiveTab('dashboard')}
-              accessibilityLabel={language === 'ur' ? 'واپس' : 'Back'}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.backBtn,
-                {
-                  backgroundColor: theme.surfaceSubtle,
-                  borderColor: softBorder,
-                },
-                pressed && { opacity: 0.8 },
-              ]}>
-              <Ionicons name="chevron-back" size={18} color={theme.text} />
-            </Pressable>
-            <View style={styles.titleTextWrap}>
-              <Text style={[styles.screenTitleText, { color: theme.text }]}>
-                {language === 'ur' ? 'تمام بل' : 'All bills'}
-              </Text>
-              <Text style={[styles.countText, { color: theme.textMuted }]}>
-                {filteredSales.length} {language === 'ur' ? 'بل' : filteredSales.length === 1 ? 'bill' : 'bills'}
-              </Text>
-            </View>
-          </View>
-
           <View style={styles.titleSpacer} />
 
           <View style={styles.headerFiltersRow}>

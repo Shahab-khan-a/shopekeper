@@ -16,6 +16,7 @@ import { useShop } from '@/context/ShopContext';
 import { KhataModal } from '@/components/KhataModal';
 import { CustomerKhataCard } from '@/components/CustomerKhataCard';
 import { CustomerModal, CustomerModalMode } from '@/components/CustomerModal';
+import { SubScreenHeader } from '@/components/SubScreenHeader';
 import { Colors, Spacing } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -56,6 +57,7 @@ export const KhataScreen: React.FC = () => {
     showAlert,
     addCustomer,
     addCustomerCredit,
+    setActiveTab,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
   const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.18)';
@@ -185,25 +187,20 @@ export const KhataScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SubScreenHeader
+        title={isUrdu ? 'ادھار کھاتہ' : 'Khata'}
+        subtitle={`${khata.length} ${isUrdu ? 'گاہک' : khata.length === 1 ? 'customer' : 'customers'}`}
+        onBack={() => setActiveTab('dashboard')}
+      />
       <ScrollView
         style={styles.khataMainScroll}
         stickyHeaderIndices={[1]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.khataScrollContent}>
-        {/* Index 0: Top Cards (Khata Title & Hero "To collect" / Add customer cards) */}
+        {/* Index 0: Top Cards (Hero "To collect" / Add customer cards) */}
         <View style={styles.topSection}>
           <View style={styles.topCardsWrap}>
-            <View style={styles.titleRow}>
-              <Text style={[styles.screenTitleText, { color: theme.text }]}>
-                {isUrdu ? 'کھاتہ' : 'Khata'}
-              </Text>
-              <Text style={[styles.countText, { color: theme.textMuted }]}>
-                {khata.length}{' '}
-                {isUrdu ? 'گاہک' : khata.length === 1 ? 'customer' : 'customers'}
-              </Text>
-            </View>
-
             <View style={styles.heroRow}>
               <View style={[styles.heroCard, { backgroundColor: theme.heroFill }]}>
                 <Text style={styles.heroLabel} numberOfLines={1}>
@@ -275,7 +272,7 @@ export const KhataScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Index 2: Metric Filter Row & Customers List */}
+        {/* Index 2: Simple 2-Pill Filter & Customers List */}
         <View style={styles.contentWrap}>
           <View style={styles.metricRow}>
             <Pressable
@@ -283,15 +280,14 @@ export const KhataScreen: React.FC = () => {
               style={({ pressed }) => [
                 styles.metricCard,
                 {
-                  backgroundColor: theme.card,
+                  backgroundColor: selectedFilter === 'all' ? theme.primaryLight : theme.card,
                   borderColor: selectedFilter === 'all' ? theme.primary : softBorder,
                 },
                 pressed && { opacity: 0.88 },
               ]}>
-              <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'تمام' : 'All'}
+              <Text style={[styles.metricLabel, { color: selectedFilter === 'all' ? theme.primaryDark : theme.textMuted }]}>
+                {isUrdu ? `تمام گاہک (${khata.length})` : `All (${khata.length})`}
               </Text>
-              <Text style={[styles.metricValue, { color: theme.text }]}>{khata.length}</Text>
             </Pressable>
 
             <Pressable
@@ -299,49 +295,14 @@ export const KhataScreen: React.FC = () => {
               style={({ pressed }) => [
                 styles.metricCard,
                 {
-                  backgroundColor: theme.card,
-                  borderColor: selectedFilter === 'pending' ? theme.primary : softBorder,
+                  backgroundColor: selectedFilter === 'pending' ? (settings.darkMode ? 'rgba(239,68,68,0.16)' : '#FEE2E2') : theme.card,
+                  borderColor: selectedFilter === 'pending' ? theme.danger : softBorder,
                 },
                 pressed && { opacity: 0.88 },
               ]}>
-              <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
-                {isUrdu ? 'ادھار' : 'Due'}
+              <Text style={[styles.metricLabel, { color: selectedFilter === 'pending' ? theme.danger : theme.textMuted }]}>
+                {isUrdu ? `ادھار باقی (${pendingCount})` : `Due (${pendingCount})`}
               </Text>
-              <Text style={[styles.metricValue, { color: theme.text }]}>{pendingCount}</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setSelectedFilter('overdue')}
-              style={({ pressed }) => [
-                styles.metricCard,
-                {
-                  backgroundColor: theme.card,
-                  borderColor: selectedFilter === 'overdue' ? theme.danger : softBorder,
-                },
-                pressed && { opacity: 0.88 },
-              ]}>
-              <Text style={[styles.metricLabel, { color: theme.danger }]}>
-                {isUrdu ? 'تاخیر' : 'Late'}
-              </Text>
-              <Text style={[styles.metricValue, { color: theme.danger }]}>
-                {overdueCustomers.length}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setSelectedFilter('settled')}
-              style={({ pressed }) => [
-                styles.metricCard,
-                {
-                  backgroundColor: theme.card,
-                  borderColor: selectedFilter === 'settled' ? theme.success : softBorder,
-                },
-                pressed && { opacity: 0.88 },
-              ]}>
-              <Text style={[styles.metricLabel, { color: theme.success }]}>
-                {isUrdu ? 'صاف' : 'Clear'}
-              </Text>
-              <Text style={[styles.metricValue, { color: theme.success }]}>{settledCount}</Text>
             </Pressable>
           </View>
 
@@ -545,13 +506,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderCurve: 'continuous',
     borderWidth: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    gap: 1,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   metricLabel: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
   metricValue: {
     fontSize: 16,
@@ -572,6 +534,6 @@ const styles = StyleSheet.create({
   },
   customersList: {
     gap: 10,
-    paddingBottom: 100,
+    paddingBottom: 28,
   },
 });
