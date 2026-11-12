@@ -1190,6 +1190,25 @@ export const SettingsScreen: React.FC = () => {
                 </>
               )}
             </Pressable>
+
+            <View style={styles.guestLegalRow}>
+              <Text style={[styles.guestLegalText, { color: theme.textMuted }]}>
+                {language === 'ur' ? 'سائن ان کر کے آپ ہماری ' : 'By signing in, you agree to our '}
+              </Text>
+              <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)} hitSlop={6}>
+                <Text style={[styles.guestLegalLink, { color: '#0284C7' }]}>
+                  {t('privacyPolicy')}
+                </Text>
+              </Pressable>
+              <Text style={[styles.guestLegalText, { color: theme.textMuted }]}>
+                {language === 'ur' ? ' اور ' : ' & '}
+              </Text>
+              <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)} hitSlop={6}>
+                <Text style={[styles.guestLegalLink, { color: '#0284C7' }]}>
+                  {t('termsOfService')}
+                </Text>
+              </Pressable>
+            </View>
           </View>
         )}
 
@@ -2715,6 +2734,21 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     textAlign: 'center',
     marginTop: 2,
+  },
+  guestLegalRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  guestLegalText: {
+    fontSize: 11.5,
+  },
+  guestLegalLink: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
 
   // Google Drive Styles

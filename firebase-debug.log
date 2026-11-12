@@ -1,0 +1,17 @@
+[debug] [2026-11-12T16:01:47.833Z] ----------------------------------------------------------------------
+[debug] [2026-11-12T16:01:47.837Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Admin0\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-11-12T16:01:47.838Z] CLI Version:   15.27.0
+[debug] [2026-11-12T16:01:47.838Z] Platform:      win32
+[debug] [2026-11-12T16:01:47.838Z] Node Version:  v24.19.0
+[debug] [2026-11-12T16:01:47.839Z] Detected Agent: unknown
+[debug] [2026-11-12T16:01:47.839Z] Time:          Thu Nov 12 2026 08:01:47 GMT-0800 (Pacific Standard Time)
+[debug] [2026-11-12T16:01:47.839Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-11-12T16:01:51.043Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-11-12T16:01:51.044Z] > authorizing via signed-in user (techflow0500@gmail.com)
+[debug] [2026-11-12T16:01:51.044Z] [iam] checking project shopkeeper-a977a for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-11-12T16:01:51.065Z] Checked if tokens are valid: true, expires at: 1794502667788
+[debug] [2026-11-12T16:01:51.065Z] Checked if tokens are valid: true, expires at: 1794502667788
+[debug] [2026-11-12T16:01:51.067Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/shopkeeper-a977a:testIamPermissions [none]
+[debug] [2026-11-12T16:01:51.067Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/shopkeeper-a977a:testIamPermissions  x-goog-user-project=shopkeeper-a977a
+[debug] [2026-11-12T16:01:51.068Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/shopkeeper-a977a:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}

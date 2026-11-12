@@ -33,8 +33,8 @@
     <h2>1. Introduction</h2>
     <p>This Privacy Policy explains how DigiShop collects, stores, uses, and safeguards information when you use our mobile application and related cloud backup services. By using DigiShop, you consent to the practices described in this policy.</p>
     <h2>2. Information We Collect</h2>
-    <h3>A. Account Information</h3>
-    <p>When you sign in using Google Sign-In, we collect your name, email address, and profile photo URL provided by Google via Firebase Authentication. If you use the app in Guest Mode, no account information is collected.</p>
+    <h3>A. Account Information &amp; No-Login Local Mode</h3>
+    <p>DigiShop launches directly in offline-first local mode without requiring sign-in or account creation. When no account is signed in, no personal account information is collected or transmitted to our servers. If you optionally choose to sign in using Google Sign-In for cloud backup and sync, we collect your name, email address, and profile photo URL provided by Google via Firebase Authentication.</p>
     <h3>B. Shop &amp; Merchant Profile</h3>
     <p>You may optionally provide store details such as your shop name (in English and Urdu), store contact phone number, physical address, and optional payment receiver details (such as your EasyPaisa, JazzCash, or bank account identifier for customer billing displays).</p>
     <h3>C. Inventory &amp; Transaction Records</h3>
@@ -62,7 +62,7 @@
     <h3>E. Device &amp; Storage Permissions</h3>
     <ul>
       <li><strong>Camera &amp; Photo Gallery:</strong> Used when you scan product barcodes into invoices or inventory, and when taking or selecting product photos and shop logos. Barcode scanning is processed entirely in real-time on your device; images or video frames from barcode scanning are never stored or uploaded to any server.</li>
-      <li><strong>Internet &amp; Network State:</strong> Used to check network connectivity and synchronize data to Google Firebase or Google Drive when enabled.</li>
+      <li><strong>Internet &amp; Network State:</strong> Used to check network connectivity, synchronize data to Google Firebase or Google Drive when enabled by you, and optionally fetch generic item-name word autocomplete suggestions when typing new item names online.</li>
     </ul>
     <h2>3. How We Use Your Information</h2>
     <p>We use the collected information solely to:</p>
@@ -74,10 +74,11 @@
     </ul>
     <p>We do not use customer Khata phone numbers for advertising, analytics profiles, or resale.</p>
     <h2>4. Third-Party Services &amp; Cloud Infrastructure</h2>
-    <p>DigiShop integrates with trusted service providers to deliver cloud backup services:</p>
+    <p>DigiShop integrates with trusted service providers to deliver optional cloud backup and autocomplete features:</p>
     <ul>
-      <li><strong>Google Firebase (Authentication, Cloud Firestore):</strong> Used for secure user authentication and cloud synchronization. All data transferred between the app and Firebase is encrypted in transit using industry-standard TLS/HTTPS.</li>
+      <li><strong>Google Firebase (Authentication, Cloud Firestore):</strong> Used for optional user authentication and cloud synchronization. All data transferred between the app and Firebase is encrypted in transit using industry-standard TLS/HTTPS.</li>
       <li><strong>Google Drive API:</strong> If you connect Google Drive, data and image backups are stored in your private Google Drive account. We do not expose your Google Drive files to the public.</li>
+      <li><strong>Datamuse Word Autocomplete API (Optional):</strong> When the device is connected to the internet and you type an item name in the quick-billing pad, the app may send the typed prefix word to the read-only Datamuse API (<code>api.datamuse.com</code>) solely to suggest common item words, which are cached locally on your device. No user, merchant, customer, phone number, or bill data is sent. When offline, billing works completely offline using only locally cached words.</li>
       <li><strong>WhatsApp / Phone dialer (device apps):</strong> If you tap Call or WhatsApp Reminder, the app opens your device's phone or WhatsApp app with the number/message you already stored. Message delivery is controlled by you and those apps—not by us.</li>
     </ul>
     <h2>5. Data Security</h2>
