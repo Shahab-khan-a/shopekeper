@@ -4,6 +4,9 @@ import { LooseWeightModal } from '@/components/LooseWeightModal';
 import { QuickItemModal } from '@/components/QuickItemModal';
 import { ProductImage } from '@/components/ProductImage';
 import { QuickBillPad } from '@/components/QuickBillPad';
+import { UdhaarConfirmPayload, UdhaarQuickSheet } from '@/components/UdhaarQuickSheet';
+import { ItemsSidebarDrawer } from '@/components/ItemsSidebarDrawer';
+import { FloatingItemsBump } from '@/components/FloatingItemsBump';
 import { SubScreenHeader } from '@/components/SubScreenHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SearchBar } from '@/components/ui/SearchBar';
@@ -94,9 +97,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [customerSearchQuery, setCustomerSearchQuery] = useState<string>('');
   const [isAddingNewCustomer, setIsAddingNewCustomer] = useState<boolean>(false);
 
-  // Calculator-first vs Catalog Items mode
-  const [billMode, setBillMode] = useState<'quick' | 'items'>('quick');
+  // Counter amount entry & right-edge Items sidebar state
   const [calcEntry, setCalcEntry] = useState<string>('');
+  const [isItemsSidebarOpen, setIsItemsSidebarOpen] = useState<boolean>(false);
+  const [counterAreaHeight, setCounterAreaHeight] = useState<number>(0);
 
   // Search, Filters & View Mode
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -111,6 +115,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
   const [isBarcodeScannerActive, setIsBarcodeScannerActive] = useState(false);
   const [isQuickItemOpen, setIsQuickItemOpen] = useState(false);
   const [isCheckoutDrawerOpen, setIsCheckoutDrawerOpen] = useState(false);
+  const [isUdhaarSheetOpen, setIsUdhaarSheetOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const checkoutScrollRef = useRef<ScrollView>(null);
@@ -474,6 +479,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     setCustomerSearchQuery('');
     setIsAddingNewCustomer(false);
     setIsCheckoutDrawerOpen(false);
+    setIsUdhaarSheetOpen(false);
   };
 
   // Rush-Hour Counter: Loose Goods Weight Converter
@@ -1005,10 +1011,56 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
     pendingAmount: number,
     label?: { en: string; ur: string }
   ) => {
-    commitPendingEntryToCart(pendingAmount, label);
-    setSaleAsUdhaar();
-    if (!isWideScreen) {
-      setIsCheckoutDrawerOpen(true);
+    const nextCart = commitPendingEntryToCart(pendingAmount, label);
+    if (nextCart.length === 0) return;
+    setIsUdhaarSheetOpen(true);
+  };
+
+  const handleConfirmUdhaarSheet = async (payload: UdhaarConfirmPayload) => {
+    if (isProcessing || cart.length === 0) return;
+    const cashPaid = Math.max(0, Math.min(grandTotal, payload.cashPaid));
+    const baki = Math.max(0, grandTotal - cashPaid);
+    const resolvedMethod: PaymentMethod = baki > 0 ? 'udhaar' : 'cash';
+
+    setIsProcessing(true);
+    try {
+      const result = await completeSale({
+        customerId: payload.selectedCustomer?.id,
+        customerName: payload.customerName || undefined,
+        customerPhone: payload.customerPhone || undefined,
+        items: cart,
+        discount: parsedDiscount,
+        discountType,
+        paymentMethod: resolvedMethod,
+        tenderedCash: cashPaid,
+      });
+
+      if (!result.success) {
+        showAlert({
+          type: 'error',
+          title: t('warningAlert'),
+          message: result.error || 'Failed to save Udhaar bill',
+        });
+        return;
+      }
+
+      setIsUdhaarSheetOpen(false);
+      finalizeSuccessFeedback(
+        result.sale,
+        grandTotal,
+        resolvedMethod,
+        payload.customerName || undefined
+      );
+      clearCart();
+    } catch (e: any) {
+      console.error(e);
+      showAlert({
+        type: 'error',
+        title: t('warningAlert'),
+        message: e?.message || 'Failed to save Udhaar bill',
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -1897,25 +1949,6 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
           title={language === 'ur' ? 'نیا بل' : 'New Bill'}
           subtitle={`${products.length} ${language === 'ur' ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}`}
           onBack={() => setActiveTab('dashboard')}
-          rightElement={
-            heldCarts.length > 0 ? (
-              <Pressable
-                onPress={() => setIsHeldCartsModalOpen(true)}
-                style={({ pressed }) => [
-                  styles.heldPillBtn,
-                  {
-                    backgroundColor: theme.warningLight,
-                    borderColor: theme.warning,
-                  },
-                  pressed && { opacity: 0.8 },
-                ]}>
-                <Ionicons name="pause-circle" size={15} color={theme.warning} />
-                <Text style={[styles.heldPillText, { color: theme.warning }]}>
-                  {heldCarts.length}
-                </Text>
-              </Pressable>
-            ) : undefined
-          }
         />
       )}
       {isModal && (
@@ -1950,8 +1983,10 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         </View>
       )}
       <View style={styles.mainLayout}>
-        {/* ================= Catalog Section (Full Screen on Mobile) ================= */}
-        <View style={styles.catalogSection}>
+        {/* ================= Counter Section ================= */}
+        <View
+          style={styles.catalogSection}
+          onLayout={(e) => setCounterAreaHeight(e.nativeEvent.layout.height)}>
           {isBarcodeScannerActive ? (
             <SaleBarcodeScannerSection
               onClose={() => setIsBarcodeScannerActive(false)}
@@ -1981,867 +2016,24 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
             />
           ) : (
             <>
-              {/* ── 2-Mode Segmented Switcher: Quick Bill (Calculator) vs Items (Catalog) ── */}
-              <View style={styles.modeSwitchWrap}>
-                <View
-                  style={[
-                    styles.modeSwitchTrack,
-                    { backgroundColor: theme.surfaceSubtle, borderColor: softBorder },
-                  ]}>
-                  <Pressable
-                    onPress={() => setBillMode('quick')}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: billMode === 'quick' }}
-                    style={[
-                      styles.modeSwitchBtn,
-                      billMode === 'quick' && { backgroundColor: theme.primary },
-                    ]}>
-                    <Ionicons
-                      name="calculator-outline"
-                      size={16}
-                      color={billMode === 'quick' ? '#FFFFFF' : theme.textSecondary}
-                    />
-                    <Text
-                      style={[
-                        styles.modeSwitchText,
-                        { color: billMode === 'quick' ? '#FFFFFF' : theme.textSecondary },
-                      ]}>
-                      {language === 'ur' ? 'تیز بل' : 'Quick Bill'}
-                    </Text>
-                  </Pressable>
+              <QuickBillPad
+                cart={cart}
+                cartTotal={subtotal}
+                entry={calcEntry}
+                onChangeEntry={setCalcEntry}
+                onAddAmount={handleAddQuickAmount}
+                onRemoveCartItem={removeFromCart}
+                onInstantCash={handleInstantCashFromPad}
+                onStartUdhaar={handleStartUdhaarFromPad}
+                onOpenScanner={() => setIsBarcodeScannerActive(true)}
+                onClearAll={clearCart}
+                isProcessing={isProcessing}
+              />
 
-                  <Pressable
-                    onPress={() => setBillMode('items')}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: billMode === 'items' }}
-                    style={[
-                      styles.modeSwitchBtn,
-                      billMode === 'items' && { backgroundColor: theme.primary },
-                    ]}>
-                    <Ionicons
-                      name="grid-outline"
-                      size={15}
-                      color={billMode === 'items' ? '#FFFFFF' : theme.textSecondary}
-                    />
-                    <Text
-                      style={[
-                        styles.modeSwitchText,
-                        { color: billMode === 'items' ? '#FFFFFF' : theme.textSecondary },
-                      ]}>
-                      {language === 'ur' ? `سامان (${products.length})` : `Items (${products.length})`}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              {billMode === 'quick' ? (
-                <QuickBillPad
-                  cart={cart}
-                  cartTotal={subtotal}
-                  entry={calcEntry}
-                  onChangeEntry={setCalcEntry}
-                  onAddAmount={handleAddQuickAmount}
-                  onRemoveCartItem={removeFromCart}
-                  onInstantCash={handleInstantCashFromPad}
-                  onStartUdhaar={handleStartUdhaarFromPad}
-                  onOpenOptions={handleOpenOptionsFromPad}
-                  onOpenScanner={() => setIsBarcodeScannerActive(true)}
-                  onClearAll={clearCart}
-                  isProcessing={isProcessing}
-                />
-              ) : (
-                <>
-              {/* ── Modern Top Active Bill & Pay Section (Mobile) ── */}
-          {!isWideScreen && cart.length > 0 && (
-            <View
-              style={[
-                styles.topActiveBillCard,
-                {
-                  backgroundColor: settings.darkMode ? '#1E293B' : '#FFFFFF',
-                  borderColor: settings.darkMode ? 'rgba(0, 201, 167, 0.4)' : 'rgba(0, 201, 167, 0.5)',
-                },
-              ]}>
-              {/* Row 1: Active bill badge, items counter, and order tools (Hold & Cancel) */}
-              <View style={styles.topBillMetaRow}>
-                <View style={styles.topBillBadgeWrap}>
-                  <View style={[styles.topBillLiveDot, { backgroundColor: theme.primary }]} />
-                  <Text style={[styles.topBillBadgeText, { color: theme.primary }]}>
-                    {language === 'ur' ? 'جاری بل' : 'Active Bill'}
-                  </Text>
-                  <Text style={[styles.topBillCountText, { color: theme.textSecondary }]}>
-                    • {totalItemsCount} {totalItemsCount === 1 ? (language === 'ur' ? 'آئٹم' : 'item') : (language === 'ur' ? 'اشیاء' : 'items')}
-                  </Text>
-                </View>
-
-                {/* Right-side quick tools */}
-                <View style={styles.topBillControlsRow}>
-                  {/* Hold Button */}
-                  <Pressable
-                    onPress={handleHoldCart}
-                    hitSlop={6}
-                    style={({ pressed }) => [
-                      styles.topBillHoldBtn,
-                      {
-                        backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7',
-                        borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.45)' : '#FDE68A',
-                      },
-                      pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
-                    ]}
-                    accessibilityLabel="Hold current order"
-                    accessibilityRole="button">
-                    <Ionicons name="pause-circle" size={13} color={settings.darkMode ? '#FBBF24' : '#D97706'} />
-                    <Text style={[styles.topBillHoldText, { color: settings.darkMode ? '#FDE68A' : '#B45309' }]}>
-                      {language === 'ur' ? 'ہولڈ' : 'Hold'}
-                    </Text>
-                  </Pressable>
-
-                  {/* Cancel Order Button */}
-                  <Pressable
-                    onPress={() => {
-                      showAlert({
-                        type: 'warning',
-                        title: language === 'ur' ? 'بل منسوخ کریں؟' : 'Cancel Current Order?',
-                        message: language === 'ur'
-                          ? `بل میں ${totalItemsCount} اشیاء شامل ہیں، کیا آپ پورا بل منسوخ اور خالی کرنا چاہتے ہیں؟`
-                          : `Discard all ${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''} and clear the active bill?`,
-                        buttons: [
-                          {
-                            text: language === 'ur' ? 'ہاں، منسوخ کریں' : 'Cancel Order',
-                            style: 'destructive',
-                            icon: 'trash-outline',
-                            onPress: clearCart,
-                          },
-                          { text: language === 'ur' ? 'واپس' : 'Keep Order', style: 'cancel' },
-                        ],
-                      });
-                    }}
-                    hitSlop={6}
-                    style={({ pressed }) => [
-                      styles.topBillCancelBtn,
-                      {
-                        backgroundColor: settings.darkMode ? 'rgba(239, 68, 68, 0.16)' : '#FEE2E2',
-                        borderColor: settings.darkMode ? 'rgba(239, 68, 68, 0.45)' : '#FECDD3',
-                      },
-                      pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
-                    ]}
-                    accessibilityLabel="Cancel order and clear cart"
-                    accessibilityRole="button">
-                    <Ionicons name="trash-outline" size={13} color={settings.darkMode ? '#F87171' : '#DC2626'} />
-                  </Pressable>
-                </View>
-              </View>
-
-              {/* Row 2: Total Amount & Primary "View Bill & Pay" CTA */}
-              <View style={styles.topBillActionRow}>
-                <Pressable
-                  onPress={openCheckoutDrawer}
-                  style={styles.topBillAmountPressable}
-                  hitSlop={6}>
-                  <Text style={[styles.topBillTotalLabel, { color: theme.textMuted }]}>
-                    {language === 'ur' ? 'کل رقم' : 'Total Amount'}
-                  </Text>
-                  <Text style={[styles.topBillTotalValue, { color: theme.text }]} numberOfLines={1}>
-                    <Text style={[styles.topBillCurrency, { color: theme.primary }]}>{settings.currencySymbol} </Text>
-                    {grandTotal.toLocaleString()}
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={openCheckoutDrawer}
-                  style={({ pressed }) => [
-                    styles.topBillPayBtn,
-                    { backgroundColor: theme.primary },
-                    pressed && { opacity: 0.92, transform: [{ scale: 0.985 }] },
-                  ]}
-                  accessibilityLabel="View bill and proceed to payment"
-                  accessibilityRole="button">
-                  <Ionicons name="receipt-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-                  <Text style={styles.topBillPayBtnText}>
-                    {language === 'ur' ? 'بل اور ادائیگی' : 'View Bill & Pay'}
-                  </Text>
-                  <Ionicons
-                    name={language === 'ur' ? 'arrow-back' : 'arrow-forward'}
-                    size={16}
-                    color="#FFFFFF"
-                    style={{ marginLeft: 6 }}
-                  />
-                </Pressable>
-              </View>
-            </View>
-          )}
-
-          {/* ── Optional Top Held Carts Banner (When Cart is Empty & Parked Carts Exist) ── */}
-          {!isWideScreen && cart.length === 0 && heldCarts.length > 0 && (
-            <Pressable
-              onPress={() => setIsHeldCartsModalOpen(true)}
-              style={({ pressed }) => [
-                styles.topHeldBanner,
-                {
-                  backgroundColor: settings.darkMode ? 'rgba(245, 158, 11, 0.16)' : '#FEF3C7',
-                  borderColor: settings.darkMode ? 'rgba(245, 158, 11, 0.45)' : '#F59E0B',
-                },
-                pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
-              ]}>
-              <View style={styles.topHeldBannerLeft}>
-                <View style={styles.topHeldBadge}>
-                  <Ionicons name="pause-circle" size={15} color="#FFFFFF" />
-                  <Text style={styles.topHeldBadgeCount}>{heldCarts.length}</Text>
-                </View>
-                <Text style={[styles.topHeldBannerText, { color: settings.darkMode ? '#FDE68A' : '#92400E' }]}>
-                  {heldCarts.length === 1
-                    ? (language === 'ur' ? '1 ہولڈ بل محفوظ ہے' : '1 Parked bill waiting')
-                    : (language === 'ur' ? `${heldCarts.length} ہولڈ بلز محفوظ ہیں` : `${heldCarts.length} Parked bills waiting`)}
-                </Text>
-              </View>
-              <View style={styles.topHeldResumePill}>
-                <Text style={styles.topHeldResumeText}>
-                  {language === 'ur' ? 'دیکھیں' : 'Resume'}
-                </Text>
-                <Ionicons
-                  name={language === 'ur' ? 'arrow-back' : 'arrow-forward'}
-                  size={13}
-                  color="#D97706"
-                />
-              </View>
-            </Pressable>
-          )}
-
-          <ScrollView
-            style={styles.catalogScroll}
-            stickyHeaderIndices={[1]}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={[
-              styles.catalogScrollContent,
-              !isWideScreen && { paddingBottom: 24 },
-            ]}>
-            {/* Index 0: Top Cards (Scan Barcode & Quick Item tiles) */}
-            <View style={styles.topSection}>
-              <View style={styles.collapsibleTopCards}>
-                {isModal && (
-                  <View style={styles.titleRow}>
-                    <Text style={[styles.screenTitleText, { color: theme.text }]}>
-                      {language === 'ur' ? 'نئی سیل' : 'New sale'}
-                    </Text>
-                    <Text style={[styles.countText, { color: theme.textMuted }]}>
-                      {products.length}{' '}
-                      {language === 'ur' ? 'اشیاء' : products.length === 1 ? 'item' : 'items'}
-                    </Text>
-                    <View style={styles.titleSpacer} />
-                    {heldCarts.length > 0 && (
-                      <Pressable
-                        onPress={() => setIsHeldCartsModalOpen(true)}
-                        style={({ pressed }) => [
-                          styles.heldPillBtn,
-                          {
-                            backgroundColor: theme.warningLight,
-                            borderColor: theme.warning,
-                          },
-                          pressed && { opacity: 0.8 },
-                        ]}>
-                        <Ionicons name="pause-circle" size={15} color={theme.warning} />
-                        <Text style={[styles.heldPillText, { color: theme.warning }]}>
-                          {heldCarts.length}
-                        </Text>
-                      </Pressable>
-                    )}
-                  </View>
-                )}
-
-                <View style={styles.actionRow}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={language === 'ur' ? 'بارکوڈ اسکین' : 'Scan barcode'}
-                    onPress={() => setIsBarcodeScannerActive(true)}
-                    style={({ pressed }) => [
-                      styles.actionTile,
-                      { backgroundColor: theme.heroFill },
-                      pressed && { opacity: 0.9 },
-                    ]}>
-                    <View style={styles.actionIconWrap}>
-                      <Ionicons name="barcode-outline" size={18} color="#FFFFFF" />
-                    </View>
-                    <Text style={styles.actionTileTitle}>
-                      {language === 'ur' ? 'اسکین' : 'Scan'}
-                    </Text>
-                    <Text style={styles.actionTileSub}>
-                      {language === 'ur' ? 'بارکوڈ' : 'Barcode'}
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Add custom or loose item"
-                    onPress={() => setIsQuickItemOpen(true)}
-                    style={({ pressed }) => [
-                      styles.actionTile,
-                      { backgroundColor: theme.secondary },
-                      pressed && { opacity: 0.9 },
-                    ]}>
-                    <View style={styles.actionIconWrap}>
-                      <Ionicons name="flash-outline" size={16} color="#FFFFFF" />
-                    </View>
-                    <Text style={styles.actionTileTitle}>
-                      {language === 'ur' ? 'فوری آئٹم' : 'Quick item'}
-                    </Text>
-                    <Text style={styles.actionTileSub}>
-                      {language === 'ur' ? 'وزن یا کسٹم' : 'Loose or custom'}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-
-            {/* Index 1: Sticky Search Bar (Always remains pinned at the top on scroll) */}
-            <View
-              style={[
-                styles.stickySearchWrap,
-                { backgroundColor: theme.background },
-              ]}>
-              <View style={styles.stickySearchInner}>
-                <SearchBar
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholder={language === 'ur' ? 'نام یا بارکوڈ...' : 'Search name or barcode...'}
-                  height={42}
-                  onSubmitEditing={handleSearchSubmit}
-                  returnKeyType="done"
-                />
-              </View>
-            </View>
-
-            {/* Index 2: Products List / Grid or Empty State */}
-            <View style={styles.catalogItemsWrap}>
-            {isProductsLoading && products.length === 0 ? (
-            <ShopStoreLoader viewMode={viewMode} />
-          ) : products.length === 0 ? (
-            <View style={styles.catalogEmptyContainer}>
-              <View style={[styles.catalogEmptyIconBox, { backgroundColor: theme.primaryLight }]}>
-                <Ionicons name="cube-outline" size={50} color={theme.primary} />
-              </View>
-              <Text style={[styles.catalogEmptyTitle, { color: theme.text }]}>
-                {language === 'ur' ? 'انوینٹری میں کوئی پروڈکٹ نہیں ہے' : 'No Products in Inventory'}
-              </Text>
-              <Text style={[styles.catalogEmptySub, { color: theme.textSecondary }]}>
-                {language === 'ur'
-                  ? 'سیل کرنے کے لیے پہلے پروڈکٹ شامل کریں۔'
-                  : 'Add products to your catalog to start creating sales.'}
-              </Text>
-
-              <View style={styles.catalogEmptyBtnRow}>
-                <Pressable
-                  onPress={() => setIsAddProductOpen(true)}
-                  style={({ pressed }) => [
-                    styles.catalogEmptyPrimaryBtn,
-                    { backgroundColor: theme.primary },
-                    pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
-                  ]}>
-                  <Ionicons name="add-circle" size={18} color="#FFFFFF" />
-                  <Text style={styles.catalogEmptyPrimaryBtnText}>
-                    {t('addProductBtn')}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          ) : filteredProducts.length === 0 ? (
-            <View style={styles.catalogEmptyContainer}>
-              <View style={[styles.catalogEmptyIconBox, { backgroundColor: theme.surfaceSubtle }]}>
-                <Ionicons name="search-outline" size={42} color={theme.textMuted} />
-              </View>
-              <Text style={[styles.catalogEmptyTitle, { color: theme.text }]}>
-                {language === 'ur' ? 'کوئی پروڈکٹ نہیں ملا' : 'No Matching Products'}
-              </Text>
-              <Text style={[styles.catalogEmptySub, { color: theme.textSecondary }]}>
-                {language === 'ur'
-                  ? 'آپ کی تلاش یا کیٹیگری کے مطابق کوئی چیز نہیں ملی۔'
-                  : 'No items match your search or category filter.'}
-              </Text>
-              <Pressable
-                onPress={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('All');
-                }}
-                style={({ pressed }) => [
-                  styles.catalogEmptySecondaryBtn,
-                  { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
-                  pressed && { opacity: 0.8 },
-                ]}>
-                <Ionicons name="refresh-outline" size={16} color={theme.text} />
-                <Text style={[styles.catalogEmptySecondaryBtnText, { color: theme.text }]}>
-                  {language === 'ur' ? 'تمام مصنوعات دکھائیں' : 'Clear Search & Show All'}
-                </Text>
-              </Pressable>
-            </View>
-          ) : (
-            <>
-              {/* Showing count + view switcher (Identical to Products screen) */}
-              <View style={styles.gridHeader}>
-                <Text style={[styles.showingText, { color: theme.textMuted }]}>
-                  {t('showingItems')}{' '}
-                  <Text style={{ color: theme.text, fontWeight: '700' }}>
-                    {filteredProducts.length} {t('itemsLabel')}
-                  </Text>
-                </Text>
-
-                <View
-                  style={[
-                    styles.viewToggle,
-                    {
-                      backgroundColor: cardBg,
-                      borderColor: softBorder,
-                    },
-                  ]}>
-                  <Pressable
-                    onPress={() => setSaleViewMode('grid')}
-                    style={[
-                      styles.viewToggleBtn,
-                      viewMode === 'grid' && {
-                        backgroundColor: settings.darkMode
-                          ? 'rgba(16,185,129,0.22)'
-                          : 'rgba(167,243,208,0.55)',
-                      },
-                    ]}
-                    accessibilityLabel={t('viewModeGrid')}>
-                    <Ionicons
-                      name="grid-outline"
-                      size={14}
-                      color={viewMode === 'grid' ? theme.primary : theme.textMuted}
-                    />
-                  </Pressable>
-                  <Pressable
-                    onPress={() => setSaleViewMode('list')}
-                    style={[
-                      styles.viewToggleBtn,
-                      viewMode === 'list' && {
-                        backgroundColor: settings.darkMode
-                          ? 'rgba(16,185,129,0.22)'
-                          : 'rgba(167,243,208,0.55)',
-                      },
-                    ]}
-                    accessibilityLabel={t('viewModeList')}>
-                    <Ionicons
-                      name="list-outline"
-                      size={14}
-                      color={viewMode === 'list' ? theme.primary : theme.textMuted}
-                    />
-                  </Pressable>
-                </View>
-              </View>
-
-              <View
-                style={
-                  viewMode === 'grid'
-                    ? [styles.catalogGrid, { gap: gridGap }]
-                    : styles.catalogList
-                }>
-                {filteredProducts.map((product) => {
-              const isOut = product.stock <= 0;
-              const isLow = !isOut && product.stock <= (settings.lowStockThreshold || 5);
-              const inCartItem = cart.find((it) => it.product.id === product.id);
-              const inBillFill = settings.darkMode
-                ? 'rgba(16, 185, 129, 0.18)'
-                : theme.primaryLight;
-              const inBillBorder = theme.primary;
-
-              if (viewMode === 'list') {
-                // ================= List row =================
-                if (inCartItem) {
-                  const lineTotal = inCartItem.total;
-                  return (
-                    <View
-                      key={product.id}
-                      style={[
-                        styles.listRowOnBill,
-                        {
-                          backgroundColor: inBillFill,
-                          borderColor: inBillBorder,
-                        },
-                      ]}>
-                      <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
-                        <ProductImage
-                          uri={product.image || product.imageUri}
-                          style={styles.listThumb}
-                          resizeMode="cover"
-                          fallbackColor={theme.textMuted}
-                          fallbackSize={24}
-                          iconName={productIconFor(product.name, product.category)}
-                        />
-                      </View>
-
-                      <View style={styles.listOnBillInfo}>
-                        <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
-                          {getProductName(product)}
-                        </Text>
-                        <Text style={[styles.listOnBillMeta, { color: theme.textMuted }]} numberOfLines={1}>
-                          {settings.currencySymbol}
-                          {formatCompactPrice(product.price)}
-                          {' → '}
-                          <Text style={{ color: theme.primaryDark, fontWeight: '800' }}>
-                            {settings.currencySymbol}
-                            {formatCompactPrice(lineTotal)}
-                          </Text>
-                        </Text>
-                      </View>
-
-                      <View
-                        style={[
-                          styles.qtyPill,
-                          {
-                            backgroundColor: settings.darkMode ? 'rgba(0,0,0,0.28)' : '#FFFFFF',
-                            borderColor: settings.darkMode ? 'rgba(255,255,255,0.12)' : '#D1FAE5',
-                          },
-                        ]}>
-                        <Pressable
-                          onPress={() => updateQuantity(product.id, -1)}
-                          accessibilityLabel={
-                            inCartItem.quantity === 1
-                              ? `Remove ${product.name} from bill`
-                              : `Decrease quantity of ${product.name}`
-                          }
-                          accessibilityRole="button"
-                          style={({ pressed }) => [
-                            styles.qtyPillBtn,
-                            pressed && { opacity: 0.65 },
-                          ]}
-                          hitSlop={4}>
-                          <Ionicons
-                            name={inCartItem.quantity === 1 ? 'trash-outline' : 'remove'}
-                            size={16}
-                            color={inCartItem.quantity === 1 ? theme.danger : theme.text}
-                          />
-                        </Pressable>
-
-                        <Pressable
-                          onPress={() => openLooseWeightModal(product, inCartItem.quantity)}
-                          accessibilityLabel={`Change quantity for ${product.name}`}
-                          accessibilityRole="button"
-                          style={styles.qtyPillCount}>
-                          <Text style={[styles.qtyPillCountText, { color: theme.text }]}>
-                            {inCartItem.quantity}
-                          </Text>
-                        </Pressable>
-
-                        <Pressable
-                          onPress={() => addToCart(product, 1)}
-                          accessibilityLabel={`Increase quantity of ${product.name}`}
-                          accessibilityRole="button"
-                          style={({ pressed }) => [
-                            styles.qtyPillBtn,
-                            styles.qtyPillBtnPlus,
-                            { backgroundColor: theme.primary },
-                            pressed && { opacity: 0.8 },
-                          ]}
-                          hitSlop={4}>
-                          <Ionicons name="add" size={16} color="#FFFFFF" />
-                        </Pressable>
-                      </View>
-                    </View>
-                  );
-                }
-
-                return (
-                  <Pressable
-                    key={product.id}
-                    onPress={() => addToCart(product)}
-                    style={({ pressed }) => [
-                      styles.listRow,
-                      {
-                        backgroundColor: theme.card,
-                        borderColor: softBorder,
-                        borderWidth: 1,
-                        opacity: isOut ? 0.6 : 1,
-                      },
-                      pressed && !isOut && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-                    ]}>
-                    <View style={styles.listThumbOuter}>
-                      <View style={[styles.listThumbWrap, { backgroundColor: theme.surfaceSubtle }]}>
-                        <ProductImage
-                          uri={product.image || product.imageUri}
-                          style={styles.listThumb}
-                          resizeMode="cover"
-                          fallbackColor={theme.textMuted}
-                          fallbackSize={24}
-                          iconName={productIconFor(product.name, product.category)}
-                        />
-                      </View>
-                    </View>
-
-                    <View style={styles.listRowContent}>
-                      <Text style={[styles.listRowName, { color: theme.text }]} numberOfLines={1}>
-                        {getProductName(product)}
-                      </Text>
-                      <View style={styles.listRowBadgeRow}>
-                        <View
-                          style={[
-                            styles.listStockBadge,
-                            {
-                              backgroundColor: isOut
-                                ? theme.dangerLight
-                                : isLow
-                                  ? theme.warningLight
-                                  : theme.successLight,
-                            },
-                          ]}>
-                          <Ionicons
-                            name={isOut ? 'alert-circle' : isLow ? 'warning' : 'cube-outline'}
-                            size={11}
-                            color={isOut ? theme.danger : isLow ? theme.warning : theme.success}
-                          />
-                          <Text
-                            style={[
-                              styles.listStockText,
-                              { color: isOut ? theme.danger : isLow ? theme.warning : theme.success },
-                            ]}>
-                            {`${product.stock} ${product.unit}`}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    <View style={styles.listRowRight}>
-                      <Text
-                        style={[styles.listRowPrice, { color: theme.primary }]}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.75}>
-                        {settings.currencySymbol}
-                        {formatCompactPrice(product.price)}
-                      </Text>
-                      <Pressable
-                        onPress={() => addToCart(product)}
-                        style={({ pressed }) => [
-                          styles.listAddBtn,
-                          {
-                            backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
-                          },
-                          pressed && { opacity: 0.8 },
-                        ]}>
-                        <Ionicons
-                          name="add-circle"
-                          size={16}
-                          color={isOut ? theme.textMuted : theme.primary}
-                        />
-                        <Text
-                          style={[
-                            styles.listAddBtnText,
-                            { color: isOut ? theme.textMuted : theme.primaryDark },
-                          ]}
-                          numberOfLines={1}>
-                          {t('addToBillShort')}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  </Pressable>
-                );
-              }
-
-                // ================= Compact Card Grid =================
-                if (inCartItem) {
-                  return (
-                    <View
-                      key={product.id}
-                      style={[
-                        styles.gridCardOnBill,
-                        {
-                          width: gridColWidth,
-                          backgroundColor: inBillFill,
-                          borderColor: inBillBorder,
-                        },
-                      ]}>
-                      <View style={styles.gridOnBillTop}>
-                        <View style={[styles.gridThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                          <ProductImage
-                            uri={product.image || product.imageUri}
-                            style={styles.gridThumb}
-                            resizeMode="cover"
-                            fallbackColor={theme.textMuted}
-                            fallbackSize={20}
-                            iconName={productIconFor(product.name, product.category)}
-                          />
-                        </View>
-                        <View style={{ flex: 1, minWidth: 0 }}>
-                          <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>
-                            {getProductName(product)}
-                          </Text>
-                          <Text style={[styles.gridOnBillPrice, { color: theme.primary }]} numberOfLines={1}>
-                            {settings.currencySymbol}
-                            {formatCompactPrice(product.price)}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View style={styles.gridOnBillActions}>
-                        <Text style={[styles.gridOnBillLine, { color: theme.textMuted }]} numberOfLines={1}>
-                          {settings.currencySymbol}
-                          {formatCompactPrice(inCartItem.total)}
-                        </Text>
-                        <View
-                          style={[
-                            styles.qtyPill,
-                            {
-                              backgroundColor: settings.darkMode ? 'rgba(0,0,0,0.28)' : '#FFFFFF',
-                              borderColor: settings.darkMode ? 'rgba(255,255,255,0.12)' : '#D1FAE5',
-                            },
-                          ]}>
-                          <Pressable
-                            onPress={() => updateQuantity(product.id, -1)}
-                            accessibilityLabel={
-                              inCartItem.quantity === 1
-                                ? `Remove ${product.name} from bill`
-                                : `Decrease quantity of ${product.name}`
-                            }
-                            accessibilityRole="button"
-                            style={({ pressed }) => [
-                              styles.qtyPillBtn,
-                              pressed && { opacity: 0.65 },
-                            ]}
-                            hitSlop={4}>
-                            <Ionicons
-                              name={inCartItem.quantity === 1 ? 'trash-outline' : 'remove'}
-                              size={15}
-                              color={inCartItem.quantity === 1 ? theme.danger : theme.text}
-                            />
-                          </Pressable>
-
-                          <Pressable
-                            onPress={() => openLooseWeightModal(product, inCartItem.quantity)}
-                            accessibilityLabel={`Change quantity for ${product.name}`}
-                            accessibilityRole="button"
-                            style={styles.qtyPillCount}>
-                            <Text style={[styles.qtyPillCountText, { color: theme.text }]}>
-                              {inCartItem.quantity}
-                            </Text>
-                          </Pressable>
-
-                          <Pressable
-                            onPress={() => addToCart(product, 1)}
-                            accessibilityLabel={`Increase quantity of ${product.name}`}
-                            accessibilityRole="button"
-                            style={({ pressed }) => [
-                              styles.qtyPillBtn,
-                              styles.qtyPillBtnPlus,
-                              { backgroundColor: theme.primary },
-                              pressed && { opacity: 0.8 },
-                            ]}
-                            hitSlop={4}>
-                            <Ionicons name="add" size={15} color="#FFFFFF" />
-                          </Pressable>
-                        </View>
-                      </View>
-                    </View>
-                  );
-                }
-
-                return (
-                  <Pressable
-                    key={product.id}
-                    onPress={() => addToCart(product)}
-                    style={({ pressed }) => [
-                      styles.gridCard,
-                      {
-                        width: gridColWidth,
-                        backgroundColor: theme.card,
-                        borderColor: softBorder,
-                        borderWidth: 1,
-                        opacity: isOut ? 0.6 : 1,
-                      },
-                      pressed && { transform: [{ scale: 0.98 }] },
-                    ]}>
-                    <View
-                      style={[
-                        styles.stockTag,
-                        {
-                          backgroundColor: isOut
-                            ? theme.dangerLight
-                            : isLow
-                              ? theme.warningLight
-                              : theme.successLight,
-                        },
-                      ]}>
-                      <Text
-                        style={[
-                          styles.stockTagText,
-                          {
-                            color: isOut
-                              ? theme.danger
-                              : isLow
-                                ? theme.warning
-                                : theme.success,
-                          },
-                        ]}>
-                        {`${product.stock}`}
-                      </Text>
-                    </View>
-
-                    <View style={styles.gridCardTop}>
-                      <View style={[styles.gridThumbFallback, { backgroundColor: theme.surfaceSubtle }]}>
-                        <ProductImage
-                          uri={product.image || product.imageUri}
-                          style={styles.gridThumb}
-                          resizeMode="cover"
-                          fallbackColor={theme.textMuted}
-                          fallbackSize={20}
-                          iconName={productIconFor(product.name, product.category)}
-                        />
-                      </View>
-                      <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={2}>
-                        {getProductName(product)}
-                      </Text>
-                    </View>
-
-                    <View style={styles.gridCardBottom}>
-                      <Text
-                        style={[styles.gridPrice, { color: theme.primary }]}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.75}>
-                        {settings.currencySymbol}
-                        {formatCompactPrice(product.price)}
-                      </Text>
-
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                          {(product.unit === 'kg' || product.unit === 'gram' || product.unit === 'litre') && (
-                            <Pressable
-                              onPress={() => openLooseWeightModal(product, 1)}
-                              style={[
-                                styles.cardScaleQuickBtn,
-                                {
-                                  backgroundColor: theme.surfaceSubtle,
-                                  borderColor: theme.border,
-                                },
-                              ]}>
-                              <Ionicons
-                                name="scale-outline"
-                                size={14}
-                                color={isOut ? theme.textMuted : theme.primary}
-                              />
-                            </Pressable>
-                          )}
-                            <Pressable
-                            onPress={() => addToCart(product)}
-                            style={[
-                              styles.cardAddBtn,
-                              {
-                                backgroundColor: isOut ? theme.surfaceSubtle : theme.primaryLight,
-                              },
-                            ]}>
-                            <Ionicons
-                              name="add"
-                              size={14}
-                              color={isOut ? theme.textMuted : theme.primary}
-                            />
-                          </Pressable>
-                        </View>
-                    </View>
-                  </Pressable>
-                );
-              })}
-                  </View>
-                </>
-              )}
-            </View>
-          </ScrollView>
-                </>
-              )}
+              <FloatingItemsBump
+                containerHeight={counterAreaHeight}
+                onPressOpen={() => setIsItemsSidebarOpen(true)}
+              />
             </>
           )}
         </View>
@@ -2881,6 +2073,28 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
       )}
 
 
+      {/* Right Slide-Over Items Sidebar */}
+      <ItemsSidebarDrawer
+        visible={isItemsSidebarOpen}
+        products={products}
+        cart={cart}
+        billTotal={grandTotal}
+        onAddProduct={(prod) => addToCart(prod, 1)}
+        onUpdateQuantity={updateQuantity}
+        onOpenScanner={() => setIsBarcodeScannerActive(true)}
+        onClose={() => setIsItemsSidebarOpen(false)}
+      />
+
+      {/* Focused, Ultra-Simple Udhaar Bottom Sheet */}
+      <UdhaarQuickSheet
+        visible={isUdhaarSheetOpen}
+        billTotal={grandTotal}
+        customers={khata}
+        isProcessing={isProcessing}
+        onClose={() => setIsUdhaarSheetOpen(false)}
+        onConfirm={handleConfirmUdhaarSheet}
+      />
+
       {/* Rush-Hour Counter: Held Carts Modal */}
       <HeldCartsModal
         visible={isHeldCartsModalOpen}
@@ -2915,7 +2129,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         <View
           style={[
             styles.heldToast,
-            billMode === 'quick' && !isWideScreen && { top: 112, bottom: undefined },
+            !isWideScreen && { top: 112, bottom: undefined },
             {
               backgroundColor: settings.darkMode ? '#78350F' : '#FEF3C7',
               borderColor: settings.darkMode ? '#F59E0B' : '#F59E0B',
@@ -2982,7 +2196,7 @@ export const SaleScreen: React.FC<SaleScreenProps> = ({ isModal, onClose }) => {
         <View
           style={[
             styles.postSaleToast,
-            billMode === 'quick' && !isWideScreen && { top: 112, bottom: undefined },
+            !isWideScreen && { top: 112, bottom: undefined },
             lastCompletedSale.isBohani
               ? {
                   backgroundColor: '#064E3B',
@@ -3538,16 +2752,16 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // Top Modern Active POS Bill Card
+  // Bottom Thumb-Zone Active POS Bill Bar
   topActiveBillCard: {
     marginHorizontal: Spacing.md,
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: 4,
+    marginBottom: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1.5,
-    ...Shadows.md,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    borderWidth: 1,
   },
   topBillMetaRow: {
     flexDirection: 'row',
@@ -3632,7 +2846,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: BorderRadius.full,
-    ...Shadows.sm,
   },
   topBillPayBtnText: {
     color: '#FFFFFF',

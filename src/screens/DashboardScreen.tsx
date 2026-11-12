@@ -7,17 +7,19 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Image } from 'expo-image';
+import { Image, ImageSource } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/constants/theme';
 import { useShop } from '@/context/ShopContext';
 import { triggerCloudBackupFlow } from '@/utils/backupAction';
+import { formatCompactPrice } from '@/utils/formatters';
 import { getPaymentBreakdown } from '@/utils/payment';
 import {
   FeatureCarousel,
   FeatureSlideAction,
 } from '@/components/FeatureCarousel';
+import { HeroStatsCard } from '@/components/HeroStatsCard';
 import { SalesChart } from '@/components/SalesChart';
 
 interface QuickTileConfig {
@@ -28,6 +30,11 @@ interface QuickTileConfig {
   icon: keyof typeof Ionicons.glyphMap;
   iconColor: string;
   iconBg: string;
+  cardBg: string;
+  cardBorder: string;
+  bgImage: ImageSource;
+  accentBarColor: string;
+  alertBadge?: string;
   accessibilityLabel: string;
   onPress: () => void;
 }
@@ -123,10 +130,10 @@ export const DashboardScreen: React.FC = () => {
     });
   }, [user, isOnline, isUrdu, pendingSyncCount, syncNow, showAlert, setIsAuthModalOpen]);
 
-  const infoCardBg = settings.darkMode ? '#111827' : '#FFFFFF';
+  const infoCardBg = settings.darkMode ? '#082925' : '#C9F3E1';
   const infoCardBorder = settings.darkMode
-    ? 'rgba(52, 211, 153, 0.2)'
-    : 'rgba(5, 150, 105, 0.2)';
+    ? 'rgba(52, 211, 153, 0.32)'
+    : 'rgba(5, 150, 105, 0.34)';
   const primarySaleBg = settings.darkMode ? '#046C4E' : '#045E44';
   const khataHeroBg = settings.darkMode ? '#9F1239' : '#BE123C';
   const khataHeroBorder = settings.darkMode
@@ -142,12 +149,23 @@ export const DashboardScreen: React.FC = () => {
           stockAlertsCount > 0
             ? isUrdu
               ? `${stockAlertsCount} کم اسٹاک`
-              : `${stockAlertsCount} low stock`
-            : `${products.length} ${isUrdu ? 'اسٹاک' : 'stock'}`,
-        subtitleColor: stockAlertsCount > 0 ? '#D97706' : theme.textMuted,
+              : `${stockAlertsCount} low`
+            : `${products.length} ${isUrdu ? 'اسٹاک' : 'items'}`,
+        subtitleColor: stockAlertsCount > 0
+          ? settings.darkMode ? '#FBBF24' : '#B45309'
+          : theme.textMuted,
         icon: 'cube-outline',
         iconColor: settings.darkMode ? '#38BDF8' : '#0284C7',
-        iconBg: settings.darkMode ? 'rgba(56, 189, 248, 0.16)' : '#E0F2FE',
+        iconBg: settings.darkMode ? 'rgba(56, 189, 248, 0.18)' : '#E0F2FE',
+        cardBg: settings.darkMode ? '#0F1C2E' : '#F3F9FF',
+        cardBorder: settings.darkMode
+          ? 'rgba(56, 189, 248, 0.28)'
+          : 'rgba(2, 132, 199, 0.24)',
+        bgImage: settings.darkMode
+          ? require('../../assets/images/tile-items-dark.jpg')
+          : require('../../assets/images/tile-items-light.jpg'),
+        accentBarColor: settings.darkMode ? '#38BDF8' : '#0284C7',
+        alertBadge: stockAlertsCount > 0 ? `${stockAlertsCount}!` : undefined,
         accessibilityLabel: isUrdu ? 'سامان و اسٹاک' : 'Items and stock',
         onPress: () => setActiveTab('products'),
       },
@@ -159,6 +177,14 @@ export const DashboardScreen: React.FC = () => {
         icon: 'receipt-outline',
         iconColor: settings.darkMode ? '#A5B4FC' : '#4F46E5',
         iconBg: settings.darkMode ? 'rgba(129, 140, 248, 0.16)' : '#EEF2FF',
+        cardBg: settings.darkMode ? '#13192B' : '#F8F9FF',
+        cardBorder: settings.darkMode
+          ? 'rgba(129, 140, 248, 0.18)'
+          : 'rgba(79, 70, 229, 0.15)',
+        bgImage: settings.darkMode
+          ? require('../../assets/images/tile-bills-dark.jpg')
+          : require('../../assets/images/tile-bills-light.jpg'),
+        accentBarColor: settings.darkMode ? '#818CF8' : '#6366F1',
         accessibilityLabel: isUrdu ? 'تمام بلز' : 'All bills',
         onPress: () => setActiveTab('history'),
       },
@@ -175,6 +201,14 @@ export const DashboardScreen: React.FC = () => {
         icon: 'bar-chart-outline',
         iconColor: settings.darkMode ? '#2DD4BF' : '#0F766E',
         iconBg: settings.darkMode ? 'rgba(13, 148, 136, 0.18)' : '#CCFBF1',
+        cardBg: settings.darkMode ? '#0F1E22' : '#F4FBF9',
+        cardBorder: settings.darkMode
+          ? 'rgba(45, 212, 191, 0.18)'
+          : 'rgba(15, 118, 110, 0.14)',
+        bgImage: settings.darkMode
+          ? require('../../assets/images/tile-reports-dark.jpg')
+          : require('../../assets/images/tile-reports-light.jpg'),
+        accentBarColor: settings.darkMode ? '#2DD4BF' : '#0F766E',
         accessibilityLabel: isUrdu ? 'رپورٹس اور منافع' : 'Profit and reports',
         onPress: () => setIsReportsOpen(true),
       },
@@ -199,24 +233,24 @@ export const DashboardScreen: React.FC = () => {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
-        {/* 1. Read-Only Today's Sales KPI Info Banner (calm airy header card, ~140px height) */}
+        {/* 1. Read-Only Today's Sales KPI Info Banner (~140px balanced height with clean light/dark bg art) */}
         <View
           style={[
             styles.salesInfoCard,
             { backgroundColor: infoCardBg, borderColor: infoCardBorder },
           ]}>
-          {/* Subtle decorative corner glow (non-interactive architectural polish) */}
-          <View
-            pointerEvents="none"
-            style={[
-              styles.infoCardGlowCircle,
-              {
-                backgroundColor: settings.darkMode
-                  ? 'rgba(16, 185, 129, 0.08)'
-                  : 'rgba(16, 185, 129, 0.09)',
-              },
-            ]}
+          <Image
+            source={
+              settings.darkMode
+                ? require('../../assets/images/hero-billing-bg.jpg')
+                : require('../../assets/images/top-sales-info-light.jpg')
+            }
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
           />
+          {settings.darkMode ? (
+            <View pointerEvents="none" style={styles.infoDarkScrim} />
+          ) : null}
 
           <View style={styles.heroTopRow}>
             <View style={styles.heroLabelGroup}>
@@ -235,11 +269,11 @@ export const DashboardScreen: React.FC = () => {
                 styles.heroBillsPill,
                 {
                   backgroundColor: settings.darkMode
-                    ? 'rgba(16, 185, 129, 0.14)'
-                    : '#ECFDF5',
+                    ? 'rgba(16, 185, 129, 0.16)'
+                    : 'rgba(255, 255, 255, 0.86)',
                   borderColor: settings.darkMode
-                    ? 'rgba(52, 211, 153, 0.25)'
-                    : 'rgba(5, 150, 105, 0.18)',
+                    ? 'rgba(52, 211, 153, 0.28)'
+                    : 'rgba(5, 150, 105, 0.24)',
                 },
               ]}>
               <Text
@@ -282,8 +316,8 @@ export const DashboardScreen: React.FC = () => {
               styles.infoDivider,
               {
                 backgroundColor: settings.darkMode
-                  ? 'rgba(255, 255, 255, 0.08)'
-                  : 'rgba(5, 150, 105, 0.12)',
+                  ? 'rgba(52, 211, 153, 0.16)'
+                  : 'rgba(6, 78, 59, 0.14)',
               },
             ]}
           />
@@ -291,7 +325,11 @@ export const DashboardScreen: React.FC = () => {
           {/* Compact Cash / Udhaar / Profit summary strip to preserve balanced height */}
           <View style={styles.infoMetricsRow}>
             <View style={styles.infoMetricItem}>
-              <Text style={[styles.infoMetricLabel, { color: theme.textMuted }]}>
+              <Text
+                style={[
+                  styles.infoMetricLabel,
+                  { color: settings.darkMode ? theme.textMuted : '#1E4638' },
+                ]}>
                 {isUrdu ? 'نقد وصول' : 'Cash'}
               </Text>
               <Text style={[styles.infoMetricValue, { color: theme.text }]} numberOfLines={1}>
@@ -299,10 +337,23 @@ export const DashboardScreen: React.FC = () => {
               </Text>
             </View>
 
-            <View style={[styles.infoMetricSep, { backgroundColor: softBorder }]} />
+            <View
+              style={[
+                styles.infoMetricSep,
+                {
+                  backgroundColor: settings.darkMode
+                    ? softBorder
+                    : 'rgba(6, 78, 59, 0.14)',
+                },
+              ]}
+            />
 
             <View style={styles.infoMetricItem}>
-              <Text style={[styles.infoMetricLabel, { color: theme.textMuted }]}>
+              <Text
+                style={[
+                  styles.infoMetricLabel,
+                  { color: settings.darkMode ? theme.textMuted : '#1E4638' },
+                ]}>
                 {isUrdu ? 'ادھار' : 'On Udhaar'}
               </Text>
               <Text
@@ -315,10 +366,23 @@ export const DashboardScreen: React.FC = () => {
               </Text>
             </View>
 
-            <View style={[styles.infoMetricSep, { backgroundColor: softBorder }]} />
+            <View
+              style={[
+                styles.infoMetricSep,
+                {
+                  backgroundColor: settings.darkMode
+                    ? softBorder
+                    : 'rgba(6, 78, 59, 0.14)',
+                },
+              ]}
+            />
 
             <View style={styles.infoMetricItem}>
-              <Text style={[styles.infoMetricLabel, { color: theme.textMuted }]}>
+              <Text
+                style={[
+                  styles.infoMetricLabel,
+                  { color: settings.darkMode ? theme.textMuted : '#1E4638' },
+                ]}>
                 {isUrdu ? 'منافع' : 'Profit'}
               </Text>
               <Text
@@ -433,7 +497,7 @@ export const DashboardScreen: React.FC = () => {
           </Pressable>
         </View>
 
-        {/* 3. Clean 3-Card Horizontal Quick Action Row */}
+        {/* 3. Architectural 3-Card Secondary Row (#3 Items -> #4 All Bills -> #5 Reports) */}
         <View style={styles.quickRow3}>
           {quickTiles.map((tile) => (
             <Pressable
@@ -443,20 +507,57 @@ export const DashboardScreen: React.FC = () => {
               accessibilityLabel={tile.accessibilityLabel}
               style={({ pressed }) => [
                 styles.quickRow3Card,
-                { backgroundColor: theme.card, borderColor: softBorder },
+                { backgroundColor: tile.cardBg, borderColor: tile.cardBorder },
                 pressed && styles.cardPressed,
               ]}>
-              <View style={[styles.quickRow3IconBox, { backgroundColor: tile.iconBg }]}>
-                <Ionicons name={tile.icon} size={20} color={tile.iconColor} />
+              <Image
+                source={tile.bgImage}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+                transition={180}
+              />
+
+              <View style={styles.quickRow3Top}>
+                <View style={[styles.quickRow3IconBox, { backgroundColor: tile.iconBg }]}>
+                  <Ionicons name={tile.icon} size={15} color={tile.iconColor} />
+                </View>
+
+                {tile.alertBadge ? (
+                  <View
+                    style={[
+                      styles.quickRow3AlertPill,
+                      {
+                        backgroundColor: settings.darkMode
+                          ? 'rgba(251, 191, 36, 0.22)'
+                          : '#FEF3C7',
+                      },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.quickRow3AlertText,
+                        { color: settings.darkMode ? '#FBBF24' : '#B45309' },
+                      ]}>
+                      {tile.alertBadge}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
-              <Text style={[styles.quickRow3Title, { color: theme.text }]} numberOfLines={1}>
-                {tile.title}
-              </Text>
-              <Text
-                style={[styles.quickRow3Sub, { color: tile.subtitleColor }]}
-                numberOfLines={1}>
-                {tile.subtitle}
-              </Text>
+
+              <View style={styles.quickRow3Copy}>
+                <Text style={[styles.quickRow3Title, { color: theme.text }]} numberOfLines={1}>
+                  {tile.title}
+                </Text>
+                <Text
+                  style={[styles.quickRow3Sub, { color: tile.subtitleColor }]}
+                  numberOfLines={1}>
+                  {tile.subtitle}
+                </Text>
+              </View>
+
+              <View
+                pointerEvents="none"
+                style={[styles.quickRow3AccentBar, { backgroundColor: tile.accentBarColor }]}
+              />
             </Pressable>
           ))}
         </View>
@@ -499,6 +600,47 @@ export const DashboardScreen: React.FC = () => {
           </View>
 
           <ScrollView contentContainerStyle={styles.reportsModalContent}>
+            <HeroStatsCard
+              bgImage={
+                settings.darkMode
+                  ? require('../../assets/images/tile-reports-dark.jpg')
+                  : require('../../assets/images/tile-reports-light.jpg')
+              }
+              isDark={settings.darkMode}
+              fallbackBg={settings.darkMode ? '#0A2E2A' : '#F0FDFA'}
+              borderColor={
+                settings.darkMode
+                  ? 'rgba(45,212,191,0.3)'
+                  : 'rgba(13,148,136,0.22)'
+              }
+              dotColor={settings.darkMode ? '#2DD4BF' : '#0F766E'}
+              eyebrow={isUrdu ? 'کاروباری خلاصہ' : 'BUSINESS REPORT'}
+              eyebrowColor={settings.darkMode ? '#5EEAD4' : '#0F766E'}
+              pillText={`${sales.filter((s) => s.status !== 'refunded' && s.status !== 'cancelled').length} ${isUrdu ? 'بلز' : 'bills'}`}
+              currencySymbol={settings.currencySymbol}
+              currencyColor={settings.darkMode ? '#2DD4BF' : '#0F766E'}
+              heroValue={totalLifetimeEarnings.toLocaleString()}
+              metrics={[
+                {
+                  label: isUrdu ? 'کل منافع' : 'Profit',
+                  value: `${settings.currencySymbol}${formatCompactPrice(totalLifetimeProfit)}`,
+                  valueColor: settings.darkMode ? '#34D399' : '#047857',
+                },
+                {
+                  label: isUrdu ? 'مارجن' : 'Margin',
+                  value: `${
+                    totalLifetimeEarnings > 0
+                      ? ((totalLifetimeProfit / totalLifetimeEarnings) * 100).toFixed(1)
+                      : '0.0'
+                  }%`,
+                },
+                {
+                  label: isUrdu ? 'اسٹاک مالیت' : 'Stock Val',
+                  value: `${settings.currencySymbol}${formatCompactPrice(totalInventoryRetailValue)}`,
+                },
+              ]}
+            />
+
             <SalesChart sales={sales} />
 
             <View style={[styles.financeCard, { backgroundColor: theme.card, borderColor: softBorder }]}>
@@ -610,13 +752,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
   },
-  infoCardGlowCircle: {
-    position: 'absolute',
-    right: -28,
-    top: -36,
-    width: 136,
-    height: 136,
-    borderRadius: 68,
+  infoDarkScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(6, 44, 38, 0.38)',
   },
   heroTopRow: {
     flexDirection: 'row',
@@ -803,30 +941,51 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
 
-  // 3. Clean 3-Card Horizontal Quick Action Row
+  // 3. Architectural 3-Card Secondary Row (#3 Items -> #4 All Bills -> #5 Reports)
   quickRow3: {
     flexDirection: 'row',
     gap: 10,
   },
   quickRow3Card: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderRadius: 18,
+    justifyContent: 'space-between',
+    gap: 10,
+    borderRadius: 19,
     borderCurve: 'continuous',
     borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 13,
-    minHeight: 96,
+    paddingHorizontal: 11,
+    paddingTop: 11,
+    paddingBottom: 11,
+    minHeight: 112,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  quickRow3Top: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: 5,
   },
   quickRow3IconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 9,
     borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  quickRow3AlertPill: {
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 7,
+  },
+  quickRow3AlertText: {
+    fontSize: 10,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  quickRow3Copy: {
+    gap: 1.5,
   },
   quickRow3Title: {
     fontSize: 13.5,
@@ -837,6 +996,12 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
+  },
+  quickRow3AccentBar: {
+    width: 22,
+    height: 2.5,
+    borderRadius: 2,
+    opacity: 0.75,
   },
 
   modalRoot: {

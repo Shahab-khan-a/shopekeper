@@ -14,8 +14,9 @@ import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SubScreenHeader } from '@/components/SubScreenHeader';
+import { HeroStatsCard } from '@/components/HeroStatsCard';
 import { formatCompactPrice } from '@/utils/formatters';
-import { openWhatsAppReceipt, openWhatsAppWithMessage } from '@/utils/whatsapp';
+import { openWhatsAppWithMessage } from '@/utils/whatsapp';
 import { getPaymentBreakdown } from '@/utils/payment';
 
 type HistoryFilter = 'all' | 'today' | 'week' | 'month' | 'custom';
@@ -33,24 +34,24 @@ export const HistoryScreen: React.FC = () => {
   const {
     sales,
     khata,
-    refundSale,
     setActiveReceipt,
     setActiveTab,
     settings,
     t,
     language,
-    showAlert,
   } = useShop();
   const theme = settings.darkMode ? Colors.dark : Colors.light;
+  const isDark = settings.darkMode;
+  const accentBlue = isDark ? '#38BDF8' : '#0284C7';
+  const softBlueBg = isDark ? 'rgba(56,189,248,0.16)' : '#EFF6FF';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<HistoryFilter>('all');
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
   const [customDate, setCustomDate] = useState<Date>(new Date());
-  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
-  const softBorder = settings.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(148,163,184,0.18)';
-  const cardBg = settings.darkMode ? theme.card : '#FFFFFF';
+  const softBorder = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(148,163,184,0.28)';
+  const cardBg = isDark ? theme.card : '#FFFFFF';
   const isUrdu = language === 'ur';
 
   const [isDateMenuOpen, setIsDateMenuOpen] = useState(false);
@@ -170,16 +171,16 @@ export const HistoryScreen: React.FC = () => {
       case 'week':
         return {
           label: t('filterWeek'),
-          pillBg: settings.darkMode ? 'rgba(16, 185, 129, 0.16)' : '#ECFDF5',
-          pillBorder: settings.darkMode ? 'rgba(16, 185, 129, 0.35)' : '#A7F3D0',
-          textColor: theme.primary,
+          pillBg: softBlueBg,
+          pillBorder: isDark ? 'rgba(56, 189, 248, 0.35)' : '#BAE6FD',
+          textColor: accentBlue,
         };
       case 'month':
         return {
           label: t('filterMonth'),
-          pillBg: settings.darkMode ? 'rgba(16, 185, 129, 0.16)' : '#ECFDF5',
-          pillBorder: settings.darkMode ? 'rgba(16, 185, 129, 0.35)' : '#A7F3D0',
-          textColor: theme.primary,
+          pillBg: softBlueBg,
+          pillBorder: isDark ? 'rgba(56, 189, 248, 0.35)' : '#BAE6FD',
+          textColor: accentBlue,
         };
       case 'custom':
         return {
@@ -302,18 +303,34 @@ export const HistoryScreen: React.FC = () => {
     return dateFilteredSales.filter((s) => s.paymentMethod === paymentFilter);
   }, [dateFilteredSales, paymentFilter]);
 
-  const { filterRevenue, filterProfit, completedCount, marginPct } = useMemo(() => {
+  const {
+    filterRevenue,
+    filterProfit,
+    completedCount,
+    marginPct,
+    filterCashTotal,
+    filterUdhaarTotal,
+  } = useMemo(() => {
     const activeSales = filteredSales.filter(
       (s) => s.status !== 'refunded' && s.status !== 'cancelled'
     );
     const rev = activeSales.reduce((sum, s) => sum + s.grandTotal, 0);
     const prof = activeSales.reduce((sum, s) => sum + (s.totalProfit || 0), 0);
+    let cashTotal = 0;
+    let udhaarTotal = 0;
+    activeSales.forEach((s) => {
+      const breakdown = getPaymentBreakdown(s);
+      cashTotal += breakdown.cleanPaid;
+      udhaarTotal += breakdown.baki;
+    });
     const margin = rev > 0 ? ((prof / rev) * 100).toFixed(1) : '0.0';
     return {
       filterRevenue: rev,
       filterProfit: prof,
       completedCount: activeSales.length,
       marginPct: margin,
+      filterCashTotal: cashTotal,
+      filterUdhaarTotal: udhaarTotal,
     };
   }, [filteredSales]);
 
@@ -332,32 +349,6 @@ export const HistoryScreen: React.FC = () => {
       );
     }
     return undefined;
-  };
-
-  const handleRefundSale = (sale: Sale) => {
-    const isUrdu = language === 'ur';
-    showAlert({
-      type: 'danger',
-      title: isUrdu ? 'بل واپس / منسوخ کریں؟' : 'Refund / Void Bill?',
-      message: isUrdu
-        ? `کیا آپ واقعی بل #${sale.billNumber} واپس کرنا چاہتے ہیں؟ اس سے اشیاء واپس اسٹاک میں شامل ہو جائیں گی اور ادھار بھی ختم ہو جائے گا۔`
-        : `Are you sure you want to refund Bill #${sale.billNumber}? Sold items will be restored to inventory and customer debt will be reversed.`,
-      buttons: [
-        {
-          text: isUrdu ? 'واپس کریں (Refund)' : 'Refund & Restore',
-          style: 'destructive',
-          icon: 'arrow-undo-outline',
-          onPress: async () => {
-            await refundSale(sale.id, 'Voided from History');
-          },
-        },
-        { text: t('cancel'), style: 'cancel' },
-      ],
-    });
-  };
-
-  const shareWhatsApp = (sale: Sale) => {
-    openWhatsAppReceipt(sale, settings, language);
   };
 
   const sendUdhaarReminder = (sale: Sale) => {
@@ -456,11 +447,6 @@ export const HistoryScreen: React.FC = () => {
     return saleDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
-  const performanceLabel =
-    filter === 'today' || (filter === 'custom' && isSameDay(customDate, new Date()))
-      ? t('todaysPerformance')
-      : t('filterPerformance');
-
   const dateFilterOptions: { key: HistoryFilter; label: string; icon?: keyof typeof Ionicons.glyphMap }[] = [
     { key: 'today', label: t('filterToday') },
     { key: 'week', label: t('filterWeek') },
@@ -475,10 +461,6 @@ export const HistoryScreen: React.FC = () => {
     { key: 'online', label: t('modeOnline'), count: paymentCounts.online },
     { key: 'udhaar', label: t('modeUdhaar'), count: paymentCounts.udhaar },
   ];
-
-  const toggleExpand = (id: string) => {
-    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   const isAnyMenuMounted = isDateMenuMounted || isModeMenuMounted;
 
@@ -674,11 +656,6 @@ export const HistoryScreen: React.FC = () => {
             </View>
           </View>
         </View>
-        <Text style={[styles.screenSubtitle, { color: theme.textMuted }]}>
-          {performanceLabel}
-          {'  ·  '}
-          +{marginPct}% {t('marginLabel')}
-        </Text>
 
         <SearchBar
           value={searchQuery}
@@ -686,51 +663,70 @@ export const HistoryScreen: React.FC = () => {
           placeholder={t('searchHistoryPlaceholder')}
           height={42}
         />
-
-        <View style={styles.metricRow}>
-          <View
-            style={[
-              styles.metricCard,
-              { backgroundColor: theme.card, borderColor: softBorder },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
-              {t('totalBillsLabel')}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]}>{completedCount}</Text>
-          </View>
-          <View
-            style={[
-              styles.metricCard,
-              { backgroundColor: theme.card, borderColor: softBorder },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
-              {t('grossSales')}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.text }]} numberOfLines={1}>
-              {settings.currencySymbol}
-              {formatCompactPrice(filterRevenue)}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.metricCard,
-              { backgroundColor: theme.card, borderColor: softBorder },
-            ]}>
-            <Text style={[styles.metricLabel, { color: theme.primary }]}>
-              {t('netProfitLabel')}
-            </Text>
-            <Text style={[styles.metricValue, { color: theme.primary }]} numberOfLines={1}>
-              {settings.currencySymbol}
-              {formatCompactPrice(filterProfit)}
-            </Text>
-          </View>
-        </View>
       </View>
 
       <ScrollView
         style={styles.contentScroll}
         contentContainerStyle={styles.contentWrap}
         showsVerticalScrollIndicator={false}>
+        <View style={{ marginBottom: 12 }}>
+          <HeroStatsCard
+            bgImage={
+              isDark
+                ? require('../../assets/images/tile-bills-dark.jpg')
+                : require('../../assets/images/tile-bills-light.jpg')
+            }
+            isDark={isDark}
+            fallbackBg={isDark ? '#1A1C46' : '#EEF2FF'}
+            borderColor={isDark ? 'rgba(129,140,248,0.3)' : 'rgba(79,70,229,0.2)'}
+            dotColor={isDark ? '#818CF8' : '#4F46E5'}
+            eyebrow={
+              filter === 'today'
+                ? language === 'ur'
+                  ? 'آج کی فروخت'
+                  : "TODAY'S BILLS"
+                : filter === 'week'
+                  ? language === 'ur'
+                    ? 'اس ہفتے کی فروخت'
+                    : 'THIS WEEK BILLS'
+                  : filter === 'month'
+                    ? language === 'ur'
+                      ? 'اس مہینے کی فروخت'
+                      : 'THIS MONTH BILLS'
+                    : filter === 'custom'
+                      ? formatDayChip(customDate).toUpperCase()
+                      : language === 'ur'
+                        ? 'کل بلز خلاصہ'
+                        : 'ALL BILLS SUMMARY'
+            }
+            eyebrowColor={isDark ? '#A5B4FC' : '#4338CA'}
+            pillText={`${completedCount} ${language === 'ur' ? 'بل' : completedCount === 1 ? 'bill' : 'bills'}`}
+            currencySymbol={settings.currencySymbol}
+            currencyColor={isDark ? '#818CF8' : '#4F46E5'}
+            heroValue={filterRevenue.toLocaleString()}
+            metrics={[
+              {
+                label: language === 'ur' ? 'نقد وصول' : 'Received',
+                value: `${settings.currencySymbol}${formatCompactPrice(filterCashTotal)}`,
+              },
+              {
+                label: language === 'ur' ? 'ادھار' : 'On Udhaar',
+                value: `${settings.currencySymbol}${formatCompactPrice(filterUdhaarTotal)}`,
+                valueColor:
+                  filterUdhaarTotal > 0
+                    ? isDark
+                      ? '#FCA5A5'
+                      : '#DC2626'
+                    : undefined,
+              },
+              {
+                label: language === 'ur' ? 'خالص منافع' : 'Profit',
+                value: `${settings.currencySymbol}${formatCompactPrice(filterProfit)}`,
+                valueColor: isDark ? '#34D399' : '#047857',
+              },
+            ]}
+          />
+        </View>
         {filter === 'custom' ? (
           <View style={styles.customDateBlock}>
             <Text style={[styles.customDateHint, { color: theme.textMuted }]}>
@@ -749,8 +745,8 @@ export const HistoryScreen: React.FC = () => {
                     style={[
                       styles.dayChip,
                       {
-                        backgroundColor: active ? theme.primary : cardBg,
-                        borderColor: active ? theme.primary : softBorder,
+                        backgroundColor: active ? '#0284C7' : cardBg,
+                        borderColor: active ? '#0284C7' : softBorder,
                       },
                     ]}>
                     <Text
@@ -799,173 +795,163 @@ export const HistoryScreen: React.FC = () => {
               const pay = getPayMeta(sale.paymentMethod, sale);
               const isRefunded = sale.status === 'refunded';
               const isUdhaar = sale.paymentMethod === 'udhaar';
-              const isExpanded = !!expandedCards[sale.id];
-              const visibleItems = isExpanded ? sale.items : sale.items.slice(0, 3);
-              const hasMore = sale.items.length > 3;
-              const customer = isUdhaar ? findCustomerDebt(sale) : undefined;
-              const debtTotal = customer?.totalDebt;
+              const { cleanPaid, baki } = getPaymentBreakdown(sale);
+
+              const itemSummaryText = sale.items
+                .slice(0, 2)
+                .map((it) => `${it.product.name} ×${it.quantity}`)
+                .join(', ') +
+                (sale.items.length > 2 ? ` +${sale.items.length - 2}` : '');
+
+              const itemCount = sale.items.reduce((sum, it) => sum + (it.quantity || 1), 0);
 
               const amountColor = isRefunded
                 ? theme.textMuted
-                : isUdhaar
+                : isUdhaar && baki > 0
                   ? theme.danger
                   : theme.text;
 
+              const statusBadge = isRefunded
+                ? {
+                    bg: isDark ? 'rgba(148,163,184,0.16)' : '#F1F5F9',
+                    text: theme.textMuted,
+                    label: isUrdu ? 'واپس' : 'Refunded',
+                  }
+                : isUdhaar && baki > 0
+                  ? {
+                      bg: isDark ? 'rgba(239,68,68,0.18)' : '#FEE2E2',
+                      text: theme.danger,
+                      label:
+                        cleanPaid > 0
+                          ? isUrdu
+                            ? `باقی ${settings.currencySymbol}${formatCompactPrice(baki)}`
+                            : `Due ${settings.currencySymbol}${formatCompactPrice(baki)}`
+                          : isUrdu
+                            ? 'ادھار'
+                            : 'Udhaar',
+                    }
+                  : sale.paymentMethod === 'online'
+                    ? {
+                        bg: softBlueBg,
+                        text: accentBlue,
+                        label: isUrdu ? 'آن لائن' : 'Online',
+                      }
+                    : {
+                        bg: isDark ? 'rgba(16,185,129,0.16)' : '#ECFDF5',
+                        text: isDark ? '#34D399' : '#059669',
+                        label: isUrdu ? 'نقد' : 'Paid',
+                      };
+
               return (
-                <View
+                <Pressable
                   key={sale.id}
-                  style={[
+                  onPress={() => setActiveReceipt(sale)}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
                     styles.billCard,
                     {
                       backgroundColor: cardBg,
-                      borderColor: softBorder,
-                      opacity: isRefunded ? 0.72 : 1,
+                      borderColor:
+                        isUdhaar && !isRefunded && baki > 0
+                          ? isDark
+                            ? 'rgba(239,68,68,0.32)'
+                            : '#FECACA'
+                          : softBorder,
+                      opacity: isRefunded ? 0.68 : 1,
                     },
+                    pressed && { opacity: 0.88, transform: [{ scale: 0.992 }] },
                   ]}>
                   <View style={styles.billHeader}>
-                    <View style={[styles.payIconWrap, { backgroundColor: pay.iconBg }]}>
-                      <Ionicons name={pay.icon} size={18} color={pay.iconColor} />
+                    <View
+                      style={[
+                        styles.payIconWrap,
+                        {
+                          backgroundColor: isRefunded
+                            ? isDark
+                              ? 'rgba(148,163,184,0.16)'
+                              : '#F1F5F9'
+                            : pay.iconBg,
+                        },
+                      ]}>
+                      <Ionicons
+                        name={isRefunded ? 'return-down-back' : pay.icon}
+                        size={18}
+                        color={isRefunded ? theme.textMuted : pay.iconColor}
+                      />
                     </View>
+
                     <View style={styles.billHeaderMeta}>
                       <Text
                         style={[styles.billNo, { color: isRefunded ? theme.textMuted : theme.text }]}
                         numberOfLines={1}>
-                        {sale.customerName || t('walkInCustomer')}
+                        {sale.customerName || (isUrdu ? 'کاؤنٹر بل' : 'Counter Sale')}
                       </Text>
                       <Text style={[styles.billMeta, { color: theme.textMuted }]} numberOfLines={1}>
-                        #{sale.billNumber.startsWith('INV') ? sale.billNumber : `INV-${sale.billNumber}`}
-                        {'  ·  '}
-                        {isRefunded
-                          ? language === 'ur'
-                            ? 'واپس شدہ'
-                            : 'Refunded'
-                          : pay.label}
-                        {'  ·  '}
                         {formatSaleTime(sale.date)}
+                        {'  ·  '}
+                        {itemCount} {isUrdu ? 'اشیاء' : itemCount === 1 ? 'item' : 'items'}
+                        {'  ·  '}#
+                        {sale.billNumber.startsWith('INV') ? sale.billNumber : `INV-${sale.billNumber}`}
                       </Text>
                     </View>
-                    <Text
-                      style={[
-                        styles.totalAmount,
-                        { color: amountColor },
-                        isRefunded && { textDecorationLine: 'line-through' },
-                      ]}
-                      numberOfLines={1}>
-                      {settings.currencySymbol}
-                      {sale.grandTotal.toLocaleString()}
-                    </Text>
-                  </View>
 
-                  <View style={styles.itemsList}>
-                    {visibleItems.map((it, idx) => (
-                      <View key={`${sale.id}-${idx}`} style={styles.itemRow}>
-                        <Text style={[styles.itemName, { color: theme.text }]} numberOfLines={1}>
-                          {it.product.name}
-                        </Text>
-                        <Text style={[styles.itemQty, { color: theme.textMuted }]}>
-                          ×{it.quantity}
-                        </Text>
-                        <Text style={[styles.itemTotal, { color: theme.textMuted }]}>
-                          {settings.currencySymbol}
-                          {it.total.toLocaleString()}
+                    <View style={styles.billRightCol}>
+                      <Text
+                        style={[
+                          styles.totalAmount,
+                          { color: amountColor },
+                          isRefunded && { textDecorationLine: 'line-through' },
+                        ]}
+                        numberOfLines={1}>
+                        {settings.currencySymbol}
+                        {formatCompactPrice(sale.grandTotal)}
+                      </Text>
+                      <View style={[styles.statusPill, { backgroundColor: statusBadge.bg }]}>
+                        <Text style={[styles.statusPillText, { color: statusBadge.text }]}>
+                          {statusBadge.label}
                         </Text>
                       </View>
-                    ))}
-                    {hasMore ? (
-                      <Pressable
-                        onPress={() => toggleExpand(sale.id)}
-                        hitSlop={8}
-                        style={({ pressed }) => [pressed && { opacity: 0.7 }]}>
-                        <Text style={[styles.moreItems, { color: theme.primary }]}>
-                          {isExpanded
-                            ? language === 'ur'
-                              ? 'کم دکھائیں'
-                              : 'Show less'
-                            : `+${sale.items.length - 3} ${t('itemsCount')}`}
-                        </Text>
-                      </Pressable>
-                    ) : null}
-                    {isUdhaar && !isRefunded ? (() => {
-                      const { cleanPaid, baki } = getPaymentBreakdown(sale);
-                      return (
-                        <View style={{ marginTop: 4 }}>
-                          {cleanPaid > 0 ? (
-                            <Text style={{ fontSize: 11, fontWeight: '700', color: '#059669', marginBottom: 2 }}>
-                              {language === 'ur' ? 'نقد وصول:' : 'Cash Paid:'} {settings.currencySymbol}
-                              {cleanPaid.toLocaleString()}
-                            </Text>
-                          ) : null}
-                          {baki > 0 ? (
-                            <Text style={[styles.debtNoteText, { color: theme.danger }]}>
-                              {t('addedToKhata')} {settings.currencySymbol}
-                              {baki.toLocaleString()}
-                            </Text>
-                          ) : null}
-                        </View>
-                      );
-                    })() : null}
+                    </View>
                   </View>
 
-                  <View style={styles.billActions}>
-                    <Pressable
-                      onPress={() => setActiveReceipt(sale)}
-                      style={({ pressed }) => [
-                        styles.softActionBtn,
-                        { backgroundColor: theme.primaryLight, flex: 1 },
-                        pressed && { opacity: 0.85 },
-                      ]}>
-                      <Ionicons name="receipt-outline" size={15} color={theme.primary} />
-                      <Text style={[styles.softActionText, { color: theme.primary }]}>
-                        {t('viewShort')}
+                  {(itemSummaryText || (isUdhaar && !isRefunded && baki > 0)) ? (
+                    <View style={[styles.billFooterLine, { borderTopColor: softBorder }]}>
+                      <Text
+                        style={[styles.itemsPreviewText, { color: theme.textMuted }]}
+                        numberOfLines={1}>
+                        {itemSummaryText}
                       </Text>
-                    </Pressable>
 
-                    {isUdhaar && !isRefunded ? (
-                      <Pressable
-                        onPress={() => sendUdhaarReminder(sale)}
-                        style={({ pressed }) => [
-                          styles.softActionBtn,
-                          { backgroundColor: theme.dangerLight, flex: 1 },
-                          pressed && { opacity: 0.85 },
-                        ]}>
-                        <Ionicons name="notifications-outline" size={15} color={theme.danger} />
-                        <Text style={[styles.softActionText, { color: theme.danger }]}>
-                          {language === 'ur' ? 'یاد دہانی' : 'Remind'}
-                        </Text>
-                      </Pressable>
-                    ) : null}
-
-                    {!isUdhaar && !isRefunded && Boolean(sale.customerPhone?.trim()) ? (
-                      <Pressable
-                        onPress={() => shareWhatsApp(sale)}
-                        style={({ pressed }) => [
-                          styles.softActionBtn,
-                          { backgroundColor: theme.heroFill, flex: 1 },
-                          pressed && { opacity: 0.88 },
-                        ]}>
-                        <Ionicons name="logo-whatsapp" size={15} color="#FFFFFF" />
-                        <Text style={[styles.softActionText, { color: '#FFFFFF' }]}>
-                          {t('whatsapp')}
-                        </Text>
-                      </Pressable>
-                    ) : null}
-
-                    {!isRefunded ? (
-                      <Pressable
-                        onPress={() => handleRefundSale(sale)}
-                        style={({ pressed }) => [
-                          styles.softActionBtn,
-                          { backgroundColor: theme.dangerLight, flex: 1 },
-                          pressed && { opacity: 0.85 },
-                        ]}>
-                        <Ionicons name="return-down-back" size={15} color={theme.danger} />
-                        <Text style={[styles.softActionText, { color: theme.danger }]}>
-                          {language === 'ur' ? 'واپس' : 'Refund'}
-                        </Text>
-                      </Pressable>
-                    ) : null}
-                  </View>
-                </View>
+                      {isUdhaar && !isRefunded && baki > 0 ? (
+                        <Pressable
+                          onPress={(e) => {
+                            e.stopPropagation?.();
+                            sendUdhaarReminder(sale);
+                          }}
+                          hitSlop={6}
+                          style={({ pressed }) => [
+                            styles.remindInlineBtn,
+                            {
+                              backgroundColor: isDark
+                                ? 'rgba(239,68,68,0.18)'
+                                : '#FEE2E2',
+                              borderColor: isDark
+                                ? 'rgba(239,68,68,0.4)'
+                                : '#FCA5A5',
+                            },
+                            pressed && { opacity: 0.78, transform: [{ scale: 0.97 }] },
+                          ]}>
+                          <Ionicons name="logo-whatsapp" size={15} color={theme.danger} />
+                          <Text style={[styles.remindInlineText, { color: theme.danger }]}>
+                            {isUrdu ? 'یاد دہانی بھیجیں' : 'Remind'}
+                          </Text>
+                        </Pressable>
+                      ) : (
+                        <Ionicons name="chevron-forward" size={14} color={theme.textMuted} />
+                      )}
+                    </View>
+                  ) : null}
+                </Pressable>
               );
             })}
           </View>
@@ -1161,24 +1147,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  billsList: { gap: 10 },
+  billsList: { gap: 9 },
   billCard: {
-    borderRadius: 20,
+    borderRadius: 18,
     borderCurve: 'continuous',
     borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 9,
   },
   billHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 11,
   },
   payIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 15,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1191,11 +1177,15 @@ const styles = StyleSheet.create({
   billNo: {
     fontSize: 15,
     fontWeight: '700',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
   billMeta: {
     fontSize: 12,
     fontWeight: '500',
+  },
+  billRightCol: {
+    alignItems: 'flex-end',
+    gap: 4,
   },
   totalAmount: {
     fontSize: 16,
@@ -1203,57 +1193,42 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
     fontVariant: ['tabular-nums'],
   },
-  itemsList: {
-    gap: 6,
-    paddingLeft: 56,
+  statusPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
   },
-  itemRow: {
+  statusPillText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+  billFooterLine: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
+    borderTopWidth: 1,
+    paddingTop: 8,
   },
-  itemName: {
+  itemsPreviewText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '500',
     minWidth: 0,
   },
-  itemQty: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  itemTotal: {
-    fontSize: 13,
-    fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
-  moreItems: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  debtNoteText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  billActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  softActionBtn: {
+  remindInlineBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
-    minHeight: 40,
-    paddingHorizontal: 10,
+    gap: 6,
+    minHeight: 38,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 12,
-    borderCurve: 'continuous',
+    borderWidth: 1,
   },
-  softActionText: {
+  remindInlineText: {
     fontSize: 13,
     fontWeight: '700',
   },
-
 });

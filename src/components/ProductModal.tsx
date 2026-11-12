@@ -57,6 +57,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
+  const [isPhotoMenuOpen, setIsPhotoMenuOpen] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -103,6 +104,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     setShowMoreDetails(false);
     setIsSubmitting(false);
     setIsCameraOpen(false);
+    setIsPhotoMenuOpen(false);
     setIsUploadingToDrive(false);
   };
 
@@ -257,6 +259,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   };
 
   const handleRequestClose = () => {
+    if (isPhotoMenuOpen) {
+      setIsPhotoMenuOpen(false);
+      return;
+    }
     if (isBarcodeScannerOpen) {
       setIsBarcodeScannerOpen(false);
       return;
@@ -342,31 +348,174 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               ]}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="interactive"
+              onScrollBeginDrag={() => setIsPhotoMenuOpen(false)}
               showsVerticalScrollIndicator={false}>
-              {/* 1. Core Essential: Item Name */}
-              <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>
-                  {isUrdu ? 'آئٹم کا نام *' : 'Item Name *'}
-                </Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      backgroundColor: inputBg,
-                      color: theme.text,
-                      borderColor: focusedField === 'name' ? theme.primary : softBorder,
-                    },
-                  ]}
-                  placeholder={isUrdu ? 'مثلاً چینی، گھی، چاول' : 'e.g. Sugar, Oil, Rice'}
-                  placeholderTextColor={theme.textMuted}
-                  value={name}
-                  onChangeText={setName}
-                  autoFocus={!productToEdit || !productToEdit.name}
-                  onFocus={() => setFocusedField('name')}
-                  onBlur={() => setFocusedField(null)}
-                  returnKeyType="next"
-                  onSubmitEditing={() => priceInputRef.current?.focus()}
-                />
+              {/* 1. Core Essential: Compact Image Preview Button + Item Name (baseline-aligned) */}
+              <View style={styles.namePhotoRow}>
+                <View style={styles.photoPickerAnchor}>
+                  <Pressable
+                    onPress={() => setIsPhotoMenuOpen((v) => !v)}
+                    accessibilityRole="button"
+                    accessibilityLabel={isUrdu ? 'آئٹم کی تصویر تبدیل کریں' : 'Set item photo'}
+                    style={({ pressed }) => [
+                      styles.photoPreviewBtn,
+                      pressed && { opacity: 0.86, transform: [{ scale: 0.96 }] },
+                    ]}>
+                    <View
+                      style={[
+                        styles.photoPreviewInner,
+                        {
+                          backgroundColor: settings.darkMode
+                            ? 'rgba(56, 189, 248, 0.1)'
+                            : '#EFF6FF',
+                          borderColor: image
+                            ? settings.darkMode
+                              ? '#38BDF8'
+                              : '#0284C7'
+                            : settings.darkMode
+                              ? 'rgba(56, 189, 248, 0.35)'
+                              : 'rgba(2, 132, 199, 0.3)',
+                          borderStyle: image ? 'solid' : 'dashed',
+                        },
+                      ]}>
+                      {image ? (
+                        <ProductImage uri={image} style={styles.photoImg} resizeMode="cover" />
+                      ) : (
+                        <Ionicons
+                          name="image-outline"
+                          size={26}
+                          color={settings.darkMode ? '#38BDF8' : '#0284C7'}
+                        />
+                      )}
+                      {isUploadingToDrive ? (
+                        <View style={styles.photoUploading}>
+                          <ActivityIndicator size="small" color="#FFFFFF" />
+                        </View>
+                      ) : null}
+                    </View>
+
+                    <View
+                      style={[
+                        styles.photoEditBadge,
+                        { borderColor: theme.surface },
+                      ]}>
+                      <Ionicons name="pencil" size={12} color="#FFFFFF" />
+                    </View>
+                  </Pressable>
+
+                  {isPhotoMenuOpen && (
+                    <View
+                      style={[
+                        styles.photoMiniPopover,
+                        {
+                          backgroundColor: settings.darkMode ? '#0F172A' : '#FFFFFF',
+                          borderColor: softBorder,
+                        },
+                      ]}>
+                      <Pressable
+                        onPress={() => {
+                          setIsPhotoMenuOpen(false);
+                          takePhoto();
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={isUrdu ? 'کیمرہ' : 'Camera'}
+                        style={({ pressed }) => [
+                          styles.photoPopoverItem,
+                          pressed && { opacity: 0.72 },
+                        ]}>
+                        <Ionicons
+                          name="camera"
+                          size={17}
+                          color={settings.darkMode ? '#38BDF8' : '#0284C7'}
+                        />
+                        <Text
+                          style={[styles.photoPopoverText, { color: theme.text }]}
+                          numberOfLines={1}>
+                          {isUrdu ? 'کیمرہ' : 'Camera'}
+                        </Text>
+                      </Pressable>
+
+                      <View style={[styles.photoPopoverSep, { backgroundColor: softBorder }]} />
+
+                      <Pressable
+                        onPress={() => {
+                          setIsPhotoMenuOpen(false);
+                          pickImage();
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={isUrdu ? 'گیلری' : 'Gallery'}
+                        style={({ pressed }) => [
+                          styles.photoPopoverItem,
+                          pressed && { opacity: 0.72 },
+                        ]}>
+                        <Ionicons
+                          name="images"
+                          size={17}
+                          color={settings.darkMode ? '#A5B4FC' : '#4F46E5'}
+                        />
+                        <Text
+                          style={[styles.photoPopoverText, { color: theme.text }]}
+                          numberOfLines={1}>
+                          {isUrdu ? 'گیلری' : 'Gallery'}
+                        </Text>
+                      </Pressable>
+
+                      {image ? (
+                        <>
+                          <View
+                            style={[styles.photoPopoverSep, { backgroundColor: softBorder }]}
+                          />
+                          <Pressable
+                            onPress={() => {
+                              setImage('');
+                              setIsPhotoMenuOpen(false);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={isUrdu ? 'تصویر ہٹائیں' : 'Remove photo'}
+                            style={({ pressed }) => [
+                              styles.photoPopoverItem,
+                              pressed && { opacity: 0.72 },
+                            ]}>
+                            <Ionicons name="trash-outline" size={17} color={theme.danger} />
+                            <Text
+                              style={[styles.photoPopoverText, { color: theme.danger }]}
+                              numberOfLines={1}>
+                              {isUrdu ? 'ہٹائیں' : 'Remove'}
+                            </Text>
+                          </Pressable>
+                        </>
+                      ) : null}
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.nameFieldWrap}>
+                  <Text style={[styles.label, { color: theme.text }]}>
+                    {isUrdu ? 'آئٹم کا نام *' : 'Item Name *'}
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: inputBg,
+                        color: theme.text,
+                        borderColor: focusedField === 'name' ? theme.primary : softBorder,
+                      },
+                    ]}
+                    placeholder={isUrdu ? 'مثلاً چینی، گھی، چاول' : 'e.g. Sugar, Oil, Rice'}
+                    placeholderTextColor={theme.textMuted}
+                    value={name}
+                    onChangeText={setName}
+                    autoFocus={!productToEdit || !productToEdit.name}
+                    onFocus={() => {
+                      setIsPhotoMenuOpen(false);
+                      setFocusedField('name');
+                    }}
+                    onBlur={() => setFocusedField(null)}
+                    returnKeyType="next"
+                    onSubmitEditing={() => priceInputRef.current?.focus()}
+                  />
+                </View>
               </View>
 
               {/* 2. Core Essential: Sale Price */}
@@ -393,7 +542,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     keyboardType="numeric"
                     value={price}
                     onChangeText={setPrice}
-                    onFocus={() => setFocusedField('price')}
+                    onFocus={() => {
+                      setIsPhotoMenuOpen(false);
+                      setFocusedField('price');
+                    }}
                     onBlur={() => setFocusedField(null)}
                     returnKeyType={showMoreDetails ? 'next' : 'done'}
                     onSubmitEditing={() => {
@@ -430,62 +582,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       ? 'کم تفصیلات دکھائیں'
                       : 'Hide extra details'
                     : isUrdu
-                      ? `مزید تفصیلات (اسٹاک: ${stock || '50'}, تصویر، بارکوڈ)`
-                      : `More details (Stock: ${stock || '50'}, Photo, Barcode)`}
+                      ? `مزید تفصیلات (اسٹاک: ${stock || '50'}, لاگت، بارکوڈ)`
+                      : `More details (Stock: ${stock || '50'}, Cost, Barcode)`}
                 </Text>
               </Pressable>
 
               {showMoreDetails && (
                 <View style={styles.moreSection}>
-                  {/* Photo */}
-                  <View style={styles.photoRow}>
-                    <View style={[styles.photoThumb, { backgroundColor: theme.surfaceSubtle, borderColor: softBorder }]}>
-                      {image ? (
-                        <ProductImage uri={image} style={styles.photoImg} resizeMode="cover" />
-                      ) : (
-                        <Ionicons name="image-outline" size={22} color={theme.textMuted} />
-                      )}
-                      {isUploadingToDrive ? (
-                        <View style={styles.photoUploading}>
-                          <ActivityIndicator size="small" color="#FFFFFF" />
-                        </View>
-                      ) : null}
-                    </View>
-                    <View style={styles.photoActions}>
-                      <Pressable
-                        onPress={takePhoto}
-                        style={({ pressed }) => [
-                          styles.photoBtn,
-                          { backgroundColor: theme.primaryLight },
-                          pressed && { opacity: 0.85 },
-                        ]}>
-                        <Ionicons name="camera" size={15} color={theme.primary} />
-                        <Text style={[styles.photoBtnText, { color: theme.primaryDark }]}>
-                          {isUrdu ? 'کیمرہ' : 'Camera'}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={pickImage}
-                        style={({ pressed }) => [
-                          styles.photoBtn,
-                          { backgroundColor: theme.surfaceSubtle, borderColor: softBorder, borderWidth: 1 },
-                          pressed && { opacity: 0.85 },
-                        ]}>
-                        <Ionicons name="images-outline" size={15} color={theme.textSecondary} />
-                        <Text style={[styles.photoBtnText, { color: theme.text }]}>
-                          {isUrdu ? 'گیلری' : 'Gallery'}
-                        </Text>
-                      </Pressable>
-                      {image ? (
-                        <Pressable onPress={() => setImage('')} hitSlop={8}>
-                          <Text style={{ color: theme.danger, fontSize: 12, fontWeight: '700' }}>
-                            {isUrdu ? 'ہٹائیں' : 'Remove'}
-                          </Text>
-                        </Pressable>
-                      ) : null}
-                    </View>
-                  </View>
-
                   {/* Stock + Cost Price */}
                   <View style={styles.twoCol}>
                     <View style={[styles.field, { flex: 1 }]}>
@@ -793,20 +896,45 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     gap: 12,
   },
-  photoRow: {
+  namePhotoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     gap: 12,
+    zIndex: 60,
+    elevation: 12,
+    overflow: 'visible',
   },
-  photoThumb: {
+  photoPickerAnchor: {
+    position: 'relative',
+    zIndex: 60,
+    overflow: 'visible',
+  },
+  photoPreviewBtn: {
     width: 64,
     height: 64,
-    borderRadius: 14,
+    position: 'relative',
+  },
+  photoPreviewInner: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
     borderCurve: 'continuous',
-    borderWidth: 1,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  photoEditBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#0284C7',
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   photoImg: {
     width: '100%',
@@ -818,24 +946,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  photoActions: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 8,
+  photoMiniPopover: {
+    position: 'absolute',
+    left: 72,
+    top: 0,
+    width: 156,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    padding: 4,
+    zIndex: 100,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    elevation: 14,
   },
-  photoBtn: {
+  photoPopoverItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 10,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    height: 40,
     borderRadius: 10,
   },
-  photoBtnText: {
-    fontSize: 12,
+  photoPopoverText: {
+    flex: 1,
+    fontSize: 13.5,
     fontWeight: '700',
+  },
+  photoPopoverSep: {
+    height: 1,
+    marginHorizontal: 8,
+    marginVertical: 2,
+  },
+  nameFieldWrap: {
+    flex: 1,
+    gap: 6,
   },
   field: {
     gap: 6,
@@ -845,8 +992,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   input: {
-    height: 46,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
     borderWidth: 1,
     paddingHorizontal: 12,
     fontSize: 15,

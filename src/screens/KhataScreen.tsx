@@ -16,7 +16,9 @@ import { useShop } from '@/context/ShopContext';
 import { KhataModal } from '@/components/KhataModal';
 import { CustomerKhataCard } from '@/components/CustomerKhataCard';
 import { CustomerModal, CustomerModalMode } from '@/components/CustomerModal';
+import { HeroActionBanner, HeroStatsCard } from '@/components/HeroStatsCard';
 import { SubScreenHeader } from '@/components/SubScreenHeader';
+import { formatCompactPrice } from '@/utils/formatters';
 import { Colors, Spacing } from '@/constants/theme';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -198,57 +200,58 @@ export const KhataScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.khataScrollContent}>
-        {/* Index 0: Top Cards (Hero "To collect" / Add customer cards) */}
+        {/* Index 0: Stylish Hero Ledger Card + Big Add Customer Action Card */}
         <View style={styles.topSection}>
           <View style={styles.topCardsWrap}>
-            <View style={styles.heroRow}>
-              <View style={[styles.heroCard, { backgroundColor: theme.heroFill }]}>
-                <Text style={styles.heroLabel} numberOfLines={1}>
-                  {isUrdu ? 'کل وصول طلب ادھار' : 'To collect'}
-                </Text>
-                <Text
-                  style={styles.heroAmount}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit>
-                  {settings.currencySymbol}
-                  {totalUdhaarReceivable.toLocaleString()}
-                </Text>
-                {recoveredThisMonth > 0 ? (
-                  <Text style={styles.heroSub} numberOfLines={1}>
-                    +{settings.currencySymbol}
-                    {recoveredThisMonth.toLocaleString()}{' '}
-                    {isUrdu ? 'اس مہینے وصول' : 'recovered'}
-                  </Text>
-                ) : (
-                  <Text style={styles.heroSub} numberOfLines={1}>
-                    {pendingCount}{' '}
-                    {isUrdu ? 'گاہکوں کا ادھار' : 'with balance'}
-                  </Text>
-                )}
-              </View>
+            <HeroStatsCard
+              bgImage={require('../../assets/images/khata-card-bg.jpg')}
+              isDark={settings.darkMode}
+              tone="rich"
+              fallbackBg="#9F1239"
+              borderColor="rgba(253,164,175,0.34)"
+              scrimColor="rgba(76, 5, 25, 0.28)"
+              dotColor="#FDA4AF"
+              eyebrow={isUrdu ? 'ادھار کھاتہ' : 'KHATA LEDGER'}
+              eyebrowColor="#FECDD3"
+              pillText={`${khata.length} ${isUrdu ? 'گاہک' : khata.length === 1 ? 'customer' : 'customers'}`}
+              currencySymbol={settings.currencySymbol}
+              currencyColor="#FECDD3"
+              heroValue={totalUdhaarReceivable.toLocaleString()}
+              metrics={[
+                {
+                  label: isUrdu ? 'ادھار باقی' : 'Due',
+                  value: String(pendingCount),
+                  valueColor: pendingCount > 0 ? '#FECDD3' : '#FFFFFF',
+                },
+                {
+                  label: isUrdu ? 'صاف' : 'Settled',
+                  value: String(settledCount),
+                },
+                {
+                  label: isUrdu ? 'ماہانہ وصولی' : 'Recovered',
+                  value: `${settings.currencySymbol}${formatCompactPrice(recoveredThisMonth)}`,
+                  valueColor: '#86EFAC',
+                },
+              ]}
+            />
 
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={isUrdu ? 'نیا گاہک شامل کریں' : 'Add customer'}
-                onPress={handleOpenAddCustomer}
-                style={({ pressed }) => [
-                  styles.addCustomerCard,
-                  { backgroundColor: theme.secondary },
-                  pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-                ]}>
-                <View style={styles.addCustomerIconWrap}>
-                  <Ionicons name="person-add" size={18} color="#FFFFFF" />
-                </View>
-                <View style={styles.addCustomerTextWrap}>
-                  <Text style={styles.addCustomerTitle} numberOfLines={1}>
-                    {isUrdu ? 'نیا گاہک' : 'Add Customer'}
-                  </Text>
-                  <Text style={styles.addCustomerSub} numberOfLines={1}>
-                    {isUrdu ? '+ نیا کھاتہ' : '+ New ledger'}
-                  </Text>
-                </View>
-              </Pressable>
-            </View>
+            <HeroActionBanner
+              bgImage={require('../../assets/images/tile-items-dark.jpg')}
+              fallbackBg="#0369A1"
+              borderColor="rgba(56,189,248,0.38)"
+              scrimColor="rgba(3, 37, 76, 0.28)"
+              icon="person-add"
+              title={isUrdu ? 'نیا گاہک شامل کریں' : 'Add Customer'}
+              subtitle={
+                isUrdu
+                  ? 'نام اور فون نمبر سے نیا کھاتہ کھولیں'
+                  : 'Create a new udhaar customer ledger'
+              }
+              arrowBg="rgba(255,255,255,0.95)"
+              arrowColor="#0284C7"
+              onPress={handleOpenAddCustomer}
+              accessibilityLabel={isUrdu ? 'نیا گاہک شامل کریں' : 'Add Customer'}
+            />
           </View>
         </View>
 
@@ -280,12 +283,33 @@ export const KhataScreen: React.FC = () => {
               style={({ pressed }) => [
                 styles.metricCard,
                 {
-                  backgroundColor: selectedFilter === 'all' ? theme.primaryLight : theme.card,
-                  borderColor: selectedFilter === 'all' ? theme.primary : softBorder,
+                  backgroundColor:
+                    selectedFilter === 'all'
+                      ? settings.darkMode
+                        ? 'rgba(56,189,248,0.16)'
+                        : '#EFF6FF'
+                      : theme.card,
+                  borderColor:
+                    selectedFilter === 'all'
+                      ? settings.darkMode
+                        ? '#38BDF8'
+                        : '#0284C7'
+                      : softBorder,
                 },
                 pressed && { opacity: 0.88 },
               ]}>
-              <Text style={[styles.metricLabel, { color: selectedFilter === 'all' ? theme.primaryDark : theme.textMuted }]}>
+              <Text
+                style={[
+                  styles.metricLabel,
+                  {
+                    color:
+                      selectedFilter === 'all'
+                        ? settings.darkMode
+                          ? '#38BDF8'
+                          : '#0284C7'
+                        : theme.textMuted,
+                  },
+                ]}>
                 {isUrdu ? `تمام گاہک (${khata.length})` : `All (${khata.length})`}
               </Text>
             </Pressable>

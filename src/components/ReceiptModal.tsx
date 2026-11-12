@@ -22,7 +22,6 @@ import {
 import { captureRef } from 'react-native-view-shot';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProductImage } from '@/components/ProductImage';
-import { productIconFor } from '@/utils/productIcon';
 import { getPaymentBreakdown } from '@/utils/payment';
 
 interface ReceiptModalProps {
@@ -1500,178 +1499,232 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
             <Pressable
               onPress={onClose}
               hitSlop={8}
-              style={({ pressed }) => [styles.closeBtn, pressed && { opacity: 0.7 }]}>
-              <Ionicons name="close" size={22} color={theme.textMuted} />
+              style={({ pressed }) => [
+                styles.closeBtn,
+                { backgroundColor: settings.darkMode ? '#1E293B' : '#E2E8F0' },
+                pressed && { opacity: 0.7 },
+              ]}>
+              <Ionicons name="close" size={20} color={theme.textSecondary} />
             </Pressable>
           </View>
 
           <ScrollView
             style={styles.receiptScroll}
             contentContainerStyle={styles.receiptPaper}
-            showsVerticalScrollIndicator
+            showsVerticalScrollIndicator={false}
             nestedScrollEnabled>
-            <View style={styles.itemPreviewBlock}>
-              <Text style={[styles.itemPreviewLabel, { color: theme.textMuted }]}>
-                {language === 'ur' ? 'اشیاء دیکھیں' : 'Check items'}
-              </Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.itemPreviewRow}>
-                {sale.items.map((it, idx) => (
-                  <View key={`${it.product.id || it.product.name}-${idx}`} style={styles.itemPreviewCard}>
-                    <View style={styles.itemPreviewThumb}>
-                      <ProductImage
-                        uri={it.product.image || it.product.imageUri}
-                        style={styles.itemPreviewImage}
-                        fallbackSize={22}
-                        fallbackColor="#94A3B8"
-                        iconName={productIconFor(it.product.name, it.product.category)}
-                      />
-                    </View>
-                    <Text style={[styles.itemPreviewName, { color: theme.text }]} numberOfLines={2}>
-                      {it.product.name}
-                    </Text>
-                    <Text style={[styles.itemPreviewMeta, { color: theme.textMuted }]}>
-                      ×{it.quantity}
-                    </Text>
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
-
-            <Text style={[styles.itemPreviewLabel, { color: theme.textMuted }]}>
-              {language === 'ur' ? 'رسید' : 'Receipt preview'}
-            </Text>
-            <View ref={receiptViewRef} collapsable={false} style={styles.paperInner}>
-              <View style={styles.letterhead}>
-                <View style={styles.shopLogoWrap}>
+            <View style={styles.posReceiptShell}>
+              <View ref={receiptViewRef} collapsable={false} style={styles.posPaperSheet}>
+                {/* 1. Standard POS Centered Store Header */}
+                <View style={styles.posStoreHeader}>
                   {settings.profileImage &&
                   !settings.profileImage.includes('googleusercontent.com/a/') ? (
-                    <ProductImage
-                      uri={settings.profileImage}
-                      style={styles.shopLogo}
-                      fallbackSize={22}
-                      fallbackColor="#64748B"
-                    />
-                  ) : (
-                    <Text style={styles.shopLogoInitials}>
-                      {(dynamicShopName || 'S')
-                        .split(' ')
-                        .map((w) => w[0])
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .join('')
-                        .toUpperCase()}
-                    </Text>
-                  )}
-                </View>
-                <View style={styles.letterheadText}>
-                  <Text style={styles.previewStoreTitle}>{dynamicShopName}</Text>
-                  {dynamicShopUrdu ? (
-                    <Text style={styles.previewStoreUrdu}>{dynamicShopUrdu}</Text>
+                    <View style={styles.posLogoCircle}>
+                      <ProductImage
+                        uri={settings.profileImage}
+                        style={styles.shopLogo}
+                        fallbackSize={20}
+                        fallbackColor="#475569"
+                      />
+                    </View>
+                  ) : null}
+                  <Text style={styles.posStoreName}>{dynamicShopName}</Text>
+                  {dynamicShopUrdu && dynamicShopUrdu !== dynamicShopName ? (
+                    <Text style={styles.posStoreUrdu}>{dynamicShopUrdu}</Text>
                   ) : null}
                   {dynamicAddress ? (
-                    <Text style={styles.metaSubText} numberOfLines={2}>
+                    <Text style={styles.posStoreMeta} numberOfLines={2}>
                       {dynamicAddress}
                     </Text>
                   ) : null}
-                  {dynamicPhone ? <Text style={styles.metaSubText}>{dynamicPhone}</Text> : null}
+                  {dynamicPhone ? (
+                    <Text style={styles.posStoreMeta}>Tel: {dynamicPhone}</Text>
+                  ) : null}
                 </View>
-              </View>
 
-              <View style={styles.softRule} />
+                <View style={styles.posDashedRule} />
 
-              {isRefunded ? (
-                <Text style={styles.refundLine}>
-                  {language === 'ur' ? 'یہ بل واپس ہو چکا ہے' : 'This bill was refunded'}
-                </Text>
-              ) : null}
-
-              <Text style={styles.metaLine}>
-                {language === 'ur' ? 'گاہک' : 'Customer'}  ·  {customerDisplayName}
-              </Text>
-              <Text style={styles.metaLine}>{formattedDate}</Text>
-              <Text style={styles.metaLine}>
-                {language === 'ur' ? 'ادائیگی' : 'Paid'}  ·  {payLine}
-              </Text>
-
-              {driveSaved ? (
-                <Text style={styles.driveLine}>
-                  {language === 'ur' ? 'گوگل ڈرائیو میں محفوظ' : 'Saved to Google Drive'}
-                </Text>
-              ) : null}
-
-              <View style={styles.softRule} />
-
-              {sale.items.map((it, idx) => (
-                <View key={idx} style={styles.previewItemRow}>
-                  <Text style={[styles.itemNameBold, { flex: 1 }]} numberOfLines={2}>
-                    {it.product.name}
-                    <Text style={styles.itemQtyInline}>
-                      {'  '}×{it.quantity}
+                {/* 2. POS Key-Value Meta Rows */}
+                <View style={styles.posMetaBlock}>
+                  <View style={styles.posKvRow}>
+                    <Text style={styles.posKvLabel}>
+                      {language === 'ur' ? 'بل نمبر' : 'BILL #'}
                     </Text>
-                  </Text>
-                  <Text style={styles.itemTotalBold}>{money(it.total)}</Text>
+                    <Text style={styles.posKvValueMono}>{sale.billNumber}</Text>
+                  </View>
+                  <View style={styles.posKvRow}>
+                    <Text style={styles.posKvLabel}>
+                      {language === 'ur' ? 'تاریخ' : 'DATE'}
+                    </Text>
+                    <Text style={styles.posKvValue}>{formattedDate}</Text>
+                  </View>
+                  <View style={styles.posKvRow}>
+                    <Text style={styles.posKvLabel}>
+                      {language === 'ur' ? 'گاہک' : 'CUSTOMER'}
+                    </Text>
+                    <Text style={styles.posKvValueBold} numberOfLines={1}>
+                      {customerDisplayName}
+                    </Text>
+                  </View>
+                  <View style={styles.posKvRow}>
+                    <Text style={styles.posKvLabel}>
+                      {language === 'ur' ? 'حالت' : 'STATUS'}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.posKvStatus,
+                        {
+                          color: isRefunded
+                            ? '#64748B'
+                            : sale.paymentMethod === 'udhaar'
+                              ? '#DC2626'
+                              : sale.paymentMethod === 'online'
+                                ? '#0284C7'
+                                : '#059669',
+                        },
+                      ]}>
+                      {isRefunded ? (language === 'ur' ? 'واپس شدہ' : 'REFUNDED') : payLine.toUpperCase()}
+                    </Text>
+                  </View>
                 </View>
-              ))}
 
-              <View style={styles.softRule} />
+                <View style={styles.posDashedRule} />
 
-              {sale.discount > 0 ? (
-                <View style={styles.calcRow}>
-                  <Text style={styles.calcLabel}>
-                    {language === 'ur' ? 'ڈسکاؤنٹ' : 'Discount'}
+                {/* 3. POS Table Header */}
+                <View style={styles.posTableHead}>
+                  <Text style={[styles.posThText, { flex: 1 }]}>
+                    {language === 'ur' ? 'آئٹم' : 'ITEM'}
                   </Text>
-                  <Text style={styles.calcLabel}>-{money(sale.discount)}</Text>
+                  <Text style={[styles.posThText, styles.posColQty]}>
+                    {language === 'ur' ? 'تعداد' : 'QTY'}
+                  </Text>
+                  <Text style={[styles.posThText, styles.posColAmt]}>
+                    {language === 'ur' ? 'رقم' : 'AMT'}
+                  </Text>
                 </View>
-              ) : null}
-              <View style={styles.grandTotalRow}>
-                <Text style={styles.grandTotalLabel}>
-                  {language === 'ur' ? 'کل رقم' : 'Total'}
+
+                <View style={styles.posThinRule} />
+
+                {/* 4. POS Line Items */}
+                {sale.items.map((it, idx) => (
+                  <View key={idx} style={styles.posItemRow}>
+                    <View style={{ flex: 1, paddingRight: 6 }}>
+                      <Text style={styles.posItemName} numberOfLines={2}>
+                        {it.product.name}
+                      </Text>
+                      {it.quantity > 1 ? (
+                        <Text style={styles.posItemUnitPrice}>
+                          @{money(it.unitPrice)}
+                        </Text>
+                      ) : null}
+                    </View>
+                    <Text style={[styles.posItemQty, styles.posColQty]}>
+                      ×{it.quantity}
+                    </Text>
+                    <Text style={[styles.posItemAmt, styles.posColAmt]}>
+                      {money(it.total)}
+                    </Text>
+                  </View>
+                ))}
+
+                <View style={styles.posDoubleRule} />
+
+                {/* 5. POS Totals Block */}
+                {sale.discount > 0 ? (
+                  <>
+                    <View style={styles.posKvRow}>
+                      <Text style={styles.posKvLabel}>
+                        {language === 'ur' ? 'سب ٹوٹل' : 'SUBTOTAL'}
+                      </Text>
+                      <Text style={styles.posKvValueMono}>{money(sale.subtotal)}</Text>
+                    </View>
+                    <View style={styles.posKvRow}>
+                      <Text style={styles.posKvLabel}>
+                        {language === 'ur' ? 'رعایت' : 'DISCOUNT'}
+                      </Text>
+                      <Text style={styles.posKvValueMono}>-{money(sale.discount)}</Text>
+                    </View>
+                  </>
+                ) : null}
+
+                <View style={styles.posGrandTotalRow}>
+                  <Text style={styles.posGrandTotalLabel}>
+                    {language === 'ur' ? 'کل رقم' : 'TOTAL'}
+                  </Text>
+                  <Text style={styles.posGrandTotalVal}>{money(sale.grandTotal)}</Text>
+                </View>
+
+                {sale.paymentMethod === 'udhaar' && cleanPaid > 0 ? (
+                  <View style={styles.posKvRow}>
+                    <Text style={[styles.posKvLabel, { color: '#059669' }]}>
+                      {language === 'ur' ? 'نقد وصول' : 'CASH PAID'}
+                    </Text>
+                    <Text style={[styles.posKvValueMono, { color: '#059669' }]}>
+                      {money(cleanPaid)}
+                    </Text>
+                  </View>
+                ) : null}
+
+                {sale.paymentMethod === 'udhaar' && Math.max(0, sale.grandTotal - cleanPaid) > 0 ? (
+                  <View style={styles.posKvRow}>
+                    <Text style={[styles.posKvLabel, { color: '#DC2626' }]}>
+                      {language === 'ur' ? 'باقی ادھار' : 'UDHAAR DUE'}
+                    </Text>
+                    <Text style={[styles.posKvValueMono, { color: '#DC2626' }]}>
+                      {money(Math.max(0, sale.grandTotal - cleanPaid))}
+                    </Text>
+                  </View>
+                ) : null}
+
+                {sale.change && sale.change > 0 ? (
+                  <View style={styles.posKvRow}>
+                    <Text style={[styles.posKvLabel, { color: '#0284C7' }]}>
+                      {language === 'ur' ? 'بقایا واپس' : 'CHANGE'}
+                    </Text>
+                    <Text style={[styles.posKvValueMono, { color: '#0284C7' }]}>
+                      {money(sale.change)}
+                    </Text>
+                  </View>
+                ) : null}
+
+                <View style={styles.posDashedRule} />
+
+                {/* 6. Authentic Barcode + Thank You Footer */}
+                <View style={styles.posBarcodeBlock}>
+                  <View style={styles.posBarcodeBars}>
+                    {Array.from(sale.billNumber || 'INV1001').map((ch, idx) => {
+                      const code = ch.charCodeAt(0);
+                      return (
+                        <React.Fragment key={idx}>
+                          <View style={[styles.posBar, { width: (code % 2) + 1.5 }]} />
+                          <View style={{ width: 1.5 }} />
+                          <View style={[styles.posBar, { width: ((code >> 1) % 2) + 2 }]} />
+                          <View style={{ width: 2 }} />
+                        </React.Fragment>
+                      );
+                    })}
+                  </View>
+                  <Text style={styles.posBarcodeCaption}>{sale.billNumber}</Text>
+                </View>
+
+                <Text style={styles.posFooterThankYou}>
+                  {language === 'ur'
+                    ? settings.footerNoteUrdu || 'خریداری کا شکریہ!'
+                    : settings.footerNote || 'Thank you for shopping!'}
                 </Text>
-                <Text style={styles.grandTotalVal}>{money(sale.grandTotal)}</Text>
+                {driveSaved ? (
+                  <Text style={styles.driveLine}>
+                    {language === 'ur' ? 'گوگل ڈرائیو میں محفوظ' : 'Backed up to Drive'}
+                  </Text>
+                ) : null}
               </View>
 
-              {/* Split / Cash / Udhaar breakdown */}
-              {cleanPaid > 0 ? (
-                <View style={styles.calcRow}>
-                  <Text style={[styles.calcLabel, { color: '#059669', fontWeight: '700' }]}>
-                    {language === 'ur' ? 'نقد وصول (Cash Paid)' : 'Cash Paid'}
-                  </Text>
-                  <Text style={[styles.calcLabel, { color: '#059669', fontWeight: '800' }]}>
-                    {money(cleanPaid)}
-                  </Text>
-                </View>
-              ) : null}
-
-              {sale.paymentMethod === 'udhaar' && Math.max(0, sale.grandTotal - cleanPaid) > 0 ? (
-                <View style={styles.calcRow}>
-                  <Text style={[styles.calcLabel, { color: '#DC2626', fontWeight: '700' }]}>
-                    {language === 'ur' ? 'باقی ادھار کھاتہ (Baki / Udhaar)' : 'Baki (Khata)'}
-                  </Text>
-                  <Text style={[styles.calcLabel, { color: '#DC2626', fontWeight: '800' }]}>
-                    {money(Math.max(0, sale.grandTotal - cleanPaid))}
-                  </Text>
-                </View>
-              ) : null}
-
-              {sale.change && sale.change > 0 ? (
-                <View style={styles.calcRow}>
-                  <Text style={[styles.calcLabel, { color: '#2563EB', fontWeight: '700' }]}>
-                    {language === 'ur' ? 'بقایا واپس (Change)' : 'Change'}
-                  </Text>
-                  <Text style={[styles.calcLabel, { color: '#2563EB', fontWeight: '800' }]}>
-                    {money(sale.change)}
-                  </Text>
-                </View>
-              ) : null}
-
-              <Text style={styles.footerEngText}>
-                {language === 'ur'
-                  ? settings.footerNoteUrdu || 'خریداری کا شکریہ'
-                  : settings.footerNote || 'Thank you for shopping with us'}
-              </Text>
+              {/* Serrated Thermal Paper Bottom Edge */}
+              <View style={styles.posSawtoothRow}>
+                {Array.from({ length: 28 }).map((_, i) => (
+                  <View key={i} style={styles.posSawtoothTooth} />
+                ))}
+              </View>
             </View>
           </ScrollView>
 
@@ -1680,117 +1733,147 @@ ${settings.footerNote || 'Thank you for shopping with us! Please visit again.'}
               styles.actionButtonsWrap,
               {
                 borderTopColor: theme.border,
-                paddingBottom: Math.max(insets.bottom, 16),
+                paddingBottom: Math.max(insets.bottom, 14),
               },
             ]}>
-            <Pressable
-              onPress={handleShareWhatsAppImage}
-              disabled={isGeneratingImage}
-              style={({ pressed }) => [
-                styles.actionBtnFull,
-                { backgroundColor: theme.heroFill },
-                pressed && { opacity: 0.9 },
-              ]}>
-              {isGeneratingImage ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
-                  <Text style={styles.actionBtnTextWhite}>
-                    {language === 'ur' ? 'واٹس ایپ' : 'WhatsApp'}
-                  </Text>
-                </>
-              )}
-            </Pressable>
-
+            {/* Primary Actions Row */}
             <View style={styles.actionRow}>
               <Pressable
-                onPress={handleShareWhatsAppText}
+                onPress={handleShareWhatsAppImage}
+                disabled={isGeneratingImage}
                 style={({ pressed }) => [
-                  styles.actionBtnHalf,
-                  { backgroundColor: theme.primaryLight },
-                  pressed && { opacity: 0.85 },
+                  styles.actionBtnPrimaryMain,
+                  { backgroundColor: '#059669' },
+                  pressed && { opacity: 0.88 },
                 ]}>
-                <Ionicons name="chatbubble-ellipses-outline" size={16} color={theme.primary} />
-                <Text style={[styles.actionBtnSoftText, { color: theme.primary }]} numberOfLines={1}>
-                  {language === 'ur' ? 'ٹیکسٹ' : 'Text'}
-                </Text>
+                {isGeneratingImage ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
+                    <Text style={styles.actionBtnTextWhite}>
+                      {language === 'ur' ? 'واٹس ایپ' : 'WhatsApp'}
+                    </Text>
+                  </>
+                )}
               </Pressable>
+
               <Pressable
                 onPress={handleDownloadImage}
                 disabled={isGeneratingImage}
                 style={({ pressed }) => [
-                  styles.actionBtnHalf,
-                  { backgroundColor: theme.primaryLight },
-                  pressed && { opacity: 0.85 },
+                  styles.actionBtnSecondarySoft,
+                  {
+                    backgroundColor: settings.darkMode ? 'rgba(56,189,248,0.16)' : '#EFF6FF',
+                  },
+                  pressed && { opacity: 0.82 },
                 ]}>
-                <Ionicons name="image-outline" size={16} color={theme.primary} />
-                <Text style={[styles.actionBtnSoftText, { color: theme.primary }]} numberOfLines={1}>
+                <Ionicons
+                  name="image-outline"
+                  size={17}
+                  color={settings.darkMode ? '#38BDF8' : '#0284C7'}
+                />
+                <Text
+                  style={[
+                    styles.actionBtnSoftText,
+                    { color: settings.darkMode ? '#38BDF8' : '#0284C7' },
+                  ]}
+                  numberOfLines={1}>
                   {language === 'ur' ? 'تصویر' : 'Save'}
                 </Text>
               </Pressable>
+
               <Pressable
                 onPress={handlePrint}
                 style={({ pressed }) => [
-                  styles.actionBtnHalf,
-                  { backgroundColor: theme.primaryLight },
-                  pressed && { opacity: 0.85 },
+                  styles.actionBtnSecondarySoft,
+                  {
+                    backgroundColor: settings.darkMode ? 'rgba(56,189,248,0.16)' : '#EFF6FF',
+                  },
+                  pressed && { opacity: 0.82 },
                 ]}>
-                <Ionicons name="print-outline" size={16} color={theme.primary} />
-                <Text style={[styles.actionBtnSoftText, { color: theme.primary }]} numberOfLines={1}>
+                <Ionicons
+                  name="print-outline"
+                  size={17}
+                  color={settings.darkMode ? '#38BDF8' : '#0284C7'}
+                />
+                <Text
+                  style={[
+                    styles.actionBtnSoftText,
+                    { color: settings.darkMode ? '#38BDF8' : '#0284C7' },
+                  ]}
+                  numberOfLines={1}>
                   {language === 'ur' ? 'پرنٹ' : 'Print'}
                 </Text>
               </Pressable>
             </View>
 
+            {/* Compact Secondary Utilities Strip */}
             <View style={styles.actionRow}>
+              <Pressable
+                onPress={handleShareWhatsAppText}
+                style={({ pressed }) => [
+                  styles.actionBtnUtility,
+                  { backgroundColor: theme.surfaceSubtle },
+                  pressed && { opacity: 0.8 },
+                ]}>
+                <Ionicons name="chatbubble-ellipses-outline" size={14} color={theme.textSecondary} />
+                <Text style={[styles.actionBtnUtilityText, { color: theme.textSecondary }]} numberOfLines={1}>
+                  {language === 'ur' ? 'ٹیکسٹ' : 'Text'}
+                </Text>
+              </Pressable>
+
               <Pressable
                 onPress={handlePrintThermal}
                 style={({ pressed }) => [
-                  styles.actionBtnHalf,
+                  styles.actionBtnUtility,
                   { backgroundColor: theme.surfaceSubtle },
-                  pressed && { opacity: 0.85 },
+                  pressed && { opacity: 0.8 },
                 ]}>
-                <Ionicons name="receipt-outline" size={16} color={theme.text} />
-                <Text style={[styles.actionBtnSoftText, { color: theme.text }]} numberOfLines={1}>
+                <Ionicons name="receipt-outline" size={14} color={theme.textSecondary} />
+                <Text style={[styles.actionBtnUtilityText, { color: theme.textSecondary }]} numberOfLines={1}>
                   {language === 'ur' ? 'تھرمل' : 'Thermal'}
                 </Text>
               </Pressable>
+
               <Pressable
                 onPress={handleSharePDF}
                 disabled={isGeneratingPDF}
                 style={({ pressed }) => [
-                  styles.actionBtnHalf,
+                  styles.actionBtnUtility,
                   { backgroundColor: theme.surfaceSubtle },
-                  pressed && { opacity: 0.85 },
+                  pressed && { opacity: 0.8 },
                 ]}>
                 {isGeneratingPDF ? (
-                  <ActivityIndicator size="small" color={theme.text} />
+                  <ActivityIndicator size="small" color={theme.textSecondary} />
                 ) : (
                   <>
-                    <Ionicons name="document-text-outline" size={16} color={theme.text} />
-                    <Text style={[styles.actionBtnSoftText, { color: theme.text }]} numberOfLines={1}>
+                    <Ionicons name="document-text-outline" size={14} color={theme.textSecondary} />
+                    <Text style={[styles.actionBtnUtilityText, { color: theme.textSecondary }]} numberOfLines={1}>
                       PDF
                     </Text>
                   </>
                 )}
               </Pressable>
+
               {!isRefunded ? (
                 <Pressable
                   onPress={handleRefund}
                   style={({ pressed }) => [
-                    styles.actionBtnHalf,
-                    { backgroundColor: theme.dangerLight },
-                    pressed && { opacity: 0.85 },
+                    styles.actionBtnUtility,
+                    {
+                      backgroundColor: settings.darkMode ? 'rgba(239,68,68,0.18)' : '#FEE2E2',
+                    },
+                    pressed && { opacity: 0.82 },
                   ]}>
-                  <Ionicons name="return-down-back" size={16} color={theme.danger} />
-                  <Text style={[styles.actionBtnSoftText, { color: theme.danger }]} numberOfLines={1}>
+                  <Ionicons name="return-down-back" size={14} color={theme.danger} />
+                  <Text style={[styles.actionBtnUtilityText, { color: theme.danger }]} numberOfLines={1}>
                     {language === 'ur' ? 'واپس' : 'Refund'}
                   </Text>
                 </Pressable>
               ) : (
-                <View style={[styles.actionBtnHalf, { backgroundColor: theme.dangerLight }]}>
-                  <Text style={[styles.actionBtnSoftText, { color: theme.danger }]}>
+                <View style={[styles.actionBtnUtility, { backgroundColor: theme.surfaceSubtle }]}>
+                  <Text style={[styles.actionBtnUtilityText, { color: theme.textMuted }]}>
                     {language === 'ur' ? 'واپس شدہ' : 'Refunded'}
                   </Text>
                 </View>
@@ -1893,8 +1976,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   closeBtn: {
-    padding: 4,
-    borderRadius: BorderRadius.full,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   receiptScroll: {
     flex: 1,
@@ -1959,9 +2045,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   shopLogoWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     borderCurve: 'continuous',
     backgroundColor: '#F1F5F9',
     overflow: 'hidden',
@@ -2004,16 +2090,263 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#DC2626',
   },
-  metaLine: {
-    fontSize: 13,
+  posReceiptShell: {
+    width: '100%',
+    maxWidth: 380,
+    alignSelf: 'center',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  posPaperSheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 14,
+  },
+  posStoreHeader: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  posLogoCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#F1F5F9',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  posStoreName: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: 0.4,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  posStoreUrdu: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#334155',
+    textAlign: 'center',
+  },
+  posStoreMeta: {
+    fontSize: 11,
     fontWeight: '500',
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  posDashedRule: {
+    borderBottomWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#94A3B8',
+    marginVertical: 10,
+  },
+  posThinRule: {
+    height: 1,
+    backgroundColor: '#CBD5E1',
+    marginVertical: 5,
+  },
+  posDoubleRule: {
+    borderTopWidth: 1.5,
+    borderBottomWidth: 1.5,
+    borderColor: '#0F172A',
+    height: 4,
+    marginVertical: 10,
+  },
+  posMetaBlock: {
+    gap: 4,
+  },
+  posKvRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginVertical: 1,
+  },
+  posKvLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.4,
+  },
+  posKvValue: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+    textAlign: 'right',
+    flexShrink: 1,
+  },
+  posKvValueBold: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#0F172A',
+    textAlign: 'right',
+    flexShrink: 1,
+  },
+  posKvValueMono: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0F172A',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
+    fontVariant: ['tabular-nums'],
+  },
+  posKvStatus: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  posTableHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  posThText: {
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#475569',
+    letterSpacing: 0.7,
+  },
+  posColQty: {
+    width: 46,
+    textAlign: 'center',
+  },
+  posColAmt: {
+    width: 78,
+    textAlign: 'right',
+  },
+  posItemRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 5,
+  },
+  posItemName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0F172A',
+    lineHeight: 17,
+  },
+  posItemUnitPrice: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+    fontVariant: ['tabular-nums'],
+  },
+  posItemQty: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#475569',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
+  },
+  posItemAmt: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
+    fontVariant: ['tabular-nums'],
+  },
+  posGrandTotalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 4,
+  },
+  posGrandTotalLabel: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: 0.5,
+  },
+  posGrandTotalVal: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#0F172A',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
+    fontVariant: ['tabular-nums'],
+  },
+  posBarcodeBlock: {
+    alignItems: 'center',
+    marginTop: 2,
+    marginBottom: 8,
+  },
+  posBarcodeBars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 28,
+  },
+  posBar: {
+    height: 28,
+    backgroundColor: '#0F172A',
+  },
+  posBarcodeCaption: {
+    marginTop: 3,
+    fontSize: 10.5,
+    fontWeight: '700',
+    letterSpacing: 1.8,
+    color: '#334155',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
+  },
+  posFooterThankYou: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#475569',
+    textAlign: 'center',
+  },
+  posSawtoothRow: {
+    flexDirection: 'row',
+    width: '100%',
+    height: 10,
+    overflow: 'hidden',
+  },
+  posSawtoothTooth: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 7,
+    borderRightWidth: 7,
+    borderTopWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#FFFFFF',
+  },
+  metaLine: {
+    fontSize: 12.5,
+    fontWeight: '500',
+    color: '#64748B',
+  },
+  cleanMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  metaCustomerName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  statusChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  statusChipText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   driveLine: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: '#059669',
     marginTop: 4,
+    textAlign: 'center',
   },
   previewItemRow: {
     flexDirection: 'row',
@@ -2225,6 +2558,43 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     gap: 8,
+  },
+  actionBtnPrimaryMain: {
+    flex: 1.45,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    minHeight: 46,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+  },
+  actionBtnSecondarySoft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    minHeight: 46,
+    paddingHorizontal: 8,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+  },
+  actionBtnUtility: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    minHeight: 38,
+    paddingHorizontal: 6,
+    borderRadius: 11,
+    borderCurve: 'continuous',
+  },
+  actionBtnUtilityText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   // Full-width button (Row 1 hero)
   actionBtnFull: {

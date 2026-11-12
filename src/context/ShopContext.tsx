@@ -1031,6 +1031,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const resetSettings = { ...INITIAL_SETTINGS, language: settings.language, darkMode: settings.darkMode };
     await SettingsRepository.saveSettings(resetSettings);
     setSettings(resetSettings);
+    await AsyncStorage.setItem('@shopkeeper_sidebar_starter_seeded_v1', '1').catch(() => {});
     await SettingsRepository.setInvoiceCounter(1001);
     await Promise.all([
       refreshProducts(),

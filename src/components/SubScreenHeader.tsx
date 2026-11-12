@@ -89,7 +89,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     gap: 10,
-    zIndex: 20,
+    zIndex: 40,
+    elevation: 8,
   },
   backPill: {
     flexDirection: 'row',
@@ -125,6 +126,7 @@ const styles = StyleSheet.create({
     minWidth: 72,
     alignItems: 'flex-end',
     justifyContent: 'center',
+    zIndex: 60,
   },
   rightSpacer: {
     width: 72,
